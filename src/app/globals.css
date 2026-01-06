@@ -1,26 +1,185 @@
 @import "tailwindcss";
 
+/* CSS Custom Properties for Theme Colors */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light mode - Emerald Green accent */
+  --color-primary: #10b981;
+  /* emerald-500 */
+  --color-primary-light: #34d399;
+  /* emerald-400 */
+  --color-primary-dark: #059669;
+  /* emerald-600 */
+  --color-primary-bg: #ecfdf5;
+  /* emerald-50 */
+
+  --color-background: #f8fafc;
+  /* slate-50 */
+  --color-surface: #ffffff;
+  --color-surface-alt: #f1f5f9;
+  /* slate-100 */
+  --color-border: #e2e8f0;
+  /* slate-200 */
+  --color-border-light: #f1f5f9;
+  /* slate-100 */
+
+  --color-text: #0f172a;
+  /* slate-900 */
+  --color-text-muted: #64748b;
+  /* slate-500 */
+  --color-text-light: #94a3b8;
+  /* slate-400 */
+
+  --font-manrope: 'Manrope', sans-serif;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* Dark mode - Finance website dark theme */
+.dark {
+  --color-primary: #10b981;
+  /* emerald-500 */
+  --color-primary-light: #34d399;
+  /* emerald-400 */
+  --color-primary-dark: #059669;
+  /* emerald-600 */
+  --color-primary-bg: rgba(16, 185, 129, 0.1);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-background: #0f172a;
+  /* slate-900 */
+  --color-surface: #1e293b;
+  /* slate-800 */
+  --color-surface-alt: #334155;
+  /* slate-700 */
+  --color-border: #334155;
+  /* slate-700 */
+  --color-border-light: #1e293b;
+  /* slate-800 */
+
+  --color-text: #f8fafc;
+  /* slate-50 */
+  --color-text-muted: #94a3b8;
+  /* slate-400 */
+  --color-text-light: #64748b;
+  /* slate-500 */
+
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-manrope), system-ui, -apple-system, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+/* Custom scrollbar - Light mode */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Custom scrollbar - Dark mode */
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Smooth theme transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Primary accent color utilities */
+.text-primary {
+  color: var(--color-primary);
+}
+
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.border-primary {
+  border-color: var(--color-primary);
+}
+
+/* Finance-specific card styles */
+.finance-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+}
+
+.finance-card-alt {
+  background-color: var(--color-surface-alt);
+  border: 1px solid var(--color-border-light);
+  border-radius: 1rem;
+}
+
+/* Gradient overlays for charts/data */
+.gradient-up {
+  background: linear-gradient(to top, rgba(16, 185, 129, 0.1), transparent);
+}
+
+.gradient-down {
+  background: linear-gradient(to top, rgba(239, 68, 68, 0.1), transparent);
+}
+
+/* Status colors */
+.status-positive {
+  color: #10b981;
+  /* emerald-500 */
+}
+
+.status-negative {
+  color: #ef4444;
+  /* red-500 */
+}
+
+.status-neutral {
+  color: var(--color-text-muted);
+}
+
+/* Dark mode specific enhancements */
+.dark .glass-effect {
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+/* Focus styles with primary color */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Selection color */
+::selection {
+  background-color: var(--color-primary);
+  color: white;
 }
