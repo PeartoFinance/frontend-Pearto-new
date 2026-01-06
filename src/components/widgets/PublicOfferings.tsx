@@ -1,30 +1,58 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowUpRight, FileText, Briefcase } from 'lucide-react';
+import { ArrowUpRight, FileText, Briefcase, Loader2 } from 'lucide-react';
+import { getStockOffers, StockOffer } from '@/services/marketService';
 
-interface IPO {
-    symbol: string;
-    company: string;
-    units: number;
-    price: number;
-    openingDate: string;
-    closingDate: string;
-    status: 'OPENING' | 'COMINGSOON' | 'CLOSED';
-}
-
-const tabs = ['IPO', 'IPO Local', 'IPO Foreign', 'Right Share', 'FPO', 'Mutual Funds', 'Debentures'];
-
-const mockIPOs: IPO[] = [
-    { symbol: 'SOLU', company: 'Solu Hydropower Limited', units: 8200000, price: 100, openingDate: '2026-01-13', closingDate: '2026-01-18', status: 'COMINGSOON' },
-    { symbol: 'SKIEL', company: 'Suryakunda Hydro Electricity', units: 1379350, price: 100, openingDate: '-', closingDate: '-', status: 'COMINGSOON' },
-    { symbol: 'BJHL', company: 'Bhujung Hydropower L...', units: 2000000, price: 100, openingDate: '-', closingDate: '-', status: 'COMINGSOON' },
-    { symbol: 'PCIL', company: 'Prime Cement Industry', units: 7500000, price: 100, openingDate: '-', closingDate: '-', status: 'COMINGSOON' },
-];
+const tabs = ['IPO', 'FPO', 'Rights'];
 
 export default function PublicOfferings() {
     const [activeTab, setActiveTab] = useState('IPO');
+    const [offers, setOffers] = useState<StockOffer[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchOffers = async () => {
+            try {
+                const data = await getStockOffers();
+                setOffers(data);
+            } catch (err) {
+                console.error('Failed to fetch stock offers:', err);
+                // Fallback to mock data
+                setOffers([
+                    { id: '1', symbol: 'RDDT', companyName: 'Reddit Inc.', offerType: 'ipo', priceRange: '$31-34', openDate: '2024-03-20', closeDate: '2024-03-25', status: 'listed' },
+                    { id: '2', symbol: 'XYZCO', companyName: 'XYZ Technologies', offerType: 'ipo', priceRange: '$18-22', openDate: '2026-01-15', closeDate: '2026-01-20', status: 'open' },
+                    { id: '3', symbol: 'NEWENERGY', companyName: 'NewEnergy Corp.', offerType: 'ipo', priceRange: '$25-30', openDate: '2026-02-01', closeDate: '2026-02-10', status: 'upcoming' },
+                ]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOffers();
+    }, []);
+
+    const filteredOffers = offers.filter(offer => {
+        if (activeTab === 'IPO') return offer.offerType === 'ipo';
+        if (activeTab === 'FPO') return offer.offerType === 'fpo';
+        if (activeTab === 'Rights') return offer.offerType === 'rights';
+        return true;
+    });
+
+    const getStatusBadge = (status: string) => {
+        switch (status) {
+            case 'open':
+                return 'badge-success';
+            case 'upcoming':
+                return 'badge-warning';
+            case 'closed':
+            case 'listed':
+                return 'badge-default';
+            default:
+                return '';
+        }
+    };
 
     return (
         <div className="card">
@@ -56,51 +84,61 @@ export default function PublicOfferings() {
                 </div>
             </div>
 
-            <div className="overflow-x-auto">
-                <table className="data-table">
-                    <thead>
-                        <tr>
-                            <th>Symbol</th>
-                            <th>Company</th>
-                            <th className="text-right">Units</th>
-                            <th className="text-right">Price</th>
-                            <th>Opening Date</th>
-                            <th>Closing Date</th>
-                            <th>Status</th>
-                            <th>View</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {mockIPOs.map((ipo) => (
-                            <tr key={ipo.symbol}>
-                                <td>
-                                    <div className="symbol-badge">
-                                        <span className="symbol-icon">{ipo.symbol.slice(0, 2)}</span>
-                                        {ipo.symbol}
-                                    </div>
-                                </td>
-                                <td className="max-w-[200px] truncate">{ipo.company}</td>
-                                <td className="text-right">{ipo.units.toLocaleString()}</td>
-                                <td className="text-right font-semibold">${ipo.price}</td>
-                                <td>{ipo.openingDate === '-' ? '-' : ipo.openingDate}</td>
-                                <td>{ipo.closingDate === '-' ? '-' : ipo.closingDate}</td>
-                                <td>
-                                    <span className={`badge ${ipo.status === 'OPENING' ? 'badge-success' :
-                                            ipo.status === 'COMINGSOON' ? 'badge-warning' : 'badge-danger'
-                                        }`}>
-                                        {ipo.status}
-                                    </span>
-                                </td>
-                                <td>
-                                    <Link href={`/market/ipo/${ipo.symbol}`} className="text-emerald-500 hover:text-emerald-400">
-                                        <FileText size={16} />
-                                    </Link>
-                                </td>
+            {loading ? (
+                <div className="flex items-center justify-center py-8">
+                    <Loader2 className="animate-spin text-emerald-500" size={24} />
+                </div>
+            ) : (
+                <div className="overflow-x-auto">
+                    <table className="data-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Company</th>
+                                <th className="text-right">Price Range</th>
+                                <th>Open Date</th>
+                                <th>Close Date</th>
+                                <th>Status</th>
+                                <th>View</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {filteredOffers.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="text-center py-8 text-gray-500">
+                                        No {activeTab} offerings available
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredOffers.map((offer) => (
+                                    <tr key={offer.id}>
+                                        <td>
+                                            <div className="symbol-badge">
+                                                <span className="symbol-icon">{offer.symbol?.slice(0, 2)}</span>
+                                                {offer.symbol}
+                                            </div>
+                                        </td>
+                                        <td className="max-w-[200px] truncate">{offer.companyName}</td>
+                                        <td className="text-right font-semibold">{offer.priceRange}</td>
+                                        <td>{offer.openDate || '-'}</td>
+                                        <td>{offer.closeDate || '-'}</td>
+                                        <td>
+                                            <span className={`badge ${getStatusBadge(offer.status)}`}>
+                                                {offer.status?.toUpperCase()}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <Link href={`/market/ipo/${offer.symbol}`} className="text-emerald-500 hover:text-emerald-400">
+                                                <FileText size={16} />
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 }
