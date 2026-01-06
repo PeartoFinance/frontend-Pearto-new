@@ -15,13 +15,20 @@ import {
     Wrench,
     BookOpen,
     Sparkles,
+    User,
+    LogOut,
+    Settings,
+    Wallet,
 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Header() {
     const { t } = useTranslation();
+    const { user, isAuthenticated, logout } = useAuth();
     const [isDarkMode, setIsDarkMode] = useState(true); // Default to dark
     const [mobileOpen, setMobileOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [userMenuOpen, setUserMenuOpen] = useState(false);
 
     // Handle dark mode - check localStorage and sync state
     useEffect(() => {
@@ -125,18 +132,90 @@ export default function Header() {
 
                             {/* Auth buttons - Desktop */}
                             <div className="hidden lg:flex items-center gap-2">
-                                <Link
-                                    href="/login"
-                                    className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                                >
-                                    Sign in
-                                </Link>
-                                <Link
-                                    href="/signup"
-                                    className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-lg shadow hover:shadow-md transition"
-                                >
-                                    Sign up
-                                </Link>
+                                {isAuthenticated ? (
+                                    <div className="relative">
+                                        <button
+                                            onClick={() => setUserMenuOpen(!userMenuOpen)}
+                                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                                        >
+                                            {user?.avatarUrl ? (
+                                                <img
+                                                    src={user.avatarUrl}
+                                                    alt={user.name}
+                                                    className="w-8 h-8 rounded-full object-cover border-2 border-emerald-500"
+                                                />
+                                            ) : (
+                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
+                                                    <span className="text-white text-sm font-bold">
+                                                        {user?.name?.charAt(0).toUpperCase() || 'U'}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <span className="text-sm font-medium text-slate-700 dark:text-white">
+                                                {user?.name?.split(' ')[0]}
+                                            </span>
+                                            <ChevronDown size={14} className="text-slate-500" />
+                                        </button>
+
+                                        {/* User Dropdown Menu */}
+                                        {userMenuOpen && (
+                                            <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl py-2 z-50">
+                                                <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                                                    <p className="text-sm font-medium text-slate-900 dark:text-white">{user?.name}</p>
+                                                    <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                                                </div>
+                                                <Link
+                                                    href="/profile"
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                                                    onClick={() => setUserMenuOpen(false)}
+                                                >
+                                                    <User size={16} />
+                                                    My Profile
+                                                </Link>
+                                                <Link
+                                                    href="/portfolio"
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                                                    onClick={() => setUserMenuOpen(false)}
+                                                >
+                                                    <Wallet size={16} />
+                                                    Portfolio
+                                                </Link>
+                                                <Link
+                                                    href="/settings"
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                                                    onClick={() => setUserMenuOpen(false)}
+                                                >
+                                                    <Settings size={16} />
+                                                    Settings
+                                                </Link>
+                                                <div className="border-t border-slate-200 dark:border-slate-700 mt-2 pt-2">
+                                                    <button
+                                                        onClick={() => { logout(); setUserMenuOpen(false); }}
+                                                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                    >
+                                                        <LogOut size={16} />
+                                                        Sign Out
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <>
+                                        <Link
+                                            href="/login"
+                                            className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                                        >
+                                            Sign in
+                                        </Link>
+                                        <Link
+                                            href="/signup"
+                                            className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-lg shadow hover:shadow-md transition"
+                                        >
+                                            Sign up
+                                        </Link>
+                                    </>
+                                )}
                             </div>
 
                             {/* Mobile menu toggle */}

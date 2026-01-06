@@ -1,79 +1,234 @@
 @import "tailwindcss";
 
-/* CSS Custom Properties for Theme Colors */
+/* ========================================
+   PEARTO FINANCE - DESIGN SYSTEM
+   Main Color: Emerald Green (#10b981)
+   Accent: White/Black
+   Clean, minimal, professional
+   ======================================== */
+
 :root {
-  /* Light mode - Emerald Green accent */
+  /* Primary - Emerald Green */
   --color-primary: #10b981;
-  /* emerald-500 */
+  --color-primary-hover: #059669;
   --color-primary-light: #34d399;
-  /* emerald-400 */
-  --color-primary-dark: #059669;
-  /* emerald-600 */
-  --color-primary-bg: #ecfdf5;
-  /* emerald-50 */
+  --color-primary-bg: rgba(16, 185, 129, 0.1);
 
-  --color-background: #f8fafc;
-  /* slate-50 */
+  /* Stock Status Colors */
+  --color-positive: #10b981;
+  --color-negative: #ef4444;
+  --color-neutral: #6b7280;
+
+  /* Light Mode */
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f9fafb;
   --color-surface: #ffffff;
-  --color-surface-alt: #f1f5f9;
-  /* slate-100 */
-  --color-border: #e2e8f0;
-  /* slate-200 */
-  --color-border-light: #f1f5f9;
-  /* slate-100 */
+  --color-border: #e5e7eb;
+  --color-text: #111827;
+  --color-text-secondary: #6b7280;
+  --color-text-muted: #9ca3af;
 
-  --color-text: #0f172a;
-  /* slate-900 */
-  --color-text-muted: #64748b;
-  /* slate-500 */
-  --color-text-light: #94a3b8;
-  /* slate-400 */
-
-  --font-manrope: 'Manrope', sans-serif;
+  --font-main: 'Inter', 'Manrope', system-ui, sans-serif;
   color-scheme: light;
 }
 
-/* Dark mode - Finance website dark theme */
+/* Dark Mode - Finance Professional */
 .dark {
-  --color-primary: #10b981;
-  /* emerald-500 */
-  --color-primary-light: #34d399;
-  /* emerald-400 */
-  --color-primary-dark: #059669;
-  /* emerald-600 */
-  --color-primary-bg: rgba(16, 185, 129, 0.1);
-
-  --color-background: #0f172a;
-  /* slate-900 */
-  --color-surface: #1e293b;
-  /* slate-800 */
-  --color-surface-alt: #334155;
-  /* slate-700 */
-  --color-border: #334155;
-  /* slate-700 */
-  --color-border-light: #1e293b;
-  /* slate-800 */
-
-  --color-text: #f8fafc;
-  /* slate-50 */
-  --color-text-muted: #94a3b8;
-  /* slate-400 */
-  --color-text-light: #64748b;
-  /* slate-500 */
+  --color-bg: #0a0a0a;
+  --color-bg-secondary: #111111;
+  --color-surface: #171717;
+  --color-border: #262626;
+  --color-text: #fafafa;
+  --color-text-secondary: #a3a3a3;
+  --color-text-muted: #737373;
 
   color-scheme: dark;
 }
 
+/* Base Styles */
 body {
-  font-family: var(--font-manrope), system-ui, -apple-system, sans-serif;
-  background-color: var(--color-background);
+  font-family: var(--font-main);
+  background-color: var(--color-bg);
   color: var(--color-text);
 }
 
-/* Custom scrollbar - Light mode */
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+/* Card Styles */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+}
+
+.card-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.card-body {
+  padding: 1rem 1.25rem;
+}
+
+/* Table Styles - Clean like ShareHub */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.data-table td {
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.data-table tbody tr:hover {
+  background: var(--color-bg-secondary);
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Stock/Price Display */
+.price-positive {
+  color: var(--color-positive);
+}
+
+.price-negative {
+  color: var(--color-negative);
+}
+
+.price-neutral {
+  color: var(--color-neutral);
+}
+
+/* Symbol Badge */
+.symbol-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.symbol-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.25rem;
+  background: var(--color-primary-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* Tab Navigation */
+.tab-nav {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--color-bg-secondary);
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+}
+
+.tab-item {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  border-radius: 0.375rem;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.tab-item:hover {
+  color: var(--color-text);
+}
+
+.tab-item.active {
+  background: var(--color-primary);
+  color: white;
+}
+
+/* Button Styles */
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: background 0.15s;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-hover);
+}
+
+.btn-outline {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.15s;
+}
+
+.btn-outline:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Status Badges */
+.badge {
+  display: inline-flex;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+}
+
+.badge-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-positive);
+}
+
+.badge-warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.badge-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-negative);
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -81,24 +236,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  background: var(--color-border);
+  border-radius: 3px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Custom scrollbar - Dark mode */
-.dark ::-webkit-scrollbar-thumb {
-  background: #475569;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
-}
-
-/* Hide scrollbar but keep functionality */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -108,78 +249,13 @@ body {
   display: none;
 }
 
-/* Smooth theme transitions */
-* {
-  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-/* Primary accent color utilities */
-.text-primary {
-  color: var(--color-primary);
-}
-
-.bg-primary {
-  background-color: var(--color-primary);
-}
-
-.border-primary {
-  border-color: var(--color-primary);
-}
-
-/* Finance-specific card styles */
-.finance-card {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 1rem;
-}
-
-.finance-card-alt {
-  background-color: var(--color-surface-alt);
-  border: 1px solid var(--color-border-light);
-  border-radius: 1rem;
-}
-
-/* Gradient overlays for charts/data */
-.gradient-up {
-  background: linear-gradient(to top, rgba(16, 185, 129, 0.1), transparent);
-}
-
-.gradient-down {
-  background: linear-gradient(to top, rgba(239, 68, 68, 0.1), transparent);
-}
-
-/* Status colors */
-.status-positive {
-  color: #10b981;
-  /* emerald-500 */
-}
-
-.status-negative {
-  color: #ef4444;
-  /* red-500 */
-}
-
-.status-neutral {
-  color: var(--color-text-muted);
-}
-
-/* Dark mode specific enhancements */
-.dark .glass-effect {
-  background: rgba(30, 41, 59, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-}
-
-/* Focus styles with primary color */
+/* Focus */
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
-/* Selection color */
 ::selection {
-  background-color: var(--color-primary);
+  background: var(--color-primary);
   color: white;
 }
