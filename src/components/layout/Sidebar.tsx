@@ -34,7 +34,7 @@ export default function Sidebar() {
     const { t } = useTranslation();
 
     return (
-        <aside className="hidden lg:flex flex-col w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex-shrink-0 h-screen sticky top-0">
+        <aside className="hidden lg:flex flex-col w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex-shrink-0 h-screen sticky top-0 z-50">
             {/* Logo */}
             <div className="p-6 pb-2">
                 <Link href="/" className="flex items-center gap-3 px-2">
@@ -61,8 +61,8 @@ export default function Sidebar() {
                                 key={item.href}
                                 href={item.href}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
-                                        ? 'bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 text-emerald-600 dark:text-emerald-400 font-semibold shadow-sm ring-1 ring-emerald-200 dark:ring-emerald-800'
-                                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                    ? 'bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 text-emerald-600 dark:text-emerald-400 font-semibold shadow-sm ring-1 ring-emerald-200 dark:ring-emerald-800'
+                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                                     }`}
                             >
                                 <Icon size={20} className={isActive ? 'text-emerald-500' : ''} />

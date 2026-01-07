@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowUpRight, Calendar, Gift } from 'lucide-react';
+import { ArrowUpRight, Gift } from 'lucide-react';
 
 interface Dividend {
     symbol: string;
@@ -22,50 +22,55 @@ const mockDividends: Dividend[] = [
 
 export default function ProposedDividends() {
     return (
-        <div className="card">
-            <div className="card-header flex items-center justify-between">
+        <div className="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-900 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Gift size={18} className="text-emerald-500" />
-                    <span>Proposed Dividends</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">Proposed Dividends</span>
                 </div>
                 <Link
                     href="/market/dividends"
-                    className="text-sm text-emerald-500 hover:text-emerald-400 flex items-center gap-1"
+                    className="text-sm text-emerald-500 hover:text-emerald-600 flex items-center gap-1"
                 >
                     View All <ArrowUpRight size={14} />
                 </Link>
             </div>
 
             <div className="overflow-x-auto">
-                <table className="data-table">
+                <table className="w-full">
                     <thead>
-                        <tr>
-                            <th>Symbol</th>
-                            <th className="text-right">Bonus (%)</th>
-                            <th className="text-right">Cash (%)</th>
-                            <th className="text-right">Total (%)</th>
-                            <th>Book Closure</th>
-                            <th>Fiscal Year</th>
+                        <tr className="border-b border-slate-200 dark:border-neutral-800">
+                            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Symbol</th>
+                            <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Bonus (%)</th>
+                            <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Cash (%)</th>
+                            <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Total (%)</th>
+                            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Book Closure</th>
+                            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Fiscal Year</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
                         {mockDividends.map((div) => (
-                            <tr key={div.symbol}>
-                                <td>
-                                    <div className="symbol-badge">
-                                        <span className="symbol-icon">{div.symbol.slice(0, 2)}</span>
-                                        {div.symbol}
+                            <tr key={div.symbol} className="hover:bg-slate-50 dark:hover:bg-neutral-800 transition-colors">
+                                <td className="px-4 py-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-7 h-7 rounded bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                            {div.symbol.slice(0, 2)}
+                                        </span>
+                                        <span className="font-medium text-emerald-600 dark:text-emerald-400">{div.symbol}</span>
                                     </div>
                                 </td>
-                                <td className="text-right">{div.bonusPercent.toFixed(2)}</td>
-                                <td className="text-right">{div.cashPercent.toFixed(2)}</td>
-                                <td className="text-right font-semibold price-positive">{div.totalPercent.toFixed(2)}</td>
-                                <td>
-                                    <span className={`badge ${div.bookClosure === 'Not Announced' ? 'badge-warning' : 'badge-success'}`}>
+                                <td className="text-right px-4 py-3 text-slate-700 dark:text-slate-300">{div.bonusPercent.toFixed(2)}</td>
+                                <td className="text-right px-4 py-3 text-slate-700 dark:text-slate-300">{div.cashPercent.toFixed(2)}</td>
+                                <td className="text-right px-4 py-3 font-semibold text-emerald-500">{div.totalPercent.toFixed(2)}</td>
+                                <td className="px-4 py-3">
+                                    <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${div.bookClosure === 'Not Announced'
+                                            ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+                                            : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                                        }`}>
                                         {div.bookClosure}
                                     </span>
                                 </td>
-                                <td className="text-gray-500 dark:text-gray-400">{div.fiscalYear}</td>
+                                <td className="px-4 py-3 text-slate-500 dark:text-neutral-400">{div.fiscalYear}</td>
                             </tr>
                         ))}
                     </tbody>

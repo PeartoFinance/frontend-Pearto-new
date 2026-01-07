@@ -19,13 +19,13 @@
   --color-negative: #ef4444;
   --color-neutral: #6b7280;
 
-  /* Light Mode */
-  --color-bg: #ffffff;
-  --color-bg-secondary: #f9fafb;
+  /* Light Mode (default) */
+  --color-bg: #f9fafb;
+  --color-bg-secondary: #f3f4f6;
   --color-surface: #ffffff;
   --color-border: #e5e7eb;
   --color-text: #111827;
-  --color-text-secondary: #6b7280;
+  --color-text-secondary: #4b5563;
   --color-text-muted: #9ca3af;
 
   --font-main: 'Inter', 'Manrope', system-ui, sans-serif;
@@ -45,6 +45,17 @@
   color-scheme: dark;
 }
 
+/* Ensure html without .dark class uses light mode */
+html:not(.dark) {
+  --color-bg: #f9fafb;
+  --color-bg-secondary: #f3f4f6;
+  --color-surface: #ffffff;
+  --color-border: #e5e7eb;
+  --color-text: #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #9ca3af;
+}
+
 /* Base Styles */
 body {
   font-family: var(--font-main);
@@ -60,7 +71,20 @@ body {
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+/* Light mode card overrides */
+html:not(.dark) .card {
+  background: #ffffff;
+  border-color: #e5e7eb;
+}
+
+/* Dark mode card overrides */
+.dark .card {
+  background: #171717;
+  border-color: #262626;
 }
 
 .card-header {
@@ -68,6 +92,18 @@ body {
   border-bottom: 1px solid var(--color-border);
   font-weight: 600;
   color: var(--color-text);
+}
+
+html:not(.dark) .card-header {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+  color: #111827;
+}
+
+.dark .card-header {
+  background: #1a1a1a;
+  border-color: #262626;
+  color: #fafafa;
 }
 
 .card-body {
@@ -91,6 +127,16 @@ body {
   border-bottom: 1px solid var(--color-border);
 }
 
+html:not(.dark) .data-table th {
+  color: #6b7280;
+  border-color: #e5e7eb;
+}
+
+.dark .data-table th {
+  color: #737373;
+  border-color: #262626;
+}
+
 .data-table td {
   padding: 0.875rem 1rem;
   font-size: 0.875rem;
@@ -98,8 +144,26 @@ body {
   border-bottom: 1px solid var(--color-border);
 }
 
+html:not(.dark) .data-table td {
+  color: #111827;
+  border-color: #e5e7eb;
+}
+
+.dark .data-table td {
+  color: #fafafa;
+  border-color: #262626;
+}
+
 .data-table tbody tr:hover {
   background: var(--color-bg-secondary);
+}
+
+html:not(.dark) .data-table tbody tr:hover {
+  background: #f3f4f6;
+}
+
+.dark .data-table tbody tr:hover {
+  background: #1a1a1a;
 }
 
 .data-table tbody tr:last-child td {

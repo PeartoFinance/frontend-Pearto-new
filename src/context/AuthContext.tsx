@@ -30,6 +30,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_TOKEN_KEY = 'auth_token';
 const AUTH_USER_KEY = 'auth_user';
+// const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
