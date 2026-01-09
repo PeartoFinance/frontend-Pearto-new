@@ -16,7 +16,7 @@ export default function MarketPage() {
             <Sidebar />
 
             {/* Main Content Area */}
-            <main className="flex-1 flex flex-col min-h-screen">
+            <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
                 {/* Fixed Header Section - Always visible */}
                 <div className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-gray-50 dark:bg-slate-900">
                     <TickerTape />
@@ -24,8 +24,8 @@ export default function MarketPage() {
                 </div>
 
                 {/* Scrollable Content - with top padding for fixed header */}
-                <div className="flex-1 pt-[112px] md:pt-[120px]">
-                    <div className="p-4 lg:p-6 space-y-6 max-w-full">
+                <div className="flex-1 pt-[112px] md:pt-[120px] overflow-x-hidden">
+                    <div className="p-4 lg:p-6 space-y-6 w-full">
                         {/* Market Header */}
                         <div className="flex items-center justify-between">
                             <div>

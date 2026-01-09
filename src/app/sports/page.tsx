@@ -36,15 +36,15 @@ export default function SportsPage() {
         fetchEvents();
     }, []);
 
-    // Get unique categories
+    // Get unique sport types
     const categories = useMemo(() => {
-        return ['All', ...new Set(events.map(e => e.category).filter(Boolean))];
+        return ['All', ...new Set(events.map(e => e.sportType).filter(Boolean))];
     }, [events]);
 
     // Filter events
     const filteredEvents = useMemo(() => {
         if (filter === 'All') return events;
-        return events.filter(e => e.category === filter);
+        return events.filter(e => e.sportType === filter);
     }, [events, filter]);
 
     return (
