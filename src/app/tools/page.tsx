@@ -7,6 +7,7 @@ import Header from '@/components/layout/Header';
 import ToolsGrid from '@/components/tools/ToolsGrid';
 import { getEnabledTools, type ToolSetting } from '@/services/toolsService';
 import { Calculator, Sparkles } from 'lucide-react';
+import { AIWidget } from '@/components/ai';
 
 export default function ToolsPage() {
     const [tools, setTools] = useState<ToolSetting[]>([]);
@@ -29,14 +30,14 @@ export default function ToolsPage() {
     }, []);
 
     return (
-        <div className="flex min-h-screen bg-gray-50 dark:bg-neutral-950">
+        <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
             {/* Sidebar - Desktop Only */}
             <Sidebar />
 
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col min-h-screen">
                 {/* Fixed Header Section - Always visible */}
-                <div className="fixed top-0 right-0 left-0 md:left-[200px] z-40 bg-gray-50 dark:bg-neutral-950">
+                <div className="fixed top-0 right-0 left-0 md:left-[200px] z-40 bg-gray-50 dark:bg-slate-900">
                     <TickerTape />
                     <Header />
                 </div>
@@ -93,6 +94,14 @@ export default function ToolsPage() {
                     </div>
                 </div>
             </main>
+
+            {/* Floating AI Widget */}
+            <AIWidget
+                type="floating"
+                position="bottom-right"
+                pageType="tools"
+                quickPrompts={["Calculate SIP returns", "Calculate EMI"]}
+            />
         </div>
     );
 }

@@ -9,6 +9,7 @@ import InstructorCard from '@/components/learn/InstructorCard';
 import { Course, Instructor } from '@/types/education';
 import { get } from '@/services/api';
 import { GraduationCap, Search, BookOpen, Users, Award, TrendingUp } from 'lucide-react';
+import { AIWidget } from '@/components/ai';
 
 export default function LearnPage() {
     const [courses, setCourses] = useState<Course[]>([]);
@@ -172,6 +173,14 @@ export default function LearnPage() {
                         )}
                     </div>
                 </main>
+
+                {/* Floating AI Widget */}
+                <AIWidget
+                    type="floating"
+                    position="bottom-right"
+                    pageType="learning"
+                    quickPrompts={["Best courses for beginners", "Explain investing basics"]}
+                />
             </div>
         </div>
     );

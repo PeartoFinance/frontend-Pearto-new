@@ -22,8 +22,8 @@ const mockTransactions: Transaction[] = [
 
 export default function BulkTransactions() {
     return (
-        <div className="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-xl overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-900 flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <TrendingUp size={18} className="text-emerald-500" />
                     <span className="font-semibold text-slate-900 dark:text-white">Bulk Transactions</span>
@@ -39,17 +39,17 @@ export default function BulkTransactions() {
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead>
-                        <tr className="border-b border-slate-200 dark:border-neutral-800">
-                            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Symbol</th>
-                            <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Buyer</th>
-                            <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Seller</th>
-                            <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Quantity</th>
-                            <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Price</th>
+                        <tr className="border-b border-slate-200 dark:border-slate-700">
+                            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Symbol</th>
+                            <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Buyer</th>
+                            <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Seller</th>
+                            <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Quantity</th>
+                            <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Price</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
                         {mockTransactions.map((tx) => (
-                            <tr key={tx.symbol} className="hover:bg-slate-50 dark:hover:bg-neutral-800 transition-colors">
+                            <tr key={tx.symbol} className="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                                 <td className="px-4 py-3">
                                     <div className="flex items-center gap-2">
                                         <span className="w-7 h-7 rounded bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-[10px] font-bold text-emerald-600 dark:text-emerald-400">

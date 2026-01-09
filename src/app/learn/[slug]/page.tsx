@@ -11,6 +11,7 @@ import {
     ArrowLeft, Star, Users, Clock, Award, Play, CheckCircle,
     BookOpen, Lock, GraduationCap, Share2, Heart, Zap, Download
 } from 'lucide-react';
+import { AIWidget } from '@/components/ai';
 
 interface CourseDetail extends Course {
     longDescription?: string;
@@ -246,8 +247,8 @@ export default function CourseDetailPage() {
                                             key={tab}
                                             onClick={() => setActiveTab(tab)}
                                             className={`px-5 py-2 rounded-lg text-sm font-medium capitalize transition-all ${activeTab === tab
-                                                    ? 'bg-emerald-600 text-white shadow-lg'
-                                                    : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                                                ? 'bg-emerald-600 text-white shadow-lg'
+                                                : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
                                                 }`}
                                         >
                                             {tab}
@@ -429,6 +430,19 @@ export default function CourseDetailPage() {
                         </div>
                     </div>
                 </main>
+
+                {/* Floating AI Widget for course help */}
+                <AIWidget
+                    type="floating"
+                    position="bottom-right"
+                    pageType="course"
+                    pageData={{ title: course.title, category: course.category }}
+                    quickPrompts={[
+                        `Explain ${course.title}`,
+                        "What will I learn?",
+                        "Career benefits?"
+                    ]}
+                />
             </div>
         </div>
     );

@@ -7,17 +7,18 @@ import BulkTransactions from '@/components/widgets/BulkTransactions';
 import ProposedDividends from '@/components/widgets/ProposedDividends';
 import PublicOfferings from '@/components/widgets/PublicOfferings';
 import MarketOverview from '@/components/widgets/MarketOverview';
+import { AIWidget } from '@/components/ai';
 
 export default function MarketPage() {
     return (
-        <div className="flex min-h-screen bg-gray-50 dark:bg-neutral-950">
+        <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
             {/* Sidebar - Desktop Only */}
             <Sidebar />
 
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col min-h-screen">
                 {/* Fixed Header Section - Always visible */}
-                <div className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-gray-50 dark:bg-neutral-950">
+                <div className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-gray-50 dark:bg-slate-900">
                     <TickerTape />
                     <Header />
                 </div>
@@ -74,6 +75,14 @@ export default function MarketPage() {
                     </div>
                 </div>
             </main>
+
+            {/* Floating AI Widget */}
+            <AIWidget
+                type="floating"
+                position="bottom-right"
+                pageType="markets"
+                quickPrompts={["Top gainers today", "Market analysis"]}
+            />
         </div>
     );
 }

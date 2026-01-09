@@ -83,8 +83,8 @@ html:not(.dark) .card {
 
 /* Dark mode card overrides */
 .dark .card {
-  background: #171717;
-  border-color: #262626;
+  background: #1e293b;
+  border-color: #334155;
 }
 
 .card-header {
@@ -101,8 +101,8 @@ html:not(.dark) .card-header {
 }
 
 .dark .card-header {
-  background: #1a1a1a;
-  border-color: #262626;
+  background: #1e293b;
+  border-color: #334155;
   color: #fafafa;
 }
 

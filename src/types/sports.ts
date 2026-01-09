@@ -1,7 +1,27 @@
 /**
  * Sports Event Types
+ * Matches API response from /api/media/sports-events
  */
 export interface SportsEvent {
+    id: string;
+    name: string;
+    sportType: string;
+    league: string;
+    status: 'scheduled' | 'live' | 'completed';
+    venue: string;
+    teamHome: string;
+    teamAway: string;
+    scoreHome: string | null;
+    scoreAway: string | null;
+    eventDate: string;
+    streamUrl: string | null;
+    thumbnailUrl: string | null;
+    countryCode: string;
+    isLive: boolean;
+}
+
+// Legacy type alias for backward compatibility
+export type LegacySportsEvent = {
     id: string;
     name: string;
     description: string;
@@ -18,4 +38,4 @@ export interface SportsEvent {
     event_date?: string;
     result?: string;
     series?: string;
-}
+};

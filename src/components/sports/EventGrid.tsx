@@ -1,8 +1,9 @@
 'use client';
 
 import { SportsEvent } from '@/types/sports';
-import EventCard from './EventCard';
+import { SportCard } from './SportCard';
 import { Trophy } from 'lucide-react';
+import { SportsEvent as ServiceSportsEvent } from '@/services/sportsService';
 
 interface EventGridProps {
     events: SportsEvent[];
@@ -37,11 +38,11 @@ export default function EventGrid({ events, loading, onSelectEvent }: EventGridP
     }
 
     return (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (
-                <EventCard
+                <SportCard
                     key={event.id}
-                    event={event}
+                    event={event as ServiceSportsEvent}
                     onClick={() => onSelectEvent(event)}
                 />
             ))}

@@ -9,6 +9,7 @@ import NewsCard from '@/components/news/NewsCard';
 import { getPublishedNews, type NewsArticle } from '@/services/newsService';
 import { categories, getCategoryBySlug } from '@/data/newsData';
 import { Newspaper, Search, RefreshCw, ArrowLeft } from 'lucide-react';
+import { AIWidget } from '@/components/ai';
 
 interface NewsPageProps {
     params?: { category?: string };
@@ -59,14 +60,14 @@ export default function NewsPage({ params }: NewsPageProps) {
     const currentCategory = selectedCategory ? getCategoryBySlug(selectedCategory) : null;
 
     return (
-        <div className="flex min-h-screen bg-gray-50 dark:bg-neutral-950">
+        <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
             {/* Sidebar */}
             <Sidebar />
 
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col min-h-screen">
                 {/* Fixed Header */}
-                <div className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-gray-50 dark:bg-neutral-950">
+                <div className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-gray-50 dark:bg-slate-900">
                     <TickerTape />
                     <Header />
                 </div>
@@ -221,6 +222,14 @@ export default function NewsPage({ params }: NewsPageProps) {
                     </div>
                 </div>
             </main>
+
+            {/* Floating AI Widget */}
+            <AIWidget
+                type="floating"
+                position="bottom-right"
+                pageType="news"
+                quickPrompts={["Latest market news", "Crypto updates"]}
+            />
         </div>
     );
 }

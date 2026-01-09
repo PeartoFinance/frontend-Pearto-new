@@ -42,8 +42,8 @@ export default function MarketOverview() {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Market Indices */}
-            <div className="lg:col-span-2 bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-900 flex items-center gap-2">
+            <div className="lg:col-span-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center gap-2">
                     <BarChart2 size={18} className="text-emerald-500" />
                     <span className="font-semibold text-slate-900 dark:text-white">Market Indices</span>
                 </div>
@@ -55,7 +55,7 @@ export default function MarketOverview() {
                     <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-slate-200 dark:divide-neutral-800">
                         {indices.map((index) => (
                             <div key={index.symbol} className="p-4 text-center">
-                                <p className="text-sm text-slate-500 dark:text-neutral-400 mb-1">{index.name}</p>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">{index.name}</p>
                                 <p className="text-xl font-bold text-slate-900 dark:text-white mb-1">{index.value?.toLocaleString()}</p>
                                 <div className={`flex items-center justify-center gap-1 text-sm font-medium ${(index.changePercent || 0) >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
                                     {(index.changePercent || 0) >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
@@ -68,33 +68,33 @@ export default function MarketOverview() {
             </div>
 
             {/* Market Stats */}
-            <div className="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-900 font-semibold text-slate-900 dark:text-white">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-semibold text-slate-900 dark:text-white">
                     Today's Summary
                 </div>
                 <div className="p-4 space-y-3">
                     <div className="flex justify-between">
-                        <span className="text-slate-500 dark:text-neutral-400">Advancers</span>
+                        <span className="text-slate-500 dark:text-slate-400">Advancers</span>
                         <span className="font-semibold text-emerald-500">{data?.advancers || 0}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-slate-500 dark:text-neutral-400">Decliners</span>
+                        <span className="text-slate-500 dark:text-slate-400">Decliners</span>
                         <span className="font-semibold text-red-500">{data?.decliners || 0}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-slate-500 dark:text-neutral-400">Unchanged</span>
+                        <span className="text-slate-500 dark:text-slate-400">Unchanged</span>
                         <span className="font-semibold text-slate-900 dark:text-white">{data?.unchanged || 0}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-slate-500 dark:text-neutral-400">Total Volume</span>
+                        <span className="text-slate-500 dark:text-slate-400">Total Volume</span>
                         <span className="font-semibold text-slate-900 dark:text-white">{((data?.totalVolume || 0) / 1000000).toFixed(1)}M</span>
                     </div>
                 </div>
             </div>
 
             {/* Top Gainers */}
-            <div className="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-900 flex items-center justify-between">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <TrendingUp size={18} className="text-emerald-500" />
                         <span className="font-semibold text-slate-900 dark:text-white">Top Gainers</span>
@@ -103,7 +103,7 @@ export default function MarketOverview() {
                 </div>
                 <div className="divide-y divide-slate-100 dark:divide-neutral-800">
                     {topGainers.slice(0, 4).map((stock) => (
-                        <div key={stock.symbol} className="p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-neutral-800 transition-colors">
+                        <div key={stock.symbol} className="p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                             <div className="flex items-center gap-2">
                                 <span className="w-7 h-7 rounded bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{stock.symbol?.slice(0, 2)}</span>
                                 <span className="font-medium text-emerald-600 dark:text-emerald-400">{stock.symbol}</span>
@@ -118,8 +118,8 @@ export default function MarketOverview() {
             </div>
 
             {/* Top Losers */}
-            <div className="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-900 flex items-center justify-between">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <TrendingUp size={18} className="text-red-500 rotate-180" />
                         <span className="font-semibold text-slate-900 dark:text-white">Top Losers</span>
@@ -128,7 +128,7 @@ export default function MarketOverview() {
                 </div>
                 <div className="divide-y divide-slate-100 dark:divide-neutral-800">
                     {topLosers.slice(0, 4).map((stock) => (
-                        <div key={stock.symbol} className="p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-neutral-800 transition-colors">
+                        <div key={stock.symbol} className="p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                             <div className="flex items-center gap-2">
                                 <span className="w-7 h-7 rounded bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-[10px] font-bold text-red-600 dark:text-red-400">{stock.symbol?.slice(0, 2)}</span>
                                 <span className="font-medium text-red-600 dark:text-red-400">{stock.symbol}</span>
@@ -143,14 +143,14 @@ export default function MarketOverview() {
             </div>
 
             {/* Most Active */}
-            <div className="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-900 flex items-center gap-2">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center gap-2">
                     <BarChart2 size={18} className="text-emerald-500" />
                     <span className="font-semibold text-slate-900 dark:text-white">Most Active</span>
                 </div>
                 {loading ? (
                     <div className="p-4">
-                        <div className="text-center text-slate-500 dark:text-neutral-400 py-8">
+                        <div className="text-center text-slate-500 dark:text-slate-400 py-8">
                             <Loader2 className="mx-auto mb-2 animate-spin" size={24} />
                             <p className="text-sm">Loading...</p>
                         </div>
@@ -158,14 +158,14 @@ export default function MarketOverview() {
                 ) : (
                     <div className="divide-y divide-slate-100 dark:divide-neutral-800">
                         {mostActive.slice(0, 4).map((stock) => (
-                            <div key={stock.symbol} className="p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-neutral-800 transition-colors">
+                            <div key={stock.symbol} className="p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                                 <div className="flex items-center gap-2">
-                                    <span className="w-7 h-7 rounded bg-slate-100 dark:bg-neutral-800 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-300">{stock.symbol?.slice(0, 2)}</span>
+                                    <span className="w-7 h-7 rounded bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-300">{stock.symbol?.slice(0, 2)}</span>
                                     <span className="font-medium text-slate-700 dark:text-slate-300">{stock.symbol}</span>
                                 </div>
                                 <div className="text-right">
                                     <p className="font-semibold text-slate-900 dark:text-white">${stock.price?.toFixed(2)}</p>
-                                    <p className="text-xs text-slate-500 dark:text-neutral-400">{((stock.volume || 0) / 1000000).toFixed(1)}M</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">{((stock.volume || 0) / 1000000).toFixed(1)}M</p>
                                 </div>
                             </div>
                         ))}

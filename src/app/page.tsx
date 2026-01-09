@@ -24,19 +24,20 @@ import ForeignExchangeMarkets from '@/components/home/ForeignExchangeMarkets';
 import MarketSnapshot from '@/components/home/MarketSnapshot';
 import EducationalHub from '@/components/home/EducationalHub';
 import CategoryBar from '@/components/home/CategoryBar';
+import { AIWidget } from '@/components/ai';
 
 export default function HomePage() {
   const { t } = useTranslation();
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-neutral-950">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
       {/* Sidebar - Desktop Only */}
       <Sidebar />
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
-        {/* Fixed Header Section - Always visible like sidebar */}
-        <div className="sticky top-0 z-40 flex-shrink-0">
+      <main className="flex-1 flex flex-col min-h-screen">
+        {/* Fixed Header Section - Always visible */}
+        <div className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-gray-50 dark:bg-slate-900">
           {/* Ticker Tape */}
           <TickerTape />
 
@@ -44,8 +45,8 @@ export default function HomePage() {
           <Header />
         </div>
 
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        {/* Scrollable Content - with top padding for fixed header */}
+        <div className="flex-1 pt-[112px] md:pt-[120px]">
           <div className="p-4 lg:p-6 space-y-6 max-w-full">
             {/* Welcome Section */}
             <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -155,6 +156,14 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+
+      {/* Floating AI Widget */}
+      <AIWidget
+        type="floating"
+        position="bottom-right"
+        pageType="dashboard"
+        pageData={{}}
+      />
     </div>
   );
 }
