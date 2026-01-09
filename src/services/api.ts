@@ -1,10 +1,10 @@
 /**
  * Base API client for PeartoFinance
- * Centralized fetch wrapper with auth and error handling
+ * Centralized fetch wrapper with auth, error handling, and country filtering
  */
 
-// const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+const USER_COUNTRY_KEY = 'user_country';
 
 interface ApiOptions extends RequestInit {
     params?: Record<string, string | number | boolean>;
@@ -21,6 +21,23 @@ interface ApiError extends Error {
 function getAuthToken(): string | null {
     if (typeof window === 'undefined') return null;
     return localStorage.getItem('auth_token');
+}
+
+/**
+ * Get user country from localStorage
+ */
+function getUserCountry(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(USER_COUNTRY_KEY);
+}
+
+/**
+ * Set user country preference
+ */
+export function setUserCountry(countryCode: string): void {
+    if (typeof window !== 'undefined') {
+        localStorage.setItem(USER_COUNTRY_KEY, countryCode.toUpperCase());
+    }
 }
 
 /**
@@ -46,13 +63,21 @@ export async function apiFetch<T>(endpoint: string, options: ApiOptions = {}): P
     const url = createUrl(endpoint, params);
 
     const token = getAuthToken();
+    const country = getUserCountry();
+
     const headers: HeadersInit = {
         'Content-Type': 'application/json',
         ...options.headers,
     };
 
+    // Add auth token if present
     if (token) {
         (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+    }
+
+    // Add country header if present
+    if (country) {
+        (headers as Record<string, string>)['X-User-Country'] = country;
     }
 
     const response = await fetch(url, {
@@ -108,4 +133,4 @@ export async function del<T>(endpoint: string): Promise<T> {
     return apiFetch<T>(endpoint, { method: 'DELETE' });
 }
 
-export default { get, post, put, del, apiFetch };
+export default { get, post, put, del, apiFetch, setUserCountry };

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
-import { signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { auth, googleProvider } from '@/lib/firebase';
+import { signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged, User as FirebaseUser, getRedirectResult } from 'firebase/auth';
+import { auth, googleProvider, signInWithGoogleRedirect } from '@/lib/firebase';
 
 interface User {
     id: string;
@@ -30,8 +30,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_TOKEN_KEY = 'auth_token';
 const AUTH_USER_KEY = 'auth_user';
-// const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+// const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
@@ -76,6 +76,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return () => unsubscribe();
     }, [user]);
 
+    // Handle redirect result (for redirect-based OAuth flow)
+    useEffect(() => {
+        const handleRedirectResult = async () => {
+            try {
+                const result = await getRedirectResult(auth);
+                if (result) {
+                    const firebaseUser = result.user;
+
+                    // Create local user
+                    const userData: User = {
+                        id: firebaseUser.uid,
+                        name: firebaseUser.displayName || 'User',
+                        email: firebaseUser.email || '',
+                        role: 'user',
+                        avatarUrl: firebaseUser.photoURL || undefined,
+                        isVerified: firebaseUser.emailVerified,
+                    };
+
+                    setUser(userData);
+                    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userData));
+
+                    // Sync with backend
+                    try {
+                        const response = await fetch(`${API_BASE}/auth/google-signin`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                firebase_uid: firebaseUser.uid,
+                                name: firebaseUser.displayName,
+                                email: firebaseUser.email,
+                                avatarUrl: firebaseUser.photoURL,
+                            }),
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.token) {
+                                setToken(data.token);
+                                localStorage.setItem(AUTH_TOKEN_KEY, data.token);
+                            }
+                        }
+                    } catch {
+                        // Ignore backend sync errors
+                    }
+                }
+            } catch (error) {
+                console.error('Redirect result error:', error);
+            }
+        };
+
+        handleRedirectResult();
+    }, []);
+
     const login = useCallback(async (email: string, password: string) => {
         const response = await fetch(`${API_BASE}/auth/login`, {
             method: 'POST',
@@ -114,6 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const signInWithGoogle = useCallback(async () => {
         try {
+            // Try popup-based sign-in first (better UX)
             const result = await signInWithPopup(auth, googleProvider);
             const firebaseUser = result.user;
 
@@ -130,9 +184,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(userData);
             localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userData));
 
-            // Optionally sync with backend
+            // Sync with backend
             try {
-                await fetch(`${API_BASE}/auth/google-signin`, {
+                const response = await fetch(`${API_BASE}/auth/google-signin`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -142,6 +196,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         avatarUrl: firebaseUser.photoURL,
                     }),
                 });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.token) {
+                        setToken(data.token);
+                        localStorage.setItem(AUTH_TOKEN_KEY, data.token);
+                    }
+                }
             } catch {
                 // Ignore backend sync errors - user is still logged in via Firebase
             }
@@ -150,10 +212,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             const firebaseError = error as { code?: string; message?: string };
 
+            // If popup is blocked, fall back to redirect-based sign-in
+            if (firebaseError.code === 'auth/popup-blocked') {
+                console.log('Popup blocked, falling back to redirect...');
+                signInWithGoogleRedirect();
+                return; // Redirect will handle the rest
+            }
+
             if (firebaseError.code === 'auth/unauthorized-domain') {
                 throw new Error('Domain not authorized. Add localhost to Firebase Console → Authentication → Settings → Authorized domains');
-            } else if (firebaseError.code === 'auth/popup-blocked') {
-                throw new Error('Popup blocked. Please allow popups and try again.');
             } else if (firebaseError.code === 'auth/popup-closed-by-user') {
                 throw new Error('Sign-in cancelled.');
             }
