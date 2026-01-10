@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { TrendingUp, TrendingDown, Plus, ChevronRight, Loader2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Plus, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
 import { getWatchlist, WatchlistItem as WatchlistItemType } from '@/services/portfolioService';
 
 interface WatchlistItem {
@@ -16,10 +16,12 @@ interface WatchlistItem {
 export default function Watchlist() {
     const [items, setItems] = useState<WatchlistItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
     useEffect(() => {
         const fetchWatchlist = async () => {
             try {
+                setLoading(true);
                 const data = await getWatchlist();
                 setItems(data.map(item => ({
                     symbol: item.symbol,
@@ -28,16 +30,10 @@ export default function Watchlist() {
                     change: item.change,
                     changePercent: item.changePercent
                 })));
+                setError(false);
             } catch (err) {
                 console.error('Failed to fetch watchlist:', err);
-                // Fallback to demo data
-                setItems([
-                    { symbol: 'AAPL', name: 'Apple Inc.', price: 185.92, change: 2.28, changePercent: 1.24 },
-                    { symbol: 'MSFT', name: 'Microsoft', price: 374.58, change: 3.21, changePercent: 0.87 },
-                    { symbol: 'GOOGL', name: 'Alphabet', price: 140.23, change: -0.63, changePercent: -0.45 },
-                    { symbol: 'AMZN', name: 'Amazon', price: 153.38, change: 3.17, changePercent: 2.11 },
-                    { symbol: 'TSLA', name: 'Tesla', price: 248.50, change: -3.32, changePercent: -1.32 },
-                ]);
+                setError(true);
             } finally {
                 setLoading(false);
             }
@@ -71,6 +67,19 @@ export default function Watchlist() {
                 <div className="flex items-center justify-center py-8">
                     <Loader2 className="animate-spin text-emerald-500" size={20} />
                 </div>
+            ) : error || items.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 gap-2">
+                    <AlertCircle size={24} className="text-slate-400" />
+                    <p className="text-sm text-slate-500 text-center">
+                        {error ? 'Failed to load watchlist' : 'Your watchlist is empty'}
+                    </p>
+                    <Link
+                        href="/stocks"
+                        className="text-sm text-emerald-500 hover:text-emerald-600"
+                    >
+                        Browse stocks to add
+                    </Link>
+                </div>
             ) : (
                 <div className="space-y-2">
                     {items.map((item) => (
@@ -99,13 +108,13 @@ export default function Watchlist() {
                             {/* Price & Change */}
                             <div className="text-right">
                                 <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                                    ${item.price.toFixed(2)}
+                                    ${item.price?.toFixed(2) || '0.00'}
                                 </p>
-                                <div className={`flex items-center gap-1 justify-end ${item.changePercent >= 0 ? 'text-emerald-500' : 'text-red-500'
+                                <div className={`flex items-center gap-1 justify-end ${(item.changePercent || 0) >= 0 ? 'text-emerald-500' : 'text-red-500'
                                     }`}>
-                                    {item.changePercent >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                                    {(item.changePercent || 0) >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                                     <span className="text-xs font-medium">
-                                        {item.changePercent >= 0 ? '+' : ''}{item.changePercent.toFixed(2)}%
+                                        {(item.changePercent || 0) >= 0 ? '+' : ''}{(item.changePercent || 0).toFixed(2)}%
                                     </span>
                                 </div>
                             </div>

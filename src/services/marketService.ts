@@ -1,11 +1,12 @@
 /**
  * Market Data Service
  * Handles all market-related API calls
+ * Field names match backend API responses exactly
  */
 
 import { get } from './api';
 
-// Types
+// Types matching backend MarketData.to_dict()
 export interface MarketStock {
     id: number;
     symbol: string;
@@ -15,23 +16,57 @@ export interface MarketStock {
     changePercent: number;
     volume: number;
     marketCap?: number;
+    peRatio?: number;
     high52w?: number;
     low52w?: number;
     sector?: string;
+    industry?: string;
     exchange?: string;
+    currency?: string;
+    assetType?: string;
+    lastUpdated?: string;
+    countryCode?: string;
+    // Extended fields
+    open?: number;
+    previousClose?: number;
+    dayHigh?: number;
+    dayLow?: number;
+    avgVolume?: number;
+    beta?: number;
+    forwardPe?: number;
+    trailingPe?: number;
+    eps?: number;
+    dividendYield?: number;
+    dividendRate?: number;
+    bookValue?: number;
+    priceToBook?: number;
+    sharesOutstanding?: number;
+    floatShares?: number;
+    shortRatio?: number;
+    logoUrl?: string;
+    website?: string;
+    description?: string;
 }
 
+// Types matching backend MarketIndices.to_dict()
 export interface MarketIndex {
     id: number;
     symbol: string;
     name: string;
-    value: number;
+    value: number;  // API returns 'value' not 'price'
     change: number;
     changePercent: number;
-    region?: string;
-    icon?: string;
+    previousClose?: number;
+    dayHigh?: number;
+    dayLow?: number;
+    yearHigh?: number;
+    yearLow?: number;
+    marketStatus?: string;
+    countryCode?: string;
+    lastUpdated?: string;
 }
 
+// Types matching backend CommodityData.to_dict()
 export interface Commodity {
     id: number;
     symbol: string;
@@ -39,8 +74,10 @@ export interface Commodity {
     price: number;
     change: number;
     changePercent: number;
-    unit: string;
-    currency: string;
+    dayHigh?: number;
+    dayLow?: number;
+    unit?: string;
+    currency?: string;
 }
 
 export interface StockOffer {
@@ -53,6 +90,10 @@ export interface StockOffer {
     closeDate: string;
     listingDate?: string;
     status: 'upcoming' | 'open' | 'closed' | 'listed';
+    exchange?: string;
+    dealType?: string;
+    sharesOffered?: number;
+    offerPrice?: number;
 }
 
 export interface MarketOverviewData {
@@ -60,7 +101,6 @@ export interface MarketOverviewData {
     topGainers: MarketStock[];
     topLosers: MarketStock[];
     mostActive: MarketStock[];
-    totalTurnover?: number;
     totalVolume?: number;
     advancers?: number;
     decliners?: number;
@@ -126,6 +166,29 @@ export async function getStockOffers(status?: 'upcoming' | 'open' | 'closed'): P
 }
 
 /**
+ * Get all stocks with optional filters
+ */
+export async function getStocks(sector?: string, limit = 50): Promise<MarketStock[]> {
+    const params: Record<string, string | number> = { limit };
+    if (sector) params.sector = sector;
+    return get<MarketStock[]>('/market/stocks', params);
+}
+
+/**
+ * Get crypto markets
+ */
+export async function getCryptoMarkets(limit = 100, page = 1, sortBy = 'market_cap'): Promise<MarketStock[]> {
+    return get<MarketStock[]>('/market/crypto', { limit, page, sort: sortBy });
+}
+
+/**
+ * Get market stats
+ */
+export async function getMarketStats() {
+    return get<{ advancers: number; decliners: number; unchanged: number; totalVolume: number; totalCount: number }>('/market/stats');
+}
+
+/**
  * Get sector performance
  */
 export async function getSectorPerformance() {
@@ -148,6 +211,9 @@ export default {
     searchStocks,
     getCommodities,
     getStockOffers,
+    getStocks,
+    getCryptoMarkets,
+    getMarketStats,
     getSectorPerformance,
     getStockHistory,
 };

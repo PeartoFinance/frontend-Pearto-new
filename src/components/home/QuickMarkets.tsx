@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { RefreshCw, TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { RefreshCw, TrendingUp, TrendingDown, Loader2, AlertCircle } from 'lucide-react';
 import { getTopMovers, MarketStock } from '@/services/marketService';
 
 type MarketTab = 'US' | 'EU' | 'ASIA' | 'CRYPTO';
@@ -17,6 +18,7 @@ export default function QuickMarkets() {
     const [activeTab, setActiveTab] = useState<MarketTab>('US');
     const [movers, setMovers] = useState<Mover[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
     const fetchMovers = async () => {
         try {
@@ -24,13 +26,13 @@ export default function QuickMarkets() {
             const data = await getTopMovers('both', 10);
             // Combine gainers and losers, sorted by absolute change
             const all = [
-                ...(data.gainers || []).map(s => ({
+                ...(data.gainers || []).map((s: MarketStock) => ({
                     symbol: s.symbol,
                     name: s.name,
                     change: s.changePercent || 0,
                     price: s.price
                 })),
-                ...(data.losers || []).map(s => ({
+                ...(data.losers || []).map((s: MarketStock) => ({
                     symbol: s.symbol,
                     name: s.name,
                     change: s.changePercent || 0,
@@ -38,16 +40,10 @@ export default function QuickMarkets() {
                 }))
             ];
             setMovers(all);
+            setError(false);
         } catch (err) {
             console.error('Failed to fetch movers:', err);
-            // Fallback to demo data
-            setMovers([
-                { symbol: 'AAPL', change: -1.38 },
-                { symbol: 'AMZN', change: -1.42 },
-                { symbol: 'MSFT', change: 2.15 },
-                { symbol: 'NVDA', change: -0.87 },
-                { symbol: 'TSLA', change: -3.07 },
-            ]);
+            setError(true);
         } finally {
             setLoading(false);
         }
@@ -55,6 +51,9 @@ export default function QuickMarkets() {
 
     useEffect(() => {
         fetchMovers();
+        // Refresh every 2 minutes
+        const interval = setInterval(fetchMovers, 120000);
+        return () => clearInterval(interval);
     }, []);
 
     // Filter movers based on tab (in production would fetch by region)
@@ -101,12 +100,18 @@ export default function QuickMarkets() {
                 <div className="flex items-center justify-center py-6">
                     <Loader2 className="animate-spin text-emerald-500" size={20} />
                 </div>
+            ) : error || filteredMovers.length === 0 ? (
+                <div className="flex items-center justify-center py-6 gap-2 text-slate-500 text-sm">
+                    <AlertCircle size={16} />
+                    <span>No movers data. Import stocks from admin panel.</span>
+                </div>
             ) : (
                 <div className="space-y-2">
                     {filteredMovers.map((mover, idx) => (
-                        <div
+                        <Link
                             key={`${mover.symbol}-${idx}`}
-                            className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg"
+                            href={`/stocks/${mover.symbol}`}
+                            className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600/50 transition-colors"
                         >
                             <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium text-slate-900 dark:text-white">{mover.symbol}</span>
@@ -119,7 +124,7 @@ export default function QuickMarkets() {
                                 {mover.change >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                                 {mover.change >= 0 ? '+' : ''}{mover.change.toFixed(2)}%
                             </span>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             )}

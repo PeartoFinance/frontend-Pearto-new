@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { TrendingUp, TrendingDown, RefreshCw, Copy, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { TrendingUp, TrendingDown, RefreshCw, Loader2, AlertCircle } from 'lucide-react';
 import { getMarketOverview, MarketOverviewData, MarketStock } from '@/services/marketService';
 
 export default function MarketSnapshot() {
@@ -47,13 +48,14 @@ export default function MarketSnapshot() {
     };
 
     const displayData = getDisplayData();
-    const totalMarketCap = 6.02; // Would come from crypto API
     const volume24h = data?.totalVolume ? (data.totalVolume / 1000000000).toFixed(2) : '0';
 
     const timeSinceRefresh = () => {
         const seconds = Math.floor((new Date().getTime() - lastRefresh.getTime()) / 1000);
         return `${seconds}s ago`;
     };
+
+    const hasNoData = !data || (data.topGainers?.length === 0 && data.topLosers?.length === 0 && data.mostActive?.length === 0);
 
     return (
         <section className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
@@ -108,10 +110,10 @@ export default function MarketSnapshot() {
                     <div className="text-xs text-slate-500 mb-2">Top Gainer</div>
                     {data?.topGainers?.[0] && (
                         <div className="flex items-center justify-between text-sm">
-                            <span className="flex items-center gap-1 text-emerald-500">
+                            <Link href={`/stocks/${data.topGainers[0].symbol}`} className="flex items-center gap-1 text-emerald-500 hover:underline">
                                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
                                 {data.topGainers[0].symbol}
-                            </span>
+                            </Link>
                             <span className="text-emerald-500">
                                 +{data.topGainers[0].changePercent?.toFixed(2)}%
                             </span>
@@ -147,8 +149,13 @@ export default function MarketSnapshot() {
                 <div className="flex items-center justify-center py-8">
                     <Loader2 className="animate-spin text-emerald-500" size={24} />
                 </div>
-            ) : error ? (
-                <div className="text-center py-8 text-red-500">{error}</div>
+            ) : error && hasNoData ? (
+                <div className="flex items-center justify-center py-8 gap-2 text-slate-500">
+                    <AlertCircle size={18} />
+                    <span>No market data available. Import data from admin panel.</span>
+                </div>
+            ) : displayData.length === 0 ? (
+                <div className="text-center py-8 text-slate-500">No data available for this category</div>
             ) : (
                 <div className="overflow-x-auto">
                     <table className="w-full">
@@ -166,7 +173,7 @@ export default function MarketSnapshot() {
                                     className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30"
                                 >
                                     <td className="py-3">
-                                        <div className="flex items-center gap-3">
+                                        <Link href={`/stocks/${asset.symbol}`} className="flex items-center gap-3 hover:underline">
                                             <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-xs font-bold text-emerald-600">
                                                 {asset.symbol?.slice(0, 2)}
                                             </div>
@@ -174,11 +181,11 @@ export default function MarketSnapshot() {
                                                 <p className="text-sm font-medium text-slate-900 dark:text-white">{asset.symbol}</p>
                                                 <p className="text-xs text-slate-500">{asset.name}</p>
                                             </div>
-                                        </div>
+                                        </Link>
                                     </td>
                                     <td className="text-right py-3">
                                         <span className="text-sm font-medium text-slate-900 dark:text-white">
-                                            ${asset.price?.toLocaleString()}
+                                            ${asset.price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                                         </span>
                                     </td>
                                     <td className="text-right py-3">

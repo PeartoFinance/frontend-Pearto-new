@@ -3,7 +3,7 @@
  * Centralized fetch wrapper with auth, error handling, and country filtering
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 const USER_COUNTRY_KEY = 'user_country';
 
 interface ApiOptions extends RequestInit {

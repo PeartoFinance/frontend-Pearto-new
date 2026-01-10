@@ -1,21 +1,97 @@
 'use client';
 
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
+import { getMarketIndices, getCommodities, MarketIndex, Commodity } from '@/services/marketService';
 
-// Mock data - in production, this would come from API
-const tickerData = [
-    { symbol: 'S&P 500', value: '4,783.45', change: '+0.42%', up: true },
-    { symbol: 'NASDAQ', value: '15,012.33', change: '+0.68%', up: true },
-    { symbol: 'DOW', value: '37,562.12', change: '-0.12%', up: false },
-    { symbol: 'BTC', value: '$43,250', change: '+2.34%', up: true },
-    { symbol: 'ETH', value: '$2,285', change: '+1.87%', up: true },
-    { symbol: 'GOLD', value: '$2,045.30', change: '-0.23%', up: false },
-    { symbol: 'S&P 500', value: '4,783.45', change: '+0.42%', up: true },
-    { symbol: 'NASDAQ', value: '15,012.33', change: '+0.68%', up: true },
-    { symbol: 'DOW', value: '37,562.12', change: '-0.12%', up: false },
-];
+interface TickerItem {
+    symbol: string;
+    value: string;
+    change: string;
+    up: boolean;
+}
 
 export default function TickerTape() {
+    const [tickerData, setTickerData] = useState<TickerItem[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const [indices, commodities] = await Promise.all([
+                    getMarketIndices(),
+                    getCommodities()
+                ]);
+
+                const items: TickerItem[] = [];
+
+                // Add indices - using 'value' field from API
+                indices.slice(0, 4).forEach((idx: MarketIndex) => {
+                    const changePercent = idx.changePercent || 0;
+                    items.push({
+                        symbol: idx.name || idx.symbol,
+                        value: idx.value?.toLocaleString(undefined, { maximumFractionDigits: 2 }) || '0',
+                        change: `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%`,
+                        up: changePercent >= 0
+                    });
+                });
+
+                // Add commodities - using 'price' field from API
+                commodities.slice(0, 3).forEach((c: Commodity) => {
+                    const changePercent = c.changePercent || 0;
+                    items.push({
+                        symbol: c.name || c.symbol,
+                        value: `$${c.price?.toLocaleString(undefined, { maximumFractionDigits: 2 }) || 0}`,
+                        change: `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%`,
+                        up: changePercent >= 0
+                    });
+                });
+
+                if (items.length > 0) {
+                    setTickerData(items);
+                    setError(false);
+                } else {
+                    setError(true);
+                }
+            } catch (err) {
+                console.error('Failed to fetch ticker data:', err);
+                setError(true);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+        // Refresh every 60 seconds
+        const interval = setInterval(fetchData, 60000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Don't render if no data and error
+    if (error && tickerData.length === 0) {
+        return (
+            <div className="bg-slate-900 text-white py-2 text-xs font-medium border-b border-slate-800">
+                <div className="flex items-center justify-center gap-2 text-slate-400">
+                    <span>Market data unavailable</span>
+                    <span className="text-xs">• Import data from admin panel</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (loading && tickerData.length === 0) {
+        return (
+            <div className="bg-slate-900 text-white py-2 text-xs font-medium border-b border-slate-800">
+                <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="animate-spin" size={12} />
+                    <span className="text-slate-400">Loading market data...</span>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="bg-slate-900 text-white py-2 text-xs font-medium overflow-hidden border-b border-slate-800">
             <div className="flex items-center gap-8 animate-marquee hover:pause-animation">
