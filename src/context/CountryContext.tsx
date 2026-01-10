@@ -26,7 +26,7 @@ const CountryContext = createContext<CountryContextType | null>(null);
 
 const STORAGE_KEY = 'user_country_override';
 const DEFAULT_COUNTRY = 'US';
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com';
 
 export function CountryProvider({ children }: { children: ReactNode }) {
     const [country, setCountryState] = useState<string>(DEFAULT_COUNTRY);
