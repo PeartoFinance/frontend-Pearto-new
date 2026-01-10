@@ -3,11 +3,7 @@
  * Unified fetch wrapper with auth, error handling, and country/email headers.
  */
 
-<<<<<<< Updated upstream
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-=======
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
->>>>>>> Stashed changes
 const USER_COUNTRY_KEY = 'user_country';
 
 // --- Interfaces ---
@@ -63,10 +59,10 @@ function createUrl(endpoint: string, params?: Record<string, string | number | b
     // Ensure base ends with slash and endpoint doesn't start with one for reliable joining
     const base = API_BASE.endsWith('/') ? API_BASE : `${API_BASE}/`;
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
-    
+
     try {
         const url = new URL(cleanEndpoint, base);
-        
+
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
                 if (value !== undefined && value !== null) {
@@ -131,16 +127,16 @@ export async function apiFetch<T>(endpoint: string, options: ApiOptions = {}): P
 
 // --- HTTP Method Helpers ---
 
-export const get = <T>(endpoint: string, params?: Record<string, string | number | boolean>) => 
+export const get = <T>(endpoint: string, params?: Record<string, string | number | boolean>) =>
     apiFetch<T>(endpoint, { method: 'GET', params });
 
-export const post = <T>(endpoint: string, data?: unknown) => 
+export const post = <T>(endpoint: string, data?: unknown) =>
     apiFetch<T>(endpoint, { method: 'POST', body: data ? JSON.stringify(data) : undefined });
 
-export const put = <T>(endpoint: string, data?: unknown) => 
+export const put = <T>(endpoint: string, data?: unknown) =>
     apiFetch<T>(endpoint, { method: 'PUT', body: data ? JSON.stringify(data) : undefined });
 
-export const del = <T>(endpoint: string) => 
+export const del = <T>(endpoint: string) =>
     apiFetch<T>(endpoint, { method: 'DELETE' });
 
 export default { get, post, put, del, apiFetch, setUserCountry };
