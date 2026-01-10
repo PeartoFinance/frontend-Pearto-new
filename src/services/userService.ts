@@ -5,7 +5,8 @@
 
 import { get, put, post } from './api';
 
-// Types
+// --- Types ---
+
 export interface UserProfile {
     id: number;
     name: string;
@@ -51,13 +52,14 @@ export interface ProfileData {
     specializations?: Specialization[];
     certifications?: Certification[];
     hourlyRate?: number;
-    netWorth?: number;
-    netWorthChange?: number;
-    netWorthChangePercent?: number;
+    // FIXED: Added | null to allow the explicit null assignments in getFullProfile
+    netWorth?: number | null;
+    netWorthChange?: number | null;
+    netWorthChangePercent?: number | null;
     memberSince?: string;
 }
 
-// API Functions
+// --- API Functions ---
 
 /**
  * Get current user profile
@@ -88,15 +90,13 @@ export async function updatePreferences(data: Partial<UserPreferences>): Promise
 }
 
 /**
- * Get user profile with extended data (including specializations, certifications, etc.)
- * This combines multiple API calls for convenience
+ * Get user profile with extended data
  */
 export async function getFullProfile(): Promise<ProfileData> {
     try {
         const [profile, preferences] = await Promise.all([
             getProfile().catch((error) => {
                 console.error('Failed to fetch profile:', error);
-                // Return fallback profile data
                 return {
                     id: 0,
                     name: 'User',
@@ -107,7 +107,6 @@ export async function getFullProfile(): Promise<ProfileData> {
             }),
             getPreferences().catch((error) => {
                 console.error('Failed to fetch preferences:', error);
-                // Return default preferences
                 return {
                     currency: 'USD',
                     languagePref: 'en',
@@ -135,6 +134,7 @@ export async function getFullProfile(): Promise<ProfileData> {
                 { id: '4', name: 'Derivatives', level: false }
             ],
             hourlyRate: 45,
+            // These now match the updated ProfileData interface
             netWorth: null,
             netWorthChange: null,
             netWorthChangePercent: null,
