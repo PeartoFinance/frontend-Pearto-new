@@ -173,7 +173,7 @@ export default function ProfileVerification({ profile }: ProfileVerificationProp
 
             {/* Verified Badge Status */}
             {status?.verifiedBadge && (
-                <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20 rounded-lg p-4">
+                <div className="bg-linear-to-br from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20 rounded-lg p-4">
                     <div className="flex items-center gap-3">
                         <CheckCircle2 className="w-6 h-6 text-emerald-500" />
                         <div>

@@ -80,7 +80,7 @@ export default function ProfileSettings({ profile, onClose, onUpdate }: ProfileS
                 <div className="mb-6">
                     <label className="block text-sm font-medium text-slate-300 mb-3">Profile Picture</label>
                     <div className="flex items-center gap-4">
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500/80 to-cyan-500/70 text-white flex items-center justify-center text-xl font-bold overflow-hidden">
+                        <div className="w-20 h-20 rounded-full bg-linear-to-br from-emerald-500/80 to-cyan-500/70 text-white flex items-center justify-center text-xl font-bold overflow-hidden">
                             {formData.avatarUrl ? (
                                 <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                             ) : (
@@ -219,7 +219,7 @@ function Field({
             </label>
             <div className="relative">
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">
-                    <Icon size={16} />
+                    <Icon  />
                 </div>
                 <input
                     type={type}
