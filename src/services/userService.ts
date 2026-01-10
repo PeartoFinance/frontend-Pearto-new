@@ -42,7 +42,7 @@ export interface Specialization {
 export interface Certification {
     id: string;
     name: string;
-    level?: string;
+    level?: boolean;
 }
 
 export interface ProfileData {
@@ -116,30 +116,28 @@ export async function getFullProfile(): Promise<ProfileData> {
             }),
         ]);
 
-        // For now, return mock data for fields not yet in backend
-        // These can be added to backend later
         return {
             profile,
             preferences,
             specializations: [
-                { id: 'equities', name: 'Equities', selected: true },
-                { id: 'etfs', name: 'ETFs', selected: true },
-                { id: 'options', name: 'Options', selected: true },
-                { id: 'crypto', name: 'Crypto', selected: true },
-                { id: 'commodities', name: 'Commodities', selected: false },
-                { id: 'macro', name: 'Macro', selected: false },
-                { id: 'fx', name: 'FX', selected: false },
+                { id: '1', name: 'Equities', selected: false },
+                { id: '2', name: 'ETFs', selected: false },
+                { id: '3', name: 'Options', selected: false },
+                { id: '4', name: 'Crypto', selected: true },
+                { id: '5', name: 'Commodities', selected: false },
+                { id: '6', name: 'Macro', selected: false },
+                { id: '7', name: 'FX', selected: false }
             ],
             certifications: [
-                { id: 'cfa1', name: 'CFA Level I', level: 'Level I' },
-                { id: 'cmt', name: 'CMT' },
-                { id: 'risk', name: 'Risk Mgmt.' },
-                { id: 'derivatives', name: 'Derivatives' },
+                { id: '1', name: 'CFA Level I', level: true },
+                { id: '2', name: 'CMT', level: false },
+                { id: '3', name: 'Risk Mgmt', level: false },
+                { id: '4', name: 'Derivatives', level: false }
             ],
             hourlyRate: 45,
-            netWorth: 125450,
-            netWorthChange: 12545,
-            netWorthChangePercent: 12.5,
+            netWorth: null,
+            netWorthChange: null,
+            netWorthChangePercent: null,
             memberSince: profile.createdAt || new Date().toISOString(),
         };
     } catch (error) {
