@@ -98,7 +98,7 @@ function DropdownMenu({ label, icon, items, isOpen, onToggle, onClose }: Dropdow
             </button>
 
             {isOpen && (
-                <div className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl py-2 z-[60] animate-in fade-in-0 slide-in-from-top-2 duration-200">
+                <div className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl py-2 z-60 animate-in fade-in-0 slide-in-from-top-2 duration-200">
                     {items.map((item) => {
                         const Icon = item.icon;
                         return (
@@ -185,7 +185,7 @@ export default function Header() {
     return (
         <>
             {/* PRIMARY NAVBAR */}
-            <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+            <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 transition-all duration-300">
                 <div className="px-4 lg:px-6">
                     <div className="flex items-center justify-between h-14 gap-4">
                         {/* Left: Hamburger Menu + Logo (mobile only) */}
@@ -197,10 +197,10 @@ export default function Header() {
                                 <Menu size={22} className="text-slate-600 dark:text-slate-300" />
                             </button>
                             <Link href="/" className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
+                                <div className="w-8 h-8 rounded-lg bg-linear-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
                                     <span className="text-white font-bold text-sm">P</span>
                                 </div>
-                                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-cyan-500">
+                                <span className="text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-emerald-500 to-cyan-500">
                                     Pearto
                                 </span>
                             </Link>
@@ -225,7 +225,7 @@ export default function Header() {
                                 {isDarkMode ? <Sun size={20} className="text-amber-400" /> : <Moon size={20} className="text-slate-700" />}
                             </button>
 
-                            <Link href="/ai" className="flex items-center gap-1.5 px-3 py-2 rounded-lg font-semibold text-sm text-white bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 shadow hover:shadow-md transition">
+                            <Link href="/ai" className="flex items-center gap-1.5 px-3 py-2 rounded-lg font-semibold text-sm text-white bg-linear-to-br from-purple-500 via-blue-500 to-cyan-500 shadow hover:shadow-md transition">
                                 <Sparkles size={16} />
                                 AI
                             </Link>
@@ -246,7 +246,7 @@ export default function Header() {
                                             {user?.avatarUrl ? (
                                                 <img src={user.avatarUrl} alt={user.name} className="w-8 h-8 rounded-full object-cover border-2 border-emerald-500" />
                                             ) : (
-                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
+                                                <div className="w-8 h-8 rounded-full bg-linear-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
                                                     <span className="text-white text-sm font-bold">{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
                                                 </div>
                                             )}
@@ -254,7 +254,7 @@ export default function Header() {
                                             <ChevronDown size={14} className="text-slate-500" />
                                         </button>
                                         {userMenuOpen && (
-                                            <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl py-2 z-[60]">
+                                            <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl py-2 z-60">
                                                 <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
                                                     <p className="text-sm font-medium text-slate-900 dark:text-white">{user?.name}</p>
                                                     <p className="text-xs text-slate-500 truncate">{user?.email}</p>
@@ -279,7 +279,7 @@ export default function Header() {
                                 ) : (
                                     <>
                                         <Link href="/login" className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Sign in</Link>
-                                        <Link href="/signup" className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-lg shadow hover:shadow-md transition">Sign up</Link>
+                                        <Link href="/signup" className="px-4 py-2 text-sm font-medium text-white bg-linear-to-r from-emerald-500 to-cyan-500 rounded-lg shadow hover:shadow-md transition">Sign up</Link>
                                     </>
                                 )}
                             </div>
@@ -288,8 +288,8 @@ export default function Header() {
                 </div>
             </header>
 
-            {/* SECONDARY NAVBAR - With working dropdowns */}
-            <div className={`hidden lg:block bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 transition-all duration-300 ${scrolled ? 'max-h-0 py-0 opacity-0 overflow-hidden' : 'max-h-20 py-2.5 opacity-100'}`}>
+            {/* SECONDARY NAVBAR - Always visible, no hiding on scroll */}
+            <div className="hidden lg:block fixed top-14 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 py-2.5">
                 <div className="px-4 lg:px-6">
                     <div className="flex items-center justify-center gap-3">
                         {/* Pillars dropdown */}
@@ -303,12 +303,12 @@ export default function Header() {
                         />
 
                         {/* Markets button */}
-                        <Link href="/markets" className="px-4 py-2 rounded-lg font-semibold text-sm text-white bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 shadow hover:shadow-md transition">
+                        <Link href="/markets" className="px-4 py-2 rounded-lg font-semibold text-sm text-white bg-linear-to-br from-blue-600 via-indigo-600 to-purple-600 shadow hover:shadow-md transition">
                             Markets
                         </Link>
 
                         {/* Booyah button */}
-                        <Link href="/booyah" className="px-4 py-2 rounded-lg font-bold text-sm text-white bg-gradient-to-br from-green-500 via-emerald-500 to-green-600 shadow hover:shadow-md transition">
+                        <Link href="/booyah" className="px-4 py-2 rounded-lg font-bold text-sm text-white bg-linear-to-br from-green-500 via-emerald-500 to-green-600 shadow hover:shadow-md transition">
                             Booyah
                         </Link>
 
@@ -335,6 +335,9 @@ export default function Header() {
                 </div>
             </div>
 
+            {/* Spacer to prevent content from being hidden behind fixed header */}
+            <div className="h-14 lg:h-26"></div>
+
             {/* Mobile Menu */}
             {mobileOpen && (
                 <>
@@ -349,10 +352,10 @@ export default function Header() {
                         {/* Menu Header with close button */}
                         <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
                             <Link href="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
+                                <div className="w-8 h-8 rounded-lg bg-linear-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
                                     <span className="text-white font-bold text-sm">P</span>
                                 </div>
-                                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-cyan-500">
+                                <span className="text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-emerald-500 to-cyan-500">
                                     Pearto
                                 </span>
                             </Link>
@@ -370,7 +373,7 @@ export default function Header() {
                                 <span>Search stocks, crypto...</span>
                             </button>
 
-                            <Link href="/ai" onClick={() => setMobileOpen(false)} className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-white bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 shadow">
+                            <Link href="/ai" onClick={() => setMobileOpen(false)} className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-white bg-linear-to-br from-purple-500 via-blue-500 to-cyan-500 shadow">
                                 <Sparkles size={18} />
                                 AI Assistant
                             </Link>
@@ -390,11 +393,11 @@ export default function Header() {
                                     </div>
                                 </div>
 
-                                <Link href="/markets" onClick={() => setMobileOpen(false)} className="flex items-center justify-center w-full py-3 rounded-xl font-bold text-white bg-gradient-to-br from-blue-600 to-purple-600 shadow">
+                                <Link href="/markets" onClick={() => setMobileOpen(false)} className="flex items-center justify-center w-full py-3 rounded-xl font-bold text-white bg-linear-to-br from-blue-600 to-purple-600 shadow">
                                     Markets Dashboard
                                 </Link>
 
-                                <Link href="/booyah" onClick={() => setMobileOpen(false)} className="flex items-center justify-center w-full py-3 rounded-xl font-bold text-white bg-gradient-to-br from-green-500 to-emerald-600 shadow">
+                                <Link href="/booyah" onClick={() => setMobileOpen(false)} className="flex items-center justify-center w-full py-3 rounded-xl font-bold text-white bg-linear-to-br from-green-500 to-emerald-600 shadow">
                                     Booyah
                                 </Link>
 
@@ -433,7 +436,7 @@ export default function Header() {
                             <div className="pt-4 border-t border-slate-200 dark:border-slate-700 space-y-3">
                                 <div className="flex gap-3">
                                     <Link href="/login" onClick={() => setMobileOpen(false)} className="flex-1 py-3 text-center rounded-xl border border-slate-200 dark:border-slate-700 font-medium">Sign in</Link>
-                                    <Link href="/signup" onClick={() => setMobileOpen(false)} className="flex-1 py-3 text-center rounded-xl text-white bg-gradient-to-r from-emerald-500 to-cyan-500 font-medium">Sign up</Link>
+                                    <Link href="/signup" onClick={() => setMobileOpen(false)} className="flex-1 py-3 text-center rounded-xl text-white bg-linear-to-r from-emerald-500 to-cyan-500 font-medium">Sign up</Link>
                                 </div>
                             </div>
                         </div>

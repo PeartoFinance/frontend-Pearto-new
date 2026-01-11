@@ -78,7 +78,7 @@ export default function CalculatorLayout({
                 </div>
 
                 {/* Results Section */}
-                <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl border border-emerald-200 dark:border-emerald-800 p-6">
+                <div className="bg-linear-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl border border-emerald-200 dark:border-emerald-800 p-6">
                     <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
                         Results
                     </h2>

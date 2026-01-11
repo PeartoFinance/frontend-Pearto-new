@@ -39,7 +39,7 @@ export default function LiveTVPreview() {
                         href={`/tvs/${channel.name.toLowerCase().replace(/\s+/g, '-')}`}
                         className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors group"
                     >
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-700 flex items-center justify-center text-xl flex-shrink-0">
+                        <div className="w-10 h-10 rounded-lg bg-linear-to-br from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-700 flex items-center justify-center text-xl flex-shrink-0">
                             {channel.icon}
                         </div>
                         <div className="flex-1 min-w-0">

@@ -86,7 +86,7 @@ export default function AuthCallbackPage() {
     }, [router]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+        <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-900 to-gray-800">
             <div className="text-center p-8 rounded-2xl bg-gray-800/50 backdrop-blur-sm border border-gray-700">
                 {status === 'processing' && (
                     <>

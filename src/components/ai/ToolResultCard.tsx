@@ -53,7 +53,7 @@ export function StockCard({ data }: { data: StockData }) {
         <div className="bg-slate-800/80 rounded-xl p-4 border border-slate-700/50">
             <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm">
+                    <div className="w-10 h-10 rounded-lg bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm">
                         {(data.symbol || 'N/A').slice(0, 2)}
                     </div>
                     <div>
@@ -142,7 +142,7 @@ export function EMICard({ data }: { data: CalculatorData }) {
 // Weather Card
 export function WeatherCard({ data }: { data: WeatherData }) {
     return (
-        <div className="bg-gradient-to-br from-sky-600 to-blue-700 rounded-xl p-4">
+        <div className="bg-linear-to-br from-sky-600 to-blue-700 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
                 <Cloud className="w-4 h-4 text-white/80" />
                 <span className="text-white/90 font-medium text-sm">{data.location}</span>
