@@ -22,7 +22,7 @@ export default function CourseCard({ course }: CourseCardProps) {
         <Link href={`/learn/${course.slug}`}>
             <div className="group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 hover:shadow-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-all duration-300">
                 {/* Thumbnail */}
-                <div className="relative aspect-video bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-slate-700 dark:to-slate-600 overflow-hidden">
+                <div className="relative aspect-video bg-linear-to-br from-emerald-100 to-cyan-100 dark:from-slate-700 dark:to-slate-600 overflow-hidden">
                     {course.thumbnailUrl ? (
                         <img
                             src={course.thumbnailUrl}
