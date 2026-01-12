@@ -131,7 +131,7 @@ function DropdownMenu({ label, icon, items, isOpen, onToggle, onClose }: Dropdow
     );
 }
 
-export default function Header() {
+export default function Header({ isFixed = false }: { isFixed?: boolean }) {
     const { t } = useTranslation();
     const { user, isAuthenticated, logout } = useAuth();
     const [isDarkMode, setIsDarkMode] = useState(true);
@@ -185,7 +185,7 @@ export default function Header() {
     return (
         <>
             {/* PRIMARY NAVBAR */}
-            <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+            <header className={`${isFixed ? 'fixed top-0 left-0 right-0 z-50' : ''} bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800`}>
                 <div className="px-4 lg:px-6">
                     <div className="flex items-center justify-between h-14 gap-4">
                         {/* Left: Hamburger Menu + Logo (mobile only) */}
@@ -288,8 +288,8 @@ export default function Header() {
                 </div>
             </header>
 
-            {/* SECONDARY NAVBAR - With working dropdowns */}
-            <div className={`hidden lg:block bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 transition-all duration-300 ${scrolled ? 'max-h-0 py-0 opacity-0 overflow-hidden' : 'max-h-20 py-2.5 opacity-100'}`}>
+            {/* SECONDARY NAVBAR */}
+            <div className={`hidden lg:block ${isFixed ? 'fixed top-14 left-0 right-0 z-40' : ''} bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 py-2.5`}>
                 <div className="px-4 lg:px-6">
                     <div className="flex items-center justify-center gap-3">
                         {/* Pillars dropdown */}

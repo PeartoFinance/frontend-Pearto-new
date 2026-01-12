@@ -122,9 +122,9 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-screen bg-[#0a0c0d] text-slate-300 font-sans pb-12">
-            <Header />
+            <Header isFixed={true} />
             
-            <div className="container mx-auto px-4 py-8 max-w-7xl">
+            <div className="container mx-auto px-4 py-8 max-w-7xl pt-27">
                 {/* Profile Header */}
                 <div className="mb-8">
                     <ProfileHeader 
