@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { getFullProfile, type ProfileData, type UserProfile } from '@/services/userService';
 import { getWatchlist, type WatchlistItem } from '@/services/portfolioService';
 import Header from '@/components/layout/Header';
+import TickerTape from '@/components/layout/TickerTape';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileSettings from '@/components/profile/ProfileSettings';
 import ProfileVerification from '@/components/profile/ProfileVerification';
@@ -122,9 +123,15 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-300 font-sans pb-12">
-            <Header isFixed={true} />
+            <div className="fixed top-0 right-0 left-0 z-40 bg-gray-50 dark:bg-slate-900">
+                <TickerTape />
+                
+                <Header />
+            </div>
             
-            <div className="container mx-auto px-4 py-8 max-w-7xl pt-27">
+            {/* Scrollable Content - with top padding for fixed header */}
+            <div className="pt-[112px] md:pt-[120px]">
+                <div className="container mx-auto px-4 py-8 max-w-7xl">
                 {/* Profile Header */}
                 <div className="mb-8">
                     <ProfileHeader 
@@ -350,6 +357,7 @@ export default function ProfilePage() {
                              <p className="text-slate-500 text-sm">Detailed {activeTab} information will appear here.</p>
                         </div>
                     )}
+                </div>
                 </div>
             </div>
 
