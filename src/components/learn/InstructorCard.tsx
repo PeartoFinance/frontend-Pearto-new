@@ -19,7 +19,7 @@ export default function InstructorCard({ instructor }: InstructorCardProps) {
                         className="h-16 w-16 rounded-full object-cover border-2 border-emerald-500"
                     />
                 ) : (
-                    <div className="h-16 w-16 rounded-full bg-linear-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
+                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
                         <span className="text-xl font-bold text-white">
                             {instructor.name.charAt(0).toUpperCase()}
                         </span>

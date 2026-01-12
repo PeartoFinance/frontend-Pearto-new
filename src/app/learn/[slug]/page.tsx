@@ -101,7 +101,7 @@ export default function CourseDetailPage() {
 
                 <main className="flex-1 overflow-y-auto">
                     {/* Hero Section */}
-                    <div className="bg-linear-to-br from-slate-800 via-slate-800 to-slate-900 border-b border-slate-700/50">
+                    <div className="bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 border-b border-slate-700/50">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                             {/* Back button */}
                             <Link
@@ -159,7 +159,7 @@ export default function CourseDetailPage() {
                                     {/* Instructor */}
                                     {course.instructor && (
                                         <div className="flex items-center gap-3 pt-2">
-                                            <div className="h-10 w-10 rounded-full bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-semibold text-sm">
+                                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-semibold text-sm">
                                                 {course.instructor.name.split(' ').map(n => n[0]).join('')}
                                             </div>
                                             <div>
@@ -174,7 +174,7 @@ export default function CourseDetailPage() {
                                 <div className="lg:col-span-1">
                                     <div className="bg-slate-800/80 backdrop-blur rounded-2xl border border-slate-700/50 overflow-hidden shadow-xl">
                                         {/* Video Preview */}
-                                        <div className="aspect-video bg-linear-to-br from-emerald-600 to-teal-700 flex items-center justify-center cursor-pointer group relative">
+                                        <div className="aspect-video bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center cursor-pointer group relative">
                                             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition" />
                                             <div className="relative bg-white/20 backdrop-blur-sm rounded-full p-4 group-hover:scale-110 transition-transform">
                                                 <Play className="h-8 w-8 text-white fill-white" />
@@ -363,7 +363,7 @@ export default function CourseDetailPage() {
                                 {activeTab === 'instructor' && course.instructor && (
                                     <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50">
                                         <div className="flex items-start gap-5">
-                                            <div className="h-20 w-20 rounded-2xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
+                                            <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
                                                 {course.instructor.name.split(' ').map(n => n[0]).join('')}
                                             </div>
                                             <div className="flex-1">

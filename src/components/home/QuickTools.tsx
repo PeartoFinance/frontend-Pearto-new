@@ -50,7 +50,7 @@ export default function QuickTools() {
                             href={tool.href}
                             className="group flex flex-col items-center p-4 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
                         >
-                            <div className={`p-3 rounded-xl bg-linear-to-br ${tool.color} mb-2 group-hover:scale-110 transition-transform`}>
+                            <div className={`p-3 rounded-xl bg-gradient-to-br ${tool.color} mb-2 group-hover:scale-110 transition-transform`}>
                                 <Icon size={20} className="text-white" />
                             </div>
                             <span className="text-sm font-semibold text-slate-900 dark:text-white text-center">

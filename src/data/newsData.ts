@@ -21,7 +21,7 @@ export const categories: CategoryInfo[] = [
         slug: 'business',
         description: 'Corporate news, earnings, mergers, and business developments',
         icon: Briefcase,
-        bgGradient: 'bg-linear-to-br from-blue-500 to-purple-600',
+        bgGradient: 'bg-gradient-to-br from-blue-500 to-purple-600',
         textColor: 'text-white',
         emoji: '📈'
     },
@@ -30,7 +30,7 @@ export const categories: CategoryInfo[] = [
         slug: 'markets',
         description: 'Stock market updates, indices, and trading insights',
         icon: TrendingUp,
-        bgGradient: 'bg-linear-to-br from-green-500 to-teal-600',
+        bgGradient: 'bg-gradient-to-br from-green-500 to-teal-600',
         textColor: 'text-white',
         emoji: '💹'
     },
@@ -39,7 +39,7 @@ export const categories: CategoryInfo[] = [
         slug: 'technology',
         description: 'Tech innovations, AI, fintech, and digital transformation',
         icon: Cpu,
-        bgGradient: 'bg-linear-to-br from-purple-500 to-indigo-600',
+        bgGradient: 'bg-gradient-to-br from-purple-500 to-indigo-600',
         textColor: 'text-white',
         emoji: '🚀'
     },
@@ -48,7 +48,7 @@ export const categories: CategoryInfo[] = [
         slug: 'world',
         description: 'Global economy, geopolitics, and international markets',
         icon: Globe,
-        bgGradient: 'bg-linear-to-br from-orange-500 to-red-600',
+        bgGradient: 'bg-gradient-to-br from-orange-500 to-red-600',
         textColor: 'text-white',
         emoji: '🌍'
     },
@@ -57,7 +57,7 @@ export const categories: CategoryInfo[] = [
         slug: 'energy',
         description: 'Oil, gas, renewable energy, and sustainability news',
         icon: Zap,
-        bgGradient: 'bg-linear-to-br from-yellow-500 to-orange-600',
+        bgGradient: 'bg-gradient-to-br from-yellow-500 to-orange-600',
         textColor: 'text-white',
         emoji: '⚡'
     }
@@ -69,7 +69,7 @@ export const getCategoryBySlug = (slug: string): CategoryInfo | undefined => {
 
 export const getCategoryGradient = (category: string): string => {
     const cat = getCategoryBySlug(category);
-    return cat?.bgGradient || 'bg-linear-to-br from-slate-500 to-slate-600';
+    return cat?.bgGradient || 'bg-gradient-to-br from-slate-500 to-slate-600';
 };
 
 export const getCategoryEmoji = (category: string): string => {

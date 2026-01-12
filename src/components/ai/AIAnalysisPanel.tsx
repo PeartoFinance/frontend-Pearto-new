@@ -110,7 +110,7 @@ export function AIAnalysisPanel({
     }, [autoAnalyze, pageData, fetchAnalysis]);
 
     return (
-        <div className={`bg-linear-to-br from-slate-800/50 to-emerald-900/20 border border-emerald-700/30 rounded-xl ${className}`}>
+        <div className={`bg-gradient-to-br from-slate-800/50 to-emerald-900/20 border border-emerald-700/30 rounded-xl ${className}`}>
             {/* Header */}
             <div className={`flex items-center justify-between ${compact ? 'p-3' : 'p-4'} border-b border-emerald-700/30`}>
                 <div className="flex items-center gap-2">

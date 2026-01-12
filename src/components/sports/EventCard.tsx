@@ -34,7 +34,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
             className="group relative rounded-xl overflow-hidden border border-emerald-100 dark:border-slate-700 bg-white/80 dark:bg-slate-800 backdrop-blur shadow-sm hover:shadow-lg transition text-left w-full"
         >
             {/* Event Header with gradient */}
-            <div className="aspect-video relative flex items-center justify-center bg-linear-to-br from-emerald-600 to-emerald-700 overflow-hidden p-4">
+            <div className="aspect-video relative flex items-center justify-center bg-gradient-to-br from-emerald-600 to-emerald-700 overflow-hidden p-4">
                 {event.thumbnailUrl ? (
                     <img
                         src={event.thumbnailUrl}

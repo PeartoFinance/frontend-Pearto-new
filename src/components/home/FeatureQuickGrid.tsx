@@ -36,7 +36,7 @@ export default function FeatureQuickGrid() {
                         className="group relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-xl p-4 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-slate-100 dark:border-slate-700"
                     >
                         {/* Icon container with gradient */}
-                        <div className={`w-10 h-10 rounded-lg bg-linear-to-br ${card.gradient} flex items-center justify-center mb-3 shadow-md group-hover:scale-110 transition-transform duration-300`}>
+                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${card.gradient} flex items-center justify-center mb-3 shadow-md group-hover:scale-110 transition-transform duration-300`}>
                             <span className="text-lg" aria-hidden="true">{card.icon}</span>
                         </div>
 
