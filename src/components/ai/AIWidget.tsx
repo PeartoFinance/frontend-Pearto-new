@@ -61,9 +61,9 @@ export function AIWidget({
     // Inline - embedded in page
     if (type === 'inline') {
         return (
-            <div className="my-6 p-5 bg-linear-to-br from-emerald-900/20 via-teal-900/20 to-cyan-900/20 rounded-2xl border border-emerald-700/30 shadow-sm hover:shadow-md transition-shadow">
+            <div className="my-6 p-5 bg-gradient-to-br from-emerald-900/20 via-teal-900/20 to-cyan-900/20 rounded-2xl border border-emerald-700/30 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
                         <Sparkles className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -135,7 +135,7 @@ export function AIWidget({
             <>
                 <button
                     onClick={() => setIsPanelOpen(true)}
-                    className={`fixed ${positionClasses[position]} z-50 p-4 bg-linear-to-br from-emerald-500 to-teal-600 text-white rounded-2xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 group`}
+                    className={`fixed ${positionClasses[position]} z-50 p-4 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 group`}
                     aria-label="Open Pearto AI"
                 >
                     <div className="flex items-center gap-3">

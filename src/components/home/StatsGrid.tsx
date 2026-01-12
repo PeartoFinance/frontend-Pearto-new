@@ -127,7 +127,7 @@ export default function StatsGrid() {
                 return (
                     <div
                         key={stat.symbol}
-                        className={`relative overflow-hidden rounded-2xl bg-linear-to-br ${colors.bg} p-5 border border-slate-200/50 dark:border-slate-700/50 hover:shadow-lg transition-shadow cursor-pointer`}
+                        className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${colors.bg} p-5 border border-slate-200/50 dark:border-slate-700/50 hover:shadow-lg transition-shadow cursor-pointer`}
                     >
                         {/* Colored accent bar */}
                         <div className={`absolute left-0 top-0 bottom-0 w-1 ${colors.bar}`} />

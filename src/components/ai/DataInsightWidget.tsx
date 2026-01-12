@@ -71,7 +71,7 @@ export function DataInsightWidget({
     // Loading state
     if (loading && insights.length === 0) {
         return (
-            <div className={`bg-linear-to-br from-emerald-900/20 to-teal-900/20 border border-emerald-700/30 rounded-xl p-4 ${className}`}>
+            <div className={`bg-gradient-to-br from-emerald-900/20 to-teal-900/20 border border-emerald-700/30 rounded-xl p-4 ${className}`}>
                 <div className="flex items-center gap-2 text-emerald-400">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span className="text-sm">Analyzing data with AI...</span>
@@ -88,10 +88,10 @@ export function DataInsightWidget({
 
     return (
         <>
-            <div className={`bg-linear-to-br from-emerald-900/20 via-teal-900/20 to-cyan-900/20 border border-emerald-700/30 rounded-xl shadow-sm hover:shadow-md transition-all ${positionStyles[position]} ${className}`}>
+            <div className={`bg-gradient-to-br from-emerald-900/20 via-teal-900/20 to-cyan-900/20 border border-emerald-700/30 rounded-xl shadow-sm hover:shadow-md transition-all ${positionStyles[position]} ${className}`}>
                 <div className="p-4">
                     <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
                             <Sparkles className="w-5 h-5 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">

@@ -62,7 +62,7 @@ export default function Sidebar({ collapsible = true }: SidebarProps) {
             {/* Logo */}
             <div className="p-4 pb-2 flex items-center justify-between">
                 <Link href="/" className={`flex items-center gap-3 px-2 ${isCollapsed ? 'justify-center' : ''}`}>
-                    <div className="h-10 w-10 rounded-xl bg-linear-to-br from-emerald-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
                         <span className="text-white font-bold text-lg">P</span>
                     </div>
                     {!isCollapsed && (
@@ -190,7 +190,7 @@ export default function Sidebar({ collapsible = true }: SidebarProps) {
                                 className="h-9 w-9 rounded-full object-cover flex-shrink-0 border-2 border-emerald-500"
                             />
                         ) : (
-                            <div className="h-9 w-9 rounded-full bg-linear-to-br from-emerald-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
                                 <span className="text-white font-bold text-sm">
                                     {user.name?.charAt(0).toUpperCase() || 'U'}
                                 </span>
@@ -213,7 +213,7 @@ export default function Sidebar({ collapsible = true }: SidebarProps) {
                     </div>
                 ) : (
                     <div className={`flex items-center gap-3 px-3 py-2.5 mt-2 rounded-xl bg-slate-100 dark:bg-slate-800 ${isCollapsed ? 'justify-center' : ''}`}>
-                        <div className="h-9 w-9 rounded-full bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
                             <User size={16} className="text-white" />
                         </div>
                         {!isCollapsed && (

@@ -57,10 +57,6 @@ html:not(.dark) {
 }
 
 /* Base Styles */
-html {
-  scroll-behavior: smooth;
-}
-
 body {
   font-family: var(--font-main);
   background-color: var(--color-bg);
