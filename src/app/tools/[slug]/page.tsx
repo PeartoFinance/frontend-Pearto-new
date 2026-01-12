@@ -152,12 +152,15 @@ const toolComponents: Record<string, React.ComponentType> = {
 // Export the component map for use by generateStaticParams in a separate file if needed
 export { toolComponents };
 
+import { use } from 'react';
+
 interface ToolPageProps {
-    params: { slug: string };
+    params: Promise<{ slug: string }>;
 }
 
 export default function DynamicToolPage({ params }: ToolPageProps) {
-    const { slug } = params;
+    // In Next.js 15+, params is a Promise that needs to be unwrapped
+    const { slug } = use(params);
 
     // Get the component for this slug
     const ToolComponent = toolComponents[slug];
