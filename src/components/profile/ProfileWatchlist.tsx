@@ -121,7 +121,7 @@ export default function ProfileWatchlist({ onAddSymbol }: ProfileWatchlistProps)
                 </div>
             </div>
 
-            <div className="bg-[#111314] border border-slate-800 rounded-lg p-4">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
                 <div className="flex gap-3">
                     <div className="flex-1 relative">
                         <input
@@ -129,7 +129,7 @@ export default function ProfileWatchlist({ onAddSymbol }: ProfileWatchlistProps)
                             value={addingSymbol}
                             onChange={(e) => setAddingSymbol(e.target.value.toUpperCase())}
                             placeholder="Enter symbol (e.g., AAPL)"
-                            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 transition"
+                            className="w-full bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2 text-slate-900 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 transition"
                             onKeyPress={(e) => e.key === 'Enter' && handleAddSymbol()}
                         />
                     </div>
@@ -156,13 +156,13 @@ export default function ProfileWatchlist({ onAddSymbol }: ProfileWatchlistProps)
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search symbols or companies..."
-                        className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 transition"
+                        className="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 transition"
                     />
                 </div>
                 <select
                     value={filterBy}
                     onChange={(e) => setFilterBy(e.target.value as 'all' | 'gainers' | 'losers')}
-                    className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-emerald-500/50 transition"
+                    className="px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition"
                 >
                     <option value="all">All Stocks</option>
                     <option value="gainers">Gainers</option>
@@ -171,7 +171,7 @@ export default function ProfileWatchlist({ onAddSymbol }: ProfileWatchlistProps)
                 <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as 'symbol' | 'price' | 'change')}
-                    className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-emerald-500/50 transition"
+                    className="px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition"
                 >
                     <option value="symbol">Sort by Symbol</option>
                     <option value="price">Sort by Price</option>
@@ -180,7 +180,7 @@ export default function ProfileWatchlist({ onAddSymbol }: ProfileWatchlistProps)
             </div>
 
             {filteredAndSortedWatchlist.length === 0 ? (
-                <div className="text-center py-12 bg-[#111314] border border-slate-800 rounded-lg">
+                <div className="text-center py-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
                     <Star className="w-12 h-12 text-slate-500 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-white mb-2">
                         {searchQuery || filterBy !== 'all' ? 'No matches found' : 'Your watchlist is empty'}
@@ -211,7 +211,7 @@ function WatchlistCard({ item, onRemove }: { item: WatchlistItem; onRemove: () =
     const isGain = item.changePercent >= 0;
     
     return (
-        <div className="bg-[#111314] border border-slate-800 rounded-lg p-4 hover:border-slate-700 transition group">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:border-slate-300 dark:hover:border-slate-600 transition group">
             <div className="flex items-start justify-between mb-3">
                 <div className="min-w-0 flex-1">
                     <div className="font-bold text-white text-lg">{item.symbol}</div>
@@ -219,7 +219,7 @@ function WatchlistCard({ item, onRemove }: { item: WatchlistItem; onRemove: () =
                 </div>
                 <button
                     onClick={onRemove}
-                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-800 rounded text-slate-500 hover:text-red-400 transition"
+                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-500 hover:text-red-400 transition"
                 >
                     <X size={14} />
                 </button>

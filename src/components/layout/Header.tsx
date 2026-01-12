@@ -131,7 +131,7 @@ function DropdownMenu({ label, icon, items, isOpen, onToggle, onClose }: Dropdow
     );
 }
 
-export default function Header({ isFixed = false }: { isFixed?: boolean }) {
+export default function Header({ isFixed = false, customBg }: { isFixed?: boolean; customBg?: string }) {
     const { t } = useTranslation();
     const { user, isAuthenticated, logout } = useAuth();
     const [isDarkMode, setIsDarkMode] = useState(true);
@@ -185,7 +185,7 @@ export default function Header({ isFixed = false }: { isFixed?: boolean }) {
     return (
         <>
             {/* PRIMARY NAVBAR */}
-            <header className={`${isFixed ? 'fixed top-0 left-0 right-0 z-50' : ''} bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800`}>
+            <header className={`${isFixed ? 'fixed top-0 left-0 right-0 z-50' : ''} ${customBg || 'bg-white dark:bg-slate-900'} border-b border-slate-200 dark:border-slate-800`}>
                 <div className="px-4 lg:px-6">
                     <div className="flex items-center justify-between h-14 gap-4">
                         {/* Left: Hamburger Menu + Logo (mobile only) */}

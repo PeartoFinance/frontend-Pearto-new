@@ -139,7 +139,7 @@ export default function ProfilePreferences({ initialPreferences, onUpdate }: Pro
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Currency */}
-                <div className="bg-[#111314] border border-slate-800 rounded-lg p-6">
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="p-2 bg-emerald-500/10 rounded-lg">
                             <DollarSign className="w-5 h-5 text-emerald-500" />
@@ -163,7 +163,7 @@ export default function ProfilePreferences({ initialPreferences, onUpdate }: Pro
                 </div>
 
                 {/* Language */}
-                <div className="bg-[#111314] border border-slate-800 rounded-lg p-6">
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="p-2 bg-cyan-500/10 rounded-lg">
                             <Languages className="w-5 h-5 text-cyan-500" />
@@ -187,7 +187,7 @@ export default function ProfilePreferences({ initialPreferences, onUpdate }: Pro
                 </div>
 
                 {/* Country */}
-                <div className="bg-[#111314] border border-slate-800 rounded-lg p-6">
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="p-2 bg-purple-500/10 rounded-lg">
                             <Globe className="w-5 h-5 text-purple-500" />
@@ -211,7 +211,7 @@ export default function ProfilePreferences({ initialPreferences, onUpdate }: Pro
                 </div>
 
                 {/* Tax Residency */}
-                <div className="bg-[#111314] border border-slate-800 rounded-lg p-6">
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="p-2 bg-amber-500/10 rounded-lg">
                             <MapPin className="w-5 h-5 text-amber-500" />
