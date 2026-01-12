@@ -47,7 +47,7 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
             {/* Background Pattern */}
             <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10" />
 
@@ -69,7 +69,7 @@ export default function LoginPage() {
                 <div className="bg-slate-800/80 backdrop-blur-xl rounded-3xl border border-slate-700 p-8 shadow-2xl">
                     {/* Logo & Header */}
                     <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-emerald-400 to-cyan-500 rounded-2xl mb-4">
+                        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-2xl mb-4">
                             <span className="text-2xl font-bold text-slate-900">P</span>
                         </div>
                         <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>

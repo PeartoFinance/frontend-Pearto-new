@@ -73,7 +73,7 @@ export default function LearnPage() {
 
                 <main className="flex-1 overflow-y-auto">
                     {/* Hero Section */}
-                    <div className="bg-linear-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white">
+                    <div className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="p-3 bg-white/20 rounded-xl backdrop-blur">
