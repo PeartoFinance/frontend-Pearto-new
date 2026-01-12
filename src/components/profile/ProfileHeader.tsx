@@ -28,7 +28,7 @@ export default function ProfileHeader({ profile, onEditProfile, onSettings }: Pr
     };
 
     return (
-        <div className="w-full bg-[#09090b] text-white p-6 rounded-2xl border border-slate-800/50">
+        <div className="w-full bg-white dark:bg-slate-900 text-white p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 
                 {/* Left Section: Avatar and Identity */}
@@ -68,7 +68,7 @@ export default function ProfileHeader({ profile, onEditProfile, onSettings }: Pr
                 <div className="flex flex-wrap items-center gap-4">
                     
                     {/* Net Worth Card (using profile.totalRewardPoints) */}
-                    <div className="bg-[#111314] border border-slate-800 rounded-xl px-5 py-3 min-w-[160px]">
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3 min-w-[160px]">
                         <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">Net Worth</p>
                         <div className="flex items-center gap-3">
                             <span className="text-xl font-bold">
@@ -82,7 +82,7 @@ export default function ProfileHeader({ profile, onEditProfile, onSettings }: Pr
                     </div>
 
                     {/* Member Since Card (using profile.createdAt) */}
-                    <div className="bg-[#111314] border border-slate-800 rounded-xl px-5 py-3 min-w-[160px]">
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3 min-w-[160px]">
                         <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">Member Since</p>
                         <p className="text-xl font-bold">
                             {formatMemberSince(profile.createdAt)}

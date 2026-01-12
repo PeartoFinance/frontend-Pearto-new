@@ -95,7 +95,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
             </div>
 
             {/* Change Password */}
-            <div className="bg-[#111314] border border-slate-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-6">
                     <div className="p-2 bg-emerald-500/10 rounded-lg">
                         <Lock className="w-5 h-5 text-emerald-500" />
@@ -243,7 +243,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
             </div>
 
             {/* Security Recommendations */}
-            <div className="bg-[#111314] border border-slate-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 bg-amber-500/10 rounded-lg">
                         <Shield className="w-5 h-5 text-amber-500" />

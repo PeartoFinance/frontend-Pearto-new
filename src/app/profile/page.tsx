@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { getFullProfile, type ProfileData, type UserProfile } from '@/services/userService';
 import { getWatchlist, type WatchlistItem } from '@/services/portfolioService';
 import Header from '@/components/layout/Header';
+import TickerTape from '@/components/layout/TickerTape';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileSettings from '@/components/profile/ProfileSettings';
 import ProfileVerification from '@/components/profile/ProfileVerification';
@@ -101,7 +102,7 @@ export default function ProfilePage() {
 
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen bg-[#0a0c0d] text-slate-400">
+            <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-400">
                 <Header />
                 <div className="container mx-auto px-4 py-16 text-center">
                     <h1 className="text-2xl font-bold mb-4 text-white">Please sign in to view your profile</h1>
@@ -112,7 +113,7 @@ export default function ProfilePage() {
 
     if (loading || !profileData) {
         return (
-            <div className="min-h-screen bg-[#0a0c0d] flex items-center justify-center">
+            <div className="min-h-screen bg-white dark:bg-slate-900 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
             </div>
         );
@@ -121,10 +122,16 @@ export default function ProfilePage() {
     const { profile, specializations = [], certifications = [], hourlyRate, netWorth, netWorthChangePercent, memberSince, preferences } = profileData;
 
     return (
-        <div className="min-h-screen bg-[#0a0c0d] text-slate-300 font-sans pb-12">
-            <Header />
+        <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-300 font-sans pb-12">
+            <div className="fixed top-0 right-0 left-0 z-40 bg-gray-50 dark:bg-slate-900">
+                <TickerTape />
+                
+                <Header />
+            </div>
             
-            <div className="container mx-auto px-4 py-8 max-w-7xl">
+            {/* Scrollable Content - with top padding for fixed header */}
+            <div className="pt-[112px] md:pt-[120px]">
+                <div className="container mx-auto px-4 py-8 max-w-7xl">
                 {/* Profile Header */}
                 <div className="mb-8">
                     <ProfileHeader 
@@ -166,7 +173,7 @@ export default function ProfilePage() {
                                 <div className="flex flex-wrap gap-2">
                                     {specializations.map((spec) => (
                                         <span key={spec.id} className={`px-4 py-2 rounded-xl text-[11px] font-bold border uppercase tracking-tighter ${
-                                            spec.selected ? 'bg-[#142d25] border-emerald-500/50 text-emerald-400' : 'bg-[#1a1d1e] border-slate-800 text-slate-400'
+                                            spec.selected ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400'
                                         }`}>
                                             {spec.name}
                                         </span>
@@ -178,7 +185,7 @@ export default function ProfilePage() {
                             <Card title="Certifications" icon={<GraduationCap size={18} className="text-emerald-500" />}>
                                 <div className="flex flex-wrap gap-2">
                                     {certifications.map((cert) => (
-                                        <div key={cert.id} className="flex items-center gap-2 bg-[#1a1d1e] border border-slate-800 px-4 py-2 rounded-xl">
+                                        <div key={cert.id} className="flex items-center gap-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 px-4 py-2 rounded-xl">
                                             <div className={`w-1.5 h-1.5 rounded-full ${cert.level ? 'bg-emerald-500 shadow-[0_0_5px_#10b981]' : 'bg-slate-600'}`} />
                                             <span className="text-xs font-semibold text-slate-300">{cert.name}</span>
                                         </div>
@@ -244,7 +251,7 @@ export default function ProfilePage() {
                                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Upcoming</span>
                                         <button className="text-[10px] text-emerald-500 font-bold hover:underline">View All</button>
                                     </div>
-                                    <div className="bg-[#1a1d1e] p-3 rounded-xl border border-slate-800 flex items-center gap-4">
+                                    <div className="bg-slate-100 dark:bg-slate-700 p-3 rounded-xl border border-slate-300 dark:border-slate-600 flex items-center gap-4">
                                         <div className="p-2 bg-emerald-500/10 rounded-lg"><CalendarIcon size={16} className="text-emerald-500" /></div>
                                         <div>
                                             <p className="text-xs font-bold text-white">Q1 Earnings Call</p>
@@ -261,7 +268,7 @@ export default function ProfilePage() {
                                         value={noteDraft}
                                         onChange={(e) => setNoteDraft(e.target.value)}
                                         placeholder="Draft your strategy..."
-                                        className="w-full bg-transparent border border-slate-800 rounded-xl p-4 text-sm text-slate-300 h-40 focus:outline-none focus:border-emerald-500/50 transition resize-none"
+                                        className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded-xl p-4 text-sm text-slate-700 dark:text-slate-300 h-40 focus:outline-none focus:border-emerald-500/50 transition resize-none"
                                     />
                                     {notes.length > 0 && (
                                         <div className="absolute top-3 right-3">
@@ -284,9 +291,9 @@ export default function ProfilePage() {
                                     </button>
                                 </div>
                                 {notes.length > 0 && (
-                                    <div className="mt-4 pt-4 border-t border-slate-800 space-y-3 max-h-32 overflow-y-auto custom-scrollbar">
+                                    <div className="mt-4 pt-4 border-t border-slate-300 dark:border-slate-600 space-y-3 max-h-32 overflow-y-auto custom-scrollbar">
                                         {notes.map((note) => (
-                                            <div key={note.id} className="text-[11px] bg-[#1a1d1e] p-2 rounded-lg border border-slate-800/50">
+                                            <div key={note.id} className="text-[11px] bg-slate-100 dark:bg-slate-700 p-2 rounded-lg border border-slate-300/50 dark:border-slate-600/50">
                                                 <div className="text-slate-500 mb-1">{new Date(note.at).toLocaleDateString()}</div>
                                                 <div className="text-slate-300 italic">"{note.text}"</div>
                                             </div>
@@ -306,7 +313,7 @@ export default function ProfilePage() {
 
                     {/* Insights Tab */}
                     {activeTab === 'insights' && (
-                        <div className="flex flex-col items-center justify-center py-20 bg-[#111314] rounded-2xl border border-dashed border-slate-800">
+                        <div className="flex flex-col items-center justify-center py-20 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-600">
                              <h3 className="text-lg font-bold text-white capitalize mb-2">Analytics & Insights</h3>
                              <p className="text-slate-500 text-sm">Advanced portfolio analytics and market insights coming soon.</p>
                         </div>
@@ -345,11 +352,12 @@ export default function ProfilePage() {
 
                     {/* Other tabs placeholder */}
                     {!['overview', 'portfolio', 'insights', 'watchlist', 'verification', 'preferences', 'security'].includes(activeTab) && (
-                        <div className="flex flex-col items-center justify-center py-20 bg-[#111314] rounded-2xl border border-dashed border-slate-800">
+                        <div className="flex flex-col items-center justify-center py-20 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-600">
                              <h3 className="text-lg font-bold text-white capitalize mb-2">{activeTab}</h3>
                              <p className="text-slate-500 text-sm">Detailed {activeTab} information will appear here.</p>
                         </div>
                     )}
+                </div>
                 </div>
             </div>
 
@@ -368,7 +376,7 @@ export default function ProfilePage() {
 // Custom Styled Card Component
 function Card({ title, icon, children, actions }: { title: string; icon?: React.ReactNode; children: React.ReactNode; actions?: React.ReactNode }) {
     return (
-        <div className="bg-[#111314] border border-slate-800 rounded-2xl p-6 hover:border-slate-700 transition-colors shadow-sm">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 hover:border-slate-300 dark:hover:border-slate-600 transition-colors shadow-sm">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-emerald-500/5 rounded-lg border border-emerald-500/10">

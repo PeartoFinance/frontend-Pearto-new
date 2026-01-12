@@ -200,7 +200,7 @@ export default function ProfileVerification({ profile }: ProfileVerificationProp
             )}
 
             {/* Email Verification */}
-            <div className="bg-[#111314] border border-slate-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
                 <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-emerald-500/10 rounded-lg">
@@ -273,7 +273,7 @@ export default function ProfileVerification({ profile }: ProfileVerificationProp
             </div>
 
             {/* Phone Verification */}
-            <div className="bg-[#111314] border border-slate-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
                 <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-cyan-500/10 rounded-lg">
@@ -355,7 +355,7 @@ export default function ProfileVerification({ profile }: ProfileVerificationProp
             </div>
 
             {/* ID Verification (Coming Soon) */}
-            <div className="bg-[#111314] border border-slate-800 rounded-lg p-6 opacity-60">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6 opacity-60">
                 <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-purple-500/10 rounded-lg">
