@@ -25,6 +25,7 @@ interface CountryContextType {
 const CountryContext = createContext<CountryContextType | null>(null);
 
 const STORAGE_KEY = 'user_country_override';
+const API_COUNTRY_KEY = 'user_country'; // Key used by api.ts for headers
 const DEFAULT_COUNTRY = 'US';
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com';
 
@@ -85,6 +86,8 @@ export function CountryProvider({ children }: { children: ReactNode }) {
             }
 
             setCountryState(selectedCode);
+            // Sync to api.ts localStorage key for HTTP headers
+            localStorage.setItem(API_COUNTRY_KEY, selectedCode);
 
             // Set detailed country data
             const found = countryList.find((c) => c.code === selectedCode);
@@ -102,6 +105,8 @@ export function CountryProvider({ children }: { children: ReactNode }) {
             const upperCode = code.toUpperCase();
             setCountryState(upperCode);
             localStorage.setItem(STORAGE_KEY, upperCode);
+            // Sync to api.ts localStorage key for HTTP headers
+            localStorage.setItem(API_COUNTRY_KEY, upperCode);
             setSource('manual');
 
             const found = countries.find((c) => c.code === upperCode);
@@ -117,6 +122,8 @@ export function CountryProvider({ children }: { children: ReactNode }) {
 
         const detected = await detectCountry();
         setCountryState(detected);
+        // Sync to api.ts localStorage key for HTTP headers
+        localStorage.setItem(API_COUNTRY_KEY, detected);
 
         const found = countries.find((c) => c.code === detected);
         setCountryData(found || null);

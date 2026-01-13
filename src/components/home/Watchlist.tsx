@@ -17,9 +17,19 @@ export default function Watchlist() {
     const [items, setItems] = useState<WatchlistItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
         const fetchWatchlist = async () => {
+            // Check if user is authenticated
+            const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+            if (!token) {
+                setIsAuthenticated(false);
+                setLoading(false);
+                return;
+            }
+
+            setIsAuthenticated(true);
             try {
                 setLoading(true);
                 const data = await getWatchlist();
@@ -31,9 +41,14 @@ export default function Watchlist() {
                     changePercent: item.changePercent
                 })));
                 setError(false);
-            } catch (err) {
-                console.error('Failed to fetch watchlist:', err);
-                setError(true);
+            } catch (err: any) {
+                // If 401, user is not authenticated - this is expected, don't log error
+                if (err?.status === 401) {
+                    setIsAuthenticated(false);
+                } else {
+                    console.error('Failed to fetch watchlist:', err);
+                    setError(true);
+                }
             } finally {
                 setLoading(false);
             }
@@ -66,6 +81,19 @@ export default function Watchlist() {
             {loading ? (
                 <div className="flex items-center justify-center py-8">
                     <Loader2 className="animate-spin text-emerald-500" size={20} />
+                </div>
+            ) : !isAuthenticated ? (
+                <div className="flex flex-col items-center justify-center py-8 gap-2">
+                    <AlertCircle size={24} className="text-slate-400" />
+                    <p className="text-sm text-slate-500 text-center">
+                        Sign in to view your watchlist
+                    </p>
+                    <Link
+                        href="/login"
+                        className="text-sm text-emerald-500 hover:text-emerald-600 font-medium"
+                    >
+                        Sign in
+                    </Link>
                 </div>
             ) : error || items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 gap-2">

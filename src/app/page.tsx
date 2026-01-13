@@ -3,6 +3,7 @@
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
@@ -28,6 +29,7 @@ import { AIWidget } from '@/components/ai';
 
 export default function HomePage() {
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
@@ -97,13 +99,15 @@ export default function HomePage() {
             {/* Main Content Grid */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Featured Story - 2 columns */}
-              <div className="lg:col-span-2">
+              <div className={isAuthenticated ? "lg:col-span-2" : "lg:col-span-3"}>
                 <FeaturedStory />
               </div>
-              {/* Watchlist - 1 column */}
-              <div>
-                <Watchlist />
-              </div>
+              {/* Watchlist - 1 column - Only show if logged in */}
+              {isAuthenticated && (
+                <div>
+                  <Watchlist />
+                </div>
+              )}
             </section>
 
             {/* Category Quick Links */}

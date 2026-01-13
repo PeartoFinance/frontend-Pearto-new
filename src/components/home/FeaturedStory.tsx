@@ -24,16 +24,7 @@ export default function FeaturedStory({ initialArticle }: FeaturedStoryProps) {
                 }
             } catch (err) {
                 console.error('Failed to fetch featured article:', err);
-                // Fallback to default
-                setArticle({
-                    id: 1,
-                    title: "Federal Reserve signals potential rate cuts in 2024 amid cooling inflation data",
-                    summary: "Markets rally as Fed Chair Powell indicates the central bank may begin easing monetary policy in the coming months...",
-                    category: "MARKETS",
-                    author: "John Smith",
-                    imageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop",
-                    publishedAt: new Date().toISOString(),
-                });
+                // No fallback - article stays null
             } finally {
                 setLoading(false);
             }

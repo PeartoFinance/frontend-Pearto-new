@@ -1,67 +1,70 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronRight, BookOpen, Users, Award, Clock } from 'lucide-react';
+import { ChevronRight, BookOpen, Clock, Loader2, AlertCircle } from 'lucide-react';
+import { get } from '@/services/api';
 
 interface Course {
+    id: number;
     title: string;
-    subtitle: string;
-    courses: number;
-    students: number;
-    description: string;
-    duration: string;
-    level: 'Beginner' | 'Intermediate' | 'Advanced';
+    slug?: string;
+    description?: string;
+    category?: string;
+    level?: 'Beginner' | 'Intermediate' | 'Advanced' | string;
+    durationHours?: number;
+    durationWeeks?: number;
+    enrollmentCount?: number;
+    thumbnailUrl?: string;
+    isFree?: boolean;
+    rating?: number;
+    price?: number;
 }
 
-const courses: Course[] = [
-    {
-        title: 'Business Communication',
-        subtitle: 'Professional Meetings & Presentations',
-        courses: 24,
-        students: 1847,
-        description: 'Master business presentations, meeting facilitation, and professional communication skills',
-        duration: '8 weeks',
-        level: 'Intermediate',
-    },
-    {
-        title: 'Event Management',
-        subtitle: 'Conferences & Large Scale Events',
-        courses: 18,
-        students: 1256,
-        description: 'Learn event planning, conference management, and corporate event coordination',
-        duration: '12 weeks',
-        level: 'Advanced',
-    },
-    {
-        title: 'Professional Development',
-        subtitle: 'Employee Training & Growth',
-        courses: 36,
-        students: 2341,
-        description: 'Comprehensive skill development, leadership training, and career advancement programs',
-        duration: '8 weeks',
-        level: 'Beginner',
-    },
-    {
-        title: 'Innovation Workshops',
-        subtitle: 'Creative Problem Solving',
-        courses: 15,
-        students: 892,
-        description: 'Interactive workshops, design thinking, brainstorming techniques, and innovation methodologies',
-        duration: '4 weeks',
-        level: 'Intermediate',
-    },
-    {
-        title: 'Employee Onboarding',
-        subtitle: 'New Hire Integration',
-        courses: 12,
-        students: 567,
-        description: 'Systematic onboarding processes, company culture integration, and new employee success programs',
-        duration: '3 weeks',
-        level: 'Beginner',
-    },
-];
+interface EducationStats {
+    totalCourses: number;
+    totalStudents: number;
+    avgCompletionRate: number;
+}
+
 
 export default function EducationalHub() {
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const [stats, setStats] = useState<EducationStats>({ totalCourses: 500, totalStudents: 50000, avgCompletionRate: 95 });
+
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                setLoading(true);
+                const response = await get<{ courses: Course[]; total: number }>('/education/courses', { limit: 5 });
+                setCourses(response.courses || []);
+                if (response.total) {
+                    setStats(prev => ({ ...prev, totalCourses: response.total }));
+                }
+                setError(false);
+            } catch (err) {
+                console.error('Failed to fetch courses:', err);
+                setError(true);
+                setCourses([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCourses();
+    }, []);
+
+    const getLevelColor = (level?: string) => {
+        switch (level?.toLowerCase()) {
+            case 'beginner': return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400';
+            case 'intermediate': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400';
+            case 'advanced': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400';
+            default: return 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400';
+        }
+    };
+
     return (
         <section className="py-8">
             <div className="text-center mb-8">
@@ -71,72 +74,86 @@ export default function EducationalHub() {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                {courses.map((course) => (
-                    <Link
-                        key={course.title}
-                        href="/learn"
-                        className="card p-5 hover:border-emerald-500 transition-all group"
-                    >
-                        {/* Level badge */}
-                        <div className="flex gap-2 mb-3">
-                            <span className="px-2 py-0.5 text-[10px] font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded">
-                                {course.level}
-                            </span>
-                        </div>
-
-                        {/* Icon */}
-                        <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-3">
-                            <BookOpen size={20} className="text-emerald-500" />
-                        </div>
-
-                        {/* Title */}
-                        <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">{course.title}</h3>
-                        <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">{course.subtitle}</p>
-
-                        {/* Stats */}
-                        <div className="flex gap-4 mb-3">
-                            <div>
-                                <span className="text-lg font-bold text-gray-900 dark:text-white">{course.courses}</span>
-                                <p className="text-[10px] text-gray-500">Courses</p>
+            {loading ? (
+                <div className="flex items-center justify-center py-12">
+                    <Loader2 className="animate-spin text-emerald-500" size={24} />
+                    <span className="ml-2 text-slate-500">Loading courses...</span>
+                </div>
+            ) : error && courses.length === 0 ? (
+                <div className="flex items-center justify-center py-12 text-slate-500">
+                    <AlertCircle size={20} className="mr-2" />
+                    <span>Failed to load courses</span>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                    {courses.slice(0, 5).map((course) => (
+                        <Link
+                            key={course.id}
+                            href={`/learn/${course.slug || course.id}`}
+                            className="card p-5 hover:border-emerald-500 transition-all group relative"
+                        >
+                            {/* Level badge */}
+                            <div className="flex gap-2 mb-3">
+                                <span className={`px-2 py-0.5 text-[10px] font-medium rounded ${getLevelColor(course.level)}`}>
+                                    {course.level || 'Beginner'}
+                                </span>
                             </div>
-                            <div>
-                                <span className="text-lg font-bold text-gray-900 dark:text-white">{course.students.toLocaleString()}</span>
-                                <p className="text-[10px] text-gray-500">Students</p>
+
+                            {/* Icon */}
+                            <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-3">
+                                <BookOpen size={20} className="text-emerald-500" />
                             </div>
-                        </div>
 
-                        {/* Description */}
-                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">{course.description}</p>
+                            {/* Title */}
+                            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">{course.title}</h3>
+                            <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">{course.category || 'General'}</p>
 
-                        {/* Duration */}
-                        <div className="flex items-center gap-1 text-[10px] text-gray-500">
-                            <Clock size={10} />
-                            Duration: {course.duration}
-                        </div>
-
-                        {/* Arrow on hover */}
-                        <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
-                                <ChevronRight size={16} className="text-white" />
+                            {/* Stats */}
+                            <div className="flex gap-4 mb-3">
+                                <div>
+                                    <span className="text-lg font-bold text-gray-900 dark:text-white">{course.durationHours || (course.durationWeeks ? course.durationWeeks * 5 : 20)}</span>
+                                    <p className="text-[10px] text-gray-500">Hours</p>
+                                </div>
+                                <div>
+                                    <span className="text-lg font-bold text-gray-900 dark:text-white">{(course.enrollmentCount || 0).toLocaleString()}</span>
+                                    <p className="text-[10px] text-gray-500">Students</p>
+                                </div>
                             </div>
-                        </div>
-                    </Link>
-                ))}
-            </div>
+
+                            {/* Description */}
+                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">{course.description}</p>
+
+                            {/* Duration */}
+                            {course.durationWeeks && (
+                                <div className="flex items-center gap-1 text-[10px] text-gray-500">
+                                    <Clock size={10} />
+                                    Duration: {course.durationWeeks} weeks
+                                </div>
+                            )}
+
+                            {/* Arrow on hover */}
+                            <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+                                    <ChevronRight size={16} className="text-white" />
+                                </div>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            )}
 
             {/* Stats Bar */}
             <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 card">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">500+</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalCourses}+</p>
                     <p className="text-sm text-gray-500">Courses Available</p>
                 </div>
                 <div className="text-center p-4 card">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">50K+</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{(stats.totalStudents / 1000).toFixed(0)}K+</p>
                     <p className="text-sm text-gray-500">Active Learners</p>
                 </div>
                 <div className="text-center p-4 card">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">95%</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.avgCompletionRate}%</p>
                     <p className="text-sm text-gray-500">Completion Rate</p>
                 </div>
                 <div className="text-center p-4 bg-emerald-500 text-white rounded-lg">
