@@ -13,14 +13,17 @@ import ProfilePreferences from '@/components/profile/ProfilePreferences';
 import ProfileSecurity from '@/components/profile/ProfileSecurity';
 import ProfilePortfolio from '@/components/profile/ProfilePortfolio';
 import ProfileWatchlist from '@/components/profile/ProfileWatchlist';
-import { 
+import ProfileAlerts from '@/components/profile/ProfileAlerts';
+import ProfileActivity from '@/components/profile/ProfileActivity';
+import ProfileDocuments from '@/components/profile/ProfileDocuments';
+import {
     CheckCircle2, GraduationCap, Info, Mail, Phone, Calendar as CalendarIcon,
-    FileText, ChevronLeft, ChevronRight, Save, Bold, Italic, List, 
+    FileText, ChevronLeft, ChevronRight, Save, Bold, Italic, List,
     Home, Briefcase, BarChart3, Bookmark, Target, Bell, Shield, User, Settings as SettingsIcon
 } from 'lucide-react';
 import Calendar from './Calendar';
 
-type TabKey = 'overview' | 'portfolio' | 'insights' | 'watchlist' | 'alerts' | 'documents' | 'verification' | 'preferences' | 'security' | 'settings';
+type TabKey = 'overview' | 'portfolio' | 'insights' | 'watchlist' | 'alerts' | 'activity' | 'documents' | 'verification' | 'preferences' | 'security' | 'settings';
 
 export default function ProfilePage() {
     const { user: authUser, isAuthenticated } = useAuth();
@@ -47,7 +50,7 @@ export default function ProfilePage() {
                 ]);
                 setProfileData(profile);
                 setWatchlist(watchlistData);
-                
+
                 const savedNotes = localStorage.getItem('profile_notes');
                 if (savedNotes) setNotes(JSON.parse(savedNotes));
             } catch (error) {
@@ -125,239 +128,252 @@ export default function ProfilePage() {
         <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-300 font-sans pb-12">
             <div className="fixed top-0 right-0 left-0 z-40 bg-gray-50 dark:bg-slate-900">
                 <TickerTape />
-                
+
                 <Header />
             </div>
-            
+
             {/* Scrollable Content - with top padding for fixed header */}
             <div className="pt-[112px] md:pt-[120px]">
                 <div className="container mx-auto px-4 py-8 max-w-7xl">
-                {/* Profile Header */}
-                <div className="mb-8">
-                    <ProfileHeader 
-                        profile={profile}
-                        onEditProfile={() => setShowSettings(true)}
-                        onSettings={() => setActiveTab('preferences')}
-                    />
-                </div>
-
-                {/* Tab Navigation */}
-                <div className="mb-8">
-                    <div className="flex gap-1 overflow-x-auto no-scrollbar">
-                        {([
-                            'overview', 'portfolio', 'insights', 'watchlist', 'alerts', 'documents',
-                            'verification', 'preferences', 'security'
-                        ] as TabKey[]).map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                                    activeTab === tab 
-                                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
-                                        : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
-                                }`}
-                            >
-                                {getTabIcon(tab)}
-                                <span className="capitalize">{tab}</span>
-                            </button>
-                        ))}
+                    {/* Profile Header */}
+                    <div className="mb-8">
+                        <ProfileHeader
+                            profile={profile}
+                            onEditProfile={() => setShowSettings(true)}
+                            onSettings={() => setActiveTab('preferences')}
+                        />
                     </div>
-                </div>
 
-                {/* Tab Content */}
-                <div className="min-h-[400px]">
-                    {activeTab === 'overview' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {/* Specializations */}
-                            <Card title="Specializations" icon={<CheckCircle2 size={18} className="text-emerald-500" />}>
-                                <div className="flex flex-wrap gap-2">
-                                    {specializations.map((spec) => (
-                                        <span key={spec.id} className={`px-4 py-2 rounded-xl text-[11px] font-bold border uppercase tracking-tighter ${
-                                            spec.selected ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400'
-                                        }`}>
-                                            {spec.name}
-                                        </span>
-                                    ))}
-                                </div>
-                            </Card>
+                    {/* Tab Navigation */}
+                    <div className="mb-8">
+                        <div className="flex gap-1 overflow-x-auto no-scrollbar">
+                            {([
+                                'overview', 'portfolio', 'insights', 'watchlist', 'alerts', 'activity', 'documents',
+                                'verification', 'preferences', 'security'
+                            ] as TabKey[]).map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${activeTab === tab
+                                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                            : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
+                                        }`}
+                                >
+                                    {getTabIcon(tab)}
+                                    <span className="capitalize">{tab}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
 
-                            {/* Certifications */}
-                            <Card title="Certifications" icon={<GraduationCap size={18} className="text-emerald-500" />}>
-                                <div className="flex flex-wrap gap-2">
-                                    {certifications.map((cert) => (
-                                        <div key={cert.id} className="flex items-center gap-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 px-4 py-2 rounded-xl">
-                                            <div className={`w-1.5 h-1.5 rounded-full ${cert.level ? 'bg-emerald-500 shadow-[0_0_5px_#10b981]' : 'bg-slate-600'}`} />
-                                            <span className="text-xs font-semibold text-slate-300">{cert.name}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </Card>
+                    {/* Tab Content */}
+                    <div className="min-h-[400px]">
+                        {activeTab === 'overview' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {/* Specializations */}
+                                <Card title="Specializations" icon={<CheckCircle2 size={18} className="text-emerald-500" />}>
+                                    <div className="flex flex-wrap gap-2">
+                                        {specializations.map((spec) => (
+                                            <span key={spec.id} className={`px-4 py-2 rounded-xl text-[11px] font-bold border uppercase tracking-tighter ${spec.selected ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400'
+                                                }`}>
+                                                {spec.name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </Card>
 
-                            {/* General */}
-                            <Card title="General" icon={<Info size={18} className="text-emerald-500" />}>
-                                <div className="space-y-4 pt-2">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm text-slate-500">Hourly Rate</span>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                            <span className="text-white font-bold">${hourlyRate}/h</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm text-slate-500">Member since</span>
-                                        <span className="text-white font-medium">{memberSince ? new Date(memberSince).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'N/A'}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm text-slate-500">Net Worth</span>
-                                        <span className="text-white font-bold">${netWorth?.toLocaleString() || '0'}</span>
-                                    </div>
-                                </div>
-                            </Card>
-
-                            {/* Contacts */}
-                            <Card title="Contacts" icon={<Mail size={18} className="text-emerald-500" />}>
-                                <div className="space-y-4 pt-2">
-                                    <div className="flex items-center justify-between group cursor-pointer">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-slate-800/50 rounded-lg group-hover:bg-emerald-500/10 transition"><Phone size={14} className="text-slate-400 group-hover:text-emerald-500" /></div>
-                                            <span className="text-sm text-slate-400">Phone</span>
-                                        </div>
-                                        <span className="text-sm text-white font-medium">{profile.phone || 'N/A'}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between group cursor-pointer">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-slate-800/50 rounded-lg group-hover:bg-emerald-500/10 transition"><Mail size={14} className="text-slate-400 group-hover:text-emerald-500" /></div>
-                                            <span className="text-sm text-slate-400">E-mail</span>
-                                        </div>
-                                        <span className="text-sm text-emerald-400 font-medium truncate ml-4">{profile.email}</span>
-                                    </div>
-                                </div>
-                            </Card>
-
-                            {/* Calendar */}
-                            <Card 
-                                title={currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                                icon={<CalendarIcon size={18} className="text-emerald-500" />}
-                                actions={
-                                    <div className="flex items-center gap-1">
-                                        <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))} className="p-1 rounded hover:bg-slate-800 text-slate-400"><ChevronLeft size={16} /></button>
-                                        <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))} className="p-1 rounded hover:bg-slate-800 text-slate-400"><ChevronRight size={16} /></button>
-                                    </div>
-                                }
-                            >
-                                <Calendar month={currentMonth} selectedDate={selectedDate} onDateSelect={setSelectedDate} />
-                                <div className="mt-6 pt-6 border-t border-slate-800">
-                                    <div className="flex justify-between items-center mb-3">
-                                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Upcoming</span>
-                                        <button className="text-[10px] text-emerald-500 font-bold hover:underline">View All</button>
-                                    </div>
-                                    <div className="bg-slate-100 dark:bg-slate-700 p-3 rounded-xl border border-slate-300 dark:border-slate-600 flex items-center gap-4">
-                                        <div className="p-2 bg-emerald-500/10 rounded-lg"><CalendarIcon size={16} className="text-emerald-500" /></div>
-                                        <div>
-                                            <p className="text-xs font-bold text-white">Q1 Earnings Call</p>
-                                            <p className="text-[10px] text-slate-500">10:00 AM - 11:30 AM</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Card>
-
-                            {/* Private Notes */}
-                            <Card title="Private Notes" icon={<FileText size={18} className="text-emerald-500" />}>
-                                <div className="relative">
-                                    <textarea
-                                        value={noteDraft}
-                                        onChange={(e) => setNoteDraft(e.target.value)}
-                                        placeholder="Draft your strategy..."
-                                        className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded-xl p-4 text-sm text-slate-700 dark:text-slate-300 h-40 focus:outline-none focus:border-emerald-500/50 transition resize-none"
-                                    />
-                                    {notes.length > 0 && (
-                                        <div className="absolute top-3 right-3">
-                                            <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md uppercase tracking-wider">Saved</span>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="flex items-center justify-between mt-4">
-                                    <div className="flex gap-1 text-slate-500">
-                                        <button className="p-2 hover:bg-slate-800 rounded-lg"><Bold size={14}/></button>
-                                        <button className="p-2 hover:bg-slate-800 rounded-lg"><Italic size={14}/></button>
-                                        <button className="p-2 hover:bg-slate-800 rounded-lg"><List size={14}/></button>
-                                    </div>
-                                    <button
-                                        onClick={handleSaveNote}
-                                        disabled={!noteDraft.trim() || savingNote}
-                                        className="bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-black font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2 transition"
-                                    >
-                                        <Save size={14} /> Save Note
-                                    </button>
-                                </div>
-                                {notes.length > 0 && (
-                                    <div className="mt-4 pt-4 border-t border-slate-300 dark:border-slate-600 space-y-3 max-h-32 overflow-y-auto custom-scrollbar">
-                                        {notes.map((note) => (
-                                            <div key={note.id} className="text-[11px] bg-slate-100 dark:bg-slate-700 p-2 rounded-lg border border-slate-300/50 dark:border-slate-600/50">
-                                                <div className="text-slate-500 mb-1">{new Date(note.at).toLocaleDateString()}</div>
-                                                <div className="text-slate-300 italic">"{note.text}"</div>
+                                {/* Certifications */}
+                                <Card title="Certifications" icon={<GraduationCap size={18} className="text-emerald-500" />}>
+                                    <div className="flex flex-wrap gap-2">
+                                        {certifications.map((cert) => (
+                                            <div key={cert.id} className="flex items-center gap-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 px-4 py-2 rounded-xl">
+                                                <div className={`w-1.5 h-1.5 rounded-full ${cert.level ? 'bg-emerald-500 shadow-[0_0_5px_#10b981]' : 'bg-slate-600'}`} />
+                                                <span className="text-xs font-semibold text-slate-300">{cert.name}</span>
                                             </div>
                                         ))}
                                     </div>
-                                )}
-                            </Card>
-                        </div>
-                    )}
+                                </Card>
 
-                    {/* Portfolio Tab */}
-                    {activeTab === 'portfolio' && (
-                        <ProfilePortfolio onAddHolding={() => {
-                            // Handle add holding action
-                        }} />
-                    )}
+                                {/* General */}
+                                <Card title="General" icon={<Info size={18} className="text-emerald-500" />}>
+                                    <div className="space-y-4 pt-2">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-slate-500">Hourly Rate</span>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                                <span className="text-white font-bold">${hourlyRate}/h</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-slate-500">Member since</span>
+                                            <span className="text-white font-medium">{memberSince ? new Date(memberSince).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'N/A'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-slate-500">Net Worth</span>
+                                            <span className="text-white font-bold">${netWorth?.toLocaleString() || '0'}</span>
+                                        </div>
+                                    </div>
+                                </Card>
 
-                    {/* Insights Tab */}
-                    {activeTab === 'insights' && (
-                        <div className="flex flex-col items-center justify-center py-20 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-600">
-                             <h3 className="text-lg font-bold text-white capitalize mb-2">Analytics & Insights</h3>
-                             <p className="text-slate-500 text-sm">Advanced portfolio analytics and market insights coming soon.</p>
-                        </div>
-                    )}
+                                {/* Contacts */}
+                                <Card title="Contacts" icon={<Mail size={18} className="text-emerald-500" />}>
+                                    <div className="space-y-4 pt-2">
+                                        <div className="flex items-center justify-between group cursor-pointer">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-slate-800/50 rounded-lg group-hover:bg-emerald-500/10 transition"><Phone size={14} className="text-slate-400 group-hover:text-emerald-500" /></div>
+                                                <span className="text-sm text-slate-400">Phone</span>
+                                            </div>
+                                            <span className="text-sm text-white font-medium">{profile.phone || 'N/A'}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between group cursor-pointer">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-slate-800/50 rounded-lg group-hover:bg-emerald-500/10 transition"><Mail size={14} className="text-slate-400 group-hover:text-emerald-500" /></div>
+                                                <span className="text-sm text-slate-400">E-mail</span>
+                                            </div>
+                                            <span className="text-sm text-emerald-400 font-medium truncate ml-4">{profile.email}</span>
+                                        </div>
+                                    </div>
+                                </Card>
 
-                    {/* Watchlist Tab */}
-                    {activeTab === 'watchlist' && (
-                        <ProfileWatchlist onAddSymbol={() => {
-                            // Handle add symbol action
-                        }} />
-                    )}
+                                {/* Calendar */}
+                                <Card
+                                    title={currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                                    icon={<CalendarIcon size={18} className="text-emerald-500" />}
+                                    actions={
+                                        <div className="flex items-center gap-1">
+                                            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))} className="p-1 rounded hover:bg-slate-800 text-slate-400"><ChevronLeft size={16} /></button>
+                                            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))} className="p-1 rounded hover:bg-slate-800 text-slate-400"><ChevronRight size={16} /></button>
+                                        </div>
+                                    }
+                                >
+                                    <Calendar month={currentMonth} selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+                                    <div className="mt-6 pt-6 border-t border-slate-800">
+                                        <div className="flex justify-between items-center mb-3">
+                                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Upcoming</span>
+                                            <button className="text-[10px] text-emerald-500 font-bold hover:underline">View All</button>
+                                        </div>
+                                        <div className="bg-slate-100 dark:bg-slate-700 p-3 rounded-xl border border-slate-300 dark:border-slate-600 flex items-center gap-4">
+                                            <div className="p-2 bg-emerald-500/10 rounded-lg"><CalendarIcon size={16} className="text-emerald-500" /></div>
+                                            <div>
+                                                <p className="text-xs font-bold text-white">Q1 Earnings Call</p>
+                                                <p className="text-[10px] text-slate-500">10:00 AM - 11:30 AM</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Card>
 
-                    {/* Verification Tab */}
-                    {activeTab === 'verification' && (
-                        <ProfileVerification profile={profile} />
-                    )}
+                                {/* Private Notes */}
+                                <Card title="Private Notes" icon={<FileText size={18} className="text-emerald-500" />}>
+                                    <div className="relative">
+                                        <textarea
+                                            value={noteDraft}
+                                            onChange={(e) => setNoteDraft(e.target.value)}
+                                            placeholder="Draft your strategy..."
+                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-600 rounded-xl p-4 text-sm text-slate-700 dark:text-slate-300 h-40 focus:outline-none focus:border-emerald-500/50 transition resize-none"
+                                        />
+                                        {notes.length > 0 && (
+                                            <div className="absolute top-3 right-3">
+                                                <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md uppercase tracking-wider">Saved</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center justify-between mt-4">
+                                        <div className="flex gap-1 text-slate-500">
+                                            <button className="p-2 hover:bg-slate-800 rounded-lg"><Bold size={14} /></button>
+                                            <button className="p-2 hover:bg-slate-800 rounded-lg"><Italic size={14} /></button>
+                                            <button className="p-2 hover:bg-slate-800 rounded-lg"><List size={14} /></button>
+                                        </div>
+                                        <button
+                                            onClick={handleSaveNote}
+                                            disabled={!noteDraft.trim() || savingNote}
+                                            className="bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-black font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2 transition"
+                                        >
+                                            <Save size={14} /> Save Note
+                                        </button>
+                                    </div>
+                                    {notes.length > 0 && (
+                                        <div className="mt-4 pt-4 border-t border-slate-300 dark:border-slate-600 space-y-3 max-h-32 overflow-y-auto custom-scrollbar">
+                                            {notes.map((note) => (
+                                                <div key={note.id} className="text-[11px] bg-slate-100 dark:bg-slate-700 p-2 rounded-lg border border-slate-300/50 dark:border-slate-600/50">
+                                                    <div className="text-slate-500 mb-1">{new Date(note.at).toLocaleDateString()}</div>
+                                                    <div className="text-slate-300 italic">"{note.text}"</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </Card>
+                            </div>
+                        )}
 
-                    {/* Preferences Tab */}
-                    {activeTab === 'preferences' && (
-                        <ProfilePreferences 
-                            initialPreferences={preferences}
-                            onUpdate={(prefs) => {
-                                if (profileData) {
-                                    setProfileData({ ...profileData, preferences: prefs });
-                                }
-                            }}
-                        />
-                    )}
+                        {/* Portfolio Tab */}
+                        {activeTab === 'portfolio' && (
+                            <ProfilePortfolio onAddHolding={() => {
+                                // Handle add holding action
+                            }} />
+                        )}
 
-                    {/* Security Tab */}
-                    {activeTab === 'security' && (
-                        <ProfileSecurity onPasswordChange={() => {
-                            // Handle password change success
-                        }} />
-                    )}
+                        {/* Insights Tab */}
+                        {activeTab === 'insights' && (
+                            <div className="flex flex-col items-center justify-center py-20 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-600">
+                                <h3 className="text-lg font-bold text-white capitalize mb-2">Analytics & Insights</h3>
+                                <p className="text-slate-500 text-sm">Advanced portfolio analytics and market insights coming soon.</p>
+                            </div>
+                        )}
 
-                    {/* Other tabs placeholder */}
-                    {!['overview', 'portfolio', 'insights', 'watchlist', 'verification', 'preferences', 'security'].includes(activeTab) && (
-                        <div className="flex flex-col items-center justify-center py-20 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-600">
-                             <h3 className="text-lg font-bold text-white capitalize mb-2">{activeTab}</h3>
-                             <p className="text-slate-500 text-sm">Detailed {activeTab} information will appear here.</p>
-                        </div>
-                    )}
-                </div>
+                        {/* Watchlist Tab */}
+                        {activeTab === 'watchlist' && (
+                            <ProfileWatchlist onAddSymbol={() => {
+                                // Handle add symbol action
+                            }} />
+                        )}
+
+                        {/* Verification Tab */}
+                        {activeTab === 'verification' && (
+                            <ProfileVerification profile={profile} />
+                        )}
+
+                        {/* Preferences Tab */}
+                        {activeTab === 'preferences' && (
+                            <ProfilePreferences
+                                initialPreferences={preferences}
+                                onUpdate={(prefs) => {
+                                    if (profileData) {
+                                        setProfileData({ ...profileData, preferences: prefs });
+                                    }
+                                }}
+                            />
+                        )}
+
+                        {/* Security Tab */}
+                        {activeTab === 'security' && (
+                            <ProfileSecurity onPasswordChange={() => {
+                                // Handle password change success
+                            }} />
+                        )}
+
+                        {/* Alerts Tab */}
+                        {activeTab === 'alerts' && (
+                            <ProfileAlerts />
+                        )}
+
+                        {/* Activity Tab */}
+                        {activeTab === 'activity' && (
+                            <ProfileActivity />
+                        )}
+
+                        {/* Documents Tab */}
+                        {activeTab === 'documents' && (
+                            <ProfileDocuments />
+                        )}
+
+                        {/* Other tabs placeholder */}
+                        {!['overview', 'portfolio', 'insights', 'watchlist', 'verification', 'preferences', 'security', 'alerts', 'activity', 'documents'].includes(activeTab) && (
+                            <div className="flex flex-col items-center justify-center py-20 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-600">
+                                <h3 className="text-lg font-bold text-white capitalize mb-2">{activeTab}</h3>
+                                <p className="text-slate-500 text-sm">Detailed {activeTab} information will appear here.</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 

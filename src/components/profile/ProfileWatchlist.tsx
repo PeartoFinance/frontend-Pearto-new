@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus, Search, TrendingUp, TrendingDown, X, Star } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, Search, TrendingUp, TrendingDown, X, Star, Bell } from 'lucide-react';
 import { getWatchlist, addToWatchlist, removeFromWatchlist, type WatchlistItem } from '@/services/portfolioService';
+import { createAlert } from '@/services/alertsService';
 
 interface ProfileWatchlistProps {
     onAddSymbol?: () => void;
@@ -11,51 +12,48 @@ interface ProfileWatchlistProps {
 export default function ProfileWatchlist({ onAddSymbol }: ProfileWatchlistProps) {
     const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<'symbol' | 'price' | 'change'>('symbol');
     const [filterBy, setFilterBy] = useState<'all' | 'gainers' | 'losers'>('all');
     const [addingSymbol, setAddingSymbol] = useState('');
     const [isAdding, setIsAdding] = useState(false);
 
-    useEffect(() => {
-        loadWatchlist();
-    }, []);
+    // Quick alert modal state
+    const [alertModal, setAlertModal] = useState<{ symbol: string; price: number } | null>(null);
+    const [alertCondition, setAlertCondition] = useState<'above' | 'below'>('above');
+    const [alertPrice, setAlertPrice] = useState('');
+    const [creatingAlert, setCreatingAlert] = useState(false);
 
-    const loadWatchlist = async () => {
+    const loadWatchlist = useCallback(async (showRefreshing = false) => {
+        if (showRefreshing) setRefreshing(true);
         try {
             const data = await getWatchlist();
             setWatchlist(data);
         } catch (error) {
             console.error('Failed to load watchlist:', error);
-            const mockWatchlist: WatchlistItem[] = [
-                {
-                    id: 1,
-                    symbol: 'AAPL',
-                    name: 'Apple Inc.',
-                    price: 175.43,
-                    change: 2.15,
-                    changePercent: 1.24,
-                    addedAt: new Date().toISOString(),
-                },
-                {
-                    id: 2,
-                    symbol: 'GOOGL',
-                    name: 'Alphabet Inc.',
-                    price: 2847.63,
-                    change: -15.32,
-                    changePercent: -0.53,
-                    addedAt: new Date().toISOString(),
-                },
-            ];
-            setWatchlist(mockWatchlist);
+            setWatchlist([]);
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        loadWatchlist();
+    }, [loadWatchlist]);
+
+    // Auto-refresh every 30 seconds
+    useEffect(() => {
+        if (watchlist.length === 0) return;
+        const interval = setInterval(() => {
+            loadWatchlist(true);
+        }, 30000);
+        return () => clearInterval(interval);
+    }, [watchlist.length, loadWatchlist]);
 
     const handleAddSymbol = async () => {
         if (!addingSymbol.trim()) return;
-        
         setIsAdding(true);
         try {
             await addToWatchlist(addingSymbol.toUpperCase());
@@ -77,27 +75,44 @@ export default function ProfileWatchlist({ onAddSymbol }: ProfileWatchlistProps)
         }
     };
 
+    const handleOpenAlertModal = (item: WatchlistItem) => {
+        setAlertModal({ symbol: item.symbol, price: item.price || 0 });
+        setAlertPrice((item.price || 0).toFixed(2));
+        setAlertCondition('above');
+    };
+
+    const handleCreateQuickAlert = async () => {
+        if (!alertModal || !alertPrice) return;
+        setCreatingAlert(true);
+        try {
+            await createAlert({
+                symbol: alertModal.symbol,
+                condition: alertCondition,
+                targetValue: parseFloat(alertPrice),
+            });
+            setAlertModal(null);
+        } catch (error) {
+            console.error('Failed to create alert:', error);
+        } finally {
+            setCreatingAlert(false);
+        }
+    };
+
     const filteredAndSortedWatchlist = watchlist
         .filter(item => {
             const matchesSearch = item.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                item.name.toLowerCase().includes(searchQuery.toLowerCase());
-            
+                (item.name || '').toLowerCase().includes(searchQuery.toLowerCase());
             if (!matchesSearch) return false;
-            
-            if (filterBy === 'gainers') return item.changePercent > 0;
-            if (filterBy === 'losers') return item.changePercent < 0;
+            if (filterBy === 'gainers') return (item.changePercent || 0) > 0;
+            if (filterBy === 'losers') return (item.changePercent || 0) < 0;
             return true;
         })
         .sort((a, b) => {
             switch (sortBy) {
-                case 'symbol':
-                    return a.symbol.localeCompare(b.symbol);
-                case 'price':
-                    return b.price - a.price;
-                case 'change':
-                    return b.changePercent - a.changePercent;
-                default:
-                    return 0;
+                case 'symbol': return a.symbol.localeCompare(b.symbol);
+                case 'price': return (b.price || 0) - (a.price || 0);
+                case 'change': return (b.changePercent || 0) - (a.changePercent || 0);
+                default: return 0;
             }
         });
 
@@ -117,135 +132,128 @@ export default function ProfileWatchlist({ onAddSymbol }: ProfileWatchlistProps)
                     <p className="text-slate-400 mt-1">Track your favorite stocks</p>
                 </div>
                 <div className="text-sm text-slate-400">
-                    {watchlist.length} symbols
+                    {watchlist.length} symbols {refreshing && '• Refreshing...'}
                 </div>
             </div>
 
+            {/* Add Symbol */}
             <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
                 <div className="flex gap-3">
-                    <div className="flex-1 relative">
-                        <input
-                            type="text"
-                            value={addingSymbol}
-                            onChange={(e) => setAddingSymbol(e.target.value.toUpperCase())}
-                            placeholder="Enter symbol (e.g., AAPL)"
-                            className="w-full bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2 text-slate-900 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 transition"
-                            onKeyPress={(e) => e.key === 'Enter' && handleAddSymbol()}
-                        />
-                    </div>
+                    <input
+                        type="text"
+                        value={addingSymbol}
+                        onChange={(e) => setAddingSymbol(e.target.value.toUpperCase())}
+                        placeholder="Enter symbol (e.g., AAPL)"
+                        className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white"
+                        onKeyPress={(e) => e.key === 'Enter' && handleAddSymbol()}
+                    />
                     <button
                         onClick={handleAddSymbol}
                         disabled={!addingSymbol.trim() || isAdding}
-                        className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-700 disabled:text-slate-500 text-black font-medium rounded-lg transition flex items-center gap-2"
+                        className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-black font-medium rounded-lg flex items-center gap-2"
                     >
-                        {isAdding ? (
-                            <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                        ) : (
-                            <Plus size={16} />
-                        )}
-                        Add
+                        <Plus size={16} /> Add
                     </button>
                 </div>
             </div>
 
+            {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500" size={16} />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search symbols or companies..."
-                        className="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 transition"
+                        placeholder="Search..."
+                        className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
                     />
                 </div>
-                <select
-                    value={filterBy}
-                    onChange={(e) => setFilterBy(e.target.value as 'all' | 'gainers' | 'losers')}
-                    className="px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition"
-                >
-                    <option value="all">All Stocks</option>
+                <select value={filterBy} onChange={(e) => setFilterBy(e.target.value as typeof filterBy)} className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white">
+                    <option value="all">All</option>
                     <option value="gainers">Gainers</option>
                     <option value="losers">Losers</option>
                 </select>
-                <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as 'symbol' | 'price' | 'change')}
-                    className="px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition"
-                >
-                    <option value="symbol">Sort by Symbol</option>
-                    <option value="price">Sort by Price</option>
-                    <option value="change">Sort by Change</option>
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white">
+                    <option value="symbol">Symbol</option>
+                    <option value="price">Price</option>
+                    <option value="change">Change</option>
                 </select>
             </div>
 
+            {/* Watchlist Grid */}
             {filteredAndSortedWatchlist.length === 0 ? (
-                <div className="text-center py-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
+                <div className="text-center py-12 bg-slate-800 border border-slate-700 rounded-lg">
                     <Star className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-white mb-2">
-                        {searchQuery || filterBy !== 'all' ? 'No matches found' : 'Your watchlist is empty'}
-                    </h3>
-                    <p className="text-slate-400 mb-4">
-                        {searchQuery || filterBy !== 'all' 
-                            ? 'Try adjusting your search or filters' 
-                            : 'Add some stocks to start tracking their performance'
-                        }
-                    </p>
+                    <p className="text-slate-400">No stocks in watchlist</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredAndSortedWatchlist.map((item) => (
-                        <WatchlistCard 
-                            key={item.id} 
-                            item={item} 
+                        <WatchlistCard
+                            key={item.id}
+                            item={item}
                             onRemove={() => handleRemoveSymbol(item.symbol)}
+                            onSetAlert={() => handleOpenAlertModal(item)}
                         />
                     ))}
+                </div>
+            )}
+
+            {/* Quick Alert Modal */}
+            {alertModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-slate-800 rounded-xl max-w-sm w-full">
+                        <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                            <div className="flex items-center gap-2">
+                                <Bell className="text-emerald-500" size={20} />
+                                <h3 className="font-semibold text-white">Alert for {alertModal.symbol}</h3>
+                            </div>
+                            <button onClick={() => setAlertModal(null)} className="text-slate-400 hover:text-white"><X size={20} /></button>
+                        </div>
+                        <div className="p-4 space-y-4">
+                            <div className="text-sm text-slate-400">Current: <span className="text-white font-bold">${alertModal.price.toFixed(2)}</span></div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button onClick={() => setAlertCondition('above')} className={`p-3 rounded-lg border text-sm ${alertCondition === 'above' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'border-slate-600 text-slate-400'}`}>📈 Above</button>
+                                <button onClick={() => setAlertCondition('below')} className={`p-3 rounded-lg border text-sm ${alertCondition === 'below' ? 'bg-red-500/10 border-red-500 text-red-400' : 'border-slate-600 text-slate-400'}`}>📉 Below</button>
+                            </div>
+                            <input type="number" value={alertPrice} onChange={(e) => setAlertPrice(e.target.value)} className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-lg font-bold" />
+                        </div>
+                        <div className="flex justify-end gap-3 p-4 border-t border-slate-700">
+                            <button onClick={() => setAlertModal(null)} className="px-4 py-2 text-slate-400">Cancel</button>
+                            <button onClick={handleCreateQuickAlert} disabled={creatingAlert} className="px-4 py-2 bg-emerald-500 text-black font-medium rounded-lg flex items-center gap-2">
+                                <Bell size={16} /> Create
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
     );
 }
 
-function WatchlistCard({ item, onRemove }: { item: WatchlistItem; onRemove: () => void }) {
-    const isGain = item.changePercent >= 0;
-    
+function WatchlistCard({ item, onRemove, onSetAlert }: { item: WatchlistItem; onRemove: () => void; onSetAlert: () => void }) {
+    const isGain = (item.changePercent || 0) >= 0;
     return (
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:border-slate-300 dark:hover:border-slate-600 transition group">
+        <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition group">
             <div className="flex items-start justify-between mb-3">
-                <div className="min-w-0 flex-1">
+                <div>
                     <div className="font-bold text-white text-lg">{item.symbol}</div>
                     <div className="text-xs text-slate-500 truncate">{item.name}</div>
                 </div>
-                <button
-                    onClick={onRemove}
-                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-500 hover:text-red-400 transition"
-                >
-                    <X size={14} />
-                </button>
+                <div className="flex gap-1">
+                    <button onClick={onSetAlert} title="Set alert" className="p-1.5 hover:bg-emerald-500/10 rounded text-slate-400 hover:text-emerald-500"><Bell size={14} /></button>
+                    <button onClick={onRemove} className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-slate-700 rounded text-slate-500 hover:text-red-400"><X size={14} /></button>
+                </div>
             </div>
-            
-            <div className="space-y-2">
-                <div className="text-xl font-bold text-white">
-                    ${item.price.toFixed(2)}
+            <div className="text-xl font-bold text-white">${(item.price || 0).toFixed(2)}</div>
+            <div className="flex items-center gap-2 mt-1">
+                <div className={`flex items-center gap-1 text-sm font-medium ${isGain ? 'text-emerald-500' : 'text-red-500'}`}>
+                    {isGain ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                    {isGain ? '+' : ''}${(item.change || 0).toFixed(2)}
                 </div>
-                
-                <div className="flex items-center gap-2">
-                    <div className={`flex items-center gap-1 text-sm font-medium ${
-                        isGain ? 'text-emerald-500' : 'text-red-500'
-                    }`}>
-                        {isGain ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                        {isGain ? '+' : ''}${item.change.toFixed(2)}
-                    </div>
-                    <div className={`text-sm ${
-                        isGain ? 'text-emerald-400' : 'text-red-400'
-                    }`}>
-                        ({isGain ? '+' : ''}{item.changePercent.toFixed(2)}%)
-                    </div>
-                </div>
-                
-                <div className="text-xs text-slate-500">
-                    Added {new Date(item.addedAt).toLocaleDateString()}
+                <div className={`text-sm ${isGain ? 'text-emerald-400' : 'text-red-400'}`}>
+                    ({isGain ? '+' : ''}{(item.changePercent || 0).toFixed(2)}%)
                 </div>
             </div>
         </div>

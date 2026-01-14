@@ -81,7 +81,10 @@ export function CountryProvider({ children }: { children: ReactNode }) {
                 selectedCode = override;
                 setSource('manual');
             } else {
-                selectedCode = await detectCountry();
+                // TODO: Re-enable geo detection when ready
+                // selectedCode = await detectCountry();
+                // For now, hardcode US as default
+                selectedCode = DEFAULT_COUNTRY;
                 setSource('auto');
             }
 
