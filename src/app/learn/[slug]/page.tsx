@@ -7,6 +7,8 @@ import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import { Course, Instructor, CourseModule } from '@/types/education';
 import { get } from '@/services/api';
+import { enrollCourse } from '@/services/educationService';
+import { useAuth } from '@/context/AuthContext';
 import {
     ArrowLeft, Star, Users, Clock, Award, Play, CheckCircle,
     BookOpen, Lock, GraduationCap, Share2, Heart, Zap, Download
@@ -25,10 +27,13 @@ export default function CourseDetailPage() {
     const params = useParams();
     const router = useRouter();
     const slug = params.slug as string;
+    const { isAuthenticated } = useAuth();
 
     const [course, setCourse] = useState<CourseDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'instructor'>('overview');
+    const [enrolling, setEnrolling] = useState(false);
+    const [enrolled, setEnrolled] = useState(false);
 
     useEffect(() => {
         const fetchCourse = async () => {
@@ -44,6 +49,35 @@ export default function CourseDetailPage() {
 
         if (slug) fetchCourse();
     }, [slug]);
+
+    const handleEnroll = async () => {
+        if (!isAuthenticated) {
+            router.push(`/login?redirect=/learn/${slug}`);
+            return;
+        }
+
+        if (!course) return;
+
+        setEnrolling(true);
+        try {
+            await enrollCourse(course.id);
+            setEnrolled(true);
+            // Redirect to my-courses after short delay
+            setTimeout(() => {
+                router.push(`/my-courses/${course.id}`);
+            }, 1000);
+        } catch (error: any) {
+            if (error?.message?.includes('Already enrolled')) {
+                setEnrolled(true);
+                router.push(`/my-courses/${course.id}`);
+            } else {
+                console.error('Failed to enroll:', error);
+                alert('Failed to enroll. Please try again.');
+            }
+        } finally {
+            setEnrolling(false);
+        }
+    };
 
     const getLevelColor = (level?: string) => {
         switch (level) {
@@ -199,8 +233,27 @@ export default function CourseDetailPage() {
                                             </div>
 
                                             {/* CTA Button */}
-                                            <button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-semibold transition-all shadow-lg shadow-emerald-600/20 hover:shadow-emerald-500/30">
-                                                Enroll Now
+                                            <button
+                                                onClick={handleEnroll}
+                                                disabled={enrolling || enrolled}
+                                                className={`w-full py-3 rounded-xl font-semibold transition-all shadow-lg flex items-center justify-center gap-2 ${enrolled
+                                                        ? 'bg-emerald-500 text-white cursor-default'
+                                                        : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20 hover:shadow-emerald-500/30'
+                                                    } ${enrolling ? 'opacity-75 cursor-wait' : ''}`}
+                                            >
+                                                {enrolling ? (
+                                                    <>
+                                                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                                        Enrolling...
+                                                    </>
+                                                ) : enrolled ? (
+                                                    <>
+                                                        <CheckCircle className="w-5 h-5" />
+                                                        Enrolled! Redirecting...
+                                                    </>
+                                                ) : (
+                                                    'Enroll Now'
+                                                )}
                                             </button>
 
                                             {/* Course Info */}

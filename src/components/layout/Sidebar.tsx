@@ -34,6 +34,11 @@ const navItems = [
     { href: '/portfolio', icon: Briefcase, labelKey: 'nav.portfolio', label: 'Portfolio' },
 ];
 
+// Items that only show when authenticated
+const authNavItems = [
+    { href: '/my-courses', icon: BookOpen, labelKey: 'nav.myCourses', label: 'My Courses' },
+];
+
 const mediaItems = [
     { href: '/tv', icon: Tv, label: 'Live TV' },
     { href: '/radio', icon: Radio, label: 'Radio' },
@@ -92,6 +97,25 @@ export default function Sidebar({ collapsible = true }: SidebarProps) {
                 <nav className="space-y-1">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href;
+                        const Icon = item.icon;
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                title={isCollapsed ? item.label : undefined}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${isActive
+                                    ? 'bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 text-emerald-600 dark:text-emerald-400 font-semibold shadow-sm ring-1 ring-emerald-200 dark:ring-emerald-800'
+                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                    } ${isCollapsed ? 'justify-center' : ''}`}
+                            >
+                                <Icon size={20} className={isActive ? 'text-emerald-500' : ''} />
+                                {!isCollapsed && <span>{t(item.labelKey, item.label)}</span>}
+                            </Link>
+                        );
+                    })}
+                    {/* My Courses - only when authenticated */}
+                    {isAuthenticated && authNavItems.map((item) => {
+                        const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
                         const Icon = item.icon;
                         return (
                             <Link
