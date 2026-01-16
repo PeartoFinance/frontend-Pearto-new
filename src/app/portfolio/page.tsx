@@ -1,0 +1,492 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, Plus, Trash2, X, RefreshCw, Search, ChevronDown } from 'lucide-react';
+import { getPortfolios, createPortfolio, addHolding, deleteHolding, type Portfolio, type PortfolioHolding } from '@/services/portfolioService';
+import { get } from '@/services/api';
+import Header from '@/components/layout/Header';
+import Sidebar from '@/components/layout/Sidebar';
+import TickerTape from '@/components/layout/TickerTape';
+
+interface StockOption {
+    symbol: string;
+    name: string;
+    exchange?: string;
+}
+
+export default function PortfolioPage() {
+    const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showAddHoldingModal, setShowAddHoldingModal] = useState(false);
+    const [newPortfolioName, setNewPortfolioName] = useState('My Portfolio');
+    const [holdingData, setHoldingData] = useState({ symbol: '', name: '', shares: '', avgBuyPrice: '' });
+    const [submitting, setSubmitting] = useState(false);
+
+    // Stock search state
+    const [stockSearch, setStockSearch] = useState('');
+    const [stockOptions, setStockOptions] = useState<StockOption[]>([]);
+    const [showStockDropdown, setShowStockDropdown] = useState(false);
+    const [searchLoading, setSearchLoading] = useState(false);
+    const searchRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        loadPortfolios();
+    }, []);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+                setShowStockDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Search stocks when typing
+    useEffect(() => {
+        const searchStocks = async () => {
+            if (stockSearch.length < 1) {
+                setStockOptions([]);
+                return;
+            }
+            setSearchLoading(true);
+            try {
+                const results = await get<StockOption[]>(`/stocks/search?q=${stockSearch}&limit=10`);
+                setStockOptions(results);
+                setShowStockDropdown(true);
+            } catch (error) {
+                console.error('Failed to search stocks:', error);
+            } finally {
+                setSearchLoading(false);
+            }
+        };
+        const debounce = setTimeout(searchStocks, 300);
+        return () => clearTimeout(debounce);
+    }, [stockSearch]);
+
+    const loadPortfolios = async () => {
+        setLoading(true);
+        try {
+            const data = await getPortfolios();
+            setPortfolios(data);
+            if (data.length > 0 && !selectedPortfolio) {
+                setSelectedPortfolio(data[0]);
+            } else if (selectedPortfolio) {
+                const updated = data.find(p => p.id === selectedPortfolio.id);
+                if (updated) setSelectedPortfolio(updated);
+            }
+        } catch (error) {
+            console.error('Failed to load portfolios:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCreatePortfolio = async () => {
+        if (!newPortfolioName.trim()) return;
+        setSubmitting(true);
+        try {
+            const newPortfolio = await createPortfolio(newPortfolioName);
+            setPortfolios([...portfolios, newPortfolio]);
+            setSelectedPortfolio(newPortfolio);
+            setShowCreateModal(false);
+            setNewPortfolioName('My Portfolio');
+        } catch (error) {
+            console.error('Failed to create portfolio:', error);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleSelectStock = (stock: StockOption) => {
+        setHoldingData({ ...holdingData, symbol: stock.symbol, name: stock.name });
+        setStockSearch(`${stock.symbol} - ${stock.name}`);
+        setShowStockDropdown(false);
+    };
+
+    const handleAddHolding = async () => {
+        if (!selectedPortfolio || !holdingData.symbol || !holdingData.shares || !holdingData.avgBuyPrice) return;
+        setSubmitting(true);
+        try {
+            await addHolding(
+                String(selectedPortfolio.id),
+                holdingData.symbol.toUpperCase(),
+                parseFloat(holdingData.shares),
+                parseFloat(holdingData.avgBuyPrice)
+            );
+            await loadPortfolios();
+            setShowAddHoldingModal(false);
+            setHoldingData({ symbol: '', name: '', shares: '', avgBuyPrice: '' });
+            setStockSearch('');
+        } catch (error) {
+            console.error('Failed to add holding:', error);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleDeleteHolding = async (holdingId: string | number) => {
+        if (!selectedPortfolio) return;
+        try {
+            await deleteHolding(String(selectedPortfolio.id), String(holdingId));
+            await loadPortfolios();
+        } catch (error) {
+            console.error('Failed to delete holding:', error);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
+                <Sidebar />
+                <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+                    <div className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-gray-50 dark:bg-slate-900">
+                        <TickerTape />
+                        <Header />
+                    </div>
+                    <div className="flex-1 pt-[112px] md:pt-[120px] flex items-center justify-center">
+                        <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+                    </div>
+                </main>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
+            <Sidebar />
+            <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+                <div className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-gray-50 dark:bg-slate-900">
+                    <TickerTape />
+                    <Header />
+                </div>
+
+                <div className="flex-1 pt-[112px] md:pt-[120px] overflow-x-hidden">
+                    <div className="p-4 lg:p-6 space-y-6 w-full">
+                        {/* Page Header */}
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Portfolio</h1>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Track and manage your investments</p>
+                            </div>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={loadPortfolios}
+                                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition"
+                                >
+                                    <RefreshCw size={16} />
+                                    Refresh
+                                </button>
+                                <button
+                                    onClick={() => setShowCreateModal(true)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white font-medium rounded-lg transition"
+                                >
+                                    <Plus size={16} />
+                                    New Portfolio
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Portfolio Tabs */}
+                        {portfolios.length > 0 && (
+                            <div className="flex gap-2 overflow-x-auto pb-2">
+                                {portfolios.map((p) => (
+                                    <button
+                                        key={p.id}
+                                        onClick={() => setSelectedPortfolio(p)}
+                                        className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition ${selectedPortfolio?.id === p.id
+                                                ? 'bg-emerald-500 text-white'
+                                                : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
+                                            }`}
+                                    >
+                                        {p.name}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* No Portfolio State */}
+                        {portfolios.length === 0 && (
+                            <div className="text-center py-20 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl">
+                                <PieChart className="w-16 h-16 text-gray-400 dark:text-slate-600 mx-auto mb-4" />
+                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Portfolio Found</h3>
+                                <p className="text-gray-500 dark:text-slate-400 mb-6">Create your first portfolio to start tracking investments.</p>
+                                <button
+                                    onClick={() => setShowCreateModal(true)}
+                                    className="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-white font-medium rounded-lg transition"
+                                >
+                                    Create Portfolio
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Portfolio Content */}
+                        {selectedPortfolio && (
+                            <div className="space-y-6">
+                                {/* Stats Cards */}
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-5">
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <div className="p-2 bg-emerald-500/10 rounded-lg">
+                                                <DollarSign className="w-5 h-5 text-emerald-500" />
+                                            </div>
+                                            <span className="text-sm text-gray-500 dark:text-slate-400">Total Value</span>
+                                        </div>
+                                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                                            ${selectedPortfolio.totalValue?.toLocaleString() || '0'}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-5">
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <div className={`p-2 rounded-lg ${selectedPortfolio.totalGain >= 0 ? 'bg-emerald-500/10' : 'bg-red-500/10'}`}>
+                                                {selectedPortfolio.totalGain >= 0 ? (
+                                                    <TrendingUp className="w-5 h-5 text-emerald-500" />
+                                                ) : (
+                                                    <TrendingDown className="w-5 h-5 text-red-500" />
+                                                )}
+                                            </div>
+                                            <span className="text-sm text-gray-500 dark:text-slate-400">Total Gain/Loss</span>
+                                        </div>
+                                        <div className={`text-2xl font-bold ${selectedPortfolio.totalGain >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                                            {selectedPortfolio.totalGain >= 0 ? '+' : ''}${selectedPortfolio.totalGain?.toLocaleString() || '0'}
+                                        </div>
+                                        <div className={`text-sm ${selectedPortfolio.totalGain >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                            {selectedPortfolio.totalGain >= 0 ? '+' : ''}{selectedPortfolio.totalGainPercent?.toFixed(2) || '0'}%
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-5">
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <div className="p-2 bg-cyan-500/10 rounded-lg">
+                                                <BarChart3 className="w-5 h-5 text-cyan-500" />
+                                            </div>
+                                            <span className="text-sm text-gray-500 dark:text-slate-400">Holdings</span>
+                                        </div>
+                                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                                            {selectedPortfolio.holdings?.length || 0}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-5 flex items-center justify-center">
+                                        <button
+                                            onClick={() => setShowAddHoldingModal(true)}
+                                            className="flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-white font-medium rounded-lg transition"
+                                        >
+                                            <Plus size={18} />
+                                            Add Holding
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Holdings Table */}
+                                <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                                    <div className="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+                                        <h3 className="font-semibold text-gray-900 dark:text-white">Holdings</h3>
+                                    </div>
+
+                                    {selectedPortfolio.holdings?.length === 0 ? (
+                                        <div className="text-center py-12">
+                                            <BarChart3 className="w-12 h-12 text-gray-400 dark:text-slate-600 mx-auto mb-3" />
+                                            <p className="text-gray-500 dark:text-slate-400">No holdings yet. Add your first stock!</p>
+                                        </div>
+                                    ) : (
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full">
+                                                <thead className="bg-gray-50 dark:bg-slate-800/50">
+                                                    <tr className="text-left">
+                                                        <th className="px-6 py-3 text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Symbol</th>
+                                                        <th className="px-6 py-3 text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Shares</th>
+                                                        <th className="px-6 py-3 text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Avg Cost</th>
+                                                        <th className="px-6 py-3 text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Current Price</th>
+                                                        <th className="px-6 py-3 text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Total Value</th>
+                                                        <th className="px-6 py-3 text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Gain/Loss</th>
+                                                        <th className="px-6 py-3 text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
+                                                    {selectedPortfolio.holdings?.map((holding) => (
+                                                        <tr key={holding.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/30 transition">
+                                                            <td className="px-6 py-4">
+                                                                <div className="font-medium text-gray-900 dark:text-white">{holding.symbol}</div>
+                                                                <div className="text-sm text-gray-500 dark:text-slate-400">{holding.name}</div>
+                                                            </td>
+                                                            <td className="px-6 py-4 text-gray-700 dark:text-slate-300">{holding.shares?.toLocaleString()}</td>
+                                                            <td className="px-6 py-4 text-gray-700 dark:text-slate-300">${holding.avgCost?.toFixed(2)}</td>
+                                                            <td className="px-6 py-4 text-gray-700 dark:text-slate-300">${holding.currentPrice?.toFixed(2)}</td>
+                                                            <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">${holding.totalValue?.toLocaleString()}</td>
+                                                            <td className="px-6 py-4">
+                                                                <div className={`font-medium ${holding.gain >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                                                                    {holding.gain >= 0 ? '+' : ''}${holding.gain?.toLocaleString()}
+                                                                </div>
+                                                                <div className={`text-xs ${holding.gain >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                                    {holding.gain >= 0 ? '+' : ''}{holding.gainPercent?.toFixed(2)}%
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-6 py-4">
+                                                                <button
+                                                                    onClick={() => handleDeleteHolding(holding.id)}
+                                                                    className="p-2 text-gray-400 dark:text-slate-400 hover:text-red-500 transition"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </main>
+
+            {/* Create Portfolio Modal */}
+            {showCreateModal && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6 w-full max-w-md">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Create Portfolio</h3>
+                            <button onClick={() => setShowCreateModal(false)} className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-white">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="mb-6">
+                            <label className="block text-sm text-gray-500 dark:text-slate-400 mb-2">Portfolio Name</label>
+                            <input
+                                type="text"
+                                value={newPortfolioName}
+                                onChange={(e) => setNewPortfolioName(e.target.value)}
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                                placeholder="My Portfolio"
+                            />
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowCreateModal(false)}
+                                className="flex-1 px-4 py-3 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleCreatePortfolio}
+                                disabled={submitting}
+                                className="flex-1 px-4 py-3 bg-emerald-500 hover:bg-emerald-400 text-white font-medium rounded-lg disabled:opacity-50"
+                            >
+                                {submitting ? 'Creating...' : 'Create'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Add Holding Modal */}
+            {showAddHoldingModal && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6 w-full max-w-md">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Add Holding</h3>
+                            <button onClick={() => { setShowAddHoldingModal(false); setStockSearch(''); setHoldingData({ symbol: '', name: '', shares: '', avgBuyPrice: '' }); }} className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-white">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="space-y-4 mb-6">
+                            {/* Stock Symbol Search */}
+                            <div ref={searchRef} className="relative">
+                                <label className="block text-sm text-gray-500 dark:text-slate-400 mb-2">Search Stock</label>
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        value={stockSearch}
+                                        onChange={(e) => setStockSearch(e.target.value)}
+                                        onFocus={() => stockOptions.length > 0 && setShowStockDropdown(true)}
+                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                                        placeholder="Search by symbol or name..."
+                                    />
+                                    {searchLoading && (
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                            <div className="w-4 h-4 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Dropdown */}
+                                {showStockDropdown && stockOptions.length > 0 && (
+                                    <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg max-h-60 overflow-auto">
+                                        {stockOptions.map((stock) => (
+                                            <button
+                                                key={stock.symbol}
+                                                onClick={() => handleSelectStock(stock)}
+                                                className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-slate-700 transition flex items-center justify-between"
+                                            >
+                                                <div>
+                                                    <div className="font-medium text-gray-900 dark:text-white">{stock.symbol}</div>
+                                                    <div className="text-sm text-gray-500 dark:text-slate-400 truncate">{stock.name}</div>
+                                                </div>
+                                                {stock.exchange && (
+                                                    <span className="text-xs text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded">{stock.exchange}</span>
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {holdingData.symbol && (
+                                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                                    <div className="text-sm text-emerald-500">Selected: <span className="font-semibold">{holdingData.symbol}</span></div>
+                                    <div className="text-xs text-emerald-400">{holdingData.name}</div>
+                                </div>
+                            )}
+
+                            <div>
+                                <label className="block text-sm text-gray-500 dark:text-slate-400 mb-2">Number of Shares</label>
+                                <input
+                                    type="number"
+                                    value={holdingData.shares}
+                                    onChange={(e) => setHoldingData({ ...holdingData, shares: e.target.value })}
+                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                                    placeholder="100"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-500 dark:text-slate-400 mb-2">Average Buy Price ($)</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={holdingData.avgBuyPrice}
+                                    onChange={(e) => setHoldingData({ ...holdingData, avgBuyPrice: e.target.value })}
+                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                                    placeholder="150.00"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => { setShowAddHoldingModal(false); setStockSearch(''); setHoldingData({ symbol: '', name: '', shares: '', avgBuyPrice: '' }); }}
+                                className="flex-1 px-4 py-3 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleAddHolding}
+                                disabled={submitting || !holdingData.symbol || !holdingData.shares || !holdingData.avgBuyPrice}
+                                className="flex-1 px-4 py-3 bg-emerald-500 hover:bg-emerald-400 text-white font-medium rounded-lg disabled:opacity-50"
+                            >
+                                {submitting ? 'Adding...' : 'Add Holding'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}

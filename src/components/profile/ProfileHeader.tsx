@@ -6,11 +6,13 @@ import { UserProfile } from '@/services/userService';
 
 interface ProfileHeaderProps {
     profile: UserProfile;
+    netWorth?: number | null;
+    netWorthChangePercent?: number | null;
     onEditProfile: () => void;
     onSettings: () => void;
 }
 
-export default function ProfileHeader({ profile, onEditProfile, onSettings }: ProfileHeaderProps) {
+export default function ProfileHeader({ profile, netWorth, netWorthChangePercent, onEditProfile, onSettings }: ProfileHeaderProps) {
     // Logic from your original code
     const userName = profile.name || 'User';
     const userHandle = profile.email?.split('@')[0] || 'user';
@@ -30,7 +32,7 @@ export default function ProfileHeader({ profile, onEditProfile, onSettings }: Pr
     return (
         <div className="w-full bg-white dark:bg-slate-900 text-white p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                
+
                 {/* Left Section: Avatar and Identity */}
                 <div className="flex items-center gap-5">
                     <div className="relative">
@@ -66,18 +68,22 @@ export default function ProfileHeader({ profile, onEditProfile, onSettings }: Pr
 
                 {/* Right Section: Stats and Actions using original profile data */}
                 <div className="flex flex-wrap items-center gap-4">
-                    
-                    {/* Net Worth Card (using profile.totalRewardPoints) */}
+
+                    {/* Net Worth Card */}
                     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3 min-w-[160px]">
                         <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">Net Worth</p>
                         <div className="flex items-center gap-3">
                             <span className="text-xl font-bold">
-                                ${profile.totalRewardPoints?.toLocaleString() || '0'}
+                                ${netWorth?.toLocaleString() || '0'}
                             </span>
-                            {/* Growth indicator - Static for now as it's not in the UserProfile interface */}
-                            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 text-[11px] font-medium border border-emerald-500/20">
-                                <span className="text-[8px]">~</span> 12.5%
-                            </span>
+                            {(netWorthChangePercent !== undefined && netWorthChangePercent !== null && netWorth !== null && netWorth !== 0) && (
+                                <span className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] font-medium border ${netWorthChangePercent >= 0
+                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                    : 'bg-red-500/10 text-red-400 border-red-500/20'
+                                    }`}>
+                                    {netWorthChangePercent >= 0 ? '+' : ''}{netWorthChangePercent?.toFixed(1)}%
+                                </span>
+                            )}
                         </div>
                     </div>
 
@@ -91,14 +97,14 @@ export default function ProfileHeader({ profile, onEditProfile, onSettings }: Pr
 
                     {/* Action Group */}
                     <div className="flex items-center gap-2 lg:ml-4">
-                        <button 
+                        <button
                             onClick={onEditProfile}
                             className="h-11 px-5 rounded-xl border border-slate-700 bg-transparent hover:bg-white/5 text-slate-200 font-semibold text-sm transition-all flex items-center gap-2"
                         >
                             <Edit2 size={16} />
                             Edit Profile
                         </button>
-                        <button 
+                        <button
                             onClick={onSettings}
                             className="h-11 w-11 flex items-center justify-center rounded-xl border border-slate-700 bg-transparent hover:bg-white/5 text-slate-400 transition-all"
                         >

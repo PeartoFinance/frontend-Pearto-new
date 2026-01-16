@@ -94,7 +94,7 @@ export async function updatePreferences(data: Partial<UserPreferences>): Promise
  */
 export async function getFullProfile(): Promise<ProfileData> {
     try {
-        const [profile, preferences] = await Promise.all([
+        const [profile, preferences, netWorthData] = await Promise.all([
             getProfile().catch((error) => {
                 console.error('Failed to fetch profile:', error);
                 return {
@@ -112,6 +112,10 @@ export async function getFullProfile(): Promise<ProfileData> {
                     languagePref: 'en',
                     countryCode: 'US',
                 } as UserPreferences;
+            }),
+            getNetWorth().catch((error) => {
+                console.error('Failed to fetch net worth:', error);
+                return { netWorth: 0, netWorthChange: 0, netWorthChangePercent: 0 };
             }),
         ]);
 
@@ -134,16 +138,22 @@ export async function getFullProfile(): Promise<ProfileData> {
                 { id: '4', name: 'Derivatives', level: false }
             ],
             hourlyRate: 45,
-            // These now match the updated ProfileData interface
-            netWorth: null,
-            netWorthChange: null,
-            netWorthChangePercent: null,
+            netWorth: netWorthData.netWorth,
+            netWorthChange: netWorthData.netWorthChange,
+            netWorthChangePercent: netWorthData.netWorthChangePercent,
             memberSince: profile.createdAt || new Date().toISOString(),
         };
     } catch (error) {
         console.error('Error in getFullProfile:', error);
         throw error;
     }
+}
+
+/**
+ * Get user net worth data
+ */
+export async function getNetWorth(): Promise<{ netWorth: number; netWorthChange: number; netWorthChangePercent: number }> {
+    return get<{ netWorth: number; netWorthChange: number; netWorthChangePercent: number }>('/user/net-worth');
 }
 
 /**

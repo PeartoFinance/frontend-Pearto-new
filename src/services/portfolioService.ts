@@ -95,6 +95,28 @@ export async function createPortfolio(name: string): Promise<Portfolio> {
     return post<Portfolio>('/portfolio', { name });
 }
 
+/**
+ * Add holding to portfolio
+ */
+export async function addHolding(
+    portfolioId: string,
+    symbol: string,
+    shares: number,
+    avgBuyPrice: number
+): Promise<{ id: string; message: string; holding: PortfolioHolding }> {
+    return post<{ id: string; message: string; holding: PortfolioHolding }>(
+        `/portfolio/${portfolioId}/holdings`,
+        { symbol, shares, avgBuyPrice }
+    );
+}
+
+/**
+ * Delete holding from portfolio
+ */
+export async function deleteHolding(portfolioId: string, holdingId: string): Promise<{ message: string }> {
+    return del<{ message: string }>(`/portfolio/${portfolioId}/holdings/${holdingId}`);
+}
+
 export default {
     getWatchlists,
     getWatchlist,
@@ -103,4 +125,6 @@ export default {
     getPortfolios,
     getPortfolio,
     createPortfolio,
+    addHolding,
+    deleteHolding,
 };

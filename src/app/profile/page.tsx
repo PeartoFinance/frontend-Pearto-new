@@ -139,6 +139,8 @@ export default function ProfilePage() {
                     <div className="mb-8">
                         <ProfileHeader
                             profile={profile}
+                            netWorth={netWorth}
+                            netWorthChangePercent={netWorthChangePercent}
                             onEditProfile={() => setShowSettings(true)}
                             onSettings={() => setActiveTab('preferences')}
                         />
@@ -155,8 +157,8 @@ export default function ProfilePage() {
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${activeTab === tab
-                                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                            : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
+                                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                        : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
                                         }`}
                                 >
                                     {getTabIcon(tab)}
