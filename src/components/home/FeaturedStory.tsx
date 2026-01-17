@@ -55,7 +55,7 @@ export default function FeaturedStory({ initialArticle }: FeaturedStoryProps) {
 
     return (
         <Link
-            href={`/news/${article.id}`}
+            href={`/news/${article.slug || article.id}`}
             className="group relative block overflow-hidden rounded-3xl aspect-[21/9] min-h-[280px]"
         >
             {/* Background Image */}

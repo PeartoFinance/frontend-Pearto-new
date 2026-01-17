@@ -198,8 +198,31 @@ export async function getSectorPerformance() {
 /**
  * Get stock history
  */
-export async function getStockHistory(symbol: string, range = '1m', interval = '1d') {
-    return get<{ symbol: string; range: string; data: unknown[] }>(`/stocks/history/${symbol}`, { range, interval });
+export interface PriceHistoryPoint {
+    date: string;
+    open: number | null;
+    high: number | null;
+    low: number | null;
+    close: number | null;
+    volume: number | null;
+}
+
+export interface StockHistoryResponse {
+    symbol: string;
+    period: string;
+    interval: string;
+    data: PriceHistoryPoint[];
+}
+
+export async function getStockHistory(symbol: string, period = '1mo', interval = '1d'): Promise<StockHistoryResponse> {
+    return get<StockHistoryResponse>(`/stocks/history/${symbol}`, { period, interval });
+}
+
+/**
+ * Get stock profile (detailed info)
+ */
+export async function getStockProfile(symbol: string): Promise<MarketStock> {
+    return get<MarketStock>(`/stocks/profile/${symbol}`);
 }
 
 export default {
@@ -216,4 +239,5 @@ export default {
     getMarketStats,
     getSectorPerformance,
     getStockHistory,
+    getStockProfile,
 };

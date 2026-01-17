@@ -17,6 +17,7 @@ export interface Article {
     publishedAt: string;
     readTime?: number;
     source?: string;
+    slug?: string;
 }
 
 export interface NewsItem {
