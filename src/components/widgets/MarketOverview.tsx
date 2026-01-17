@@ -149,7 +149,7 @@ export default function MarketOverview() {
                         <TrendingUp size={18} className="text-red-500 rotate-180" />
                         <span className="font-semibold text-slate-900 dark:text-white">Top Losers</span>
                     </div>
-                    <Link href="/market/losers" className="text-xs text-emerald-500 hover:text-emerald-600">View All</Link>
+                    <Link href="/market/gainers" className="text-xs text-emerald-500 hover:text-emerald-600">View All</Link>
                 </div>
                 <div className="divide-y divide-slate-100 dark:divide-neutral-800">
                     {topLosers.length === 0 ? (

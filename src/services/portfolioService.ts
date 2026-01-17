@@ -117,6 +117,144 @@ export async function deleteHolding(portfolioId: string, holdingId: string): Pro
     return del<{ message: string }>(`/portfolio/${portfolioId}/holdings/${holdingId}`);
 }
 
+// Transaction Types
+export interface PortfolioTransaction {
+    id: string;
+    symbol: string;
+    type: 'buy' | 'sell' | 'dividend' | 'split';
+    shares: number;
+    pricePerShare: number;
+    totalAmount: number;
+    fees: number;
+    notes?: string;
+    date: string;
+    createdAt: string;
+}
+
+export interface HoldingDetail {
+    holding: {
+        id: string;
+        symbol: string;
+        shares: number;
+        avgCost: number;
+        currentPrice: number;
+        totalValue: number;
+        totalCost: number;
+        totalGain: number;
+        gainPercent: number;
+        portfolioWeight: number;
+        firstBuyDate?: string;
+    };
+    market: {
+        name: string;
+        sector?: string;
+        industry?: string;
+        dayChange: number;
+        dayChangePercent: number;
+        high52w?: number;
+        low52w?: number;
+        peRatio?: number;
+        marketCap?: number;
+    } | null;
+    transactions: {
+        id: string;
+        type: string;
+        shares: number;
+        price: number;
+        total: number;
+        date: string;
+    }[];
+}
+
+export interface WealthHistoryPoint {
+    date: string;
+    totalValue: number;
+    totalCash: number;
+    totalInvestments: number;
+    dailyChange: number;
+}
+
+export interface PortfolioAnalytics {
+    totalValue: number;
+    totalGain: number;
+    totalGainPercent: number;
+    holdingsCount: number;
+    allocation: {
+        symbol: string;
+        name: string;
+        value: number;
+        gain: number;
+        gainPercent: number;
+        shares: number;
+        sector: string;
+        weight: number;
+    }[];
+    sectorBreakdown: {
+        sector: string;
+        value: number;
+        weight: number;
+    }[];
+    topPerformers: any[];
+    worstPerformers: any[];
+}
+
+/**
+ * Get portfolio transactions
+ */
+export async function getTransactions(
+    portfolioId: string,
+    options?: { symbol?: string; type?: string; limit?: number }
+): Promise<PortfolioTransaction[]> {
+    const params = new URLSearchParams();
+    if (options?.symbol) params.set('symbol', options.symbol);
+    if (options?.type) params.set('type', options.type);
+    if (options?.limit) params.set('limit', String(options.limit));
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return get<PortfolioTransaction[]>(`/portfolio/${portfolioId}/transactions${query}`);
+}
+
+/**
+ * Add transaction to portfolio
+ */
+export async function addTransaction(
+    portfolioId: string,
+    data: {
+        symbol: string;
+        type: 'buy' | 'sell' | 'dividend' | 'split';
+        shares: number;
+        price: number;
+        fees?: number;
+        notes?: string;
+        date?: string;
+    }
+): Promise<{ id: string; message: string; transaction: any }> {
+    return post<{ id: string; message: string; transaction: any }>(
+        `/portfolio/${portfolioId}/transactions`,
+        data
+    );
+}
+
+/**
+ * Get holding detail with transactions
+ */
+export async function getHoldingDetail(portfolioId: string, holdingId: string): Promise<HoldingDetail> {
+    return get<HoldingDetail>(`/portfolio/${portfolioId}/holdings/${holdingId}`);
+}
+
+/**
+ * Get wealth history for net worth chart
+ */
+export async function getWealthHistory(days = 30): Promise<WealthHistoryPoint[]> {
+    return get<WealthHistoryPoint[]>(`/portfolio/wealth-history?days=${days}`);
+}
+
+/**
+ * Get portfolio analytics
+ */
+export async function getPortfolioAnalytics(portfolioId: string): Promise<PortfolioAnalytics> {
+    return get<PortfolioAnalytics>(`/portfolio/${portfolioId}/analytics`);
+}
+
 export default {
     getWatchlists,
     getWatchlist,
@@ -127,4 +265,9 @@ export default {
     createPortfolio,
     addHolding,
     deleteHolding,
+    getTransactions,
+    addTransaction,
+    getHoldingDetail,
+    getWealthHistory,
+    getPortfolioAnalytics,
 };

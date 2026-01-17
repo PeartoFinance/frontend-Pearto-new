@@ -199,8 +199,8 @@ export default function PortfolioPage() {
                                         key={p.id}
                                         onClick={() => setSelectedPortfolio(p)}
                                         className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition ${selectedPortfolio?.id === p.id
-                                                ? 'bg-emerald-500 text-white'
-                                                : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
+                                            ? 'bg-emerald-500 text-white'
+                                            : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
                                             }`}
                                     >
                                         {p.name}
@@ -310,10 +310,21 @@ export default function PortfolioPage() {
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
                                                     {selectedPortfolio.holdings?.map((holding) => (
-                                                        <tr key={holding.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/30 transition">
+                                                        <tr
+                                                            key={holding.id}
+                                                            className="hover:bg-gray-50 dark:hover:bg-slate-800/30 transition cursor-pointer"
+                                                            onClick={() => window.location.href = `/portfolio/${selectedPortfolio.id}/holdings/${holding.id}`}
+                                                        >
                                                             <td className="px-6 py-4">
-                                                                <div className="font-medium text-gray-900 dark:text-white">{holding.symbol}</div>
-                                                                <div className="text-sm text-gray-500 dark:text-slate-400">{holding.name}</div>
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                                                                        {holding.symbol.slice(0, 2)}
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="font-medium text-gray-900 dark:text-white">{holding.symbol}</div>
+                                                                        <div className="text-sm text-gray-500 dark:text-slate-400">{holding.name}</div>
+                                                                    </div>
+                                                                </div>
                                                             </td>
                                                             <td className="px-6 py-4 text-gray-700 dark:text-slate-300">{holding.shares?.toLocaleString()}</td>
                                                             <td className="px-6 py-4 text-gray-700 dark:text-slate-300">${holding.avgCost?.toFixed(2)}</td>
@@ -329,7 +340,7 @@ export default function PortfolioPage() {
                                                             </td>
                                                             <td className="px-6 py-4">
                                                                 <button
-                                                                    onClick={() => handleDeleteHolding(holding.id)}
+                                                                    onClick={(e) => { e.stopPropagation(); handleDeleteHolding(holding.id); }}
                                                                     className="p-2 text-gray-400 dark:text-slate-400 hover:text-red-500 transition"
                                                                 >
                                                                     <Trash2 size={16} />

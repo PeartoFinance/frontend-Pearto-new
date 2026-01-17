@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, TrendingUp, TrendingDown, X, Star, Bell } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Plus, Search, TrendingUp, TrendingDown, X, Star, Bell, ExternalLink } from 'lucide-react';
 import { getWatchlist, addToWatchlist, removeFromWatchlist, type WatchlistItem } from '@/services/portfolioService';
 import { createAlert } from '@/services/alertsService';
 
@@ -131,8 +133,17 @@ export default function ProfileWatchlist({ onAddSymbol }: ProfileWatchlistProps)
                     <h2 className="text-2xl font-bold text-white">Watchlist</h2>
                     <p className="text-slate-400 mt-1">Track your favorite stocks</p>
                 </div>
-                <div className="text-sm text-slate-400">
-                    {watchlist.length} symbols {refreshing && '• Refreshing...'}
+                <div className="flex items-center gap-3">
+                    <Link
+                        href="/watchlist"
+                        className="flex items-center gap-2 px-4 py-2 border border-slate-600 text-slate-300 hover:bg-slate-700 font-medium rounded-lg transition text-sm"
+                    >
+                        <ExternalLink size={14} />
+                        View Full Watchlist
+                    </Link>
+                    <span className="text-sm text-slate-400">
+                        {watchlist.length} symbols {refreshing && '• Refreshing...'}
+                    </span>
                 </div>
             </div>
 
@@ -233,17 +244,27 @@ export default function ProfileWatchlist({ onAddSymbol }: ProfileWatchlistProps)
 }
 
 function WatchlistCard({ item, onRemove, onSetAlert }: { item: WatchlistItem; onRemove: () => void; onSetAlert: () => void }) {
+    const router = useRouter();
     const isGain = (item.changePercent || 0) >= 0;
+
     return (
-        <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition group">
+        <div
+            onClick={() => router.push(`/stocks/${item.symbol}`)}
+            className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-emerald-500/50 transition group cursor-pointer"
+        >
             <div className="flex items-start justify-between mb-3">
-                <div>
-                    <div className="font-bold text-white text-lg">{item.symbol}</div>
-                    <div className="text-xs text-slate-500 truncate">{item.name}</div>
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-sm font-bold text-amber-600 dark:text-amber-400">
+                        {item.symbol.slice(0, 2)}
+                    </div>
+                    <div>
+                        <div className="font-bold text-white text-lg">{item.symbol}</div>
+                        <div className="text-xs text-slate-500 truncate">{item.name}</div>
+                    </div>
                 </div>
                 <div className="flex gap-1">
-                    <button onClick={onSetAlert} title="Set alert" className="p-1.5 hover:bg-emerald-500/10 rounded text-slate-400 hover:text-emerald-500"><Bell size={14} /></button>
-                    <button onClick={onRemove} className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-slate-700 rounded text-slate-500 hover:text-red-400"><X size={14} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); onSetAlert(); }} title="Set alert" className="p-1.5 hover:bg-emerald-500/10 rounded text-slate-400 hover:text-emerald-500"><Bell size={14} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); onRemove(); }} className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-slate-700 rounded text-slate-500 hover:text-red-400"><X size={14} /></button>
                 </div>
             </div>
             <div className="text-xl font-bold text-white">${(item.price || 0).toFixed(2)}</div>

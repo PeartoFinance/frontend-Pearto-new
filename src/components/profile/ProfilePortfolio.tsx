@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, Plus, Trash2, X, Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, Plus, Trash2, X, Search, ExternalLink } from 'lucide-react';
 import { getPortfolios, createPortfolio, addHolding, deleteHolding, type Portfolio, type PortfolioHolding } from '@/services/portfolioService';
 import { get } from '@/services/api';
 
@@ -198,13 +200,22 @@ export default function ProfilePortfolio({ onAddHolding }: ProfilePortfolioProps
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Portfolio</h2>
                     <p className="text-gray-500 dark:text-slate-400 mt-1">Track your investment performance</p>
                 </div>
-                <button
-                    onClick={() => setShowAddHoldingModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white font-medium rounded-lg transition"
-                >
-                    <Plus size={16} />
-                    Add Holding
-                </button>
+                <div className="flex items-center gap-3">
+                    <Link
+                        href="/portfolio"
+                        className="flex items-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 font-medium rounded-lg transition"
+                    >
+                        <ExternalLink size={16} />
+                        View Full Portfolio
+                    </Link>
+                    <button
+                        onClick={() => setShowAddHoldingModal(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white font-medium rounded-lg transition"
+                    >
+                        <Plus size={16} />
+                        Add Holding
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -286,7 +297,7 @@ export default function ProfilePortfolio({ onAddHolding }: ProfilePortfolioProps
                             </thead>
                             <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
                                 {selectedPortfolio.holdings?.map((holding) => (
-                                    <HoldingRow key={holding.id} holding={holding} onDelete={() => handleDeleteHolding(holding.id)} />
+                                    <HoldingRow key={holding.id} holding={holding} portfolioId={String(selectedPortfolio.id)} onDelete={() => handleDeleteHolding(holding.id)} />
                                 ))}
                             </tbody>
                         </table>
@@ -394,15 +405,28 @@ export default function ProfilePortfolio({ onAddHolding }: ProfilePortfolioProps
     );
 }
 
-function HoldingRow({ holding, onDelete }: { holding: PortfolioHolding; onDelete: () => void }) {
+function HoldingRow({ holding, portfolioId, onDelete }: { holding: PortfolioHolding; portfolioId: string; onDelete: () => void }) {
+    const router = useRouter();
     const isGain = holding.gain >= 0;
 
+    const handleRowClick = () => {
+        router.push(`/portfolio/${portfolioId}/holdings/${holding.id}`);
+    };
+
     return (
-        <tr className="hover:bg-gray-50 dark:hover:bg-slate-800/30 transition">
+        <tr
+            className="hover:bg-gray-50 dark:hover:bg-slate-800/30 transition cursor-pointer"
+            onClick={handleRowClick}
+        >
             <td className="px-6 py-4">
-                <div>
-                    <div className="font-medium text-gray-900 dark:text-white">{holding.symbol}</div>
-                    <div className="text-sm text-gray-500 dark:text-slate-400 truncate max-w-[150px]">{holding.name}</div>
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                        {holding.symbol.slice(0, 2)}
+                    </div>
+                    <div>
+                        <div className="font-medium text-gray-900 dark:text-white">{holding.symbol}</div>
+                        <div className="text-sm text-gray-500 dark:text-slate-400 truncate max-w-[150px]">{holding.name}</div>
+                    </div>
                 </div>
             </td>
             <td className="px-6 py-4 text-sm text-gray-700 dark:text-slate-300">{holding.shares?.toLocaleString()}</td>
@@ -418,7 +442,10 @@ function HoldingRow({ holding, onDelete }: { holding: PortfolioHolding; onDelete
                 </div>
             </td>
             <td className="px-6 py-4">
-                <button onClick={onDelete} className="p-2 text-gray-400 dark:text-slate-400 hover:text-red-500 transition">
+                <button
+                    onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                    className="p-2 text-gray-400 dark:text-slate-400 hover:text-red-500 transition"
+                >
                     <Trash2 size={16} />
                 </button>
             </td>

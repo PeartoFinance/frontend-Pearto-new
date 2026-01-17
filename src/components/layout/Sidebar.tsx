@@ -23,6 +23,7 @@ import {
     Wallet,
     Globe,
     LogOut,
+    Star,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -31,11 +32,12 @@ const navItems = [
     { href: '/markets', icon: TrendingUp, labelKey: 'nav.markets', label: 'Markets' },
     { href: '/news', icon: Newspaper, labelKey: 'nav.news', label: 'News' },
     { href: '/learn', icon: GraduationCap, labelKey: 'nav.learn', label: 'Learn' },
-    { href: '/portfolio', icon: Briefcase, labelKey: 'nav.portfolio', label: 'Portfolio' },
 ];
 
 // Items that only show when authenticated
 const authNavItems = [
+    { href: '/portfolio', icon: Briefcase, labelKey: 'nav.portfolio', label: 'Portfolio' },
+    { href: '/watchlist', icon: Star, labelKey: 'nav.watchlist', label: 'My Watchlist' },
     { href: '/my-courses', icon: BookOpen, labelKey: 'nav.myCourses', label: 'My Courses' },
 ];
 

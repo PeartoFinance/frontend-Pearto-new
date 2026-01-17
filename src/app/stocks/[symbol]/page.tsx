@@ -6,9 +6,10 @@ import Link from 'next/link';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
-import StockChart from '@/components/stocks/StockChart';
+import { MultiChart } from '@/components/charts';
 import StockCompareModal from '@/components/stocks/StockCompareModal';
 import { AIWidget } from '@/components/ai';
+import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
 import {
     getStockProfile,
     getStockHistory,
@@ -214,6 +215,57 @@ export default function StockDetailPage() {
                                     </div>
                                 </div>
 
+                                {/* AI Stock Analysis Panel - Full Data */}
+                                <AIAnalysisPanel
+                                    title={`${stock.symbol} Analysis`}
+                                    pageType="stock-detail"
+                                    pageData={{
+                                        // Stock profile
+                                        symbol: stock.symbol,
+                                        name: stock.name,
+                                        exchange: stock.exchange,
+                                        currency: stock.currency,
+                                        sector: stock.sector,
+                                        industry: stock.industry,
+                                        // Price data
+                                        price: stock.price,
+                                        change: stock.change,
+                                        changePercent: stock.changePercent,
+                                        open: stock.open,
+                                        previousClose: stock.previousClose,
+                                        dayHigh: stock.dayHigh,
+                                        dayLow: stock.dayLow,
+                                        high52w: stock.high52w,
+                                        low52w: stock.low52w,
+                                        // Volume
+                                        volume: stock.volume,
+                                        avgVolume: stock.avgVolume,
+                                        // Fundamentals
+                                        marketCap: stock.marketCap,
+                                        peRatio: stock.peRatio,
+                                        forwardPe: stock.forwardPe,
+                                        eps: stock.eps,
+                                        beta: stock.beta,
+                                        dividendYield: stock.dividendYield,
+                                        dividendRate: stock.dividendRate,
+                                        priceToBook: stock.priceToBook,
+                                        bookValue: stock.bookValue,
+                                        sharesOutstanding: stock.sharesOutstanding,
+                                        // History summary
+                                        historyPeriod: period,
+                                        historyPoints: history?.data?.length || 0,
+                                        // Related news
+                                        newsCount: news.length
+                                    }}
+                                    autoAnalyze={!!stock}
+                                    quickPrompts={[
+                                        `Is ${stock.symbol} undervalued?`,
+                                        'Technical analysis',
+                                        'Buy or sell recommendation'
+                                    ]}
+                                    className="mb-5"
+                                />
+
                                 {/* Main Content: Stats + Chart */}
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                                     {/* Left Column: Key Stats */}
@@ -264,36 +316,23 @@ export default function StockDetailPage() {
                                     </div>
 
                                     {/* Right Column: Chart */}
-                                    <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
-                                        {/* Period Selector */}
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="flex gap-1">
-                                                {periods.map((p) => (
-                                                    <button
-                                                        key={p.id}
-                                                        onClick={() => loadHistory(p.id)}
-                                                        className={`px-3 py-1.5 text-sm font-medium rounded-lg transition ${period === p.id
-                                                            ? 'bg-blue-600 text-white'
-                                                            : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                                                            }`}
-                                                    >
-                                                        {p.label}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                            <span className={`text-sm font-medium px-2 py-1 rounded ${isPositive
-                                                ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                                                : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-                                                }`}>
-                                                {isPositive ? '+' : ''}{formatNumber(stock.changePercent)}% ({period.toUpperCase()})
-                                            </span>
-                                        </div>
-
-                                        {/* Chart */}
-                                        <StockChart
-                                            data={history?.data || []}
+                                    <div className="lg:col-span-2">
+                                        <MultiChart
+                                            data={history?.data?.map(d => ({
+                                                date: d.date,
+                                                open: d.open,
+                                                high: d.high,
+                                                low: d.low,
+                                                close: d.close,
+                                                volume: d.volume
+                                            })) || []}
+                                            period={period}
+                                            onPeriodChange={(p) => loadHistory(p as Period)}
                                             loading={chartLoading}
-                                            symbol={symbol}
+                                            height={400}
+                                            priceRange={stock.dayLow && stock.dayHigh ? { low: stock.dayLow, high: stock.dayHigh } : undefined}
+                                            change={{ value: stock.change || 0, percent: stock.changePercent || 0 }}
+                                            initialChartType="area"
                                         />
                                     </div>
                                 </div>

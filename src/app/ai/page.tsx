@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
     Sparkles, Lightbulb, RefreshCw, X, ChevronRight,
@@ -9,6 +9,7 @@ import {
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import { AIChat } from '@/components/ai/AIChat';
+import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
 
 // Tool categories for suggestions
 const TOOL_CATEGORIES = [
@@ -165,8 +166,27 @@ export default function AIPage() {
                                 <ToolCategory key={idx} category={cat} onSelect={handleSelectPrompt} />
                             ))}
                         </div>
-                        <div className="flex-shrink-0 p-4 border-t border-slate-700/50">
-                            <div className="bg-emerald-900/30 rounded-xl p-4 border border-emerald-700/30">
+
+                        {/* AI Insights Panel - Similar to Screener Insights in Stocks */}
+                        <div className="flex-shrink-0 p-3 border-t border-slate-700/50">
+                            <AIAnalysisPanel
+                                title="AI Quick Insights"
+                                pageType="ai-assistant"
+                                pageData={{
+                                    capabilities: ['stocks', 'crypto', 'forex', 'calculators', 'weather'],
+                                    status: 'ready'
+                                }}
+                                autoAnalyze={false}
+                                compact={true}
+                                quickPrompts={[
+                                    'Best value stocks here',
+                                    'High dividend picks',
+                                    'Growth opportunities'
+                                ]}
+                                className="mb-3"
+                            />
+
+                            <div className="bg-emerald-900/30 rounded-xl p-3 border border-emerald-700/30">
                                 <div className="flex items-center gap-2 mb-2">
                                     <Sparkles className="w-4 h-4 text-emerald-400" />
                                     <span className="text-xs font-semibold text-emerald-300 uppercase">Pro Tip</span>

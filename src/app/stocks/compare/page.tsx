@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import { AIWidget } from '@/components/ai';
+import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
 import {
     getStockProfile,
     getStockHistory,
@@ -26,7 +27,7 @@ interface CompareStock extends MarketStock {
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-export default function StockComparePage() {
+function StockCompareContent() {
     const searchParams = useSearchParams();
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
@@ -359,6 +360,42 @@ export default function StockComparePage() {
 
                         {!loading && stocks.length > 0 && (
                             <>
+                                {/* AI Comparison Analysis - Full Data */}
+                                <AIAnalysisPanel
+                                    title="Comparison Analysis"
+                                    pageType="comparison"
+                                    pageData={{
+                                        stockCount: stocks.length,
+                                        period: period,
+                                        // All stocks with full data
+                                        stocks: stocks.map(s => ({
+                                            symbol: s.symbol,
+                                            name: s.name,
+                                            price: s.price,
+                                            change: s.change,
+                                            changePercent: s.changePercent,
+                                            marketCap: s.marketCap,
+                                            volume: s.volume,
+                                            peRatio: s.peRatio,
+                                            eps: s.eps,
+                                            beta: s.beta,
+                                            dividendYield: s.dividendYield,
+                                            high52w: s.high52w,
+                                            low52w: s.low52w,
+                                            sector: s.sector,
+                                            industry: s.industry,
+                                            dataPoints: s.data?.length || 0
+                                        }))
+                                    }}
+                                    autoAnalyze={stocks.length > 0}
+                                    quickPrompts={[
+                                        'Which stock is the best buy?',
+                                        'Compare valuations',
+                                        'Risk analysis'
+                                    ]}
+                                    className="mb-5"
+                                />
+
                                 {/* Chart Section */}
                                 <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
                                     <div className="flex items-center justify-between mb-4">
@@ -371,8 +408,8 @@ export default function StockComparePage() {
                                                     key={p.id}
                                                     onClick={() => refreshHistory(p.id)}
                                                     className={`px-3 py-1.5 text-sm font-medium rounded-lg transition ${period === p.id
-                                                            ? 'bg-blue-600 text-white'
-                                                            : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                                        ? 'bg-blue-600 text-white'
+                                                        : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
                                                         }`}
                                                 >
                                                     {p.label}
@@ -519,5 +556,18 @@ export default function StockComparePage() {
                 quickPrompts={["Compare these stocks"]}
             />
         </div>
+    );
+}
+
+// Wrapper with Suspense boundary for useSearchParams
+export default function StockComparePage() {
+    return (
+        <Suspense fallback={
+            <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-slate-900">
+                <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+            </div>
+        }>
+            <StockCompareContent />
+        </Suspense>
     );
 }
