@@ -90,8 +90,10 @@ export default function StockChart({ data, loading = false, symbol }: StockChart
 
         // Set data if available
         if (data.length > 0) {
-            // Sort data by date first
-            const sortedData = [...data].sort((a, b) => a.date.localeCompare(b.date));
+            // Sort and deduplicate data by date (keep last occurrence for each date)
+            const dataMap = new Map<string, typeof data[0]>();
+            data.forEach(d => dataMap.set(d.date, d));
+            const sortedData = Array.from(dataMap.values()).sort((a, b) => a.date.localeCompare(b.date));
 
             if (chartType === 'area') {
                 // Area chart

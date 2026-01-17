@@ -123,3 +123,17 @@ export async function getHeadlines(options?: {
     );
     return response;
 }
+
+/**
+ * Get news related to a specific stock symbol
+ */
+export async function getNewsByStock(symbol: string, limit: number = 10): Promise<{
+    symbol: string;
+    items: NewsArticle[];
+    total: number;
+}> {
+    const response = await get<{ symbol: string; items: NewsArticle[]; total: number }>(
+        `/news/stock/${symbol}?limit=${limit}`
+    );
+    return response;
+}
