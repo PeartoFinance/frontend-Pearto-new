@@ -34,6 +34,7 @@ import {
     Newspaper,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import SearchModal from './SearchModal';
 
 // Navigation data
 const pillarsItems = [
@@ -141,6 +142,7 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
 
     // Dropdown states
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const [searchOpen, setSearchOpen] = useState(false);
 
     // Handle dark mode
     useEffect(() => {
@@ -208,16 +210,19 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
 
                         {/* Center: Search Bar */}
                         <div className="hidden md:flex flex-1 max-w-sm ml-4">
-                            <button className="w-full flex items-center gap-2 h-9 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-sm text-slate-500 dark:text-slate-400 transition">
+                            <button
+                                onClick={() => setSearchOpen(true)}
+                                className="w-full flex items-center gap-2 h-9 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-sm text-slate-500 dark:text-slate-400 transition"
+                            >
                                 <Search size={16} />
-                                <span className="flex-1 text-left truncate">Search...</span>
+                                <span className="flex-1 text-left truncate">Search stocks, crypto...</span>
                                 <kbd className="hidden lg:inline-flex px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-[10px]">/</kbd>
                             </button>
                         </div>
 
                         {/* Right: Actions */}
                         <div className="flex items-center gap-2 lg:gap-3">
-                            <button className="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                            <button onClick={() => setSearchOpen(true)} className="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
                                 <Search size={20} className="text-slate-600 dark:text-slate-300" />
                             </button>
 
@@ -440,6 +445,9 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                     </div>
                 </>
             )}
+
+            {/* Search Modal */}
+            <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
         </>
     );
 }

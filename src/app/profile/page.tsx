@@ -16,6 +16,7 @@ import ProfileWatchlist from '@/components/profile/ProfileWatchlist';
 import ProfileAlerts from '@/components/profile/ProfileAlerts';
 import ProfileActivity from '@/components/profile/ProfileActivity';
 import ProfileDocuments from '@/components/profile/ProfileDocuments';
+import ProfileInsights from '@/components/profile/ProfileInsights';
 import {
     CheckCircle2, GraduationCap, Info, Mail, Phone, Calendar as CalendarIcon,
     FileText, ChevronLeft, ChevronRight, Save, Bold, Italic, List,
@@ -316,10 +317,7 @@ export default function ProfilePage() {
 
                         {/* Insights Tab */}
                         {activeTab === 'insights' && (
-                            <div className="flex flex-col items-center justify-center py-20 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-600">
-                                <h3 className="text-lg font-bold text-white capitalize mb-2">Analytics & Insights</h3>
-                                <p className="text-slate-500 text-sm">Advanced portfolio analytics and market insights coming soon.</p>
-                            </div>
+                            <ProfileInsights />
                         )}
 
                         {/* Watchlist Tab */}

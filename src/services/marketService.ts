@@ -221,8 +221,146 @@ export async function getStockHistory(symbol: string, period = '1mo', interval =
 /**
  * Get stock profile (detailed info)
  */
-export async function getStockProfile(symbol: string): Promise<MarketStock> {
-    return get<MarketStock>(`/stocks/profile/${symbol}`);
+export async function getStockProfile(symbol: string): Promise<MarketStock & { marketIssues?: MarketIssue[]; news?: NewsArticle[] }> {
+    return get<MarketStock & { marketIssues?: MarketIssue[]; news?: NewsArticle[] }>(`/stocks/profile/${symbol}`);
+}
+
+// ============================================================================
+// BUSINESS PROFILE TYPES & API (for tabbed stock detail page)
+// ============================================================================
+
+/**
+ * Company financial statement record (from /stocks/financials/:symbol)
+ */
+export interface CompanyFinancial {
+    id: number;
+    symbol: string;
+    period: 'annual' | 'quarterly';
+    fiscalDateEnding: string;
+    revenue: number | null;
+    netIncome: number | null;
+    grossProfit: number | null;
+    ebitda: number | null;
+    totalAssets: number | null;
+    totalLiabilities: number | null;
+    epsActual: number | null;
+    currency: string;
+}
+
+/**
+ * Analyst forecast and price targets (from /stocks/forecast/:symbol)
+ */
+export interface AnalystForecast {
+    symbol: string;
+    targetHigh: number | null;
+    targetLow: number | null;
+    targetMean: number | null;
+    targetMedian: number | null;
+    currentPrice: number | null;
+    strongBuy: number;
+    buy: number;
+    hold: number;
+    sell: number;
+    strongSell: number;
+    recommendations?: {
+        firm: string;
+        toGrade: string;
+        fromGrade?: string;
+        action: string;
+        date: string;
+    }[];
+}
+
+/**
+ * Dividend record (from /stocks/dividends/:symbol)
+ */
+export interface DividendRecord {
+    id: number;
+    symbol: string;
+    companyName: string;
+    dividendType: 'cash' | 'bonus' | 'both';
+    cashPercent: number;
+    bonusPercent: number;
+    totalPercent: number;
+    dividendAmount: number | null;
+    exDividendDate: string | null;
+    recordDate: string | null;
+    paymentDate: string | null;
+    fiscalYear: string;
+    status: 'proposed' | 'approved' | 'paid';
+}
+
+/**
+ * Market issue/alert (from profile response)
+ */
+export interface MarketIssue {
+    id: number;
+    symbol: string;
+    title: string;
+    description: string;
+    severity: 'info' | 'warning' | 'critical';
+    issueDate: string;
+    isActive: boolean;
+}
+
+/**
+ * News article (simplified for stock profile)
+ */
+export interface NewsArticle {
+    id: string | number;
+    title: string;
+    summary?: string;
+    link?: string;
+    url?: string;
+    image?: string;
+    source?: string;
+    publishedAt?: string;
+    slug?: string;
+}
+
+/**
+ * Get company financials (for Financials tab)
+ */
+export async function getStockFinancials(symbol: string, period: 'annual' | 'quarterly' = 'annual'): Promise<CompanyFinancial[]> {
+    return get<CompanyFinancial[]>(`/stocks/financials/${symbol}`, { period });
+}
+
+/**
+ * Get analyst forecast and price targets (for Forecast tab)
+ */
+export async function getStockForecast(symbol: string): Promise<AnalystForecast> {
+    return get<AnalystForecast>(`/stocks/forecast/${symbol}`);
+}
+
+/**
+ * Get stock statistics (extended fundamental data)
+ */
+export async function getStockStatistics(symbol: string) {
+    return get<{
+        symbol: string;
+        marketCap: number | null;
+        peRatio: number | null;
+        forwardPe: number | null;
+        eps: number | null;
+        beta: number | null;
+        dividendYield: number | null;
+        dividendRate: number | null;
+        sharesOutstanding: number | null;
+        floatShares: number | null;
+        bookValue: number | null;
+        priceToBook: number | null;
+        shortRatio: number | null;
+        high52w: number | null;
+        low52w: number | null;
+        avgVolume: number | null;
+    }>(`/stocks/statistics/${symbol}`);
+}
+
+/**
+ * Get dividend history (for Dividends tab)
+ */
+export async function getStockDividends(symbol: string): Promise<DividendRecord[]> {
+    return get<DividendRecord[]>(`/stocks/dividends/${symbol}`);
 }
 
 export default {
@@ -240,4 +378,9 @@ export default {
     getSectorPerformance,
     getStockHistory,
     getStockProfile,
+    // Business Profile APIs
+    getStockFinancials,
+    getStockForecast,
+    getStockStatistics,
+    getStockDividends,
 };

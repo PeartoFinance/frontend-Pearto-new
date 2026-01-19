@@ -7,10 +7,13 @@ import {
     AreaSeries,
     CandlestickSeries,
     LineSeries,
+    BarSeries,
+    BaselineSeries,
+    HistogramSeries,
     type IChartApi,
     type ISeriesApi,
 } from 'lightweight-charts';
-import { BarChart2, TrendingUp, Activity, Loader2 } from 'lucide-react';
+import { BarChart2, TrendingUp, Activity, Loader2, Mountain, BarChart3, GitBranch, BarChartHorizontal } from 'lucide-react';
 
 export interface ChartDataPoint {
     date: string;
@@ -52,6 +55,7 @@ export interface MultiChartProps {
 }
 
 const PERIODS = [
+    { id: '1m', label: '1 Min' },
     { id: '1d', label: '1 Day' },
     { id: '5d', label: '5 Days' },
     { id: '1mo', label: '1 Month' },
@@ -60,7 +64,7 @@ const PERIODS = [
     { id: '5y', label: '5 Years' },
 ];
 
-type ChartType = 'area' | 'candle' | 'line';
+type ChartType = 'area' | 'candle' | 'line' | 'mountain' | 'bars' | 'baseline' | 'histogram';
 
 export function MultiChart({
     data,
@@ -232,6 +236,88 @@ export function MultiChart({
 
             series.setData(lineData as any);
             seriesRef.current = series as any;
+
+        } else if (chartType === 'mountain') {
+            // Mountain chart - steeper gradient area fill
+            const series = chart.addSeries(AreaSeries, {
+                lineColor: chartColor,
+                topColor: isPositive ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.6)',
+                bottomColor: 'transparent',
+                lineWidth: 2,
+                crosshairMarkerVisible: true,
+                crosshairMarkerRadius: 4,
+            });
+
+            const mountainData = sortedData.map(d => ({
+                time: d.date,
+                value: d.close ?? d.value ?? 0,
+            }));
+
+            series.setData(mountainData as any);
+            seriesRef.current = series as any;
+
+        } else if (chartType === 'bars') {
+            // OHLC Bars chart
+            const series = chart.addSeries(BarSeries, {
+                upColor: positiveColor,
+                downColor: negativeColor,
+                thinBars: false,
+            });
+
+            const barsData = sortedData
+                .filter(d => d.open != null && d.high != null && d.low != null && d.close != null)
+                .map(d => ({
+                    time: d.date,
+                    open: d.open!,
+                    high: d.high!,
+                    low: d.low!,
+                    close: d.close!,
+                }));
+
+            series.setData(barsData as any);
+            seriesRef.current = series as any;
+
+        } else if (chartType === 'baseline') {
+            // Baseline chart - shows above/below a reference line
+            const avgValue = sortedData.reduce((sum, d) => sum + (d.close ?? d.value ?? 0), 0) / sortedData.length;
+
+            const series = chart.addSeries(BaselineSeries, {
+                baseValue: { type: 'price', price: avgValue },
+                topLineColor: positiveColor,
+                topFillColor1: 'rgba(16, 185, 129, 0.3)',
+                topFillColor2: 'rgba(16, 185, 129, 0.05)',
+                bottomLineColor: negativeColor,
+                bottomFillColor1: 'rgba(239, 68, 68, 0.05)',
+                bottomFillColor2: 'rgba(239, 68, 68, 0.3)',
+                lineWidth: 2,
+            });
+
+            const baselineData = sortedData.map(d => ({
+                time: d.date,
+                value: d.close ?? d.value ?? 0,
+            }));
+
+            series.setData(baselineData as any);
+            seriesRef.current = series as any;
+
+        } else if (chartType === 'histogram') {
+            // Volume-style histogram chart
+            const series = chart.addSeries(HistogramSeries, {
+                color: chartColor,
+            });
+
+            const histogramData = sortedData.map((d, i, arr) => {
+                const prevClose = i > 0 ? (arr[i - 1].close ?? arr[i - 1].value ?? 0) : (d.close ?? d.value ?? 0);
+                const currentClose = d.close ?? d.value ?? 0;
+                return {
+                    time: d.date,
+                    value: currentClose,
+                    color: currentClose >= prevClose ? positiveColor : negativeColor,
+                };
+            });
+
+            series.setData(histogramData as any);
+            seriesRef.current = series as any;
         }
 
         chart.timeScale().fitContent();
@@ -256,25 +342,30 @@ export function MultiChart({
 
     const chartTypes: { id: ChartType; label: string; icon: React.ReactNode }[] = [
         { id: 'area', label: 'Area', icon: <BarChart2 size={14} /> },
+        { id: 'mountain', label: 'Mountain', icon: <Mountain size={14} /> },
         { id: 'candle', label: 'Candle', icon: <Activity size={14} /> },
+        { id: 'bars', label: 'Bars', icon: <BarChart3 size={14} /> },
         { id: 'line', label: 'Line', icon: <TrendingUp size={14} /> },
+        { id: 'baseline', label: 'Baseline', icon: <GitBranch size={14} /> },
+        { id: 'histogram', label: 'Histogram', icon: <BarChartHorizontal size={14} /> },
     ];
 
     return (
         <div className={`bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden ${className}`}>
-            {/* Header Controls */}
-            <div className="p-4 border-b border-slate-200 dark:border-slate-700">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* Header Controls - Two Row Layout */}
+            <div className="p-4 border-b border-slate-200 dark:border-slate-700 space-y-3">
+                {/* Row 1: Period Selector + Change Badge */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     {/* Period Selector */}
                     {showPeriodSelector && (
-                        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/50 rounded-lg p-1">
+                        <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-700/50 rounded-lg p-1 overflow-x-auto">
                             {PERIODS.map((p) => (
                                 <button
                                     key={p.id}
                                     onClick={() => onPeriodChange?.(p.id)}
-                                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition ${period === p.id
-                                        ? 'bg-blue-600 text-white'
-                                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                    className={`px-2.5 py-1.5 text-xs sm:text-sm font-medium rounded-md transition whitespace-nowrap ${period === p.id
+                                        ? 'bg-blue-600 text-white shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                                         }`}
                                 >
                                     {p.label}
@@ -283,49 +374,44 @@ export function MultiChart({
                         </div>
                     )}
 
-                    {/* Right side: Price info + Chart Type */}
-                    <div className="flex items-center gap-4 flex-wrap">
-                        {/* Price Range & Change */}
-                        {(priceRange || change) && (
-                            <div className="flex items-center gap-3 flex-shrink-0">
-                                {priceRange && (
-                                    <span className="text-sm text-slate-500 whitespace-nowrap">
-                                        Range: <span className="font-medium text-slate-700 dark:text-slate-300">
-                                            ${priceRange.low.toFixed(2)} - ${priceRange.high.toFixed(2)}
-                                        </span>
-                                    </span>
-                                )}
-                                {change && (
-                                    <span className={`inline-flex items-center px-2.5 py-1 rounded text-sm font-semibold whitespace-nowrap ${isPositive
-                                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
-                                        : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                                        }`}>
-                                        {change.value >= 0 ? '+' : ''}{change.value.toFixed(2)} ({change.percent >= 0 ? '+' : ''}{change.percent.toFixed(2)}%)
-                                    </span>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Chart Type Selector */}
-                        {showChartTypeSelector && (
-                            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/50 rounded-lg p-1">
-                                {chartTypes.map((type) => (
-                                    <button
-                                        key={type.id}
-                                        onClick={() => setChartType(type.id)}
-                                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition ${chartType === type.id
-                                            ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
-                                            : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                                            }`}
-                                    >
-                                        {type.icon}
-                                        {type.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    {/* Change Badge */}
+                    {change && (
+                        <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold whitespace-nowrap self-start sm:self-auto ${isPositive
+                            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
+                            : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800'
+                            }`}>
+                            {change.value >= 0 ? '+' : ''}{change.value.toFixed(2)} ({change.percent >= 0 ? '+' : ''}{change.percent.toFixed(2)}%)
+                        </span>
+                    )}
                 </div>
+
+                {/* Row 2: Chart Type Selector */}
+                {showChartTypeSelector && (
+                    <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/50 rounded-lg p-1 overflow-x-auto">
+                        {chartTypes.map((type) => (
+                            <button
+                                key={type.id}
+                                onClick={() => setChartType(type.id)}
+                                className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs sm:text-sm font-medium rounded-md transition whitespace-nowrap ${chartType === type.id
+                                    ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                                    }`}
+                            >
+                                {type.icon}
+                                <span className="hidden xs:inline">{type.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                )}
+
+                {/* Price Range (optional) */}
+                {priceRange && (
+                    <div className="text-xs text-slate-500">
+                        Range: <span className="font-medium text-slate-700 dark:text-slate-300">
+                            ${priceRange.low.toFixed(2)} - ${priceRange.high.toFixed(2)}
+                        </span>
+                    </div>
+                )}
             </div>
 
             {/* Chart Container */}
