@@ -238,18 +238,79 @@ export interface CompanyFinancial {
     period: 'annual' | 'quarterly';
     fiscalDateEnding: string;
     revenue: number | null;
+    totalRevenue?: number | null;  // Alias for revenue
     netIncome: number | null;
     grossProfit: number | null;
+    operatingIncome?: number | null;
     ebitda: number | null;
     totalAssets: number | null;
     totalLiabilities: number | null;
+    totalEquity?: number | null;
+    shareholderEquity?: number | null;  // Alias for totalEquity
+    operatingCashFlow?: number | null;
+    freeCashFlow?: number | null;
     epsActual: number | null;
     currency: string;
+    // Allow dynamic access for comparison tables
+    [key: string]: string | number | null | undefined;
 }
 
 /**
  * Analyst forecast and price targets (from /stocks/forecast/:symbol)
+ * Enhanced with earnings estimates and recommendation trends
  */
+export interface EarningsEstimate {
+    fiscalYear: string;
+    periodType: string;
+    revenueEstimate?: number | null;
+    revenueLow?: number | null;
+    revenueHigh?: number | null;
+    revenueAvg?: number | null;
+    revenueGrowth?: number | null;
+    numRevenueAnalysts?: number | null;
+    epsEstimate?: number | null;
+    epsLow?: number | null;
+    epsHigh?: number | null;
+    epsAvg?: number | null;
+    epsGrowth?: number | null;
+    numEpsAnalysts?: number | null;
+}
+
+export interface RecommendationTrend {
+    periodLabel: string;
+    periodDate: string;
+    strongBuy: number;
+    buy: number;
+    hold: number;
+    sell: number;
+    strongSell: number;
+}
+
+export interface DetailedForecast {
+    priceTarget: {
+        low: number | null;
+        mean: number | null;
+        high: number | null;
+        current: number | null;
+        upside: number | null;
+    };
+    analystConsensus: {
+        consensus: string;
+        strongBuy: number;
+        buy: number;
+        hold: number;
+        sell: number;
+        strongSell: number;
+        total: number;
+    };
+    earningsEstimates: {
+        annual: EarningsEstimate[];
+        quarterly: EarningsEstimate[];
+    };
+    recommendationTrends: RecommendationTrend[];
+}
+
+// Legacy interface for backward compatibility
 export interface AnalystForecast {
     symbol: string;
     targetHigh: number | null;
@@ -326,10 +387,11 @@ export async function getStockFinancials(symbol: string, period: 'annual' | 'qua
 }
 
 /**
- * Get analyst forecast and price targets (for Forecast tab)
+ * Get detailed analyst forecast (for Forecast tab)
+ * Returns price targets, consensus, earnings estimates, and recommendation trends
  */
-export async function getStockForecast(symbol: string): Promise<AnalystForecast> {
-    return get<AnalystForecast>(`/stocks/forecast/${symbol}`);
+export async function getStockForecast(symbol: string): Promise<DetailedForecast> {
+    return get<DetailedForecast>(`/stocks/forecast/${symbol}`);
 }
 
 /**

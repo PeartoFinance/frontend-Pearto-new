@@ -1,36 +1,33 @@
 'use client';
 
-import { LucideIcon, LayoutGrid, BarChart3, LineChart, Wallet, TrendingUp, Building2, Newspaper, CandlestickChart, History } from 'lucide-react';
+import { LucideIcon, LayoutGrid, BarChart3, CandlestickChart, TrendingUp, Building2 } from 'lucide-react';
 
-export type TabId = 'overview' | 'financials' | 'chart' | 'history' | 'dividends' | 'forecast' | 'profile' | 'news';
+export type CompareTabId = 'overview' | 'chart' | 'financials' | 'forecast' | 'profile';
 
 interface Tab {
-    id: TabId;
+    id: CompareTabId;
     label: string;
     icon: LucideIcon;
 }
 
-export const stockTabs: Tab[] = [
+export const compareTabs: Tab[] = [
     { id: 'overview', label: 'Overview', icon: LayoutGrid },
-    { id: 'financials', label: 'Financials', icon: BarChart3 },
     { id: 'chart', label: 'Chart', icon: CandlestickChart },
-    { id: 'history', label: 'History', icon: History },
-    { id: 'dividends', label: 'Dividends', icon: Wallet },
+    { id: 'financials', label: 'Financials', icon: BarChart3 },
     { id: 'forecast', label: 'Forecast', icon: TrendingUp },
     { id: 'profile', label: 'Profile', icon: Building2 },
-    { id: 'news', label: 'News', icon: Newspaper },
 ];
 
-interface StockTabsProps {
-    activeTab: TabId;
-    onTabChange: (tab: TabId) => void;
+interface CompareTabsProps {
+    activeTab: CompareTabId;
+    onTabChange: (tab: CompareTabId) => void;
 }
 
-export default function StockTabs({ activeTab, onTabChange }: StockTabsProps) {
+export default function CompareTabs({ activeTab, onTabChange }: CompareTabsProps) {
     return (
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
             <div className="flex overflow-x-auto scrollbar-hide">
-                {stockTabs.map((tab) => {
+                {compareTabs.map((tab) => {
                     const Icon = tab.icon;
                     const isActive = activeTab === tab.id;
                     return (
@@ -38,7 +35,7 @@ export default function StockTabs({ activeTab, onTabChange }: StockTabsProps) {
                             key={tab.id}
                             onClick={() => onTabChange(tab.id)}
                             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${isActive
-                                ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                                ? 'text-teal-600 dark:text-teal-400 border-teal-600 dark:border-teal-400 bg-teal-50 dark:bg-teal-900/20'
                                 : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
                                 }`}
                         >

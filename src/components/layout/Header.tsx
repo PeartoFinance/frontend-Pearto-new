@@ -9,7 +9,7 @@ import {
     Bitcoin, DollarSign, BarChart3, Calculator, PiggyBank, Landmark,
     GraduationCap, FileText, HelpCircle, Tv, Radio, Newspaper, LucideIcon,
     LayoutDashboard, Briefcase, Star, Zap, Home, Mail, Phone, Globe,
-    Shield, Lock, Key, Heart, Filter, List
+    Shield, Lock, Key, Heart, Filter, List, Clock
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import SearchModal from './SearchModal';
@@ -147,6 +147,14 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [searchOpen, setSearchOpen] = useState(false);
 
+    // Market status state
+    const [marketStatus, setMarketStatus] = useState<{
+        isOpen: boolean;
+        message: string;
+        shortMessage?: string;
+        exchangeCode: string;
+    } | null>(null);
+
     // Dynamic navigation state
     const [pillarsItems, setPillarsItems] = useState<DropdownItem[]>(fallbackPillarsItems);
     const [toolsItems, setToolsItems] = useState<DropdownItem[]>(fallbackToolsItems);
@@ -187,6 +195,35 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
         } else {
             document.documentElement.classList.remove('dark');
         }
+    }, []);
+
+    // Load market status
+    useEffect(() => {
+        const fetchMarketStatus = async () => {
+            try {
+                // Try to get user's country from localStorage or default to US
+                const userCountry = localStorage.getItem('userCountry') || 'US';
+                const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+                const res = await fetch(`${API_BASE}/market/status`, {
+                    headers: { 'X-User-Country': userCountry }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setMarketStatus({
+                        isOpen: data.status?.isOpen ?? false,
+                        message: data.status?.message || 'Unknown',
+                        shortMessage: data.status?.shortMessage,
+                        exchangeCode: data.exchange?.exchangeCode || 'NYSE'
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to load market status:', err);
+            }
+        };
+        fetchMarketStatus();
+        // Refresh every 5 minutes
+        const interval = setInterval(fetchMarketStatus, 5 * 60 * 1000);
+        return () => clearInterval(interval);
     }, []);
 
     // Handle scroll
@@ -257,6 +294,23 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                             <button onClick={() => setSearchOpen(true)} className="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
                                 <Search size={20} className="text-slate-600 dark:text-slate-300" />
                             </button>
+
+                            {/* Market Status Badge */}
+                            {marketStatus && (
+                                <div className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium ${marketStatus.isOpen
+                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                    : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
+                                    }`} title={marketStatus.message}>
+                                    <span className={`w-2 h-2 rounded-full ${marketStatus.isOpen ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                                    <span className="font-semibold">{marketStatus.exchangeCode}</span>
+                                    <span className="hidden lg:inline">
+                                        {marketStatus.isOpen ? 'Open' : 'Closed'}
+                                    </span>
+                                    <span className="hidden xl:inline text-[10px] opacity-80">
+                                        · {marketStatus.shortMessage || marketStatus.message}
+                                    </span>
+                                </div>
+                            )}
 
                             <button onClick={toggleDarkMode} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                                 {isDarkMode ? <Sun size={20} className="text-amber-400" /> : <Moon size={20} className="text-slate-700" />}

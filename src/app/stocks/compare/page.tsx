@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef, Suspense } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Sidebar from '@/components/layout/Sidebar';
@@ -15,22 +15,26 @@ import {
     type MarketStock,
     type PriceHistoryPoint
 } from '@/services/marketService';
-import { createChart, ColorType, LineSeries, type IChartApi } from 'lightweight-charts';
 import {
-    ArrowLeft, Loader2, Search, Plus, X, TrendingUp, TrendingDown
-} from 'lucide-react';
+    CompareTabs,
+    CompareOverviewTab,
+    CompareChartTab,
+    CompareFinancialsTab,
+    CompareForecastTab,
+    CompareProfileTab,
+    type CompareTabId,
+} from '@/components/stocks/compare';
+import { ArrowLeft, Loader2, Search, Plus, X } from 'lucide-react';
 
 interface CompareStock extends MarketStock {
     color: string;
     data: PriceHistoryPoint[];
 }
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+const COLORS = ['#14b8a6', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 function StockCompareContent() {
     const searchParams = useSearchParams();
-    const chartContainerRef = useRef<HTMLDivElement>(null);
-    const chartRef = useRef<IChartApi | null>(null);
 
     const [stocks, setStocks] = useState<CompareStock[]>([]);
     const [loading, setLoading] = useState(true);
@@ -38,18 +42,7 @@ function StockCompareContent() {
     const [searchResults, setSearchResults] = useState<MarketStock[]>([]);
     const [searching, setSearching] = useState(false);
     const [period, setPeriod] = useState('1mo');
-    const [isDark, setIsDark] = useState(false);
-
-    // Detect dark mode
-    useEffect(() => {
-        const checkDarkMode = () => {
-            setIsDark(document.documentElement.classList.contains('dark'));
-        };
-        checkDarkMode();
-        const observer = new MutationObserver(checkDarkMode);
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-        return () => observer.disconnect();
-    }, []);
+    const [activeTab, setActiveTab] = useState<CompareTabId>('overview');
 
     // Load initial stocks from URL params
     useEffect(() => {
@@ -108,88 +101,6 @@ function StockCompareContent() {
         }
     }, [stocks]);
 
-    // Draw chart
-    useEffect(() => {
-        if (!chartContainerRef.current || stocks.length === 0) return;
-
-        // Remove existing chart
-        if (chartRef.current) {
-            chartRef.current.remove();
-            chartRef.current = null;
-        }
-
-        const container = chartContainerRef.current;
-        const chart = createChart(container, {
-            layout: {
-                background: { type: ColorType.Solid, color: 'transparent' },
-                textColor: isDark ? '#94a3b8' : '#64748b',
-                attributionLogo: false,
-            },
-            grid: {
-                vertLines: { color: isDark ? '#1e293b' : '#f1f5f9' },
-                horzLines: { color: isDark ? '#1e293b' : '#f1f5f9' },
-            },
-            width: container.clientWidth,
-            height: 400,
-            rightPriceScale: {
-                borderColor: isDark ? '#334155' : '#e2e8f0',
-                scaleMargins: { top: 0.1, bottom: 0.1 },
-            },
-            timeScale: {
-                borderColor: isDark ? '#334155' : '#e2e8f0',
-                timeVisible: true,
-            },
-        });
-
-        chartRef.current = chart;
-
-        // Normalize prices to percentage change for comparison
-        stocks.forEach((stock) => {
-            if (stock.data.length === 0) return;
-
-            // Deduplicate data
-            const dataMap = new Map<string, PriceHistoryPoint>();
-            stock.data.forEach(d => dataMap.set(d.date, d));
-            const sortedData = Array.from(dataMap.values())
-                .sort((a, b) => a.date.localeCompare(b.date));
-
-            const firstPrice = sortedData[0]?.close || 1;
-
-            const series = chart.addSeries(LineSeries, {
-                color: stock.color,
-                lineWidth: 2,
-                title: stock.symbol,
-            });
-
-            const normalizedData = sortedData
-                .filter(d => d.close != null)
-                .map(d => ({
-                    time: d.date,
-                    value: ((d.close! - firstPrice) / firstPrice) * 100,
-                }));
-
-            series.setData(normalizedData as any);
-        });
-
-        chart.timeScale().fitContent();
-
-        // Handle resize
-        const handleResize = () => {
-            if (chartContainerRef.current && chartRef.current) {
-                chartRef.current.applyOptions({ width: chartContainerRef.current.clientWidth });
-            }
-        };
-        window.addEventListener('resize', handleResize);
-
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            if (chartRef.current) {
-                chartRef.current.remove();
-                chartRef.current = null;
-            }
-        };
-    }, [stocks, isDark]);
-
     // Search stocks
     const handleSearch = async () => {
         if (!searchQuery.trim()) return;
@@ -232,27 +143,23 @@ function StockCompareContent() {
         setStocks(prev => prev.filter(s => s.symbol !== symbol));
     };
 
-    // Format helpers
-    const formatNumber = (num: number | null | undefined, decimals = 2) => {
-        if (num == null) return '-';
-        return num.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    // Render active tab content
+    const renderTabContent = () => {
+        switch (activeTab) {
+            case 'overview':
+                return <CompareOverviewTab stocks={stocks} />;
+            case 'chart':
+                return <CompareChartTab stocks={stocks} period={period} onPeriodChange={refreshHistory} />;
+            case 'financials':
+                return <CompareFinancialsTab stocks={stocks} />;
+            case 'forecast':
+                return <CompareForecastTab stocks={stocks} />;
+            case 'profile':
+                return <CompareProfileTab stocks={stocks} />;
+            default:
+                return <CompareOverviewTab stocks={stocks} />;
+        }
     };
-
-    const formatLargeNumber = (num: number | null | undefined) => {
-        if (num == null) return '-';
-        if (num >= 1e12) return `${(num / 1e12).toFixed(2)}T`;
-        if (num >= 1e9) return `${(num / 1e9).toFixed(2)}B`;
-        if (num >= 1e6) return `${(num / 1e6).toFixed(2)}M`;
-        return num.toLocaleString();
-    };
-
-    const periods = [
-        { id: '1d', label: '1D' },
-        { id: '5d', label: '5D' },
-        { id: '1mo', label: '1M' },
-        { id: '3mo', label: '3M' },
-        { id: '1y', label: '1Y' },
-    ];
 
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
@@ -265,11 +172,11 @@ function StockCompareContent() {
                 </div>
 
                 <div className="flex-1 pt-[112px] md:pt-[120px] overflow-x-hidden">
-                    <div className="p-4 lg:p-6 space-y-6 w-full max-w-7xl mx-auto">
+                    <div className="p-2 lg:p-3 space-y-3 w-full">
                         {/* Header */}
                         <div className="flex items-center justify-between">
                             <div>
-                                <Link href="/stocks" className="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 mb-2 text-sm">
+                                <Link href="/stocks" className="inline-flex items-center gap-2 text-slate-500 hover:text-teal-600 mb-2 text-sm">
                                     <ArrowLeft size={16} />
                                     Back to Stocks
                                 </Link>
@@ -300,7 +207,7 @@ function StockCompareContent() {
                                 <button
                                     onClick={handleSearch}
                                     disabled={searching || stocks.length >= 5}
-                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+                                    className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-medium disabled:opacity-50"
                                 >
                                     {searching ? 'Searching...' : 'Search'}
                                 </button>
@@ -319,7 +226,7 @@ function StockCompareContent() {
                                                 <p className="font-semibold text-slate-900 dark:text-white">{stock.symbol}</p>
                                                 <p className="text-xs text-slate-500">{stock.name}</p>
                                             </div>
-                                            <button className="flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded text-sm">
+                                            <button className="flex items-center gap-1 px-3 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-600 rounded text-sm">
                                                 <Plus size={14} /> Add
                                             </button>
                                         </div>
@@ -348,7 +255,7 @@ function StockCompareContent() {
 
                         {loading && (
                             <div className="flex justify-center py-10">
-                                <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                                <Loader2 className="w-8 h-8 text-teal-500 animate-spin" />
                             </div>
                         )}
 
@@ -360,187 +267,43 @@ function StockCompareContent() {
 
                         {!loading && stocks.length > 0 && (
                             <>
-                                {/* AI Comparison Analysis - Full Data */}
-                                <AIAnalysisPanel
-                                    title="Comparison Analysis"
-                                    pageType="comparison"
-                                    pageData={{
-                                        stockCount: stocks.length,
-                                        period: period,
-                                        // All stocks with full data
-                                        stocks: stocks.map(s => ({
-                                            symbol: s.symbol,
-                                            name: s.name,
-                                            price: s.price,
-                                            change: s.change,
-                                            changePercent: s.changePercent,
-                                            marketCap: s.marketCap,
-                                            volume: s.volume,
-                                            peRatio: s.peRatio,
-                                            eps: s.eps,
-                                            beta: s.beta,
-                                            dividendYield: s.dividendYield,
-                                            high52w: s.high52w,
-                                            low52w: s.low52w,
-                                            sector: s.sector,
-                                            industry: s.industry,
-                                            dataPoints: s.data?.length || 0
-                                        }))
-                                    }}
-                                    autoAnalyze={stocks.length > 0}
-                                    quickPrompts={[
-                                        'Which stock is the best buy?',
-                                        'Compare valuations',
-                                        'Risk analysis'
-                                    ]}
-                                    className="mb-5"
-                                />
+                                {/* Tabs - Full Width */}
+                                <CompareTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-                                {/* Chart Section */}
-                                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                                            Price Performance (% Change)
-                                        </h3>
-                                        <div className="flex gap-1">
-                                            {periods.map((p) => (
-                                                <button
-                                                    key={p.id}
-                                                    onClick={() => refreshHistory(p.id)}
-                                                    className={`px-3 py-1.5 text-sm font-medium rounded-lg transition ${period === p.id
-                                                        ? 'bg-blue-600 text-white'
-                                                        : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
-                                                        }`}
-                                                >
-                                                    {p.label}
-                                                </button>
-                                            ))}
+                                {/* Tab Content + AI Widget - 2 Column Layout */}
+                                <div className="flex gap-3 mt-3">
+                                    {/* Main Tab Content */}
+                                    <div className="flex-1 min-w-0">
+                                        {renderTabContent()}
+                                    </div>
+
+                                    {/* Right Column: AI Widget (Desktop only) */}
+                                    <div className="hidden xl:block w-[320px] flex-shrink-0">
+                                        <div className="sticky top-[130px]">
+                                            <AIAnalysisPanel
+                                                title="Comparison Analysis"
+                                                pageType="comparison"
+                                                pageData={{
+                                                    stockCount: stocks.length,
+                                                    period: period,
+                                                    stocks: stocks.map(s => ({
+                                                        symbol: s.symbol,
+                                                        name: s.name,
+                                                        price: s.price,
+                                                        changePercent: s.changePercent,
+                                                        marketCap: s.marketCap,
+                                                        peRatio: s.peRatio,
+                                                    }))
+                                                }}
+                                                autoAnalyze={stocks.length > 0}
+                                                quickPrompts={[
+                                                    'Which stock is the best buy?',
+                                                    'Compare valuations',
+                                                    'Risk analysis'
+                                                ]}
+                                                className="h-fit"
+                                            />
                                         </div>
-                                    </div>
-
-                                    <div ref={chartContainerRef} className="w-full h-[400px]" />
-
-                                    {/* Legend */}
-                                    <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                                        {stocks.map((stock) => (
-                                            <div key={stock.symbol} className="flex items-center gap-2">
-                                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: stock.color }} />
-                                                <span className="text-sm font-medium text-slate-900 dark:text-white">{stock.symbol}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Comparison Table */}
-                                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                                    <div className="p-5 border-b border-slate-200 dark:border-slate-700">
-                                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                                            Detailed Comparison
-                                        </h3>
-                                    </div>
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full">
-                                            <thead>
-                                                <tr className="bg-slate-50 dark:bg-slate-800/50">
-                                                    <th className="text-left py-3 px-4 text-sm font-semibold text-slate-500">Metric</th>
-                                                    {stocks.map((stock) => (
-                                                        <th key={stock.symbol} className="text-right py-3 px-4 text-sm font-semibold" style={{ color: stock.color }}>
-                                                            {stock.symbol}
-                                                        </th>
-                                                    ))}
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                                <tr>
-                                                    <td className="py-3 px-4 text-sm text-slate-500">Price</td>
-                                                    {stocks.map((s) => (
-                                                        <td key={s.symbol} className="py-3 px-4 text-right text-sm font-semibold text-slate-900 dark:text-white">
-                                                            ${formatNumber(s.price)}
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                                <tr>
-                                                    <td className="py-3 px-4 text-sm text-slate-500">Change</td>
-                                                    {stocks.map((s) => (
-                                                        <td key={s.symbol} className={`py-3 px-4 text-right text-sm font-medium ${s.changePercent >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                                                            {s.changePercent >= 0 ? '+' : ''}{formatNumber(s.changePercent)}%
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                                <tr>
-                                                    <td className="py-3 px-4 text-sm text-slate-500">Market Cap</td>
-                                                    {stocks.map((s) => (
-                                                        <td key={s.symbol} className="py-3 px-4 text-right text-sm text-slate-900 dark:text-white">
-                                                            {formatLargeNumber(s.marketCap)}
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                                <tr>
-                                                    <td className="py-3 px-4 text-sm text-slate-500">Volume</td>
-                                                    {stocks.map((s) => (
-                                                        <td key={s.symbol} className="py-3 px-4 text-right text-sm text-slate-900 dark:text-white">
-                                                            {formatLargeNumber(s.volume)}
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                                <tr>
-                                                    <td className="py-3 px-4 text-sm text-slate-500">P/E Ratio</td>
-                                                    {stocks.map((s) => (
-                                                        <td key={s.symbol} className="py-3 px-4 text-right text-sm text-slate-900 dark:text-white">
-                                                            {formatNumber(s.peRatio)}
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                                <tr>
-                                                    <td className="py-3 px-4 text-sm text-slate-500">EPS</td>
-                                                    {stocks.map((s) => (
-                                                        <td key={s.symbol} className="py-3 px-4 text-right text-sm text-slate-900 dark:text-white">
-                                                            ${formatNumber(s.eps)}
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                                <tr>
-                                                    <td className="py-3 px-4 text-sm text-slate-500">Beta</td>
-                                                    {stocks.map((s) => (
-                                                        <td key={s.symbol} className="py-3 px-4 text-right text-sm text-slate-900 dark:text-white">
-                                                            {formatNumber(s.beta)}
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                                <tr>
-                                                    <td className="py-3 px-4 text-sm text-slate-500">52W High</td>
-                                                    {stocks.map((s) => (
-                                                        <td key={s.symbol} className="py-3 px-4 text-right text-sm text-slate-900 dark:text-white">
-                                                            ${formatNumber(s.high52w)}
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                                <tr>
-                                                    <td className="py-3 px-4 text-sm text-slate-500">52W Low</td>
-                                                    {stocks.map((s) => (
-                                                        <td key={s.symbol} className="py-3 px-4 text-right text-sm text-slate-900 dark:text-white">
-                                                            ${formatNumber(s.low52w)}
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                                <tr>
-                                                    <td className="py-3 px-4 text-sm text-slate-500">Dividend Yield</td>
-                                                    {stocks.map((s) => (
-                                                        <td key={s.symbol} className="py-3 px-4 text-right text-sm text-slate-900 dark:text-white">
-                                                            {s.dividendYield ? `${(s.dividendYield * 100).toFixed(2)}%` : '-'}
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                                <tr>
-                                                    <td className="py-3 px-4 text-sm text-slate-500">Sector</td>
-                                                    {stocks.map((s) => (
-                                                        <td key={s.symbol} className="py-3 px-4 text-right text-sm text-slate-900 dark:text-white">
-                                                            {s.sector || '-'}
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                            </tbody>
-                                        </table>
                                     </div>
                                 </div>
                             </>
@@ -549,12 +312,15 @@ function StockCompareContent() {
                 </div>
             </main>
 
-            <AIWidget
-                type="floating"
-                position="bottom-right"
-                pageType="stocks"
-                quickPrompts={["Compare these stocks"]}
-            />
+            {/* Floating AI Widget (Mobile/Tablet only) */}
+            <div className="xl:hidden">
+                <AIWidget
+                    type="floating"
+                    position="bottom-right"
+                    pageType="stocks"
+                    quickPrompts={["Compare these stocks"]}
+                />
+            </div>
         </div>
     );
 }
@@ -564,7 +330,7 @@ export default function StockComparePage() {
     return (
         <Suspense fallback={
             <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-slate-900">
-                <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-teal-500 animate-spin" />
             </div>
         }>
             <StockCompareContent />

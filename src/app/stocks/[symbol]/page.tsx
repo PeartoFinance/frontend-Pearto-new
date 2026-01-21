@@ -14,6 +14,8 @@ import {
     StockTabs,
     MarketIssuesBanner,
     FinancialsTab,
+    ChartTab,
+    HistoryTab,
     DividendsTab,
     ForecastTab,
     ProfileTab,
@@ -154,46 +156,14 @@ export default function StockDetailPage() {
             case 'overview':
                 return (
                     <>
-                        {/* AI Analysis Panel */}
-                        <AIAnalysisPanel
-                            title={`${stock.symbol} Analysis`}
-                            pageType="stock-detail"
-                            pageData={{
-                                symbol: stock.symbol,
-                                name: stock.name,
-                                exchange: stock.exchange,
-                                currency: stock.currency,
-                                sector: stock.sector,
-                                industry: stock.industry,
-                                price: stock.price,
-                                change: stock.change,
-                                changePercent: stock.changePercent,
-                                marketCap: stock.marketCap,
-                                peRatio: stock.peRatio,
-                                eps: stock.eps,
-                                beta: stock.beta,
-                                dividendYield: stock.dividendYield,
-                                historyPeriod: period,
-                                historyPoints: history?.data?.length || 0,
-                                newsCount: news.length
-                            }}
-                            autoAnalyze={!!stock}
-                            quickPrompts={[
-                                `Is ${stock.symbol} undervalued?`,
-                                'Technical analysis',
-                                'Buy or sell recommendation'
-                            ]}
-                            className="mb-5"
-                        />
-
                         {/* Stats + Chart Grid */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                             {/* Key Stats */}
-                            <div className="lg:col-span-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
-                                <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-4">
+                            <div className="lg:col-span-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+                                <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
                                     Key Statistics
                                 </h3>
-                                <div className="space-y-3">
+                                <div className="space-y-2">
                                     {[
                                         { label: 'Market Cap', value: formatLargeNumber(stock.marketCap) },
                                         { label: 'Volume', value: formatLargeNumber(stock.volume) },
@@ -314,28 +284,23 @@ export default function StockDetailPage() {
             case 'financials':
                 return <FinancialsTab symbol={symbol} />;
 
-            case 'history':
+            case 'chart':
                 return (
-                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
-                        <MultiChart
-                            data={history?.data?.map(d => ({
-                                date: formatChartDate(d.date),
-                                open: d.open,
-                                high: d.high,
-                                low: d.low,
-                                close: d.close,
-                                volume: d.volume
-                            })) || []}
-                            period={period}
-                            onPeriodChange={(p) => loadHistory(p as Period)}
-                            loading={chartLoading}
-                            height={500}
-                            priceRange={stock.dayLow && stock.dayHigh ? { low: stock.dayLow, high: stock.dayHigh } : undefined}
-                            change={{ value: stock.change || 0, percent: stock.changePercent || 0 }}
-                            initialChartType="candle"
-                        />
-                    </div>
+                    <ChartTab
+                        symbol={symbol}
+                        currentPrice={stock.price}
+                        open={stock.open}
+                        high={stock.dayHigh}
+                        low={stock.dayLow}
+                        previousClose={stock.previousClose}
+                        volume={stock.volume}
+                        change={stock.change}
+                        changePercent={stock.changePercent}
+                    />
                 );
+
+            case 'history':
+                return <HistoryTab symbol={symbol} />;
 
             case 'dividends':
                 return <DividendsTab symbol={symbol} />;
@@ -365,7 +330,7 @@ export default function StockDetailPage() {
                 </div>
 
                 <div className="flex-1 pt-[112px] md:pt-[120px] overflow-x-hidden">
-                    <div className="p-4 lg:p-6 space-y-5 w-full max-w-7xl mx-auto">
+                    <div className="p-2 lg:p-3 space-y-3 w-full">
                         {/* Back Button */}
                         <Link
                             href="/stocks"
@@ -384,7 +349,7 @@ export default function StockDetailPage() {
 
                         {/* Error State */}
                         {error && !loading && (
-                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
+                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 text-center">
                                 <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
                                 <h2 className="text-xl font-semibold text-red-700 dark:text-red-400 mb-2">
                                     Stock Not Found
@@ -396,31 +361,27 @@ export default function StockDetailPage() {
                         {/* Stock Content */}
                         {stock && !loading && (
                             <>
-                                {/* Market Issues Banner */}
+                                {/* Market Issues Banner - Full Width */}
                                 {stock.marketIssues && stock.marketIssues.length > 0 && (
                                     <MarketIssuesBanner issues={stock.marketIssues} />
                                 )}
 
-                                {/* Company Header */}
-                                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
-                                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                                        {/* Left: Company Info */}
+                                {/* Company Header - Full Width */}
+                                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+                                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
                                         <div>
-                                            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">
+                                            <h1 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white">
                                                 {stock.name} ({stock.symbol})
                                             </h1>
-                                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                                                 {stock.exchange} · Real-Time Price · {stock.currency || 'USD'}
                                             </p>
-
-                                            {/* Price Row */}
-                                            <div className="flex items-baseline gap-4 mt-3">
-                                                <span className="text-4xl font-bold text-slate-900 dark:text-white">
+                                            <div className="flex items-baseline gap-3 mt-2">
+                                                <span className="text-3xl font-bold text-slate-900 dark:text-white">
                                                     ${formatNumber(stock.price)}
                                                 </span>
-                                                <div className={`flex items-center gap-1 text-lg font-semibold ${isPositive ? 'text-emerald-600' : 'text-red-500'
-                                                    }`}>
-                                                    {isPositive ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
+                                                <div className={`flex items-center gap-1 text-base font-semibold ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
+                                                    {isPositive ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
                                                     <span>
                                                         {isPositive ? '+' : ''}{formatNumber(stock.change)} ({isPositive ? '+' : ''}{formatNumber(stock.changePercent)}%)
                                                     </span>
@@ -430,42 +391,73 @@ export default function StockDetailPage() {
                                                 Last updated: {stock.lastUpdated ? new Date(stock.lastUpdated).toLocaleString() : 'Just now'}
                                             </p>
                                         </div>
-
-                                        {/* Right: Action Buttons */}
                                         <div className="flex gap-2">
-                                            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-medium">
-                                                <Star size={16} />
+                                            <button className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-medium">
+                                                <Star size={14} />
                                                 Watchlist
                                             </button>
                                             <button
                                                 onClick={() => setShowCompareModal(true)}
-                                                className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition text-sm font-medium"
+                                                className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition text-sm font-medium"
                                             >
-                                                <BarChart2 size={16} />
+                                                <BarChart2 size={14} />
                                                 Compare
                                             </button>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Tab Navigation */}
+                                {/* Tab Navigation - Full Width */}
                                 <StockTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-                                {/* Tab Content */}
-                                {renderTabContent()}
+                                {/* Tab Content + AI Widget - 2 Column Layout */}
+                                <div className="flex gap-3">
+                                    {/* Main Tab Content */}
+                                    <div className="flex-1 min-w-0">
+                                        {renderTabContent()}
+                                    </div>
+
+                                    {/* Right Column: AI Widget (Desktop only) */}
+                                    <div className="hidden xl:block w-[320px] flex-shrink-0">
+                                        <div className="sticky top-[130px]">
+                                            <AIAnalysisPanel
+                                                title={`${symbol} Analysis`}
+                                                pageType="stock-detail"
+                                                pageData={{
+                                                    symbol,
+                                                    name: stock?.name,
+                                                    price: stock?.price,
+                                                    change: stock?.change,
+                                                    changePercent: stock?.changePercent,
+                                                    marketCap: stock?.marketCap,
+                                                    peRatio: stock?.peRatio,
+                                                }}
+                                                quickPrompts={[
+                                                    `Is ${symbol} undervalued?`,
+                                                    'Technical analysis',
+                                                    'Buy or sell recommendation'
+                                                ]}
+                                                className="h-fit"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                             </>
                         )}
                     </div>
                 </div>
             </main>
 
-            <AIWidget
-                type="floating"
-                position="bottom-right"
-                pageType="stocks"
-                pageData={{ symbol }}
-                quickPrompts={[`Analyze ${symbol}`, `${symbol} price prediction`]}
-            />
+            {/* Floating AI Widget (Mobile/Tablet only) */}
+            <div className="xl:hidden">
+                <AIWidget
+                    type="floating"
+                    position="bottom-right"
+                    pageType="stocks"
+                    pageData={{ symbol }}
+                    quickPrompts={[`Analyze ${symbol}`, `${symbol} price prediction`]}
+                />
+            </div>
 
             {/* Compare Modal */}
             <StockCompareModal
