@@ -4,66 +4,65 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import {
-    Search,
-    Moon,
-    Sun,
-    Bell,
-    Menu,
-    X,
-    ChevronDown,
-    Layers,
-    Wrench,
-    BookOpen,
-    Sparkles,
-    User,
-    LogOut,
-    Settings,
-    Wallet,
-    TrendingUp,
-    Bitcoin,
-    DollarSign,
-    BarChart3,
-    Calculator,
-    PiggyBank,
-    Landmark,
-    GraduationCap,
-    FileText,
-    HelpCircle,
-    Tv,
-    Radio,
-    Newspaper,
+    Search, Moon, Sun, Bell, Menu, X, ChevronDown, Layers, Wrench,
+    BookOpen, Sparkles, User, LogOut, Settings, Wallet, TrendingUp,
+    Bitcoin, DollarSign, BarChart3, Calculator, PiggyBank, Landmark,
+    GraduationCap, FileText, HelpCircle, Tv, Radio, Newspaper, LucideIcon,
+    LayoutDashboard, Briefcase, Star, Zap, Home, Mail, Phone, Globe,
+    Shield, Lock, Key, Heart, Filter, List
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import SearchModal from './SearchModal';
+import { fetchNavigation, NavigationItem } from '@/services/navigationService';
 
-// Navigation data
-const pillarsItems = [
-    { href: '/stocks', label: 'Stocks', icon: TrendingUp },
-    { href: '/crypto', label: 'Crypto', icon: Bitcoin },
-    { href: '/forex', label: 'Forex', icon: DollarSign },
-    { href: '/commodities', label: 'Commodities', icon: BarChart3 },
+// Icon mapping for dynamic icons
+const iconMap: Record<string, LucideIcon> = {
+    LayoutDashboard, TrendingUp, Newspaper, GraduationCap, Briefcase, Wrench,
+    Settings, User, ChevronRight: ChevronDown, Radio, Tv, Zap, BookOpen,
+    Calculator, Wallet, Globe, LogOut, Star, Bitcoin, DollarSign, BarChart3,
+    PiggyBank, Landmark, FileText, HelpCircle, Sparkles, Home, Mail, Phone,
+    Shield, Lock, Key, Bell, Heart, Search, Filter, List, Layers, Menu, X
+};
+
+// Fallback navigation data
+const fallbackPillarsItems = [
+    { href: '/stocks', label: 'Stocks', icon: 'TrendingUp' },
+    { href: '/crypto', label: 'Crypto', icon: 'Bitcoin' },
+    { href: '/forex', label: 'Forex', icon: 'DollarSign' },
+    { href: '/commodities', label: 'Commodities', icon: 'BarChart3' },
 ];
 
-const toolsItems = [
-    { href: '/tools/sip', label: 'SIP Calculator', icon: Calculator },
-    { href: '/tools/emi', label: 'EMI Calculator', icon: Calculator },
-    { href: '/tools/compound', label: 'Compound Interest', icon: PiggyBank },
-    { href: '/tools/retirement', label: 'Retirement Planner', icon: Landmark },
+const fallbackToolsItems = [
+    { href: '/tools/sip', label: 'SIP Calculator', icon: 'Calculator' },
+    { href: '/tools/emi', label: 'EMI Calculator', icon: 'Calculator' },
+    { href: '/tools/compound', label: 'Compound Interest', icon: 'PiggyBank' },
+    { href: '/tools/retirement', label: 'Retirement Planner', icon: 'Landmark' },
 ];
 
-const resourcesItems = [
-    { href: '/learn', label: 'Learn', icon: GraduationCap },
-    { href: '/news', label: 'News', icon: Newspaper },
-    { href: '/tv', label: 'Live TV', icon: Tv },
-    { href: '/radio', label: 'Radio', icon: Radio },
-    { href: '/blog', label: 'Blog', icon: FileText },
-    { href: '/help', label: 'Help Center', icon: HelpCircle },
+const fallbackResourcesItems = [
+    { href: '/learn', label: 'Learn', icon: 'GraduationCap' },
+    { href: '/news', label: 'News', icon: 'Newspaper' },
+    { href: '/tv', label: 'Live TV', icon: 'Tv' },
+    { href: '/radio', label: 'Radio', icon: 'Radio' },
+    { href: '/blog', label: 'Blog', icon: 'FileText' },
+    { href: '/help', label: 'Help Center', icon: 'HelpCircle' },
 ];
+
+const fallbackFeaturedItems = [
+    { href: '/markets', label: 'Markets', css_class: 'bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600' },
+    { href: '/booyah', label: 'Booyah', css_class: 'bg-gradient-to-br from-green-500 via-emerald-500 to-green-600' },
+];
+
+interface DropdownItem {
+    href: string;
+    label: string;
+    icon: string;
+}
 
 interface DropdownMenuProps {
     label: string;
     icon: React.ReactNode;
-    items: { href: string; label: string; icon: typeof TrendingUp }[];
+    items: DropdownItem[];
     isOpen: boolean;
     onToggle: () => void;
     onClose: () => void;
@@ -101,7 +100,7 @@ function DropdownMenu({ label, icon, items, isOpen, onToggle, onClose }: Dropdow
             {isOpen && (
                 <div className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl py-2 z-[60] animate-in fade-in-0 slide-in-from-top-2 duration-200">
                     {items.map((item) => {
-                        const Icon = item.icon;
+                        const Icon = iconMap[item.icon] || LayoutDashboard;
                         return (
                             <Link
                                 key={item.href}
@@ -132,6 +131,12 @@ function DropdownMenu({ label, icon, items, isOpen, onToggle, onClose }: Dropdow
     );
 }
 
+interface FeaturedItem {
+    href: string;
+    label: string;
+    css_class?: string;
+}
+
 export default function Header({ isFixed = false, customBg }: { isFixed?: boolean; customBg?: string }) {
     const { t } = useTranslation();
     const { user, isAuthenticated, logout } = useAuth();
@@ -139,10 +144,37 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
     const [mobileOpen, setMobileOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
-
-    // Dropdown states
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [searchOpen, setSearchOpen] = useState(false);
+
+    // Dynamic navigation state
+    const [pillarsItems, setPillarsItems] = useState<DropdownItem[]>(fallbackPillarsItems);
+    const [toolsItems, setToolsItems] = useState<DropdownItem[]>(fallbackToolsItems);
+    const [resourcesItems, setResourcesItems] = useState<DropdownItem[]>(fallbackResourcesItems);
+    const [featuredItems, setFeaturedItems] = useState<FeaturedItem[]>(fallbackFeaturedItems);
+
+    // Load dynamic navigation
+    useEffect(() => {
+        const loadNavigation = async () => {
+            try {
+                const nav = await fetchNavigation();
+                if (nav.items.length > 0) {
+                    const pillars = nav.navigation['header_pillars'];
+                    const tools = nav.navigation['header_tools'];
+                    const resources = nav.navigation['header_resources'];
+                    const featured = nav.navigation['header_featured'];
+
+                    if (pillars?.length) setPillarsItems(pillars.map(i => ({ href: i.url, label: i.label, icon: i.icon })));
+                    if (tools?.length) setToolsItems(tools.map(i => ({ href: i.url, label: i.label, icon: i.icon })));
+                    if (resources?.length) setResourcesItems(resources.map(i => ({ href: i.url, label: i.label, icon: i.icon })));
+                    if (featured?.length) setFeaturedItems(featured.map(i => ({ href: i.url, label: i.label, css_class: i.css_class || undefined })));
+                }
+            } catch (error) {
+                console.error('Failed to load navigation:', error);
+            }
+        };
+        loadNavigation();
+    }, []);
 
     // Handle dark mode
     useEffect(() => {
@@ -307,15 +339,16 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                             onClose={closeDropdown}
                         />
 
-                        {/* Markets button */}
-                        <Link href="/markets" className="px-4 py-2 rounded-lg font-semibold text-sm text-white bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 shadow hover:shadow-md transition">
-                            Markets
-                        </Link>
-
-                        {/* Booyah button */}
-                        <Link href="/booyah" className="px-4 py-2 rounded-lg font-bold text-sm text-white bg-gradient-to-br from-green-500 via-emerald-500 to-green-600 shadow hover:shadow-md transition">
-                            Booyah
-                        </Link>
+                        {/* Featured buttons (dynamic) */}
+                        {featuredItems.map((item) => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={`px-4 py-2 rounded-lg font-semibold text-sm text-white shadow hover:shadow-md transition ${item.css_class || 'bg-gradient-to-br from-emerald-500 to-cyan-500'}`}
+                            >
+                                {item.label}
+                            </Link>
+                        ))}
 
                         {/* Tools dropdown */}
                         <DropdownMenu
@@ -343,15 +376,8 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
             {/* Mobile Menu */}
             {mobileOpen && (
                 <>
-                    {/* Backdrop - click to close */}
-                    <div
-                        className="lg:hidden fixed inset-0 bg-black/50 z-40"
-                        onClick={() => setMobileOpen(false)}
-                    />
-
-                    {/* Menu Panel */}
+                    <div className="lg:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setMobileOpen(false)} />
                     <div className="lg:hidden fixed inset-y-0 left-0 w-80 max-w-[85vw] z-50 bg-white dark:bg-slate-900 overflow-auto shadow-2xl">
-                        {/* Menu Header with close button */}
                         <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
                             <Link href="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
@@ -361,10 +387,7 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                                     Pearto
                                 </span>
                             </Link>
-                            <button
-                                onClick={() => setMobileOpen(false)}
-                                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
-                            >
+                            <button onClick={() => setMobileOpen(false)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
                                 <X size={20} className="text-slate-600 dark:text-slate-300" />
                             </button>
                         </div>
@@ -386,34 +409,44 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                                         <Layers size={14} /> Pillars
                                     </div>
                                     <div className="space-y-1">
-                                        {pillarsItems.map((item) => (
-                                            <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-                                                <item.icon size={16} className="text-slate-500" />
-                                                {item.label}
-                                            </Link>
-                                        ))}
+                                        {pillarsItems.map((item) => {
+                                            const Icon = iconMap[item.icon] || TrendingUp;
+                                            return (
+                                                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                                                    <Icon size={16} className="text-slate-500" />
+                                                    {item.label}
+                                                </Link>
+                                            );
+                                        })}
                                     </div>
                                 </div>
 
-                                <Link href="/markets" onClick={() => setMobileOpen(false)} className="flex items-center justify-center w-full py-3 rounded-xl font-bold text-white bg-gradient-to-br from-blue-600 to-purple-600 shadow">
-                                    Markets Dashboard
-                                </Link>
-
-                                <Link href="/booyah" onClick={() => setMobileOpen(false)} className="flex items-center justify-center w-full py-3 rounded-xl font-bold text-white bg-gradient-to-br from-green-500 to-emerald-600 shadow">
-                                    Booyah
-                                </Link>
+                                {/* Dynamic featured buttons */}
+                                {featuredItems.map((item) => (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        onClick={() => setMobileOpen(false)}
+                                        className={`flex items-center justify-center w-full py-3 rounded-xl font-bold text-white shadow ${item.css_class || 'bg-gradient-to-br from-emerald-500 to-cyan-500'}`}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                ))}
 
                                 <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4">
                                     <div className="text-xs uppercase tracking-wide text-slate-500 mb-3 flex items-center gap-2">
                                         <Wrench size={14} /> Tools
                                     </div>
                                     <div className="space-y-1">
-                                        {toolsItems.map((item) => (
-                                            <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition text-sm">
-                                                <item.icon size={16} className="text-slate-500" />
-                                                {item.label}
-                                            </Link>
-                                        ))}
+                                        {toolsItems.map((item) => {
+                                            const Icon = iconMap[item.icon] || Calculator;
+                                            return (
+                                                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition text-sm">
+                                                    <Icon size={16} className="text-slate-500" />
+                                                    {item.label}
+                                                </Link>
+                                            );
+                                        })}
                                         <Link href="/tools" onClick={() => setMobileOpen(false)} className="text-sm text-emerald-600 dark:text-emerald-400 px-3 py-2 hover:underline">
                                             View All Tools →
                                         </Link>
@@ -425,12 +458,15 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                                         <BookOpen size={14} /> Resources
                                     </div>
                                     <div className="space-y-1">
-                                        {resourcesItems.map((item) => (
-                                            <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition text-sm">
-                                                <item.icon size={16} className="text-slate-500" />
-                                                {item.label}
-                                            </Link>
-                                        ))}
+                                        {resourcesItems.map((item) => {
+                                            const Icon = iconMap[item.icon] || BookOpen;
+                                            return (
+                                                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition text-sm">
+                                                    <Icon size={16} className="text-slate-500" />
+                                                    {item.label}
+                                                </Link>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>

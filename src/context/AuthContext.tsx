@@ -30,8 +30,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_TOKEN_KEY = 'auth_token';
 const AUTH_USER_KEY = 'auth_user';
-// const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+// const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.71:5000/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.71:5000/api';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
@@ -202,6 +202,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     if (data.token) {
                         setToken(data.token);
                         localStorage.setItem(AUTH_TOKEN_KEY, data.token);
+                    }
+                    // Use backend user data if available (has numeric ID)
+                    if (data.user) {
+                        setUser(data.user);
+                        localStorage.setItem(AUTH_USER_KEY, JSON.stringify(data.user));
                     }
                 }
             } catch {
