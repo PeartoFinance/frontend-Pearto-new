@@ -1,14 +1,22 @@
 'use client';
 
-import { useState } from 'react';
-import { Save, Eye, EyeOff, Shield, Lock, Key, AlertTriangle } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { Save, Eye, EyeOff, Shield, Lock, Key, AlertTriangle, Download, Upload, Trash2, Power, Loader2 } from 'lucide-react';
 import { changePassword } from '@/services/userService';
+import { exportBackup, importBackup, deactivateAccount, deleteAccountPermanently } from '@/services/accountService';
+import { useAuth } from '@/context/AuthContext';
 
 interface ProfileSecurityProps {
     onPasswordChange?: () => void;
 }
 
 export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityProps) {
+    const router = useRouter();
+    const { logout } = useAuth();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Password Change State
     const [formData, setFormData] = useState({
         currentPassword: '',
         newPassword: '',
@@ -22,6 +30,22 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+    // Backup State
+    const [exporting, setExporting] = useState(false);
+    const [importing, setImporting] = useState(false);
+    const [backupMessage, setBackupMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+    // Account Management State
+    const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deactivatePassword, setDeactivatePassword] = useState('');
+    const [deactivateReason, setDeactivateReason] = useState('');
+    const [deletePassword, setDeletePassword] = useState('');
+    const [deleteConfirmation, setDeleteConfirmation] = useState('');
+    const [accountActionLoading, setAccountActionLoading] = useState(false);
+    const [accountMessage, setAccountMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+    // Password handlers
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
         setMessage(null);
@@ -76,12 +100,91 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
             setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
             onPasswordChange?.();
         } catch (error: any) {
-            setMessage({ 
-                type: 'error', 
-                text: error.message || 'Failed to change password' 
+            setMessage({
+                type: 'error',
+                text: error.message || 'Failed to change password'
             });
         } finally {
             setSaving(false);
+        }
+    };
+
+    // Backup handlers
+    const handleExport = async () => {
+        setExporting(true);
+        setBackupMessage(null);
+        try {
+            await exportBackup();
+            setBackupMessage({ type: 'success', text: 'Backup downloaded successfully!' });
+        } catch (error: any) {
+            setBackupMessage({ type: 'error', text: error.message || 'Failed to export data' });
+        } finally {
+            setExporting(false);
+        }
+    };
+
+    const handleImportClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        if (!file.name.endsWith('.json')) {
+            setBackupMessage({ type: 'error', text: 'Only .json files are allowed' });
+            return;
+        }
+
+        setImporting(true);
+        setBackupMessage(null);
+        try {
+            const result = await importBackup(file);
+            setBackupMessage({ type: 'success', text: result.message || 'Data restored successfully!' });
+        } catch (error: any) {
+            setBackupMessage({ type: 'error', text: error.message || 'Failed to import data' });
+        } finally {
+            setImporting(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
+    // Account management handlers
+    const handleDeactivate = async () => {
+        if (!deactivatePassword) {
+            setAccountMessage({ type: 'error', text: 'Password is required' });
+            return;
+        }
+
+        setAccountActionLoading(true);
+        setAccountMessage(null);
+        try {
+            await deactivateAccount(deactivatePassword, deactivateReason);
+            logout();
+            router.push('/auth/reactivate');
+        } catch (error: any) {
+            setAccountMessage({ type: 'error', text: error.message || 'Failed to deactivate account' });
+        } finally {
+            setAccountActionLoading(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!deletePassword || deleteConfirmation !== 'DELETE') {
+            setAccountMessage({ type: 'error', text: 'Password and DELETE confirmation required' });
+            return;
+        }
+
+        setAccountActionLoading(true);
+        setAccountMessage(null);
+        try {
+            await deleteAccountPermanently(deletePassword);
+            logout();
+            router.push('/auth/account-deleted');
+        } catch (error: any) {
+            setAccountMessage({ type: 'error', text: error.message || 'Failed to delete account' });
+        } finally {
+            setAccountActionLoading(false);
         }
     };
 
@@ -90,7 +193,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
             <div>
                 <h2 className="text-2xl font-bold text-white">Security Settings</h2>
                 <p className="text-slate-400 mt-1">
-                    Manage your password and security preferences.
+                    Manage your password, data backups, and account settings.
                 </p>
             </div>
 
@@ -151,32 +254,17 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                                 {showPasswords.new ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                         </div>
-                        
+
                         {/* Password Requirements */}
                         {formData.newPassword && (
                             <div className="mt-3 space-y-2">
                                 <p className="text-xs text-slate-400">Password requirements:</p>
                                 <div className="grid grid-cols-2 gap-2 text-xs">
-                                    <RequirementItem 
-                                        met={passwordValidation.minLength} 
-                                        text="At least 8 characters" 
-                                    />
-                                    <RequirementItem 
-                                        met={passwordValidation.hasUpper} 
-                                        text="Uppercase letter" 
-                                    />
-                                    <RequirementItem 
-                                        met={passwordValidation.hasLower} 
-                                        text="Lowercase letter" 
-                                    />
-                                    <RequirementItem 
-                                        met={passwordValidation.hasNumber} 
-                                        text="Number" 
-                                    />
-                                    <RequirementItem 
-                                        met={passwordValidation.hasSpecial} 
-                                        text="Special character" 
-                                    />
+                                    <RequirementItem met={passwordValidation.minLength} text="At least 8 characters" />
+                                    <RequirementItem met={passwordValidation.hasUpper} text="Uppercase letter" />
+                                    <RequirementItem met={passwordValidation.hasLower} text="Lowercase letter" />
+                                    <RequirementItem met={passwordValidation.hasNumber} text="Number" />
+                                    <RequirementItem met={passwordValidation.hasSpecial} text="Special character" />
                                 </div>
                             </div>
                         )}
@@ -211,11 +299,10 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
 
                 {/* Message */}
                 {message && (
-                    <div className={`mt-4 p-3 rounded-lg text-sm ${
-                        message.type === 'success' 
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                    <div className={`mt-4 p-3 rounded-lg text-sm ${message.type === 'success'
+                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                             : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                    }`}>
+                        }`}>
                         {message.text}
                     </div>
                 )}
@@ -229,7 +316,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                     >
                         {saving ? (
                             <>
-                                <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                                <Loader2 className="w-4 h-4 animate-spin" />
                                 Changing...
                             </>
                         ) : (
@@ -239,6 +326,72 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                             </>
                         )}
                     </button>
+                </div>
+            </div>
+
+            {/* Data Backup */}
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-cyan-500/10 rounded-lg">
+                        <Download className="w-5 h-5 text-cyan-500" />
+                    </div>
+                    <div>
+                        <h3 className="font-semibold text-white">Data Backup</h3>
+                        <p className="text-sm text-slate-400">Export or restore your financial profile</p>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <p className="text-sm text-slate-400">
+                        Export your entire financial profile including portfolios, watchlists, alerts, and preferences as a JSON file.
+                        You can restore this data later, even on a new account.
+                    </p>
+
+                    <div className="flex gap-4">
+                        <button
+                            onClick={handleExport}
+                            disabled={exporting}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-lg transition disabled:opacity-50"
+                        >
+                            {exporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                            Export Data
+                        </button>
+
+                        <button
+                            onClick={handleImportClick}
+                            disabled={importing}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 rounded-lg transition disabled:opacity-50"
+                        >
+                            {importing ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                            Import Backup
+                        </button>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".json"
+                            onChange={handleFileSelect}
+                            className="hidden"
+                        />
+                    </div>
+
+                    {/* Backup Warning */}
+                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                        <div className="flex items-start gap-2">
+                            <AlertTriangle size={16} className="text-amber-500 mt-0.5 flex-shrink-0" />
+                            <p className="text-xs text-amber-400">
+                                Importing a backup will replace your existing portfolios, watchlists, and alerts with the data from the backup file.
+                            </p>
+                        </div>
+                    </div>
+
+                    {backupMessage && (
+                        <div className={`p-3 rounded-lg text-sm ${backupMessage.type === 'success'
+                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                            }`}>
+                            {backupMessage.text}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -262,7 +415,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                             <p className="text-slate-400">Avoid using the same password across multiple sites</p>
                         </div>
                     </div>
-                    
+
                     <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
                         <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5" />
                         <div>
@@ -270,7 +423,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                             <p className="text-slate-400">Add an extra layer of security to your account</p>
                         </div>
                     </div>
-                    
+
                     <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
                         <Shield className="w-4 h-4 text-cyan-500 mt-0.5" />
                         <div>
@@ -280,6 +433,168 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                     </div>
                 </div>
             </div>
+
+            {/* Danger Zone */}
+            <div className="bg-white dark:bg-slate-800 border border-red-500/30 rounded-lg p-6">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-red-500/10 rounded-lg">
+                        <AlertTriangle className="w-5 h-5 text-red-500" />
+                    </div>
+                    <div>
+                        <h3 className="font-semibold text-red-400">Danger Zone</h3>
+                        <p className="text-sm text-slate-400">Irreversible account actions</p>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    {/* Deactivate Account */}
+                    <div className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                        <div>
+                            <p className="text-white font-medium">Deactivate Account</p>
+                            <p className="text-sm text-slate-400">Temporarily disable your account. You can reactivate it later.</p>
+                        </div>
+                        <button
+                            onClick={() => setShowDeactivateModal(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-lg transition"
+                        >
+                            <Power size={16} />
+                            Deactivate
+                        </button>
+                    </div>
+
+                    {/* Delete Account */}
+                    <div className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg border border-red-500/20">
+                        <div>
+                            <p className="text-white font-medium">Delete Account Permanently</p>
+                            <p className="text-sm text-slate-400">Permanently delete your account and all data. 30-day recovery window.</p>
+                        </div>
+                        <button
+                            onClick={() => setShowDeleteModal(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg transition"
+                        >
+                            <Trash2 size={16} />
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Deactivate Modal */}
+            {showDeactivateModal && (
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                    <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 max-w-md w-full">
+                        <h3 className="text-xl font-bold text-white mb-4">Deactivate Account</h3>
+                        <p className="text-slate-400 text-sm mb-4">
+                            Your account will be deactivated and you will be logged out. You can reactivate it by logging in again.
+                        </p>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm text-slate-300 mb-2">Password</label>
+                                <input
+                                    type="password"
+                                    value={deactivatePassword}
+                                    onChange={(e) => setDeactivatePassword(e.target.value)}
+                                    placeholder="Enter your password"
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500/50"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-slate-300 mb-2">Reason (optional)</label>
+                                <input
+                                    type="text"
+                                    value={deactivateReason}
+                                    onChange={(e) => setDeactivateReason(e.target.value)}
+                                    placeholder="Why are you leaving?"
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500/50"
+                                />
+                            </div>
+                        </div>
+
+                        {accountMessage && (
+                            <div className="mt-4 p-3 rounded-lg text-sm bg-red-500/10 text-red-400 border border-red-500/20">
+                                {accountMessage.text}
+                            </div>
+                        )}
+
+                        <div className="mt-6 flex gap-3 justify-end">
+                            <button
+                                onClick={() => { setShowDeactivateModal(false); setDeactivatePassword(''); setDeactivateReason(''); setAccountMessage(null); }}
+                                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeactivate}
+                                disabled={accountActionLoading || !deactivatePassword}
+                                className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-medium rounded-lg transition disabled:opacity-50 flex items-center gap-2"
+                            >
+                                {accountActionLoading && <Loader2 size={16} className="animate-spin" />}
+                                Deactivate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Modal */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                    <div className="bg-slate-800 border border-red-500/30 rounded-xl p-6 max-w-md w-full">
+                        <h3 className="text-xl font-bold text-red-400 mb-4">Delete Account Permanently</h3>
+                        <p className="text-slate-400 text-sm mb-4">
+                            This action cannot be undone. Your account and all data will be permanently deleted after 30 days.
+                            Type <span className="text-red-400 font-mono">DELETE</span> to confirm.
+                        </p>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm text-slate-300 mb-2">Password</label>
+                                <input
+                                    type="password"
+                                    value={deletePassword}
+                                    onChange={(e) => setDeletePassword(e.target.value)}
+                                    placeholder="Enter your password"
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder:text-slate-500 focus:outline-none focus:border-red-500/50"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-slate-300 mb-2">Type DELETE to confirm</label>
+                                <input
+                                    type="text"
+                                    value={deleteConfirmation}
+                                    onChange={(e) => setDeleteConfirmation(e.target.value)}
+                                    placeholder="DELETE"
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder:text-slate-500 focus:outline-none focus:border-red-500/50 font-mono"
+                                />
+                            </div>
+                        </div>
+
+                        {accountMessage && (
+                            <div className="mt-4 p-3 rounded-lg text-sm bg-red-500/10 text-red-400 border border-red-500/20">
+                                {accountMessage.text}
+                            </div>
+                        )}
+
+                        <div className="mt-6 flex gap-3 justify-end">
+                            <button
+                                onClick={() => { setShowDeleteModal(false); setDeletePassword(''); setDeleteConfirmation(''); setAccountMessage(null); }}
+                                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                disabled={accountActionLoading || !deletePassword || deleteConfirmation !== 'DELETE'}
+                                className="px-4 py-2 bg-red-500 hover:bg-red-400 text-white font-medium rounded-lg transition disabled:opacity-50 flex items-center gap-2"
+                            >
+                                {accountActionLoading && <Loader2 size={16} className="animate-spin" />}
+                                Delete Forever
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

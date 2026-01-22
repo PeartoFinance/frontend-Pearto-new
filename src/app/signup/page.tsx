@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Check } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Check, TrendingUp, PieChart, Shield } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function SignupPage() {
@@ -66,46 +66,111 @@ export default function SignupPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10" />
+        <div className="min-h-screen flex bg-gray-100 dark:bg-slate-900">
+            {/* Left Panel - Branding with Features */}
+            <div className="hidden md:flex md:w-5/12 bg-slate-900 relative p-12 flex-col justify-between overflow-hidden">
+                {/* Background Effects */}
+                <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                    <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/20 rounded-full blur-[100px]" />
+                    <div className="absolute bottom-[-10%] right-[-10%] w-80 h-80 bg-blue-600/20 rounded-full blur-[80px]" />
+                </div>
 
-            {/* Decorative Elements */}
-            <div className="absolute top-20 right-20 w-72 h-72 bg-emerald-500/20 rounded-full blur-3xl" />
-            <div className="absolute bottom-20 left-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
+                {/* Top Content */}
+                <div className="relative z-10">
+                    {/* Logo */}
+                    <div className="flex items-center gap-3 mb-12">
+                        <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-slate-900 font-bold text-xl">
+                            P
+                        </div>
+                        <span className="text-2xl font-bold text-white tracking-tight">Pearto Finance</span>
+                    </div>
 
-            <div className="relative w-full max-w-md">
+                    {/* Headline */}
+                    <h1 className="text-4xl font-bold text-white leading-tight mb-6">
+                        Master your <br />
+                        <span className="text-emerald-500">financial future</span>
+                    </h1>
+
+                    {/* Subtitle */}
+                    <p className="text-slate-400 text-lg mb-12 max-w-sm">
+                        Join thousands of investors tracking their portfolios and analyzing markets in real-time.
+                    </p>
+                </div>
+
+                {/* Features */}
+                <div className="relative z-10 space-y-8">
+                    <div className="flex items-start gap-4 group">
+                        <div className="p-3 bg-white/5 rounded-xl group-hover:bg-emerald-500/20 transition-colors duration-300">
+                            <TrendingUp className="text-emerald-500" size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-white font-semibold text-lg">Real-time Analytics</h3>
+                            <p className="text-slate-400 text-sm mt-1">Advanced charting tools and market data at your fingertips.</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-4 group">
+                        <div className="p-3 bg-white/5 rounded-xl group-hover:bg-emerald-500/20 transition-colors duration-300">
+                            <PieChart className="text-emerald-500" size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-white font-semibold text-lg">Portfolio Tracking</h3>
+                            <p className="text-slate-400 text-sm mt-1">Monitor all your assets across different exchanges in one place.</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-4 group">
+                        <div className="p-3 bg-white/5 rounded-xl group-hover:bg-emerald-500/20 transition-colors duration-300">
+                            <Shield className="text-emerald-500" size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-white font-semibold text-lg">Secure Trading</h3>
+                            <p className="text-slate-400 text-sm mt-1">Bank-grade encryption keeping your data and assets safe.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <div className="relative z-10 mt-12 text-xs text-slate-500">
+                    © 2024 Pearto Finance. All rights reserved.
+                </div>
+            </div>
+
+            {/* Right Panel - Form */}
+            <div className="w-full md:w-7/12 p-8 md:p-12 lg:p-16 flex flex-col justify-center bg-white dark:bg-slate-900 relative overflow-y-auto">
                 {/* Back Link */}
                 <Link
                     href="/"
-                    className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition"
+                    className="absolute top-8 left-8 md:left-auto md:right-12 flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-emerald-500 transition-colors"
                 >
-                    <ArrowLeft size={18} />
+                    <ArrowLeft size={16} className="mr-1" />
                     Back to Home
                 </Link>
 
-                {/* Signup Card */}
-                <div className="bg-slate-800/80 backdrop-blur-xl rounded-3xl border border-slate-700 p-8 shadow-2xl">
-                    {/* Logo & Header */}
+                <div className="w-full max-w-md mx-auto">
+                    {/* Mobile Logo */}
+                    <div className="md:hidden w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-slate-900 font-bold text-2xl mx-auto mb-4">
+                        P
+                    </div>
+
+                    {/* Header */}
                     <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-2xl mb-4">
-                            <span className="text-2xl font-bold text-slate-900">P</span>
-                        </div>
-                        <h1 className="text-2xl font-bold text-white mb-2">Create Account</h1>
-                        <p className="text-slate-400">Join Pearto Finance today</p>
+                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Create Account</h2>
+                        <p className="text-gray-500 dark:text-gray-400">Join Pearto Finance today</p>
                     </div>
 
                     {/* Error Message */}
                     {error && (
-                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-sm">
                             {error}
                         </div>
                     )}
 
-                    {/* Google Sign Up */}
+                    {/* Google Sign In */}
                     <button
                         onClick={handleGoogleSignIn}
-                        className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-slate-100 text-slate-900 font-medium rounded-xl transition"
+                        type="button"
+                        className="w-full bg-white dark:bg-white text-gray-700 font-semibold py-3 px-4 rounded-xl border border-gray-300 dark:border-transparent shadow-sm hover:bg-gray-50 transition duration-200 flex items-center justify-center gap-3 mb-8"
                     >
                         <svg className="h-5 w-5" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -117,29 +182,29 @@ export default function SignupPage() {
                     </button>
 
                     {/* Divider */}
-                    <div className="relative my-6">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-slate-700" />
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="bg-slate-800 px-4 text-slate-500">or create with email</span>
-                        </div>
+                    <div className="relative flex py-2 items-center mb-8">
+                        <div className="flex-grow border-t border-gray-300 dark:border-gray-700" />
+                        <span className="flex-shrink-0 mx-4 text-sm text-gray-400 dark:text-gray-500">or create with email</span>
+                        <div className="flex-grow border-t border-gray-300 dark:border-gray-700" />
                     </div>
 
-                    {/* Signup Form */}
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Name */}
+                    {/* Form */}
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        {/* Full Name */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                            <label htmlFor="fullname" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                                 Full Name
                             </label>
                             <div className="relative">
-                                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <User className="text-gray-400 dark:text-gray-500" size={20} />
+                                </div>
                                 <input
                                     type="text"
+                                    id="fullname"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full pl-11 pr-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition outline-none"
+                                    className="block w-full pl-10 pr-3 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent sm:text-sm transition-shadow"
                                     placeholder="John Doe"
                                     required
                                 />
@@ -148,17 +213,20 @@ export default function SignupPage() {
 
                         {/* Email */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                                 Email Address
                             </label>
                             <div className="relative">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Mail className="text-gray-400 dark:text-gray-500" size={20} />
+                                </div>
                                 <input
                                     type="email"
+                                    id="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full pl-11 pr-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition outline-none"
-                                    placeholder="you@example.com"
+                                    className="block w-full pl-10 pr-3 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent sm:text-sm transition-shadow"
+                                    placeholder="name@example.com"
                                     required
                                 />
                             </div>
@@ -166,42 +234,48 @@ export default function SignupPage() {
 
                         {/* Password */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                                 Password
                             </label>
                             <div className="relative">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Lock className="text-gray-400 dark:text-gray-500" size={20} />
+                                </div>
                                 <input
                                     type={showPassword ? 'text' : 'password'}
+                                    id="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-11 pr-12 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition outline-none"
-                                    placeholder="Min. 6 characters"
+                                    className="block w-full pl-10 pr-10 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent sm:text-sm transition-shadow"
+                                    placeholder="••••••••••••"
                                     required
                                     minLength={6}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition"
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                                 >
-                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                 </button>
                             </div>
                         </div>
 
                         {/* Confirm Password */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                            <label htmlFor="confirm_password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                                 Confirm Password
                             </label>
                             <div className="relative">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Lock className="text-gray-400 dark:text-gray-500" size={20} />
+                                </div>
                                 <input
                                     type={showPassword ? 'text' : 'password'}
+                                    id="confirm_password"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="w-full pl-11 pr-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition outline-none"
+                                    className="block w-full pl-10 pr-3 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent sm:text-sm transition-shadow"
                                     placeholder="Repeat password"
                                     required
                                 />
@@ -209,42 +283,50 @@ export default function SignupPage() {
                         </div>
 
                         {/* Terms Checkbox */}
-                        <div className="flex items-start gap-3">
-                            <button
-                                type="button"
-                                onClick={() => setAgreed(!agreed)}
-                                className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition ${agreed
-                                        ? 'bg-emerald-500 border-emerald-500'
-                                        : 'bg-slate-900/50 border-slate-700'
-                                    }`}
-                            >
-                                {agreed && <Check size={14} className="text-white" />}
-                            </button>
-                            <span className="text-sm text-slate-400">
-                                I agree to the{' '}
-                                <Link href="/terms" className="text-emerald-400 hover:underline">Terms of Service</Link>
-                                {' '}and{' '}
-                                <Link href="/privacy" className="text-emerald-400 hover:underline">Privacy Policy</Link>
-                            </span>
+                        <div className="flex items-start">
+                            <div className="flex items-center h-5">
+                                <button
+                                    type="button"
+                                    onClick={() => setAgreed(!agreed)}
+                                    className={`h-4 w-4 rounded border flex items-center justify-center transition ${agreed
+                                            ? 'bg-emerald-500 border-emerald-500'
+                                            : 'bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-gray-600'
+                                        }`}
+                                >
+                                    {agreed && <Check size={12} className="text-white" />}
+                                </button>
+                            </div>
+                            <div className="ml-3 text-sm">
+                                <label className="font-medium text-gray-700 dark:text-gray-300">
+                                    I agree to the{' '}
+                                    <Link href="/terms" className="text-emerald-500 hover:text-emerald-400 underline decoration-transparent hover:decoration-current transition-all">
+                                        Terms of Service
+                                    </Link>{' '}
+                                    and{' '}
+                                    <Link href="/privacy" className="text-emerald-500 hover:text-emerald-400 underline decoration-transparent hover:decoration-current transition-all">
+                                        Privacy Policy
+                                    </Link>
+                                </label>
+                            </div>
                         </div>
 
                         {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-semibold rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/25"
+                            className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-emerald-500 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-slate-900 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? 'Creating account...' : 'Create Account'}
                         </button>
                     </form>
 
                     {/* Sign In Link */}
-                    <p className="mt-6 text-center text-slate-400">
-                        Already have an account?{' '}
-                        <Link href="/login" className="text-emerald-400 hover:text-emerald-300 font-medium transition">
+                    <div className="mt-8 text-center text-sm">
+                        <span className="text-gray-500 dark:text-gray-400">Already have an account?</span>
+                        <Link href="/login" className="font-medium text-emerald-500 hover:text-emerald-400 ml-1">
                             Sign in
                         </Link>
-                    </p>
+                    </div>
                 </div>
             </div>
         </div>
