@@ -11,6 +11,7 @@ import {
     ArrowLeft, TrendingUp, Loader2, AlertCircle,
     RefreshCw, Search, ArrowUpRight, ArrowDownRight, DollarSign
 } from 'lucide-react';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 interface Transaction {
     id: number;
@@ -188,6 +189,23 @@ export default function TransactionsPage() {
                             </div>
                         ) : (
                             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+                                    <h3 className="font-semibold text-slate-900 dark:text-white">Transaction Records</h3>
+                                    <TableExportButton
+                                        data={filteredTransactions}
+                                        columns={[
+                                            { key: 'symbol', label: 'Symbol' },
+                                            { key: 'companyName', label: 'Company' },
+                                            { key: 'buyerBroker', label: 'Buyer Broker', format: 'number' },
+                                            { key: 'sellerBroker', label: 'Seller Broker', format: 'number' },
+                                            { key: 'quantity', label: 'Quantity', format: 'largeNumber' },
+                                            { key: 'price', label: 'Price', format: 'currency' },
+                                        ]}
+                                        filename="bulk-transactions"
+                                        title="Bulk Transactions"
+                                        variant="compact"
+                                    />
+                                </div>
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
                                         <thead>

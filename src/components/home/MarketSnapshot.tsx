@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { TrendingUp, TrendingDown, RefreshCw, Loader2, AlertCircle } from 'lucide-react';
 import { getMarketOverview, MarketOverviewData, MarketStock } from '@/services/marketService';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 export default function MarketSnapshot() {
     const [data, setData] = useState<MarketOverviewData | null>(null);
@@ -136,11 +137,25 @@ export default function MarketSnapshot() {
                         {tab}
                     </button>
                 ))}
-                <div className="ml-auto flex items-center gap-2 text-xs text-slate-500">
-                    <button onClick={fetchData} disabled={loading}>
-                        <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
-                    </button>
-                    Auto-refresh • {timeSinceRefresh()}
+                <div className="ml-auto flex items-center gap-3">
+                    <TableExportButton
+                        data={displayData}
+                        columns={[
+                            { key: 'symbol', label: 'Symbol' },
+                            { key: 'name', label: 'Name' },
+                            { key: 'price', label: 'Price', format: 'currency' },
+                            { key: 'changePercent', label: 'Change %', format: 'percent' },
+                        ]}
+                        filename={`market-${activeTab.toLowerCase()}`}
+                        title={`Market ${activeTab}`}
+                        variant="icon"
+                    />
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <button onClick={fetchData} disabled={loading}>
+                            <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
+                        </button>
+                        Auto-refresh • {timeSinceRefresh()}
+                    </div>
                 </div>
             </div>
 

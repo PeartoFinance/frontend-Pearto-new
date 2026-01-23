@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight, ArrowDownRight, TrendingUp, Loader2, AlertCircle } from 'lucide-react';
 import { get } from '@/services/api';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 interface Transaction {
     id: number;
@@ -44,12 +45,27 @@ export default function BulkTransactions() {
                     <TrendingUp size={18} className="text-emerald-500" />
                     <span className="font-semibold text-slate-900 dark:text-white">Bulk Transactions</span>
                 </div>
-                <Link
-                    href="/market/transactions"
-                    className="text-sm text-emerald-500 hover:text-emerald-600 flex items-center gap-1"
-                >
-                    View More <ArrowUpRight size={14} />
-                </Link>
+                <div className="flex items-center gap-3">
+                    <TableExportButton
+                        data={transactions}
+                        columns={[
+                            { key: 'symbol', label: 'Symbol' },
+                            { key: 'buyerBroker', label: 'Buyer Broker', format: 'number' },
+                            { key: 'sellerBroker', label: 'Seller Broker', format: 'number' },
+                            { key: 'quantity', label: 'Quantity', format: 'number' },
+                            { key: 'price', label: 'Price', format: 'currency' },
+                        ]}
+                        filename="bulk-transactions"
+                        title="Bulk Transactions"
+                        variant="icon"
+                    />
+                    <Link
+                        href="/market/transactions"
+                        className="text-sm text-emerald-500 hover:text-emerald-600 flex items-center gap-1"
+                    >
+                        View More <ArrowUpRight size={14} />
+                    </Link>
+                </div>
             </div>
 
             {loading ? (

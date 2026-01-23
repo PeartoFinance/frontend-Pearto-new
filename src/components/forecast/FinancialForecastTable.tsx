@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Lock } from 'lucide-react';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 interface EarningsEstimate {
     fiscalYear: string;
@@ -93,8 +94,8 @@ export function FinancialForecastTable({ annual, quarterly }: FinancialForecastT
                         <button
                             onClick={() => setPeriodType('annual')}
                             className={`px-3 py-1.5 text-sm font-medium rounded-md transition ${periodType === 'annual'
-                                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                                 }`}
                         >
                             Annual
@@ -102,13 +103,26 @@ export function FinancialForecastTable({ annual, quarterly }: FinancialForecastT
                         <button
                             onClick={() => setPeriodType('quarterly')}
                             className={`px-3 py-1.5 text-sm font-medium rounded-md transition ${periodType === 'quarterly'
-                                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                                 }`}
                         >
                             Quarterly
                         </button>
                     </div>
+                    <TableExportButton
+                        data={data}
+                        columns={[
+                            { key: 'fiscalYear', label: 'Period' },
+                            { key: 'revenueAvg', label: 'Revenue', format: 'largeNumber' },
+                            { key: 'revenueGrowth', label: 'Revenue Growth', format: 'percent' },
+                            { key: 'epsAvg', label: 'EPS', format: 'currency' },
+                            { key: 'epsGrowth', label: 'EPS Growth', format: 'percent' },
+                        ]}
+                        filename={`forecast-${periodType}`}
+                        title="Financial Forecast"
+                        variant="icon"
+                    />
                 </div>
             </div>
 
@@ -151,8 +165,8 @@ export function FinancialForecastTable({ annual, quarterly }: FinancialForecastT
                                                 <td
                                                     key={e.fiscalYear}
                                                     className={`px-4 py-3 text-right font-medium ${growth.isPositive
-                                                            ? 'text-emerald-600 dark:text-emerald-400'
-                                                            : 'text-red-600 dark:text-red-400'
+                                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                                        : 'text-red-600 dark:text-red-400'
                                                         }`}
                                                 >
                                                     {idx >= 2 ? (

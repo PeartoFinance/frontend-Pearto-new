@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight, FileText, Briefcase, Loader2, AlertCircle } from 'lucide-react';
 import { getStockOffers, StockOffer } from '@/services/marketService';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 const tabs = ['IPO', 'FPO', 'Rights'];
 
@@ -72,12 +73,28 @@ export default function PublicOfferings() {
                     <Briefcase size={18} className="text-emerald-500" />
                     <span className="font-semibold text-slate-900 dark:text-white">Public Offerings</span>
                 </div>
-                <Link
-                    href="/market/ipo"
-                    className="text-sm text-emerald-500 hover:text-emerald-600 flex items-center gap-1"
-                >
-                    View All <ArrowUpRight size={14} />
-                </Link>
+                <div className="flex items-center gap-3">
+                    <TableExportButton
+                        data={filteredOffers}
+                        columns={[
+                            { key: 'symbol', label: 'Symbol' },
+                            { key: 'companyName', label: 'Company' },
+                            { key: 'priceRange', label: 'Price Range' },
+                            { key: 'openDate', label: 'Open Date', format: 'date' },
+                            { key: 'closeDate', label: 'Close Date', format: 'date' },
+                            { key: 'status', label: 'Status' },
+                        ]}
+                        filename={`${activeTab.toLowerCase()}-offerings`}
+                        title={`${activeTab} Offerings`}
+                        variant="icon"
+                    />
+                    <Link
+                        href="/market/ipo"
+                        className="text-sm text-emerald-500 hover:text-emerald-600 flex items-center gap-1"
+                    >
+                        View All <ArrowUpRight size={14} />
+                    </Link>
+                </div>
             </div>
 
             {/* Tabs */}

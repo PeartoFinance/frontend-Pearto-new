@@ -25,6 +25,7 @@ import {
     TrendingUp, TrendingDown, Activity, BarChart2, Loader2,
     ArrowUpRight, ArrowDownRight, RefreshCw, Clock, LineChart, PieChart
 } from 'lucide-react';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 type TabType = 'overview' | 'live' | 'floorsheet' | 'charts' | 'analysis';
 
@@ -185,9 +186,26 @@ export default function MarketPage() {
                                         <Activity size={18} className="text-emerald-500" />
                                         <span className="font-semibold text-slate-900 dark:text-white">Live Market Data</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-xs text-slate-500">
-                                        <Clock size={12} />
-                                        Real-time prices • Auto-updates every 60s
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                                            <Clock size={12} />
+                                            Real-time prices • Auto-updates every 60s
+                                        </div>
+                                        <TableExportButton
+                                            data={allStocks.slice(0, 25)}
+                                            columns={[
+                                                { key: 'symbol', label: 'Symbol' },
+                                                { key: 'name', label: 'Name' },
+                                                { key: 'price', label: 'Price', format: 'currency' },
+                                                { key: 'change', label: 'Change', format: 'currency' },
+                                                { key: 'changePercent', label: 'Change %', format: 'percent' },
+                                                { key: 'volume', label: 'Volume', format: 'largeNumber' },
+                                                { key: 'marketCap', label: 'Market Cap', format: 'largeNumber' },
+                                            ]}
+                                            filename="live-market"
+                                            title="Live Market Data"
+                                            variant="compact"
+                                        />
                                     </div>
                                 </div>
 

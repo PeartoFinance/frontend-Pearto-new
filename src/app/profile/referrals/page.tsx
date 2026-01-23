@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Gift, Users, Copy, Check, Share2, ChevronRight, Award, Loader2 } from 'lucide-react';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.71:5000/api';
 
@@ -191,8 +192,20 @@ export default function ReferralsPage() {
 
                 {/* Referred Users Table */}
                 <div className="bg-slate-800/50 border border-slate-700 rounded-2xl overflow-hidden">
-                    <div className="p-6 border-b border-slate-700">
+                    <div className="p-6 border-b border-slate-700 flex items-center justify-between">
                         <h2 className="text-lg font-semibold text-white">People You Referred</h2>
+                        <TableExportButton
+                            data={data?.referrals || []}
+                            columns={[
+                                { key: 'name', label: 'Name' },
+                                { key: 'email', label: 'Email' },
+                                { key: 'status', label: 'Status' },
+                                { key: 'createdAt', label: 'Date Joined', format: 'date' },
+                            ]}
+                            filename="referrals"
+                            title="My Referrals"
+                            variant="compact"
+                        />
                     </div>
 
                     {data?.referrals && data.referrals.length > 0 ? (
@@ -210,8 +223,8 @@ export default function ReferralsPage() {
                                     </div>
                                     <div className="text-right">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${referral.status === 'active'
-                                                ? 'bg-emerald-500/20 text-emerald-400'
-                                                : 'bg-slate-600/50 text-slate-400'
+                                            ? 'bg-emerald-500/20 text-emerald-400'
+                                            : 'bg-slate-600/50 text-slate-400'
                                             }`}>
                                             {referral.status}
                                         </span>

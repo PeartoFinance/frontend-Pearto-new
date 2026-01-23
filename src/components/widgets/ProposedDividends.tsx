@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight, Gift, Loader2, AlertCircle } from 'lucide-react';
 import { get } from '@/services/api';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 interface Dividend {
     id: number;
@@ -58,12 +59,29 @@ export default function ProposedDividends() {
                     <Gift size={18} className="text-emerald-500" />
                     <span className="font-semibold text-slate-900 dark:text-white">Proposed Dividends</span>
                 </div>
-                <Link
-                    href="/market/dividends"
-                    className="text-sm text-emerald-500 hover:text-emerald-600 flex items-center gap-1"
-                >
-                    View All <ArrowUpRight size={14} />
-                </Link>
+                <div className="flex items-center gap-3">
+                    <TableExportButton
+                        data={dividends}
+                        columns={[
+                            { key: 'symbol', label: 'Symbol' },
+                            { key: 'companyName', label: 'Company' },
+                            { key: 'bonusPercent', label: 'Bonus %', format: 'percent' },
+                            { key: 'cashPercent', label: 'Cash %', format: 'percent' },
+                            { key: 'totalPercent', label: 'Total %', format: 'percent' },
+                            { key: 'bookClosureDate', label: 'Book Closure', format: 'date' },
+                            { key: 'fiscalYear', label: 'Fiscal Year' },
+                        ]}
+                        filename="proposed-dividends"
+                        title="Proposed Dividends"
+                        variant="icon"
+                    />
+                    <Link
+                        href="/market/dividends"
+                        className="text-sm text-emerald-500 hover:text-emerald-600 flex items-center gap-1"
+                    >
+                        View All <ArrowUpRight size={14} />
+                    </Link>
+                </div>
             </div>
 
             {loading ? (

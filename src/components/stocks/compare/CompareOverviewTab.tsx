@@ -2,6 +2,7 @@
 
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import type { MarketStock, PriceHistoryPoint } from '@/services/marketService';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 interface CompareStock extends MarketStock {
     color: string;
@@ -82,10 +83,25 @@ export default function CompareOverviewTab({ stocks }: CompareOverviewTabProps) 
 
             {/* Detailed Comparison Table */}
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <div className="p-5 border-b border-slate-200 dark:border-slate-700">
+                <div className="p-5 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
                         Detailed Metrics Comparison
                     </h3>
+                    <TableExportButton
+                        data={stocks}
+                        columns={[
+                            { key: 'symbol', label: 'Symbol' },
+                            { key: 'price', label: 'Price', format: 'currency' },
+                            { key: 'changePercent', label: 'Change %', format: 'percent' },
+                            { key: 'marketCap', label: 'Market Cap', format: 'largeNumber' },
+                            { key: 'volume', label: 'Volume', format: 'largeNumber' },
+                            { key: 'peRatio', label: 'P/E Ratio', format: 'number' },
+                            { key: 'eps', label: 'EPS', format: 'currency' },
+                        ]}
+                        filename="stock-comparison"
+                        title="Stock Comparison"
+                        variant="icon"
+                    />
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">

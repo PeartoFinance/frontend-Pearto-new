@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { getStockFinancials, type CompanyFinancial } from '@/services/marketService';
 import type { MarketStock, PriceHistoryPoint } from '@/services/marketService';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 interface CompareStock extends MarketStock {
     color: string;
@@ -108,10 +109,27 @@ export default function CompareFinancialsTab({ stocks }: CompareFinancialsTabPro
 
             {/* Comparison Table */}
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <div className="p-5 border-b border-slate-200 dark:border-slate-700">
+                <div className="p-5 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
                         Financial Comparison (Latest {period === 'annual' ? 'Year' : 'Quarter'})
                     </h3>
+                    <TableExportButton
+                        data={stockFinancials.map(sf => ({
+                            ...(sf.financials[0] || {}),
+                            symbol: sf.symbol,
+                        }))}
+                        columns={[
+                            { key: 'symbol', label: 'Symbol' },
+                            { key: 'revenue', label: 'Revenue', format: 'largeNumber' },
+                            { key: 'grossProfit', label: 'Gross Profit', format: 'largeNumber' },
+                            { key: 'operatingIncome', label: 'Operating Income', format: 'largeNumber' },
+                            { key: 'netIncome', label: 'Net Income', format: 'largeNumber' },
+                            { key: 'ebitda', label: 'EBITDA', format: 'largeNumber' },
+                        ]}
+                        filename={`financials-comparison-${period}`}
+                        title="Financial Comparison"
+                        variant="icon"
+                    />
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">

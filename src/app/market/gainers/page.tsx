@@ -12,6 +12,7 @@ import {
     ArrowLeft, TrendingUp, TrendingDown, Loader2, AlertCircle,
     RefreshCw, BarChart2, ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 type TabType = 'gainers' | 'losers' | 'active';
 
@@ -283,6 +284,26 @@ export default function MarketMoversPage() {
                             </div>
                         ) : (
                             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+                                    <h3 className="font-semibold text-slate-900 dark:text-white">
+                                        {activeTab === 'gainers' ? 'Top Gainers' : 'Top Losers'}
+                                    </h3>
+                                    <TableExportButton
+                                        data={currentStocks}
+                                        columns={[
+                                            { key: 'symbol', label: 'Symbol' },
+                                            { key: 'name', label: 'Company' },
+                                            { key: 'price', label: 'Price', format: 'currency' },
+                                            { key: 'change', label: 'Change', format: 'currency' },
+                                            { key: 'changePercent', label: 'Change %', format: 'percent' },
+                                            { key: 'volume', label: 'Volume', format: 'largeNumber' },
+                                            { key: 'marketCap', label: 'Market Cap', format: 'largeNumber' },
+                                        ]}
+                                        filename={`market-${activeTab}`}
+                                        title={`Market ${activeTab === 'gainers' ? 'Gainers' : 'Losers'}`}
+                                        variant="compact"
+                                    />
+                                </div>
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
                                         <thead>

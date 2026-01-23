@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Wallet, Calendar, DollarSign } from 'lucide-react';
 import { getStockDividends, type DividendRecord } from '@/services/marketService';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 interface DividendsTabProps {
     symbol: string;
@@ -77,11 +78,24 @@ export default function DividendsTab({ symbol }: DividendsTabProps) {
 
             {/* Dividend History Table */}
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                         <Calendar size={18} className="text-slate-400" />
                         Dividend History
                     </h3>
+                    <TableExportButton
+                        data={dividends}
+                        columns={[
+                            { key: 'fiscalYear', label: 'Period' },
+                            { key: 'dividendType', label: 'Type' },
+                            { key: 'dividendAmount', label: 'Amount', format: 'currency' },
+                            { key: 'exDividendDate', label: 'Ex-Date', format: 'date' },
+                            { key: 'status', label: 'Status' },
+                        ]}
+                        filename={`${symbol}-dividends`}
+                        title={`${symbol} Dividend History`}
+                        variant="icon"
+                    />
                 </div>
                 <table className="w-full">
                     <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">

@@ -4,6 +4,8 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { type MarketStock } from '@/services/marketService';
 import { ArrowUpDown, ArrowUp, ArrowDown, TrendingUp, TrendingDown } from 'lucide-react';
+import { TableExportButton, type ExportColumn } from '@/components/common/TableExportButton';
+
 
 interface StockTableProps {
     stocks: MarketStock[];
@@ -105,10 +107,32 @@ export default function StockTable({ stocks, loading = false }: StockTableProps)
         );
     }
 
+    const exportColumns: ExportColumn[] = [
+        { key: 'symbol', label: 'Symbol' },
+        { key: 'name', label: 'Name' },
+        { key: 'price', label: 'Price', format: 'currency' },
+        { key: 'change', label: 'Change', format: 'currency' },
+        { key: 'changePercent', label: 'Change %', format: 'percent' },
+        { key: 'volume', label: 'Volume', format: 'largeNumber' },
+        { key: 'marketCap', label: 'Market Cap', format: 'largeNumber' },
+    ];
+
     return (
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+            {/* Header with Export */}
+            <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+                <h3 className="font-semibold text-slate-900 dark:text-white">Stocks</h3>
+                <TableExportButton
+                    data={sortedStocks}
+                    columns={exportColumns}
+                    filename="stocks"
+                    title="Stock Data"
+                    variant="compact"
+                />
+            </div>
             <div className="overflow-x-auto">
                 <table className="w-full">
+
                     <thead className="bg-slate-50 dark:bg-slate-800 sticky top-0">
                         <tr>
                             <th

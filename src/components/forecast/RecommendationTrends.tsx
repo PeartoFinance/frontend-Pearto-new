@@ -1,5 +1,7 @@
 'use client';
 
+import { TableExportButton } from '@/components/common/TableExportButton';
+
 interface RecommendationTrend {
     periodLabel: string;
     periodDate: string;
@@ -28,9 +30,25 @@ export function RecommendationTrends({ trends }: RecommendationTrendsProps) {
 
     return (
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-                Recommendation Trends
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                    Recommendation Trends
+                </h3>
+                <TableExportButton
+                    data={trends}
+                    columns={[
+                        { key: 'periodLabel', label: 'Period' },
+                        { key: 'strongBuy', label: 'Strong Buy', format: 'number' },
+                        { key: 'buy', label: 'Buy', format: 'number' },
+                        { key: 'hold', label: 'Hold', format: 'number' },
+                        { key: 'sell', label: 'Sell', format: 'number' },
+                        { key: 'strongSell', label: 'Strong Sell', format: 'number' },
+                    ]}
+                    filename="recommendation-trends"
+                    title="Analyst Recommendations"
+                    variant="icon"
+                />
+            </div>
 
             {/* Stacked bar chart - green themed */}
             <div className="space-y-3">

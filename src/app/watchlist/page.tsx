@@ -13,6 +13,7 @@ import {
     Star, Plus, Trash2, TrendingUp, TrendingDown, Search, Loader2, X,
     Grid3X3, List, Bell, ExternalLink, AlertCircle
 } from 'lucide-react';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 export default function WatchlistPage() {
     const router = useRouter();
@@ -193,6 +194,22 @@ export default function WatchlistPage() {
                             </div>
                         ) : (
                             <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                                <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between">
+                                    <h3 className="font-semibold text-slate-900 dark:text-white">Watchlist</h3>
+                                    <TableExportButton
+                                        data={filteredItems}
+                                        columns={[
+                                            { key: 'symbol', label: 'Symbol' },
+                                            { key: 'name', label: 'Name' },
+                                            { key: 'price', label: 'Price', format: 'currency' },
+                                            { key: 'change', label: 'Change', format: 'currency' },
+                                            { key: 'changePercent', label: 'Change %', format: 'percent' },
+                                        ]}
+                                        filename="watchlist"
+                                        title="Watchlist"
+                                        variant="compact"
+                                    />
+                                </div>
                                 <table className="w-full">
                                     <thead className="bg-slate-50 dark:bg-slate-800/50">
                                         <tr className="text-left">

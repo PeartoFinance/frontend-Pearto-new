@@ -7,6 +7,7 @@ import { get } from '@/services/api';
 import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 interface StockOption {
     symbol: string;
@@ -285,8 +286,24 @@ export default function PortfolioPage() {
 
                                 {/* Holdings Table */}
                                 <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
-                                    <div className="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+                                    <div className="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
                                         <h3 className="font-semibold text-gray-900 dark:text-white">Holdings</h3>
+                                        <TableExportButton
+                                            data={selectedPortfolio.holdings || []}
+                                            columns={[
+                                                { key: 'symbol', label: 'Symbol' },
+                                                { key: 'name', label: 'Name' },
+                                                { key: 'shares', label: 'Shares', format: 'number' },
+                                                { key: 'avgCost', label: 'Avg Cost', format: 'currency' },
+                                                { key: 'currentPrice', label: 'Current Price', format: 'currency' },
+                                                { key: 'totalValue', label: 'Total Value', format: 'currency' },
+                                                { key: 'gain', label: 'Gain/Loss', format: 'currency' },
+                                                { key: 'gainPercent', label: 'Gain %', format: 'percent' },
+                                            ]}
+                                            filename={`portfolio-${selectedPortfolio.name}`}
+                                            title={`${selectedPortfolio.name} Holdings`}
+                                            variant="compact"
+                                        />
                                     </div>
 
                                     {selectedPortfolio.holdings?.length === 0 ? (

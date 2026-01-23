@@ -2,8 +2,9 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { StockChartWidget } from '@/components/charts';
-import { Loader2, Download, ChevronDown } from 'lucide-react';
+import { Loader2, ChevronDown } from 'lucide-react';
 import { getStockHistory } from '@/services/marketService';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 interface HistoryTabProps {
     symbol: string;
@@ -173,11 +174,21 @@ export default function HistoryTab({ symbol }: HistoryTabProps) {
                             )}
                         </div>
 
-                        {/* Download Button */}
-                        <button className="flex items-center gap-1 px-3 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">
-                            <Download size={14} />
-                            Download
-                        </button>
+                        {/* Export Button */}
+                        <TableExportButton
+                            data={data}
+                            columns={[
+                                { key: 'date', label: 'Date', format: 'date' },
+                                { key: 'open', label: 'Open', format: 'currency' },
+                                { key: 'high', label: 'High', format: 'currency' },
+                                { key: 'low', label: 'Low', format: 'currency' },
+                                { key: 'close', label: 'Close', format: 'currency' },
+                                { key: 'volume', label: 'Volume', format: 'largeNumber' },
+                            ]}
+                            filename={`${symbol}-history-${period}`}
+                            title={`${symbol} Price History`}
+                            variant="compact"
+                        />
                     </div>
                 </div>
 

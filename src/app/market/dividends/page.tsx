@@ -11,6 +11,7 @@ import {
     ArrowLeft, Gift, Loader2, AlertCircle, TrendingUp, TrendingDown,
     Calendar, Filter, Search, Download, RefreshCw
 } from 'lucide-react';
+import { TableExportButton } from '@/components/common/TableExportButton';
 
 interface Dividend {
     id: number;
@@ -220,6 +221,24 @@ export default function DividendsPage() {
                             </div>
                         ) : (
                             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+                                    <h3 className="font-semibold text-slate-900 dark:text-white">Dividend Data</h3>
+                                    <TableExportButton
+                                        data={filteredDividends}
+                                        columns={[
+                                            { key: 'symbol', label: 'Symbol' },
+                                            { key: 'companyName', label: 'Company' },
+                                            { key: 'bonusPercent', label: 'Bonus %', format: 'percent' },
+                                            { key: 'cashPercent', label: 'Cash %', format: 'percent' },
+                                            { key: 'totalPercent', label: 'Total %', format: 'percent' },
+                                            { key: 'bookClosureDate', label: 'Book Closure', format: 'date' },
+                                            { key: 'fiscalYear', label: 'Fiscal Year' },
+                                        ]}
+                                        filename="dividends"
+                                        title="Proposed Dividends"
+                                        variant="compact"
+                                    />
+                                </div>
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
                                         <thead>
@@ -260,10 +279,10 @@ export default function DividendsPage() {
                                                     </td>
                                                     <td className="px-4 py-4">
                                                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full ${!div.bookClosureDate
-                                                                ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
-                                                                : new Date(div.bookClosureDate) > new Date()
-                                                                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                                                                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                                                            ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+                                                            : new Date(div.bookClosureDate) > new Date()
+                                                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                                                                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                                                             }`}>
                                                             <Calendar size={12} />
                                                             {formatDate(div.bookClosureDate)}
