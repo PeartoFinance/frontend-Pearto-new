@@ -20,7 +20,7 @@ interface AuthContextType {
     isLoading: boolean;
     isAdmin: boolean;
     login: (email: string, password: string) => Promise<void>;
-    signup: (name: string, email: string, password: string) => Promise<void>;
+    signup: (name: string, email: string, password: string, referralCode?: string) => Promise<void>;
     signInWithGoogle: () => Promise<void>;
     logout: () => void;
     token: string | null;
@@ -30,8 +30,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_TOKEN_KEY = 'auth_token';
 const AUTH_USER_KEY = 'auth_user';
-// const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+// const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.71:5000/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.71:5000/api';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
@@ -149,11 +149,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(AUTH_USER_KEY, JSON.stringify(data.user));
     }, []);
 
-    const signup = useCallback(async (name: string, email: string, password: string) => {
+    const signup = useCallback(async (name: string, email: string, password: string, referralCode?: string) => {
         const response = await fetch(`${API_BASE}/auth/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password }),
+            body: JSON.stringify({ name, email, password, referralCode }),
         });
 
         if (!response.ok) {

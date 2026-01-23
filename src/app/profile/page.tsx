@@ -17,14 +17,15 @@ import ProfileAlerts from '@/components/profile/ProfileAlerts';
 import ProfileActivity from '@/components/profile/ProfileActivity';
 import ProfileDocuments from '@/components/profile/ProfileDocuments';
 import ProfileInsights from '@/components/profile/ProfileInsights';
+import ProfileReferrals from '@/components/profile/ProfileReferrals';
 import {
     CheckCircle2, GraduationCap, Info, Mail, Phone, Calendar as CalendarIcon,
     FileText, ChevronLeft, ChevronRight, Save, Bold, Italic, List,
-    Home, Briefcase, BarChart3, Bookmark, Target, Bell, Shield, User, Settings as SettingsIcon
+    Home, Briefcase, BarChart3, Bookmark, Target, Bell, Shield, User, Settings as SettingsIcon, Gift
 } from 'lucide-react';
 import Calendar from './Calendar';
 
-type TabKey = 'overview' | 'portfolio' | 'insights' | 'watchlist' | 'alerts' | 'activity' | 'documents' | 'verification' | 'preferences' | 'security' | 'settings';
+type TabKey = 'overview' | 'portfolio' | 'insights' | 'watchlist' | 'alerts' | 'activity' | 'documents' | 'referrals' | 'verification' | 'preferences' | 'security' | 'settings';
 
 export default function ProfilePage() {
     const { user: authUser, isAuthenticated } = useAuth();
@@ -99,6 +100,7 @@ export default function ProfilePage() {
             case 'verification': return <Shield {...iconProps} />;
             case 'preferences': return <SettingsIcon {...iconProps} />;
             case 'security': return <Shield {...iconProps} />;
+            case 'referrals': return <Gift {...iconProps} />;
             case 'settings': return <User {...iconProps} />;
             default: return null;
         }
@@ -152,7 +154,7 @@ export default function ProfilePage() {
                         <div className="flex gap-1 overflow-x-auto no-scrollbar">
                             {([
                                 'overview', 'portfolio', 'insights', 'watchlist', 'alerts', 'activity', 'documents',
-                                'verification', 'preferences', 'security'
+                                'referrals', 'verification', 'preferences', 'security'
                             ] as TabKey[]).map((tab) => (
                                 <button
                                     key={tab}
@@ -366,8 +368,13 @@ export default function ProfilePage() {
                             <ProfileDocuments />
                         )}
 
+                        {/* Referrals Tab */}
+                        {activeTab === 'referrals' && (
+                            <ProfileReferrals />
+                        )}
+
                         {/* Other tabs placeholder */}
-                        {!['overview', 'portfolio', 'insights', 'watchlist', 'verification', 'preferences', 'security', 'alerts', 'activity', 'documents'].includes(activeTab) && (
+                        {!['overview', 'portfolio', 'insights', 'watchlist', 'verification', 'preferences', 'security', 'alerts', 'activity', 'documents', 'referrals'].includes(activeTab) && (
                             <div className="flex flex-col items-center justify-center py-20 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-600">
                                 <h3 className="text-lg font-bold text-white capitalize mb-2">{activeTab}</h3>
                                 <p className="text-slate-500 text-sm">Detailed {activeTab} information will appear here.</p>

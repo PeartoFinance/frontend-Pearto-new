@@ -37,7 +37,7 @@ export default function AuthCallbackPage() {
 
                     // Sync with backend
                     try {
-                        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+                        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.71:5000/api';
                         const response = await fetch(`${API_BASE}/auth/google-signin`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },

@@ -3,8 +3,8 @@
  * Handles data backup/restore and account management operations
  */
 
-// Use same API_BASE as api.ts for consistency
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+// Use same API_BASE pattern as api.ts for consistency
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.71:5000/api';
 
 function getAuthToken(): string | null {
     if (typeof window === 'undefined') return null;
@@ -25,7 +25,15 @@ function getAuthHeaders(): HeadersInit {
  * Export user data as JSON file (triggers download)
  */
 export async function exportBackup(): Promise<void> {
-    const token = getAuthToken();
+    // Get token directly from localStorage at runtime
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+
+    // Validate token before making request
+    if (!token) {
+        throw new Error('Not authenticated. Please log in again.');
+    }
+
+    console.log('[Export] Token found:', token ? 'Yes' : 'No');
 
     const response = await fetch(`${API_BASE}/backup/export`, {
         method: 'GET',
@@ -35,8 +43,14 @@ export async function exportBackup(): Promise<void> {
     });
 
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to export data');
+        let errorMessage = 'Failed to export data';
+        try {
+            const error = await response.json();
+            errorMessage = error.error || errorMessage;
+        } catch {
+            // Response might not be JSON
+        }
+        throw new Error(errorMessage);
     }
 
     // Get filename from Content-Disposition header or generate one

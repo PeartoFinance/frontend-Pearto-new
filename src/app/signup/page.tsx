@@ -1,23 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Check, TrendingUp, PieChart, Shield } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Check, TrendingUp, PieChart, Shield, Gift } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
+// Wrapper component for Suspense
 export default function SignupPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-slate-900 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+            <SignupContent />
+        </Suspense>
+    );
+}
+
+function SignupContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { signup, signInWithGoogle, isAuthenticated } = useAuth();
+
+    // Get referral code from URL param
+    const urlReferralCode = searchParams.get('ref') || '';
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [referralCode, setReferralCode] = useState(urlReferralCode);
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [agreed, setAgreed] = useState(false);
+
+    // Update referral code if URL param changes
+    useEffect(() => {
+        if (urlReferralCode) {
+            setReferralCode(urlReferralCode);
+        }
+    }, [urlReferralCode]);
 
     // Redirect if already authenticated
     if (isAuthenticated) {
@@ -47,7 +68,7 @@ export default function SignupPage() {
         setLoading(true);
 
         try {
-            await signup(name, email, password);
+            await signup(name, email, password, referralCode || undefined);
             router.push('/');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Signup failed');
@@ -282,6 +303,34 @@ export default function SignupPage() {
                             </div>
                         </div>
 
+                        {/* Referral Code (Optional) */}
+                        <div>
+                            <label htmlFor="referralCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                                Referral Code <span className="text-gray-400">(Optional)</span>
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Gift className="text-gray-400 dark:text-gray-500" size={20} />
+                                </div>
+                                <input
+                                    type="text"
+                                    id="referralCode"
+                                    value={referralCode}
+                                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                                    className="block w-full pl-10 pr-3 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent sm:text-sm transition-shadow"
+                                    placeholder="PEARTO-XXXXXX"
+                                />
+                                {urlReferralCode && (
+                                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <span className="text-xs text-emerald-500 font-medium">Applied</span>
+                                    </div>
+                                )}
+                            </div>
+                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Have a referral code? Enter it to earn rewards!
+                            </p>
+                        </div>
+
                         {/* Terms Checkbox */}
                         <div className="flex items-start">
                             <div className="flex items-center h-5">
@@ -289,8 +338,8 @@ export default function SignupPage() {
                                     type="button"
                                     onClick={() => setAgreed(!agreed)}
                                     className={`h-4 w-4 rounded border flex items-center justify-center transition ${agreed
-                                            ? 'bg-emerald-500 border-emerald-500'
-                                            : 'bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-gray-600'
+                                        ? 'bg-emerald-500 border-emerald-500'
+                                        : 'bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-gray-600'
                                         }`}
                                 >
                                     {agreed && <Check size={12} className="text-white" />}

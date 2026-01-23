@@ -26,7 +26,7 @@ interface RatiosData {
     error?: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.71:5000/api';
 
 export default function FinancialsTab({ symbol }: FinancialsTabProps) {
     const [data, setData] = useState<FinancialData | RatiosData | null>(null);

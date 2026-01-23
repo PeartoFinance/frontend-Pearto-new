@@ -1,13 +1,35 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Lock, ArrowLeft, Eye, EyeOff, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.71:5000/api';
 
+// Loading fallback for Suspense
+function LoadingFallback() {
+    return (
+        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+            <div className="bg-slate-800/80 backdrop-blur-xl rounded-3xl border border-slate-700 p-8 shadow-2xl max-w-md w-full text-center">
+                <Loader2 className="w-8 h-8 text-emerald-500 animate-spin mx-auto mb-4" />
+                <p className="text-slate-400">Loading...</p>
+            </div>
+        </div>
+    );
+}
+
+// Main page component (wrapper with Suspense)
 export default function ResetPasswordPage() {
+    return (
+        <Suspense fallback={<LoadingFallback />}>
+            <ResetPasswordContent />
+        </Suspense>
+    );
+}
+
+// Inner component that uses useSearchParams
+function ResetPasswordContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const token = searchParams.get('token');
@@ -64,8 +86,9 @@ export default function ResetPasswordPage() {
 
             setSuccess(true);
             setTimeout(() => router.push('/login'), 3000);
-        } catch (err: any) {
-            setError(err.message || 'Something went wrong');
+        } catch (err: unknown) {
+            const error = err as Error;
+            setError(error.message || 'Something went wrong');
         } finally {
             setLoading(false);
         }
