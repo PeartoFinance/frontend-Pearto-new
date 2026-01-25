@@ -34,6 +34,30 @@ export interface UserPreferences {
     countryCode: string;
 }
 
+export interface NotificationPreferences {
+    // Email preferences
+    emailSecurity: boolean;
+    emailAccount: boolean;
+    emailPriceAlerts: boolean;
+    emailDailyDigest: boolean;
+    emailEarnings: boolean;
+    emailNews: boolean;
+    emailMarketing: boolean;
+    emailNewsletter: boolean;
+    // Push preferences
+    pushSecurity: boolean;
+    pushPriceAlerts: boolean;
+    pushNews: boolean;
+    pushEarnings: boolean;
+    // SMS preferences
+    smsSecurity: boolean;
+    smsPriceAlerts: boolean;
+    // Quiet hours
+    quietHoursEnabled: boolean;
+    quietHoursStart: string | null;
+    quietHoursEnd: string | null;
+}
+
 export interface Specialization {
     id: string;
     name: string;
@@ -166,6 +190,25 @@ export async function changePassword(currentPassword: string, newPassword: strin
     });
 }
 
+/**
+ * Get notification preferences
+ */
+export async function getNotificationPreferences(): Promise<NotificationPreferences> {
+    return get<NotificationPreferences>('/user/notification-preferences');
+}
+
+/**
+ * Update notification preferences
+ */
+export async function updateNotificationPreferences(
+    data: Partial<NotificationPreferences>
+): Promise<{ success: boolean; message: string; preferences: NotificationPreferences }> {
+    return put<{ success: boolean; message: string; preferences: NotificationPreferences }>(
+        '/user/notification-preferences',
+        data
+    );
+}
+
 export default {
     getProfile,
     updateProfile,
@@ -173,4 +216,6 @@ export default {
     updatePreferences,
     changePassword,
     getFullProfile,
+    getNotificationPreferences,
+    updateNotificationPreferences,
 };
