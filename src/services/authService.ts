@@ -13,6 +13,7 @@ export interface User {
     avatarUrl?: string;
     countryCode?: string;
     isVerified?: boolean;
+    hasPassword?: boolean;
 }
 
 export interface LoginResponse {
@@ -67,10 +68,18 @@ export async function verifyEmail(token: string): Promise<{ message: string }> {
     return post<{ message: string }>('/auth/verify-email', { token });
 }
 
+/**
+ * Set password for Google-logged in user
+ */
+export async function setPassword(password: string): Promise<{ message: string }> {
+    return post<{ message: string }>('/auth/set-password', { password });
+}
+
 export default {
     login,
     signup,
     googleSignIn,
     requestPasswordReset,
     verifyEmail,
+    setPassword,
 };

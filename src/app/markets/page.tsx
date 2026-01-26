@@ -523,7 +523,7 @@ function MiniChart({ index }: { index: MarketIndex }) {
         });
 
         const chartData = sortedData.filter(d => d.close != null).map(d => ({
-            time: d.date,
+            time: d.date.split('T')[0], // Fix: Ensure strictly yyyy-mm-dd
             value: d.close!,
         }));
 

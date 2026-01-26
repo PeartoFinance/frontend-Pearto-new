@@ -20,8 +20,9 @@ function SignupContent() {
     const searchParams = useSearchParams();
     const { signup, signInWithGoogle, isAuthenticated } = useAuth();
 
-    // Get referral code from URL param
+    // Get params
     const urlReferralCode = searchParams.get('ref') || '';
+    const redirectParam = searchParams.get('redirect');
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -32,6 +33,14 @@ function SignupContent() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [agreed, setAgreed] = useState(false);
+    const [referrer, setReferrer] = useState<string | null>(null);
+
+    // Capture referrer on mount
+    useEffect(() => {
+        if (typeof document !== 'undefined' && document.referrer) {
+            setReferrer(document.referrer);
+        }
+    }, []);
 
     // Update referral code if URL param changes
     useEffect(() => {
@@ -40,11 +49,35 @@ function SignupContent() {
         }
     }, [urlReferralCode]);
 
-    // Redirect if already authenticated
-    if (isAuthenticated) {
+    // Helper to handle post-login redirect
+    const handleRedirect = () => {
+        if (redirectParam) {
+            // If redirect is a URL, go there
+            if (redirectParam.startsWith('http') || redirectParam.startsWith('/')) {
+                window.location.href = redirectParam;
+                return;
+            }
+
+            // If redirect=true, try to go back to referrer
+            if (redirectParam === 'true' && referrer) {
+                // Prevent redirect loops
+                if (!referrer.includes('/signup') && !referrer.includes('/login')) {
+                    window.location.href = referrer;
+                    return;
+                }
+            }
+        }
+
+        // Default
         router.push('/');
-        return null;
-    }
+    };
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            handleRedirect();
+        }
+    }, [isAuthenticated, redirectParam, referrer]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -69,10 +102,9 @@ function SignupContent() {
 
         try {
             await signup(name, email, password, referralCode || undefined);
-            router.push('/');
+            handleRedirect();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Signup failed');
-        } finally {
             setLoading(false);
         }
     };
@@ -80,7 +112,7 @@ function SignupContent() {
     const handleGoogleSignIn = async () => {
         try {
             await signInWithGoogle();
-            router.push('/');
+            handleRedirect();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Google sign-in failed');
         }
@@ -372,7 +404,7 @@ function SignupContent() {
                     {/* Sign In Link */}
                     <div className="mt-8 text-center text-sm">
                         <span className="text-gray-500 dark:text-gray-400">Already have an account?</span>
-                        <Link href="/login" className="font-medium text-emerald-500 hover:text-emerald-400 ml-1">
+                        <Link href={`/login${redirectParam ? `?redirect=${redirectParam}` : ''}`} className="font-medium text-emerald-500 hover:text-emerald-400 ml-1">
                             Sign in
                         </Link>
                     </div>

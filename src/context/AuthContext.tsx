@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged, User as FirebaseUser, getRedirectResult } from 'firebase/auth';
 import { auth, googleProvider, signInWithGoogleRedirect } from '@/lib/firebase';
+import SetPasswordModal from '@/components/auth/SetPasswordModal';
 
 interface User {
     id: string;
@@ -12,6 +13,7 @@ interface User {
     avatarUrl?: string;
     countryCode?: string;
     isVerified?: boolean;
+    hasPassword?: boolean;
 }
 
 interface AuthContextType {
@@ -37,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
 
     // Initialize from localStorage
     useEffect(() => {
@@ -55,26 +58,69 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
+    // Check if user needs to set password
+    useEffect(() => {
+        if (user && user.hasPassword === false) {
+            setShowPasswordModal(true);
+        }
+    }, [user]);
+
     // Listen for Firebase auth state changes
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
-            if (firebaseUser && !user) {
-                // User signed in with Firebase but no local user - create one
-                const userData: User = {
-                    id: firebaseUser.uid,
-                    name: firebaseUser.displayName || 'User',
-                    email: firebaseUser.email || '',
-                    role: 'user',
-                    avatarUrl: firebaseUser.photoURL || undefined,
-                    isVerified: firebaseUser.emailVerified,
-                };
-                setUser(userData);
-                localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userData));
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+            if (firebaseUser) {
+                // Check if we need to sync with backend (missing token)
+                const localToken = localStorage.getItem(AUTH_TOKEN_KEY);
+
+                if (!localToken) {
+                    console.log('Firebase user found but no token. Syncing with backend...');
+                    try {
+                        const response = await fetch(`${API_BASE}/auth/google-signin`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                firebase_uid: firebaseUser.uid,
+                                name: firebaseUser.displayName,
+                                email: firebaseUser.email,
+                                avatarUrl: firebaseUser.photoURL,
+                            }),
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.token) {
+                                setToken(data.token);
+                                localStorage.setItem(AUTH_TOKEN_KEY, data.token);
+                            }
+                            if (data.user) {
+                                setUser(data.user);
+                                localStorage.setItem(AUTH_USER_KEY, JSON.stringify(data.user));
+                                return; // Done
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Backend sync error:', error);
+                    }
+                }
+
+                if (!user) {
+                    // User signed in with Firebase but no local user - create one
+                    const userData: User = {
+                        id: firebaseUser.uid,
+                        name: firebaseUser.displayName || 'User',
+                        email: firebaseUser.email || '',
+                        role: 'user',
+                        avatarUrl: firebaseUser.photoURL || undefined,
+                        isVerified: firebaseUser.emailVerified,
+                    };
+                    setUser(userData);
+                    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userData));
+                }
             }
         });
 
         return () => unsubscribe();
-    }, [user]);
+    }, [user, token]);
 
     // Handle redirect result (for redirect-based OAuth flow)
     useEffect(() => {
@@ -249,7 +295,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const value: AuthContextType = {
         user,
-        isAuthenticated: !!user,
+        isAuthenticated: !!user && !!token,
         isLoading,
         isAdmin: user?.role === 'admin',
         login,
@@ -262,6 +308,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return (
         <AuthContext.Provider value={value}>
             {children}
+            <SetPasswordModal
+                isOpen={showPasswordModal}
+                onClose={() => setShowPasswordModal(false)}
+                onSuccess={() => {
+                    // Update user state to reflect password is set
+                    if (user) {
+                        const updatedUser = { ...user, hasPassword: true };
+                        setUser(updatedUser);
+                        localStorage.setItem(AUTH_USER_KEY, JSON.stringify(updatedUser));
+                    }
+                }}
+            />
         </AuthContext.Provider>
     );
 }

@@ -1,26 +1,70 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-slate-900 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+            <LoginContent />
+        </Suspense>
+    );
+}
+
+function LoginContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { login, signInWithGoogle, isAuthenticated } = useAuth();
+
+    // Get redirect param
+    const redirectParam = searchParams.get('redirect');
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [referrer, setReferrer] = useState<string | null>(null);
+
+    // Capture referrer on mount
+    useEffect(() => {
+        if (typeof document !== 'undefined' && document.referrer) {
+            setReferrer(document.referrer);
+        }
+    }, []);
+
+    // Helper to handle post-login redirect
+    const handleRedirect = () => {
+        if (redirectParam) {
+            // If redirect is a URL, go there (for same-domain or explicitly provided URLs)
+            if (redirectParam.startsWith('http') || redirectParam.startsWith('/')) {
+                window.location.href = redirectParam;
+                return;
+            }
+
+            // If redirect=true, try to go back to referrer
+            if (redirectParam === 'true' && referrer) {
+                // Prevent redirect loops if referrer is login page
+                if (!referrer.includes('/login')) {
+                    window.location.href = referrer;
+                    return;
+                }
+            }
+        }
+
+        // Default
+        router.push('/');
+    };
 
     // Redirect if already authenticated
-    if (isAuthenticated) {
-        router.push('/');
-        return null;
-    }
+    useEffect(() => {
+        if (isAuthenticated) {
+            handleRedirect();
+        }
+    }, [isAuthenticated, redirectParam, referrer]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,10 +73,9 @@ export default function LoginPage() {
 
         try {
             await login(email, password);
-            router.push('/');
+            handleRedirect();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Login failed');
-        } finally {
             setLoading(false);
         }
     };
@@ -40,7 +83,7 @@ export default function LoginPage() {
     const handleGoogleSignIn = async () => {
         try {
             await signInWithGoogle();
-            router.push('/');
+            handleRedirect();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Google sign-in failed');
         }
@@ -223,7 +266,7 @@ export default function LoginPage() {
                             <div className="relative flex justify-center text-sm">
                                 <span className="px-2 bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400">
                                     Don't have an account?{' '}
-                                    <Link href="/signup" className="font-medium text-emerald-500 hover:text-emerald-400">
+                                    <Link href={`/signup${redirectParam ? `?redirect=${redirectParam}` : ''}`} className="font-medium text-emerald-500 hover:text-emerald-400">
                                         Create one
                                     </Link>
                                 </span>
