@@ -25,6 +25,8 @@ import ForeignExchangeMarkets from '@/components/home/ForeignExchangeMarkets';
 import MarketSnapshot from '@/components/home/MarketSnapshot';
 import EducationalHub from '@/components/home/EducationalHub';
 import CategoryBar from '@/components/home/CategoryBar';
+import Testimonials from '@/components/home/Testimonials';
+import FAQ from '@/components/home/FAQ';
 import { AIWidget } from '@/components/ai';
 
 export default function HomePage() {
@@ -156,6 +158,15 @@ export default function HomePage() {
             {/* Educational Hub Cards */}
             <section>
               <EducationalHubCards />
+            </section>
+            {/* Testimonials */}
+            <section>
+              <Testimonials />
+            </section>
+
+            {/* FAQ */}
+            <section>
+              <FAQ />
             </section>
           </div>
         </div>

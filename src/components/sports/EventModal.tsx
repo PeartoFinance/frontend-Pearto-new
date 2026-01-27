@@ -3,6 +3,7 @@
 import { X, Play, ExternalLink, MapPin, Calendar, Trophy } from 'lucide-react';
 import { SportsEvent } from '@/types/sports';
 import { getSportEmoji } from '@/data/sportsConfig';
+import VideoPlayer from '@/components/common/VideoPlayer';
 
 interface EventModalProps {
     event: SportsEvent | null;
@@ -61,20 +62,12 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
 
                 {/* Video Player */}
                 <div className="aspect-video bg-slate-900 relative">
-                    {event.streamUrl ? (
-                        <iframe
-                            src={event.streamUrl}
-                            className="absolute inset-0 w-full h-full"
-                            allowFullScreen
-                            allow="autoplay; encrypted-media; fullscreen"
-                        />
-                    ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-                            <Play className="h-16 w-16 opacity-50 mb-4" />
-                            <p className="text-lg font-medium">Stream not available</p>
-                            <p className="text-sm text-slate-400">Check back later for live coverage</p>
-                        </div>
-                    )}
+                    <VideoPlayer
+                        url={event.streamUrl || undefined}
+                        thumbnail={event.thumbnailUrl || undefined}
+                        title={event.name}
+                        autoplay={isLive}
+                    />
 
                     {/* Live Badge */}
                     {isLive && (

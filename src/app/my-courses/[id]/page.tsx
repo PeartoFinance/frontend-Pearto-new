@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Play, CheckCircle, Clock, BookOpen } from 'lucide-react';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
+import VideoPlayer from '@/components/common/VideoPlayer';
+import { AIWidget } from '@/components/ai';
 import { useAuth } from '@/context/AuthContext';
 import { getMyCourse, completeModule, unenrollCourse, type MyCourseDetail, type CourseModule } from '@/services/educationService';
 
@@ -133,25 +135,34 @@ export default function MyCourseDetailPage({ params }: PageProps) {
                             <div className="lg:col-span-2 space-y-4">
                                 {/* Video Player */}
                                 <div className="bg-slate-800 rounded-xl overflow-hidden aspect-video">
-                                    {selectedModule?.videoUrl || course.videoUrl ? (
-                                        <video
-                                            key={selectedModule?.id || 'intro'}
-                                            src={selectedModule?.videoUrl || course.videoUrl}
-                                            controls
-                                            className="w-full h-full"
-                                            poster={course.thumbnailUrl}
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-700">
-                                            <div className="text-center">
-                                                <BookOpen className="w-16 h-16 text-slate-500 mx-auto mb-4" />
-                                                <p className="text-slate-400">
-                                                    {selectedModule ? selectedModule.title : 'Select a module to begin'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
+                                    <VideoPlayer
+                                        url={selectedModule?.videoUrl || course.videoUrl}
+                                        thumbnail={course.thumbnailUrl}
+                                        title={selectedModule?.title || course.title}
+                                        autoplay={false}
+                                    />
                                 </div>
+
+                                {/* AI Insight Widget (Inline) */}
+                                <AIWidget
+                                    type="inline"
+                                    pageType="course_module"
+                                    title="AI Learning Assistant"
+                                    description="Get help with this module, summarize the video, or ask quiz questions."
+                                    quickPrompts={[
+                                        "Summarize this module",
+                                        "Explain key concepts",
+                                        "Generate a quiz",
+                                        "How do I apply this?"
+                                    ]}
+                                    pageData={{
+                                        courseId: course.id,
+                                        courseTitle: course.title,
+                                        moduleTitle: selectedModule?.title || course.title,
+                                        moduleDescription: selectedModule?.description || course.description,
+                                        instructor: course.instructor?.name
+                                    }}
+                                />
 
                                 {/* Module Info */}
                                 {selectedModule && (
@@ -277,13 +288,11 @@ export default function MyCourseDetailPage({ params }: PageProps) {
                                                 <img
                                                     src={course.instructor.avatarUrl}
                                                     alt={course.instructor.name}
-                                                    className="w-12 h-12 rounded-full object-cover"
+                                                    className="w-12 h-12 rounded-full object-cover border-2 border-slate-600"
                                                 />
                                             ) : (
-                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
-                                                    <span className="text-white font-bold">
-                                                        {course.instructor.name.charAt(0)}
-                                                    </span>
+                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-lg">
+                                                    {course.instructor.name.split(' ').map(n => n[0]).join('')}
                                                 </div>
                                             )}
                                             <div>
@@ -307,6 +316,19 @@ export default function MyCourseDetailPage({ params }: PageProps) {
                         </div>
                     </div>
                 </main>
+
+                {/* Floating AI Widget */}
+                <AIWidget
+                    type="floating"
+                    position="bottom-right"
+                    pageType="course_study"
+                    pageData={{
+                        courseId: course.id,
+                        courseTitle: course.title,
+                        currentModule: selectedModule?.title,
+                        progress: enrollment.progress
+                    }}
+                />
             </div>
         </div>
     );

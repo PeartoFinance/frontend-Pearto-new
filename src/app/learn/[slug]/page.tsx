@@ -67,7 +67,8 @@ export default function CourseDetailPage() {
                 router.push(`/my-courses/${course.id}`);
             }, 1000);
         } catch (error: any) {
-            if (error?.message?.includes('Already enrolled')) {
+            // Check for 409 Conflict (Already Enrolled)
+            if (error?.status === 409 || error?.data?.error === 'Already enrolled') {
                 setEnrolled(true);
                 router.push(`/my-courses/${course.id}`);
             } else {
@@ -193,9 +194,13 @@ export default function CourseDetailPage() {
                                     {/* Instructor */}
                                     {course.instructor && (
                                         <div className="flex items-center gap-3 pt-2">
-                                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-semibold text-sm">
-                                                {course.instructor.name.split(' ').map(n => n[0]).join('')}
-                                            </div>
+                                            {course.instructor.avatarUrl ? (
+                                                <img src={course.instructor.avatarUrl} alt={course.instructor.name} className="h-10 w-10 rounded-full object-cover border-2 border-slate-700/50" />
+                                            ) : (
+                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-semibold text-sm">
+                                                    {course.instructor.name.split(' ').map(n => n[0]).join('')}
+                                                </div>
+                                            )}
                                             <div>
                                                 <p className="font-medium text-white text-sm">{course.instructor.name}</p>
                                                 <p className="text-slate-500 text-xs">{course.instructor.title}</p>
@@ -208,10 +213,18 @@ export default function CourseDetailPage() {
                                 <div className="lg:col-span-1">
                                     <div className="bg-slate-800/80 backdrop-blur rounded-2xl border border-slate-700/50 overflow-hidden shadow-xl">
                                         {/* Video Preview */}
-                                        <div className="aspect-video bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center cursor-pointer group relative">
+                                        {/* Video/Image Preview */}
+                                        <div className="aspect-video bg-slate-900 flex items-center justify-center cursor-pointer group relative overflow-hidden">
+                                            {course.thumbnailUrl ? (
+                                                <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                                            ) : (
+                                                <div className="w-full h-full bg-gradient-to-br from-emerald-600 to-teal-700" />
+                                            )}
                                             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition" />
-                                            <div className="relative bg-white/20 backdrop-blur-sm rounded-full p-4 group-hover:scale-110 transition-transform">
-                                                <Play className="h-8 w-8 text-white fill-white" />
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <div className="bg-white/20 backdrop-blur-sm rounded-full p-4 group-hover:scale-110 transition-transform">
+                                                    <Play className="h-8 w-8 text-white fill-white" />
+                                                </div>
                                             </div>
                                         </div>
 
@@ -237,8 +250,8 @@ export default function CourseDetailPage() {
                                                 onClick={handleEnroll}
                                                 disabled={enrolling || enrolled}
                                                 className={`w-full py-3 rounded-xl font-semibold transition-all shadow-lg flex items-center justify-center gap-2 ${enrolled
-                                                        ? 'bg-emerald-500 text-white cursor-default'
-                                                        : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20 hover:shadow-emerald-500/30'
+                                                    ? 'bg-emerald-500 text-white cursor-default'
+                                                    : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20 hover:shadow-emerald-500/30'
                                                     } ${enrolling ? 'opacity-75 cursor-wait' : ''}`}
                                             >
                                                 {enrolling ? (
@@ -416,9 +429,13 @@ export default function CourseDetailPage() {
                                 {activeTab === 'instructor' && course.instructor && (
                                     <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50">
                                         <div className="flex items-start gap-5">
-                                            <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
-                                                {course.instructor.name.split(' ').map(n => n[0]).join('')}
-                                            </div>
+                                            {course.instructor.avatarUrl ? (
+                                                <img src={course.instructor.avatarUrl} alt={course.instructor.name} className="h-20 w-20 rounded-2xl object-cover border-2 border-slate-700/50 flex-shrink-0" />
+                                            ) : (
+                                                <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
+                                                    {course.instructor.name.split(' ').map(n => n[0]).join('')}
+                                                </div>
+                                            )}
                                             <div className="flex-1">
                                                 <h3 className="text-xl font-semibold text-white">{course.instructor.name}</h3>
                                                 <p className="text-slate-400">{course.instructor.title}</p>
