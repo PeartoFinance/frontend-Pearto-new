@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Mail, ArrowLeft, Send, Loader2, CheckCircle } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.71:5000/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState('');
