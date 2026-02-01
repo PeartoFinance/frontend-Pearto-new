@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { DollarSign, Percent, TrendingUp, Users } from 'lucide-react';
 import {
     createChart,
@@ -173,8 +174,7 @@ export default function DCACalculator() {
         };
     }, [result, isDark]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
 
     return (
         <CalculatorLayout
@@ -187,10 +187,13 @@ export default function DCACalculator() {
                     <div className="text-center p-6 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
                         <TrendingUp className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
                         <p className="text-sm text-slate-500">DCA Final Balance</p>
-                        <p className="text-4xl font-bold text-emerald-600">{formatCurrency(result.dcaBalance)}</p>
+                        <p className="text-4xl font-bold text-emerald-600">
+                            <PriceDisplay amount={result.dcaBalance} maximumFractionDigits={0} />
+                        </p>
                         <p className="text-sm mt-1">
                             <span className={result.dcaProfit >= 0 ? 'text-emerald-600' : 'text-red-500'}>
-                                {result.dcaProfit >= 0 ? '+' : ''}{formatCurrency(result.dcaProfit)} ({result.dcaReturn.toFixed(1)}%)
+                                {result.dcaProfit >= 0 ? '+' : ''}
+                                <PriceDisplay amount={result.dcaProfit} maximumFractionDigits={0} /> ({result.dcaReturn.toFixed(1)}%)
                             </span>
                         </p>
                     </div>
@@ -198,7 +201,9 @@ export default function DCACalculator() {
                     <div className="grid grid-cols-2 gap-3">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Total Invested</p>
-                            <p className="text-xl font-bold text-slate-700 dark:text-slate-300">{formatCurrency(result.totalInvested)}</p>
+                            <p className="text-xl font-bold text-slate-700 dark:text-slate-300">
+                                <PriceDisplay amount={result.totalInvested} maximumFractionDigits={0} />
+                            </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Investments Made</p>

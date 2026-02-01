@@ -3,11 +3,11 @@
 import Link from 'next/link';
 
 const categories = [
-    { icon: '💻', label: 'Technology', href: '/technology', color: 'blue' },
-    { icon: '💼', label: 'Business', href: '/business', color: 'emerald' },
-    { icon: '🌍', label: 'World News', href: '/world', color: 'purple' },
+    { icon: '💻', label: 'Technology', href: '/news?category=technology', color: 'blue' },
+    { icon: '💼', label: 'Business', href: '/news?category=business', color: 'emerald' },
+    { icon: '🌍', label: 'World News', href: '/news?category=world', color: 'purple' },
     { icon: '📊', label: 'Market Data', href: '/markets', color: 'orange' },
-    { icon: '🏦', label: 'Forex', href: '/tools/fx-rates', color: 'rose' },
+    { icon: '🏦', label: 'Forex', href: '/forex', color: 'rose' },
     { icon: '📚', label: 'Education', href: '/learn', color: 'indigo' },
 ];
 

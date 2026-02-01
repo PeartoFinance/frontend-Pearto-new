@@ -27,6 +27,7 @@ export interface SignupResponse {
 }
 
 export interface GoogleSignInData {
+    idToken: string;
     firebase_uid: string;
     name: string | null;
     email: string | null;

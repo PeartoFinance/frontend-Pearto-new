@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { Wallet, TrendingUp, Calendar, Clock, PiggyBank } from 'lucide-react';
 import {
     createChart,
@@ -178,8 +179,7 @@ export default function PensionCalculator() {
         };
     }, [result, isDark]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
 
     return (
         <CalculatorLayout
@@ -192,13 +192,17 @@ export default function PensionCalculator() {
                     <div className="text-center p-6 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
                         <Wallet className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
                         <p className="text-sm text-slate-500">Balance at Retirement (Age {retirementAge})</p>
-                        <p className="text-4xl font-bold text-emerald-600">{formatCurrency(result.balanceAtRetirement)}</p>
+                        <p className="text-4xl font-bold text-emerald-600">
+                            <PriceDisplay amount={result.balanceAtRetirement} maximumFractionDigits={0} />
+                        </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Monthly Income</p>
-                            <p className="text-xl font-bold text-blue-600">{formatCurrency(result.monthlyIncome)}</p>
+                            <p className="text-xl font-bold text-blue-600">
+                                <PriceDisplay amount={result.monthlyIncome} maximumFractionDigits={0} />
+                            </p>
                             <p className="text-xs text-slate-400">at {withdrawalRate}% withdrawal</p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
@@ -234,15 +238,21 @@ export default function PensionCalculator() {
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Your Contributions</span>
-                                <span className="font-medium">{formatCurrency(result.totalContributions * (employeeContribution / (employeeContribution + employerMatch)))}</span>
+                                <span className="font-medium">
+                                    <PriceDisplay amount={result.totalContributions * (employeeContribution / (employeeContribution + employerMatch))} maximumFractionDigits={0} />
+                                </span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Employer Match</span>
-                                <span className="font-medium">{formatCurrency(result.totalContributions * (employerMatch / (employeeContribution + employerMatch)))}</span>
+                                <span className="font-medium">
+                                    <PriceDisplay amount={result.totalContributions * (employerMatch / (employeeContribution + employerMatch))} maximumFractionDigits={0} />
+                                </span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Investment Growth</span>
-                                <span className="font-medium text-emerald-600">{formatCurrency(result.investmentGrowth)}</span>
+                                <span className="font-medium text-emerald-600">
+                                    <PriceDisplay amount={result.investmentGrowth} maximumFractionDigits={0} />
+                                </span>
                             </div>
                         </div>
                     </div>

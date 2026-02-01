@@ -1,73 +1,59 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
-import { getMarketIndices, getCommodities, MarketIndex, Commodity } from '@/services/marketService';
+import { useMarketIndices, useCommodities } from '@/hooks/useMarketData';
+import { MarketIndex, Commodity } from '@/services/marketService';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface TickerItem {
     symbol: string;
-    value: string;
+    value: string | number;
+    isCurrency: boolean;
     change: string;
     up: boolean;
 }
 
 export default function TickerTape() {
-    const [tickerData, setTickerData] = useState<TickerItem[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
+    // Use shared React Query hooks (caches data across components)
+    const { data: indices, isLoading: indicesLoading, isError: indicesError } = useMarketIndices();
+    const { data: commodities, isLoading: commoditiesLoading, isError: commoditiesError } = useCommodities();
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const [indices, commodities] = await Promise.all([
-                    getMarketIndices(),
-                    getCommodities()
-                ]);
+    const loading = indicesLoading || commoditiesLoading;
+    const error = indicesError || commoditiesError;
 
-                const items: TickerItem[] = [];
+    // Transform data into ticker items
+    const tickerData = useMemo(() => {
+        const items: TickerItem[] = [];
 
-                // Add indices - using 'value' field from API
-                indices.slice(0, 4).forEach((idx: MarketIndex) => {
-                    const changePercent = idx.changePercent || 0;
-                    items.push({
-                        symbol: idx.name || idx.symbol,
-                        value: idx.value?.toLocaleString(undefined, { maximumFractionDigits: 2 }) || '0',
-                        change: `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%`,
-                        up: changePercent >= 0
-                    });
+        if (indices) {
+            indices.slice(0, 4).forEach((idx: MarketIndex) => {
+                const changePercent = idx.changePercent || 0;
+                items.push({
+                    symbol: idx.name || idx.symbol,
+                    value: idx.value?.toLocaleString(undefined, { maximumFractionDigits: 2 }) || '0',
+                    isCurrency: false,
+                    change: `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%`,
+                    up: changePercent >= 0
                 });
+            });
+        }
 
-                // Add commodities - using 'price' field from API
-                commodities.slice(0, 3).forEach((c: Commodity) => {
-                    const changePercent = c.changePercent || 0;
-                    items.push({
-                        symbol: c.name || c.symbol,
-                        value: `$${c.price?.toLocaleString(undefined, { maximumFractionDigits: 2 }) || 0}`,
-                        change: `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%`,
-                        up: changePercent >= 0
-                    });
+        if (commodities) {
+            commodities.slice(0, 3).forEach((c: Commodity) => {
+                const changePercent = c.changePercent || 0;
+                items.push({
+                    symbol: c.name || c.symbol,
+                    value: c.price || 0,
+                    isCurrency: true,
+                    change: `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%`,
+                    up: changePercent >= 0
                 });
+            });
+        }
 
-                if (items.length > 0) {
-                    setTickerData(items);
-                    setError(false);
-                } else {
-                    setError(true);
-                }
-            } catch (err) {
-                console.error('Failed to fetch ticker data:', err);
-                setError(true);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-        // Refresh every 60 seconds
-        const interval = setInterval(fetchData, 60000);
-        return () => clearInterval(interval);
-    }, []);
+        return items;
+    }, [indices, commodities]);
 
     // Don't render if no data and error
     if (error && tickerData.length === 0) {
@@ -99,7 +85,9 @@ export default function TickerTape() {
                 {tickerData.map((ticker, index) => (
                     <div key={index} className="flex items-center gap-2 flex-shrink-0">
                         <span className="text-slate-400">{ticker.symbol}</span>
-                        <span className="font-semibold">{ticker.value}</span>
+                        <span className="font-semibold">
+                            {ticker.isCurrency ? <PriceDisplay amount={ticker.value as number} /> : ticker.value}
+                        </span>
                         <span
                             className={`flex items-center gap-0.5 ${ticker.up ? 'text-emerald-400' : 'text-red-400'}`}
                         >
@@ -113,7 +101,9 @@ export default function TickerTape() {
                 {tickerData.map((ticker, index) => (
                     <div key={`dup-${index}`} className="flex items-center gap-2 flex-shrink-0">
                         <span className="text-slate-400">{ticker.symbol}</span>
-                        <span className="font-semibold">{ticker.value}</span>
+                        <span className="font-semibold">
+                            {ticker.isCurrency ? <PriceDisplay amount={ticker.value as number} /> : ticker.value}
+                        </span>
                         <span
                             className={`flex items-center gap-0.5 ${ticker.up ? 'text-emerald-400' : 'text-red-400'}`}
                         >

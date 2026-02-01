@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { Target, DollarSign, Calendar, TrendingUp } from 'lucide-react';
 
 interface GoalResult {
@@ -38,11 +39,7 @@ export default function GoalPlanner() {
         };
     }, [goalAmount, timeHorizon, expectedReturn, inflation]);
 
-    const formatCurrency = (amount: number) => {
-        if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
-        if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-    };
+
 
     return (
         <CalculatorLayout
@@ -55,7 +52,7 @@ export default function GoalPlanner() {
                     <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-xl">
                         <p className="text-sm text-slate-500 mb-1">Monthly SIP Required</p>
                         <p className="text-4xl font-bold text-emerald-600">
-                            {formatCurrency(result.monthlyRequired)}
+                            <PriceDisplay amount={result.monthlyRequired} />
                         </p>
                     </div>
 
@@ -63,7 +60,9 @@ export default function GoalPlanner() {
                     <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                         <div className="flex justify-between items-center">
                             <span className="text-sm text-slate-500">Inflation-Adjusted Goal</span>
-                            <span className="font-semibold text-amber-600">{formatCurrency(result.inflationAdjustedGoal)}</span>
+                            <span className="font-semibold text-amber-600">
+                                <PriceDisplay amount={result.inflationAdjustedGoal} />
+                            </span>
                         </div>
                     </div>
 
@@ -75,7 +74,7 @@ export default function GoalPlanner() {
                                 <span className="text-xs text-slate-500">Your Investment</span>
                             </div>
                             <p className="text-lg font-semibold text-slate-900 dark:text-white">
-                                {formatCurrency(result.totalInvestment)}
+                                <PriceDisplay amount={result.totalInvestment} />
                             </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
@@ -84,7 +83,7 @@ export default function GoalPlanner() {
                                 <span className="text-xs text-slate-500">Expected Returns</span>
                             </div>
                             <p className="text-lg font-semibold text-emerald-600">
-                                {formatCurrency(result.totalReturns)}
+                                <PriceDisplay amount={result.totalReturns} />
                             </p>
                         </div>
                     </div>

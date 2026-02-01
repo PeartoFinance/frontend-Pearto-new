@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronRight, BookOpen, Clock, Loader2, AlertCircle } from 'lucide-react';
-import { get } from '@/services/api';
+import { useCourses } from '@/hooks/useEducationData';
 
 interface Course {
     id: number;
@@ -29,32 +28,16 @@ interface EducationStats {
 
 
 export default function EducationalHub() {
-    const [courses, setCourses] = useState<Course[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [stats, setStats] = useState<EducationStats>({ totalCourses: 500, totalStudents: 50000, avgCompletionRate: 95 });
+    const { data, isLoading: loading, isError: error } = useCourses(5);
+    const courses = data?.courses || [];
 
-    useEffect(() => {
-        const fetchCourses = async () => {
-            try {
-                setLoading(true);
-                const response = await get<{ courses: Course[]; total: number }>('/education/courses', { limit: 5 });
-                setCourses(response.courses || []);
-                if (response.total) {
-                    setStats(prev => ({ ...prev, totalCourses: response.total }));
-                }
-                setError(false);
-            } catch (err) {
-                console.error('Failed to fetch courses:', err);
-                setError(true);
-                setCourses([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCourses();
-    }, []);
+    // Hardcoded stats for now, could catch from API if needed
+    // If we want real stats, we can use data.total for totalCourses
+    const stats: EducationStats = {
+        totalCourses: data?.total || 500,
+        totalStudents: 50000,
+        avgCompletionRate: 95
+    };
 
     const getLevelColor = (level?: string) => {
         switch (level?.toLowerCase()) {
@@ -111,11 +94,11 @@ export default function EducationalHub() {
                             {/* Stats */}
                             <div className="flex gap-4 mb-3">
                                 <div>
-                                    <span className="text-lg font-bold text-gray-900 dark:text-white">{course.durationHours || (course.durationWeeks ? course.durationWeeks * 5 : 20)}</span>
+                                    <span className="text-lg font-bold text-gray-900 dark:text-white">{course.duration || 10}</span>
                                     <p className="text-[10px] text-gray-500">Hours</p>
                                 </div>
                                 <div>
-                                    <span className="text-lg font-bold text-gray-900 dark:text-white">{(course.enrollmentCount || 0).toLocaleString()}</span>
+                                    <span className="text-lg font-bold text-gray-900 dark:text-white">{(course.enrolledCount || 0).toLocaleString()}</span>
                                     <p className="text-[10px] text-gray-500">Students</p>
                                 </div>
                             </div>
@@ -123,11 +106,11 @@ export default function EducationalHub() {
                             {/* Description */}
                             <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">{course.description}</p>
 
-                            {/* Duration */}
-                            {course.durationWeeks && (
+                            {/* Duration (Alternative display if needed, otherwise removed as redundant) */}
+                            {course.lessonsCount && (
                                 <div className="flex items-center gap-1 text-[10px] text-gray-500">
                                     <Clock size={10} />
-                                    Duration: {course.durationWeeks} weeks
+                                    Lessons: {course.lessonsCount}
                                 </div>
                             )}
 

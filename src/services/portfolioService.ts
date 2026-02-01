@@ -255,6 +255,101 @@ export async function getPortfolioAnalytics(portfolioId: string): Promise<Portfo
     return get<PortfolioAnalytics>(`/portfolio/${portfolioId}/analytics`);
 }
 
+// --- Portfolio Health & Goals ---
+
+export interface InvestmentGoals {
+    target_stocks_percent: number;
+    target_bonds_percent: number;
+    target_cash_percent: number;
+    target_crypto_percent: number;
+    target_commodities_percent: number;
+    risk_tolerance: 'conservative' | 'moderate' | 'aggressive';
+    benchmark_symbol: string;
+    age?: number;
+}
+
+export interface PortfolioHealth {
+    score: number;
+    status: string;
+    total_value?: number;
+    actual_allocation?: Record<string, number>;
+    target_allocation?: Record<string, number>;
+    recommendations: string[];
+    benchmark?: any;
+    // Client-side computed properties (optional in API response)
+    letter_grade?: string;
+    summary?: string;
+    allocation_health?: Record<string, { actual: number; target: number; diff: number; status: string }>;
+
+    // Error/Empty states
+    message?: string;
+    needs_setup?: boolean;
+    needs_holdings?: boolean;
+}
+
+/**
+ * Get portfolio health score
+ */
+export async function getPortfolioHealth(): Promise<PortfolioHealth> {
+    return get<PortfolioHealth>('/portfolio/analysis/health-score');
+}
+
+/**
+ * Get investment goals
+ */
+export async function getInvestmentGoals(): Promise<InvestmentGoals> {
+    return get<InvestmentGoals>('/portfolio/goals');
+}
+
+/**
+ * Update investment goals
+ */
+export async function updateInvestmentGoals(goals: Partial<InvestmentGoals>): Promise<{ message: string }> {
+    return post<{ message: string }>('/portfolio/goals', goals);
+}
+
+// --- Financial Goals (NEW) ---
+
+export interface FinancialGoal {
+    id: string;
+    name?: string;
+    target_amount: number;
+    current_amount: number;
+    start_amount?: number;
+    target_date: string;
+    progress_percent: number;
+    status: 'active' | 'achieved';
+    portfolio_id?: string | null;
+    created_at?: string;
+}
+
+/**
+ * Get user's financial goals
+ */
+export async function getFinancialGoals(): Promise<FinancialGoal[]> {
+    return get<FinancialGoal[]>('/portfolio/financial-goals');
+}
+
+/**
+ * Create a new financial goal
+ */
+export async function createFinancialGoal(data: {
+    name?: string;
+    target_amount: number;
+    target_date: string;
+    start_amount?: number;
+    portfolio_id?: string | null;
+}): Promise<FinancialGoal> {
+    return post<FinancialGoal>('/portfolio/financial-goals', data);
+}
+
+/**
+ * Delete a financial goal
+ */
+export async function deleteFinancialGoal(id: string): Promise<{ message: string }> {
+    return del<{ message: string }>(`/portfolio/financial-goals/${id}`);
+}
+
 export default {
     getWatchlists,
     getWatchlist,
@@ -270,4 +365,10 @@ export default {
     getHoldingDetail,
     getWealthHistory,
     getPortfolioAnalytics,
+    getPortfolioHealth,
+    getInvestmentGoals,
+    updateInvestmentGoals,
+    getFinancialGoals,
+    createFinancialGoal,
+    deleteFinancialGoal,
 };

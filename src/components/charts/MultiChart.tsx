@@ -14,6 +14,7 @@ import {
     type ISeriesApi,
 } from 'lightweight-charts';
 import { BarChart2, TrendingUp, Activity, Loader2, Mountain, BarChart3, GitBranch, BarChartHorizontal } from 'lucide-react';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 export interface ChartDataPoint {
     date: string;
@@ -52,6 +53,8 @@ export interface MultiChartProps {
     positiveColor?: string;
     /** Negative color */
     negativeColor?: string;
+    /** Skip internal price conversion (if data is already converted) */
+    skipPriceConversion?: boolean;
 }
 
 const PERIODS = [
@@ -80,8 +83,12 @@ export function MultiChart({
     className = '',
     positiveColor = '#10b981',
     negativeColor = '#ef4444',
+    skipPriceConversion = false,
 }: MultiChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
+    // ... (unchanged code) ...
+    // ... around line 384 for Change Badge ...
+    // ... around line 412 for Price Range ...
     const chartRef = useRef<IChartApi | null>(null);
     const seriesRef = useRef<ISeriesApi<'Area' | 'Candlestick' | 'Line'> | null>(null);
 
@@ -380,7 +387,7 @@ export function MultiChart({
                             ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
                             : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800'
                             }`}>
-                            {change.value >= 0 ? '+' : ''}{change.value.toFixed(2)} ({change.percent >= 0 ? '+' : ''}{change.percent.toFixed(2)}%)
+                            <PriceDisplay amount={Math.abs(change.value)} autoConvert={!skipPriceConversion} /> ({change.percent >= 0 ? '+' : ''}{change.percent.toFixed(2)}%)
                         </span>
                     )}
                 </div>
@@ -408,7 +415,7 @@ export function MultiChart({
                 {priceRange && (
                     <div className="text-xs text-slate-500">
                         Range: <span className="font-medium text-slate-700 dark:text-slate-300">
-                            ${priceRange.low.toFixed(2)} - ${priceRange.high.toFixed(2)}
+                            <PriceDisplay amount={priceRange.low} autoConvert={!skipPriceConversion} /> - <PriceDisplay amount={priceRange.high} autoConvert={!skipPriceConversion} />
                         </span>
                     </div>
                 )}

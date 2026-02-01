@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { TrendingUp, DollarSign, Calculator } from 'lucide-react';
 
 export default function DividendYieldCalculator() {
@@ -23,9 +24,7 @@ export default function DividendYieldCalculator() {
         };
     }, [stockPrice, annualDividend, sharesOwned]);
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-    };
+
 
     return (
         <CalculatorLayout
@@ -41,16 +40,18 @@ export default function DividendYieldCalculator() {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Annual Income</span>
-                            <p className="text-lg font-semibold text-emerald-600">{formatCurrency(result.totalAnnualIncome)}</p>
+                            <p className="text-lg font-semibold text-emerald-600">
+                                <PriceDisplay amount={result.totalAnnualIncome} />
+                            </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Monthly Income</span>
-                            <p className="text-lg font-semibold">{formatCurrency(result.monthlyIncome)}</p>
+                            <p className="text-lg font-semibold"><PriceDisplay amount={result.monthlyIncome} /></p>
                         </div>
                     </div>
                     <div className="p-4 bg-white dark:bg-slate-800 rounded-xl flex justify-between">
                         <span className="text-slate-500">Investment Value</span>
-                        <span className="font-semibold">{formatCurrency(result.investmentValue)}</span>
+                        <span className="font-semibold"><PriceDisplay amount={result.investmentValue} /></span>
                     </div>
                 </div>
             }

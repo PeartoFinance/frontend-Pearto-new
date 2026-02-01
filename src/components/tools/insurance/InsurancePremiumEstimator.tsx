@@ -3,8 +3,10 @@
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
 import { Shield, Calculator, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 export default function InsurancePremiumEstimator() {
+    const { formatPrice } = useCurrency();
     const [age, setAge] = useState(35);
     const [coverageAmount, setCoverageAmount] = useState(500000);
     const [term, setTerm] = useState(20);
@@ -47,7 +49,7 @@ export default function InsurancePremiumEstimator() {
         };
     }, [age, coverageAmount, term, smoker, healthRating]);
 
-    const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
+    const formatCurrency = (value: number) => formatPrice(value);
 
     return (
         <CalculatorLayout
@@ -84,11 +86,11 @@ export default function InsurancePremiumEstimator() {
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Coverage Amount</span>
                                 <span className="font-medium text-slate-700 dark:text-slate-300">
-                                    ${coverageAmount.toLocaleString()}
+                                    {formatPrice(coverageAmount)}
                                 </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-slate-500">Cost per $1,000/year</span>
+                                <span className="text-slate-500">Cost per {formatPrice(1000)}/year</span>
                                 <span className="font-medium text-slate-700 dark:text-slate-300">
                                     {formatCurrency(results.costPerThousand)}
                                 </span>
@@ -152,12 +154,12 @@ export default function InsurancePremiumEstimator() {
                         onChange={(e) => setCoverageAmount(Number(e.target.value))}
                         className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
                     >
-                        <option value={100000}>$100,000</option>
-                        <option value={250000}>$250,000</option>
-                        <option value={500000}>$500,000</option>
-                        <option value={750000}>$750,000</option>
-                        <option value={1000000}>$1,000,000</option>
-                        <option value={2000000}>$2,000,000</option>
+                        <option value={100000}>{formatPrice(100000)}</option>
+                        <option value={250000}>{formatPrice(250000)}</option>
+                        <option value={500000}>{formatPrice(500000)}</option>
+                        <option value={750000}>{formatPrice(750000)}</option>
+                        <option value={1000000}>{formatPrice(1000000)}</option>
+                        <option value={2000000}>{formatPrice(2000000)}</option>
                     </select>
                 </div>
 

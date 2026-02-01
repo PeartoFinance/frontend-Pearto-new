@@ -1,48 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { RefreshCw, TrendingUp, TrendingDown, Loader2, AlertCircle } from 'lucide-react';
-import { get } from '@/services/api';
-
-interface ForexRate {
-    pair: string;
-    rate: number;
-    change: number;
-    changePercent: number;
-    high: number;
-    low: number;
-}
+import { useForexRates } from '@/hooks/useContentData';
 
 const tabs = ['Major Pairs', 'Emerging Markets', 'Currency Exchange', 'Price Charts'];
 
 export default function ForeignExchangeMarkets() {
     const [activeTab, setActiveTab] = useState('Major Pairs');
     const [baseCurrency, setBaseCurrency] = useState('USD');
-    const [forexRates, setForexRates] = useState<ForexRate[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
 
-    const fetchForexData = async () => {
-        try {
-            setLoading(true);
-            const data = await get<ForexRate[]>('/content/forex', { base: baseCurrency });
-            setForexRates(data || []);
-            setError(false);
-        } catch (err) {
-            console.error('Failed to fetch forex rates:', err);
-            setError(true);
-            setForexRates([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchForexData();
-    }, [baseCurrency]);
+    const { data: forexRates = [], isLoading: loading, isError: error, refetch } = useForexRates(baseCurrency);
 
     const handleRefresh = () => {
-        fetchForexData();
+        refetch();
     };
 
     return (

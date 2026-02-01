@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { RefreshCw, TrendingUp, TrendingDown, Loader2, AlertCircle } from 'lucide-react';
-import { getTopMovers, MarketStock } from '@/services/marketService';
+import { useTopMovers, MarketStock } from '@/hooks/useMarketData';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 type MarketTab = 'US' | 'EU' | 'ASIA' | 'CRYPTO';
 
@@ -16,47 +17,27 @@ interface Mover {
 
 export default function QuickMarkets() {
     const [activeTab, setActiveTab] = useState<MarketTab>('US');
-    const [movers, setMovers] = useState<Mover[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
+    const { data, isLoading: loading, isError: error, refetch } = useTopMovers('both', 10);
 
-    const fetchMovers = async () => {
-        try {
-            setLoading(true);
-            const data = await getTopMovers('both', 10);
-            // Combine gainers and losers, sorted by absolute change
-            const all = [
-                ...(data.gainers || []).map((s: MarketStock) => ({
-                    symbol: s.symbol,
-                    name: s.name,
-                    change: s.changePercent || 0,
-                    price: s.price
-                })),
-                ...(data.losers || []).map((s: MarketStock) => ({
-                    symbol: s.symbol,
-                    name: s.name,
-                    change: s.changePercent || 0,
-                    price: s.price
-                }))
-            ];
-            setMovers(all);
-            setError(false);
-        } catch (err) {
-            console.error('Failed to fetch movers:', err);
-            setError(true);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Transform data into movers
+    const movers = useMemo(() => {
+        if (!data) return [];
+        return [
+            ...(data.gainers || []).map((s: MarketStock) => ({
+                symbol: s.symbol,
+                name: s.name,
+                change: s.changePercent || 0,
+                price: s.price
+            })),
+            ...(data.losers || []).map((s: MarketStock) => ({
+                symbol: s.symbol,
+                name: s.name,
+                change: s.changePercent || 0,
+                price: s.price
+            }))
+        ];
+    }, [data]);
 
-    useEffect(() => {
-        fetchMovers();
-        // Refresh every 2 minutes
-        const interval = setInterval(fetchMovers, 120000);
-        return () => clearInterval(interval);
-    }, []);
-
-    // Filter movers based on tab (in production would fetch by region)
     const filteredMovers = movers.slice(0, 5);
 
     return (
@@ -67,7 +48,7 @@ export default function QuickMarkets() {
                     Quick Markets
                 </h3>
                 <button
-                    onClick={fetchMovers}
+                    onClick={() => refetch()}
                     disabled={loading}
                     className="text-xs text-slate-500 hover:text-emerald-500 flex items-center gap-1"
                 >
@@ -116,7 +97,9 @@ export default function QuickMarkets() {
                             <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium text-slate-900 dark:text-white">{mover.symbol}</span>
                                 {mover.price && (
-                                    <span className="text-xs text-slate-500">${mover.price.toFixed(2)}</span>
+                                    <span className="text-xs text-slate-500">
+                                        <PriceDisplay amount={mover.price} />
+                                    </span>
                                 )}
                             </div>
                             <span className={`flex items-center gap-1 text-sm font-semibold ${mover.change >= 0 ? 'text-emerald-500' : 'text-red-500'

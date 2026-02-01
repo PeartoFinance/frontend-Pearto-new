@@ -425,6 +425,50 @@ export async function getStockDividends(symbol: string): Promise<DividendRecord[
     return get<DividendRecord[]>(`/stocks/dividends/${symbol}`);
 }
 
+/**
+ * Get detailed crypto profile
+ */
+export async function getCryptoProfile(symbol: string): Promise<MarketStock> {
+    return get<MarketStock>(`/crypto/coin/${symbol}`);
+}
+
+/**
+ * Get crypto history
+ */
+export async function getCryptoHistory(symbol: string, period = '1mo', interval = '1d'): Promise<StockHistoryResponse> {
+    return get<StockHistoryResponse>(`/crypto/history/${symbol}`, { period, interval });
+}
+
+export interface EconomicEvent {
+    id: string;
+    title: string;
+    country: string;
+    eventDate: string;
+    importance: 'low' | 'medium' | 'high';
+    forecast?: string;
+    previous?: string;
+    actual?: string;
+    currency?: string;
+    source?: string;
+}
+
+/**
+ * Get economic calendar events
+ */
+export async function getEconomicCalendar(start?: string, end?: string, limit = 50): Promise<EconomicEvent[]> {
+    const params: any = { limit };
+    if (start) params.start = start;
+    if (end) params.end = end;
+    return get<EconomicEvent[]>('/market/calendar', params);
+}
+
+/**
+ * Get forex history
+ */
+export async function getForexHistory(symbol: string, period = '1mo', interval = '1d'): Promise<PriceHistoryPoint[]> {
+    return get<PriceHistoryPoint[]>(`/market/forex/history/${symbol}`, { period, interval });
+}
+
 export default {
     getMarketOverview,
     getMarketIndices,
@@ -440,6 +484,13 @@ export default {
     getSectorPerformance,
     getStockHistory,
     getStockProfile,
+    // Crypto
+    getCryptoProfile,
+    getCryptoHistory,
+    // Calendar
+    getEconomicCalendar,
+    // Forex
+    getForexHistory,
     // Business Profile APIs
     getStockFinancials,
     getStockForecast,

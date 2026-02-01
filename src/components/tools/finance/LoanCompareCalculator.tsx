@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { DollarSign, Calculator, CreditCard } from 'lucide-react';
 
 export default function LoanCompareCalculator() {
@@ -27,10 +28,7 @@ export default function LoanCompareCalculator() {
         return { loan1, loan2, savings: Math.abs(savings), betterOption };
     }, [loanAmount, loan1Rate, loan2Rate, tenure]);
 
-    const formatCurrency = (amount: number) => {
-        if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-    };
+
 
     return (
         <CalculatorLayout
@@ -41,19 +39,21 @@ export default function LoanCompareCalculator() {
                 <div className="space-y-6">
                     <div className="text-center p-6 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
                         <p className="text-sm text-slate-500 mb-1">You Save with Loan {result.betterOption}</p>
-                        <p className="text-4xl font-bold text-emerald-600">{formatCurrency(result.savings)}</p>
+                        <p className="text-4xl font-bold text-emerald-600">
+                            <PriceDisplay amount={result.savings} />
+                        </p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className={`p-4 rounded-xl ${result.betterOption === 1 ? 'bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-400' : 'bg-white dark:bg-slate-800'}`}>
                             <span className="text-xs text-slate-500">Loan 1 ({loan1Rate}%)</span>
-                            <p className="text-lg font-semibold">{formatCurrency(result.loan1.emi)}/mo</p>
-                            <p className="text-xs text-slate-500">Total: {formatCurrency(result.loan1.totalPayment)}</p>
+                            <p className="text-lg font-semibold"><PriceDisplay amount={result.loan1.emi} />/mo</p>
+                            <p className="text-xs text-slate-500">Total: <PriceDisplay amount={result.loan1.totalPayment} /></p>
                             {result.betterOption === 1 && <p className="text-xs text-emerald-600 mt-1">✓ Best Option</p>}
                         </div>
                         <div className={`p-4 rounded-xl ${result.betterOption === 2 ? 'bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-400' : 'bg-white dark:bg-slate-800'}`}>
                             <span className="text-xs text-slate-500">Loan 2 ({loan2Rate}%)</span>
-                            <p className="text-lg font-semibold">{formatCurrency(result.loan2.emi)}/mo</p>
-                            <p className="text-xs text-slate-500">Total: {formatCurrency(result.loan2.totalPayment)}</p>
+                            <p className="text-lg font-semibold"><PriceDisplay amount={result.loan2.emi} />/mo</p>
+                            <p className="text-xs text-slate-500">Total: <PriceDisplay amount={result.loan2.totalPayment} /></p>
                             {result.betterOption === 2 && <p className="text-xs text-emerald-600 mt-1">✓ Best Option</p>}
                         </div>
                     </div>

@@ -13,16 +13,16 @@ interface FeatureCard {
 }
 
 const featureCards: FeatureCard[] = [
-    { title: 'Technology', subtitle: 'Tech news & innovation', detail: 'AI, startups, crypto', gradient: 'from-blue-500 to-purple-600', icon: '💻', href: '/technology', isNew: true },
-    { title: 'Business', subtitle: 'Corporate & markets', detail: 'Earnings, stocks', gradient: 'from-emerald-500 to-teal-600', icon: '💼', href: '/business' },
-    { title: 'World News', subtitle: 'Global coverage', detail: 'International affairs', gradient: 'from-slate-500 to-gray-600', icon: '🌍', href: '/world' },
+    { title: 'Technology', subtitle: 'Tech news & innovation', detail: 'AI, startups, crypto', gradient: 'from-blue-500 to-purple-600', icon: '💻', href: '/news?category=technology', isNew: true },
+    { title: 'Business', subtitle: 'Corporate & markets', detail: 'Earnings, stocks', gradient: 'from-emerald-500 to-teal-600', icon: '💼', href: '/news?category=business' },
+    { title: 'World News', subtitle: 'Global coverage', detail: 'International affairs', gradient: 'from-slate-500 to-gray-600', icon: '🌍', href: '/news?category=world' },
     { title: 'Latest News', subtitle: 'Verified RSS feeds', detail: 'Real-time updates', gradient: 'from-fuchsia-500 to-pink-600', icon: '📰', href: '/news' },
     { title: 'Market Dashboard', subtitle: 'GLOBAL MARKETS', detail: 'Indices, crypto & commodities', gradient: 'from-emerald-500 to-cyan-600', icon: '📊', href: '/markets' },
     { title: 'Economic Calendar', subtitle: 'KEY EVENTS', detail: 'CPI, Fed & Jobs reports', gradient: 'from-indigo-500 to-violet-600', icon: '📅', href: '/calendar' },
     { title: 'Gold & Silver', subtitle: 'Bullion live spot prices', detail: 'Track precious metals', gradient: 'from-amber-400 to-orange-500', icon: '✨', href: '/markets/metals' },
-    { title: 'Foreign FX Rates', subtitle: 'Global currency crosses', detail: 'Real-time exchange', gradient: 'from-sky-500 to-blue-600', icon: '🏦', href: '/tools/fx-rates' },
-    { title: 'TV Hub', subtitle: 'Global TV channels', detail: 'Live markets & factual', gradient: 'from-emerald-500 to-teal-600', icon: '📺', href: '/tvs' },
-    { title: 'Radio Hub', subtitle: '600+ stations streaming', detail: 'Nepali / Intl FM', gradient: 'from-red-500 to-rose-600', icon: '📻', href: '/radios' },
+    { title: 'Foreign FX Rates', subtitle: 'Global currency crosses', detail: 'Real-time exchange', gradient: 'from-sky-500 to-blue-600', icon: '🏦', href: '/forex' },
+    { title: 'TV Hub', subtitle: 'Global TV channels', detail: 'Live markets & factual', gradient: 'from-emerald-500 to-teal-600', icon: '📺', href: '/tv' },
+    { title: 'Radio Hub', subtitle: '600+ stations streaming', detail: 'Nepali / Intl FM', gradient: 'from-red-500 to-rose-600', icon: '📻', href: '/radio' },
 ];
 
 export default function FeatureQuickGrid() {

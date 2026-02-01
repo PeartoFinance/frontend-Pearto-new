@@ -15,6 +15,7 @@ import {
     getMarketOverview,
     getStocks,
     getStockHistory,
+    getCryptoMarkets,
     type MarketOverviewData,
     type MarketStock,
     type MarketIndex,
@@ -23,16 +24,17 @@ import {
 import { createChart, ColorType, AreaSeries, type IChartApi } from 'lightweight-charts';
 import {
     TrendingUp, TrendingDown, Activity, BarChart2, Loader2,
-    ArrowUpRight, ArrowDownRight, RefreshCw, Clock, LineChart, PieChart
+    ArrowUpRight, ArrowDownRight, RefreshCw, Clock, LineChart, PieChart, Coins
 } from 'lucide-react';
 import { TableExportButton } from '@/components/common/TableExportButton';
 
-type TabType = 'overview' | 'live' | 'floorsheet' | 'charts' | 'analysis';
+type TabType = 'overview' | 'live' | 'crypto' | 'floorsheet' | 'charts' | 'analysis';
 
 export default function MarketPage() {
     const [activeTab, setActiveTab] = useState<TabType>('overview');
     const [overview, setOverview] = useState<MarketOverviewData | null>(null);
     const [allStocks, setAllStocks] = useState<MarketStock[]>([]);
+    const [cryptoData, setCryptoData] = useState<MarketStock[]>([]);
     const [loading, setLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
@@ -40,12 +42,14 @@ export default function MarketPage() {
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
-            const [overviewData, stocksData] = await Promise.all([
+            const [overviewData, stocksData, crypto] = await Promise.all([
                 getMarketOverview(),
-                getStocks(undefined, 50)
+                getStocks(undefined, 50),
+                getCryptoMarkets(100)
             ]);
             setOverview(overviewData);
             setAllStocks(stocksData);
+            setCryptoData(crypto);
             setLastUpdated(new Date());
         } catch (err) {
             console.error('Failed to load market data:', err);
@@ -77,6 +81,7 @@ export default function MarketPage() {
     const tabs: { id: TabType; label: string }[] = [
         { id: 'overview', label: 'Overview' },
         { id: 'live', label: 'Live Market' },
+        { id: 'crypto', label: 'Crypto' },
         { id: 'floorsheet', label: 'Floorsheet' },
         { id: 'charts', label: 'Charts' },
         { id: 'analysis', label: 'Analysis' },
@@ -277,6 +282,102 @@ export default function MarketPage() {
                                         View All Stocks <ArrowUpRight size={14} />
                                     </Link>
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Crypto Tab */}
+                        {activeTab === 'crypto' && (
+                            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                                <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Coins size={18} className="text-amber-500" />
+                                        <span className="font-semibold text-slate-900 dark:text-white">Crypto Market</span>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                                            <Clock size={12} />
+                                            Real-time prices • Auto-updates every 60s
+                                        </div>
+                                        <TableExportButton
+                                            data={cryptoData}
+                                            columns={[
+                                                { key: 'symbol', label: 'Symbol' },
+                                                { key: 'name', label: 'Name' },
+                                                { key: 'price', label: 'Price', format: 'currency' },
+                                                { key: 'change', label: 'Change', format: 'currency' },
+                                                { key: 'changePercent', label: 'Change %', format: 'percent' },
+                                                { key: 'volume', label: 'Volume', format: 'largeNumber' },
+                                                { key: 'marketCap', label: 'Market Cap', format: 'largeNumber' },
+                                            ]}
+                                            filename="crypto-market"
+                                            title="Crypto Market Data"
+                                            variant="compact"
+                                        />
+                                    </div>
+                                </div>
+
+                                {loading && !cryptoData.length ? (
+                                    <div className="flex items-center justify-center py-12">
+                                        <Loader2 className="animate-spin text-emerald-500" size={24} />
+                                    </div>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr className="border-b border-slate-200 dark:border-slate-700">
+                                                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Symbol</th>
+                                                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Name</th>
+                                                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Price</th>
+                                                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Change</th>
+                                                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">% Change</th>
+                                                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Volume</th>
+                                                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Market Cap</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
+                                                {cryptoData.map((coin) => {
+                                                    const isPositive = (coin.changePercent || 0) >= 0;
+                                                    return (
+                                                        <tr key={coin.symbol} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                                                            <td className="px-4 py-3">
+                                                                <Link href={`/crypto/${coin.symbol}`} className="flex items-center gap-2 hover:underline">
+                                                                    <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-xs font-bold text-amber-600 dark:text-amber-400">
+                                                                        {coin.symbol?.slice(0, 3)}
+                                                                    </div>
+                                                                    <span className="font-medium text-amber-600 dark:text-amber-400">{coin.symbol}</span>
+                                                                </Link>
+                                                            </td>
+                                                            <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 truncate max-w-[200px]">
+                                                                {coin.name}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right font-semibold text-slate-900 dark:text-white">
+                                                                ${formatNumber(coin.price)}
+                                                            </td>
+                                                            <td className={`px-4 py-3 text-right font-medium ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
+                                                                {isPositive ? '+' : ''}{formatNumber(coin.change)}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right">
+                                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${isPositive
+                                                                    ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                                                                    : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                                                                    }`}>
+                                                                    {isPositive ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+                                                                    {isPositive ? '+' : ''}{formatNumber(coin.changePercent)}%
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
+                                                                {formatLargeNumber(coin.volume)}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
+                                                                {formatLargeNumber(coin.marketCap)}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
                             </div>
                         )}
 

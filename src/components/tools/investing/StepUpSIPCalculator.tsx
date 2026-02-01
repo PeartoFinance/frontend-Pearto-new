@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { TrendingUp, TrendingDown, ArrowLeftRight } from 'lucide-react';
 
 export default function StepUpSIPCalculator() {
@@ -41,11 +42,7 @@ export default function StepUpSIPCalculator() {
         };
     }, [monthlyInvestment, annualStepUp, expectedReturn, timePeriod]);
 
-    const formatCurrency = (amount: number) => {
-        if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
-        if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-    };
+
 
     return (
         <CalculatorLayout
@@ -56,22 +53,26 @@ export default function StepUpSIPCalculator() {
                 <div className="space-y-6">
                     <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-xl">
                         <p className="text-sm text-slate-500 mb-1">Step-Up SIP Value</p>
-                        <p className="text-4xl font-bold text-emerald-600">{formatCurrency(result.futureValue)}</p>
+                        <p className="text-4xl font-bold text-emerald-600">
+                            <PriceDisplay amount={result.futureValue} />
+                        </p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Total Invested</span>
-                            <p className="text-lg font-semibold">{formatCurrency(result.totalInvested)}</p>
+                            <p className="text-lg font-semibold"><PriceDisplay amount={result.totalInvested} /></p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Total Returns</span>
-                            <p className="text-lg font-semibold text-emerald-600">{formatCurrency(result.returns)}</p>
+                            <p className="text-lg font-semibold text-emerald-600">
+                                <PriceDisplay amount={result.returns} />
+                            </p>
                         </div>
                     </div>
                     <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
                         <p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium">Extra gains vs Regular SIP</p>
-                        <p className="text-2xl font-bold text-emerald-600">+{formatCurrency(result.extraGains)}</p>
-                        <p className="text-xs text-slate-500 mt-1">Regular SIP would give {formatCurrency(result.regularFV)}</p>
+                        <p className="text-2xl font-bold text-emerald-600">+<PriceDisplay amount={result.extraGains} /></p>
+                        <p className="text-xs text-slate-500 mt-1">Regular SIP would give <PriceDisplay amount={result.regularFV} /></p>
                     </div>
                 </div>
             }

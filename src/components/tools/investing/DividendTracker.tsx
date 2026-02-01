@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { DollarSign, TrendingUp, Calendar, PlusCircle, Trash2 } from 'lucide-react';
 import {
     createChart,
@@ -165,8 +166,7 @@ export default function DividendTracker() {
         setHoldings(holdings.filter((_, i) => i !== index));
     };
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+
 
     return (
         <CalculatorLayout
@@ -179,11 +179,15 @@ export default function DividendTracker() {
                     <div className="grid grid-cols-2 gap-3">
                         <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Monthly Income</p>
-                            <p className="text-2xl font-bold text-emerald-600">{formatCurrency(result.monthlyTotal)}</p>
+                            <p className="text-2xl font-bold text-emerald-600">
+                                <PriceDisplay amount={result.monthlyTotal} />
+                            </p>
                         </div>
                         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Annual Income</p>
-                            <p className="text-2xl font-bold text-blue-600">{formatCurrency(result.annualTotal)}</p>
+                            <p className="text-2xl font-bold text-blue-600">
+                                <PriceDisplay amount={result.annualTotal} />
+                            </p>
                         </div>
                     </div>
 
@@ -214,7 +218,7 @@ export default function DividendTracker() {
                                         <span className="text-xs text-slate-400">{h.shares} shares</span>
                                     </div>
                                     <span className="text-sm font-medium text-emerald-600">
-                                        {formatCurrency(h.annualDividend)}/yr
+                                        <PriceDisplay amount={h.annualDividend} />/yr
                                     </span>
                                 </div>
                             ))}

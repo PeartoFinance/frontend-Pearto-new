@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { type MarketStock } from '@/services/marketService';
 import { ArrowUpDown, ArrowUp, ArrowDown, TrendingUp, TrendingDown } from 'lucide-react';
 import { TableExportButton, type ExportColumn } from '@/components/common/TableExportButton';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 
 interface StockTableProps {
@@ -219,7 +220,7 @@ export default function StockTable({ stocks, loading = false }: StockTableProps)
                                     </td>
                                     <td className="px-4 py-3 text-right">
                                         <span className="font-semibold text-slate-900 dark:text-white">
-                                            ${formatNumber(stock.price)}
+                                            <PriceDisplay amount={stock.price} />
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-right">
@@ -227,7 +228,7 @@ export default function StockTable({ stocks, loading = false }: StockTableProps)
                                             }`}>
                                             {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                                             <span>
-                                                {isPositive ? '+' : ''}{formatNumber(stock.change)} ({isPositive ? '+' : ''}{formatNumber(stock.changePercent)}%)
+                                                {isPositive ? '+' : ''}<PriceDisplay amount={Math.abs(stock.change || 0)} showSymbol={false} /> ({isPositive ? '+' : ''}{formatNumber(stock.changePercent)}%)
                                             </span>
                                         </div>
                                     </td>
@@ -239,9 +240,9 @@ export default function StockTable({ stocks, loading = false }: StockTableProps)
                                     </td>
                                     <td className="px-4 py-3 text-right hidden xl:table-cell">
                                         <div className="text-xs text-slate-500">
-                                            <span className="text-red-500">${formatNumber(stock.low52w, 0)}</span>
+                                            <span className="text-red-500"><PriceDisplay amount={stock.low52w} minimumFractionDigits={0} maximumFractionDigits={0} /></span>
                                             <span className="mx-1">-</span>
-                                            <span className="text-emerald-500">${formatNumber(stock.high52w, 0)}</span>
+                                            <span className="text-emerald-500"><PriceDisplay amount={stock.high52w} minimumFractionDigits={0} maximumFractionDigits={0} /></span>
                                         </div>
                                     </td>
                                 </tr>

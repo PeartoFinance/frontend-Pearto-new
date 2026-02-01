@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { Receipt, DollarSign, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
 
 type AssetType = 'stocks' | 'real_estate' | 'crypto' | 'collectibles';
@@ -125,8 +126,7 @@ export default function CapitalGainsTaxCalculator() {
         };
     }, [purchasePrice, salePrice, holdingPeriod, filingStatus, otherIncome, purchaseDate, saleDate, assetType]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
 
     return (
         <CalculatorLayout
@@ -144,7 +144,7 @@ export default function CapitalGainsTaxCalculator() {
                         )}
                         <p className="text-sm text-slate-500">Capital {result.isProfit ? 'Gain' : 'Loss'}</p>
                         <p className={`text-4xl font-bold ${result.isProfit ? 'text-emerald-600' : 'text-red-600'}`}>
-                            {result.isProfit ? '+' : ''}{formatCurrency(result.gain)}
+                            {result.isProfit ? '+' : ''}<PriceDisplay amount={result.gain} maximumFractionDigits={0} />
                         </p>
                         {result.holdingDays > 0 && (
                             <p className="text-sm text-slate-500 mt-1">
@@ -162,13 +162,17 @@ export default function CapitalGainsTaxCalculator() {
                                 </div>
                                 <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                                     <p className="text-xs text-slate-500 mb-1">Tax Owed</p>
-                                    <p className="text-2xl font-bold text-red-500">{formatCurrency(result.taxOwed)}</p>
+                                    <p className="text-2xl font-bold text-red-500">
+                                        <PriceDisplay amount={result.taxOwed} maximumFractionDigits={0} />
+                                    </p>
                                 </div>
                             </div>
 
                             <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl text-center">
                                 <p className="text-sm text-slate-500 mb-1">Net Profit After Tax</p>
-                                <p className="text-3xl font-bold text-emerald-600">{formatCurrency(result.netProfit)}</p>
+                                <p className="text-3xl font-bold text-emerald-600">
+                                    <PriceDisplay amount={result.netProfit} maximumFractionDigits={0} />
+                                </p>
                             </div>
 
                             {/* Visual breakdown */}
@@ -187,8 +191,8 @@ export default function CapitalGainsTaxCalculator() {
                                     />
                                 </div>
                                 <div className="flex justify-between text-xs mt-2">
-                                    <span className="text-emerald-600">Keep: {formatCurrency(result.netProfit)}</span>
-                                    <span className="text-red-500">Tax: {formatCurrency(result.taxOwed)}</span>
+                                    <span className="text-emerald-600 flex items-center gap-1">Keep: <PriceDisplay amount={result.netProfit} maximumFractionDigits={0} /></span>
+                                    <span className="text-red-500 flex items-center gap-1">Tax: <PriceDisplay amount={result.taxOwed} maximumFractionDigits={0} /></span>
                                 </div>
                             </div>
                         </>

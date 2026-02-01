@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight, ArrowDownRight, TrendingUp, BarChart2, Loader2, AlertCircle } from 'lucide-react';
 import { getMarketOverview, getMarketIndices, MarketOverviewData, MarketIndex } from '@/services/marketService';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 export default function MarketOverview() {
     const [data, setData] = useState<MarketOverviewData | null>(null);
@@ -133,7 +134,7 @@ export default function MarketOverview() {
                                     <span className="font-medium text-emerald-600 dark:text-emerald-400">{stock.symbol}</span>
                                 </div>
                                 <div className="text-right">
-                                    <p className="font-semibold text-slate-900 dark:text-white">${stock.price?.toFixed(2)}</p>
+                                    <div className="font-semibold text-slate-900 dark:text-white"><PriceDisplay amount={stock.price} /></div>
                                     <p className="text-xs text-emerald-500">+{stock.changePercent?.toFixed(2)}%</p>
                                 </div>
                             </Link>
@@ -162,7 +163,7 @@ export default function MarketOverview() {
                                     <span className="font-medium text-red-600 dark:text-red-400">{stock.symbol}</span>
                                 </div>
                                 <div className="text-right">
-                                    <p className="font-semibold text-slate-900 dark:text-white">${stock.price?.toFixed(2)}</p>
+                                    <div className="font-semibold text-slate-900 dark:text-white"><PriceDisplay amount={stock.price} /></div>
                                     <p className="text-xs text-red-500">{stock.changePercent?.toFixed(2)}%</p>
                                 </div>
                             </Link>
@@ -195,7 +196,7 @@ export default function MarketOverview() {
                                     <span className="font-medium text-slate-700 dark:text-slate-300">{stock.symbol}</span>
                                 </div>
                                 <div className="text-right">
-                                    <p className="font-semibold text-slate-900 dark:text-white">${stock.price?.toFixed(2)}</p>
+                                    <div className="font-semibold text-slate-900 dark:text-white"><PriceDisplay amount={stock.price} /></div>
                                     <p className="text-xs text-slate-500 dark:text-slate-400">{((stock.volume || 0) / 1000000).toFixed(1)}M</p>
                                 </div>
                             </Link>

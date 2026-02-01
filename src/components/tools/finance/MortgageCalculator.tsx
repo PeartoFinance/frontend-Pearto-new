@@ -2,7 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { Home, DollarSign, Calendar, Percent } from 'lucide-react';
+import VendorList from '@/components/vendors/VendorList';
 
 interface MortgageResult {
     monthlyPayment: number;
@@ -36,11 +38,7 @@ export default function MortgageCalculator() {
         };
     }, [homePrice, downPayment, interestRate, loanTerm]);
 
-    const formatCurrency = (amount: number) => {
-        if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
-        if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-    };
+
 
     const downPaymentPercent = Math.round((downPayment / homePrice) * 100);
 
@@ -51,29 +49,35 @@ export default function MortgageCalculator() {
             category="Real Estate"
             results={
                 <div className="space-y-6">
-                    <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-xl">
+                    <div className="text-center p-6 bg-slate-50 dark:bg-slate-900/50 rounded-xl">
                         <p className="text-sm text-slate-500 mb-1">Monthly EMI</p>
-                        <p className="text-4xl font-bold text-emerald-600">{formatCurrency(result.monthlyPayment)}</p>
+                        <p className="text-4xl font-bold text-emerald-600">
+                            <PriceDisplay amount={result.monthlyPayment} />
+                        </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
+                        <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl">
                             <div className="flex items-center gap-2 mb-2">
                                 <DollarSign className="w-4 h-4 text-blue-500" />
                                 <span className="text-xs text-slate-500">Total Payment</span>
                             </div>
-                            <p className="text-lg font-semibold text-slate-900 dark:text-white">{formatCurrency(result.totalPayment)}</p>
+                            <p className="text-lg font-semibold text-slate-900 dark:text-white">
+                                <PriceDisplay amount={result.totalPayment} />
+                            </p>
                         </div>
-                        <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
+                        <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl">
                             <div className="flex items-center gap-2 mb-2">
                                 <Percent className="w-4 h-4 text-red-500" />
                                 <span className="text-xs text-slate-500">Total Interest</span>
                             </div>
-                            <p className="text-lg font-semibold text-red-600">{formatCurrency(result.totalInterest)}</p>
+                            <p className="text-lg font-semibold text-red-600">
+                                <PriceDisplay amount={result.totalInterest} />
+                            </p>
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-slate-800 rounded-xl p-4">
+                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-4">
                         <div className="flex h-6 rounded-full overflow-hidden">
                             <div className="bg-emerald-500 flex items-center justify-center text-xs text-white font-medium" style={{ width: `${result.principalPercent}%` }}>
                                 {result.principalPercent}%
@@ -88,6 +92,13 @@ export default function MortgageCalculator() {
                         </div>
                     </div>
                 </div>
+            }
+            rightColumn={
+                <VendorList
+                    category="Real Estate"
+                    title="Find Mortgage Lenders"
+                    description="Compare rates from top lenders"
+                />
             }
         >
             <div>

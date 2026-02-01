@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { Flame, TrendingUp, DollarSign, Clock, Target } from 'lucide-react';
 import {
     createChart,
@@ -150,8 +151,7 @@ export default function FIRECalculator() {
         };
     }, [result, isDark]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
 
     return (
         <CalculatorLayout
@@ -165,7 +165,7 @@ export default function FIRECalculator() {
                         <Flame className={`w-8 h-8 mx-auto mb-2 ${result.onTrack ? 'text-emerald-500' : 'text-amber-500'}`} />
                         <p className="text-sm text-slate-500">Your FIRE Number</p>
                         <p className={`text-4xl font-bold ${result.onTrack ? 'text-emerald-600' : 'text-amber-600'}`}>
-                            {formatCurrency(result.fireNumber)}
+                            <PriceDisplay amount={result.fireNumber} maximumFractionDigits={0} />
                         </p>
                         {result.yearsToFIRE && (
                             <p className="text-sm mt-1 text-emerald-600">
@@ -178,13 +178,13 @@ export default function FIRECalculator() {
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">At Retirement Age {retireAge}</p>
                             <p className={`text-xl font-bold ${result.onTrack ? 'text-emerald-600' : 'text-amber-600'}`}>
-                                {formatCurrency(result.finalBalance)}
+                                <PriceDisplay amount={result.finalBalance} maximumFractionDigits={0} />
                             </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Annual Expenses</p>
                             <p className="text-xl font-bold text-blue-600">
-                                {formatCurrency(result.annualExpenses)}
+                                <PriceDisplay amount={result.annualExpenses} maximumFractionDigits={0} />
                             </p>
                         </div>
                     </div>
@@ -196,7 +196,7 @@ export default function FIRECalculator() {
                         </p>
                         <div ref={chartContainerRef} className="w-full" style={{ height: 200 }} />
                         <p className="text-xs text-center text-slate-400 mt-2">
-                            Target: {formatCurrency(result.fireNumber)} (horizontal goal)
+                            Target: <PriceDisplay amount={result.fireNumber} maximumFractionDigits={0} /> (horizontal goal)
                         </p>
                     </div>
 
@@ -205,7 +205,9 @@ export default function FIRECalculator() {
                         <p className="text-sm font-medium text-purple-800 dark:text-purple-300 mb-1">
                             Coast FIRE Value
                         </p>
-                        <p className="text-xl font-bold text-purple-600">{formatCurrency(result.coastFIRE)}</p>
+                        <p className="text-xl font-bold text-purple-600">
+                            <PriceDisplay amount={result.coastFIRE} maximumFractionDigits={0} />
+                        </p>
                         <p className="text-xs text-purple-600 mt-1">
                             If you stop saving, your current savings would grow to this amount
                         </p>
@@ -217,7 +219,7 @@ export default function FIRECalculator() {
                                 💡 To reach FIRE by age {retireAge}:
                             </p>
                             <p className="text-sm text-blue-700 dark:text-blue-400">
-                                Save {formatCurrency(result.requiredMonthlySavings)}/month
+                                Save <PriceDisplay amount={result.requiredMonthlySavings} maximumFractionDigits={0} />/month
                             </p>
                         </div>
                     )}
@@ -295,7 +297,7 @@ export default function FIRECalculator() {
                     />
                     <div className="flex justify-between text-xs text-slate-400 mt-1">
                         <span>10%</span>
-                        <span>Annual: {formatCurrency(annualIncome * savingsRate / 100)}</span>
+                        <span>Annual: <PriceDisplay amount={annualIncome * savingsRate / 100} maximumFractionDigits={0} /></span>
                         <span>90%</span>
                     </div>
                 </div>

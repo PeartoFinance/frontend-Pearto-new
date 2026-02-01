@@ -3,6 +3,7 @@
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import type { MarketStock, PriceHistoryPoint } from '@/services/marketService';
 import { TableExportButton } from '@/components/common/TableExportButton';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface CompareStock extends MarketStock {
     color: string;
@@ -28,19 +29,19 @@ export default function CompareOverviewTab({ stocks }: CompareOverviewTabProps) 
     };
 
     const metrics = [
-        { label: 'Price', getValue: (s: CompareStock) => `$${formatNumber(s.price)}`, highlight: true },
+        { label: 'Price', getValue: (s: CompareStock) => <PriceDisplay amount={s.price} />, highlight: true },
         { label: 'Change %', getValue: (s: CompareStock) => `${s.changePercent >= 0 ? '+' : ''}${formatNumber(s.changePercent)}%`, color: (s: CompareStock) => s.changePercent >= 0 ? 'text-teal-600' : 'text-red-500' },
         { label: 'Market Cap', getValue: (s: CompareStock) => formatLargeNumber(s.marketCap) },
         { label: 'Volume', getValue: (s: CompareStock) => formatLargeNumber(s.volume) },
         { label: 'P/E Ratio', getValue: (s: CompareStock) => formatNumber(s.peRatio) },
-        { label: 'EPS', getValue: (s: CompareStock) => `$${formatNumber(s.eps)}` },
+        { label: 'EPS', getValue: (s: CompareStock) => <PriceDisplay amount={s.eps} /> },
         { label: 'Beta', getValue: (s: CompareStock) => formatNumber(s.beta) },
-        { label: '52W High', getValue: (s: CompareStock) => `$${formatNumber(s.high52w)}` },
-        { label: '52W Low', getValue: (s: CompareStock) => `$${formatNumber(s.low52w)}` },
+        { label: '52W High', getValue: (s: CompareStock) => <PriceDisplay amount={s.high52w} /> },
+        { label: '52W Low', getValue: (s: CompareStock) => <PriceDisplay amount={s.low52w} /> },
         { label: 'Dividend Yield', getValue: (s: CompareStock) => s.dividendYield ? `${(s.dividendYield * 100).toFixed(2)}%` : '-' },
         { label: 'Avg Volume', getValue: (s: CompareStock) => formatLargeNumber(s.avgVolume) },
-        { label: 'Open', getValue: (s: CompareStock) => `$${formatNumber(s.open)}` },
-        { label: 'Previous Close', getValue: (s: CompareStock) => `$${formatNumber(s.previousClose)}` },
+        { label: 'Open', getValue: (s: CompareStock) => <PriceDisplay amount={s.open} /> },
+        { label: 'Previous Close', getValue: (s: CompareStock) => <PriceDisplay amount={s.previousClose} /> },
     ];
 
     return (
@@ -63,7 +64,7 @@ export default function CompareOverviewTab({ stocks }: CompareOverviewTabProps) 
 
                         <div className="flex items-baseline gap-2">
                             <span className="text-2xl font-bold text-slate-900 dark:text-white">
-                                ${formatNumber(stock.price)}
+                                <PriceDisplay amount={stock.price} />
                             </span>
                             <span className={`flex items-center text-sm font-medium ${stock.changePercent >= 0 ? 'text-teal-600' : 'text-red-500'}`}>
                                 {stock.changePercent >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
@@ -74,7 +75,7 @@ export default function CompareOverviewTab({ stocks }: CompareOverviewTabProps) 
                         <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-2 text-sm">
                             <div><span className="text-slate-500">Mkt Cap</span> <span className="font-medium text-slate-900 dark:text-white ml-1">{formatLargeNumber(stock.marketCap)}</span></div>
                             <div><span className="text-slate-500">P/E</span> <span className="font-medium text-slate-900 dark:text-white ml-1">{formatNumber(stock.peRatio)}</span></div>
-                            <div><span className="text-slate-500">EPS</span> <span className="font-medium text-slate-900 dark:text-white ml-1">${formatNumber(stock.eps)}</span></div>
+                            <div><span className="text-slate-500">EPS</span> <span className="font-medium text-slate-900 dark:text-white ml-1"><PriceDisplay amount={stock.eps} /></span></div>
                             <div><span className="text-slate-500">Beta</span> <span className="font-medium text-slate-900 dark:text-white ml-1">{formatNumber(stock.beta)}</span></div>
                         </div>
                     </div>

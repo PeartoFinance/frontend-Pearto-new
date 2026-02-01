@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { DollarSign, TrendingUp, Download } from 'lucide-react';
 
 export default function SWPCalculator() {
@@ -43,11 +44,7 @@ export default function SWPCalculator() {
         };
     }, [corpus, monthlyWithdrawal, expectedReturn]);
 
-    const formatCurrency = (amount: number) => {
-        if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
-        if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-    };
+
 
     return (
         <CalculatorLayout
@@ -70,16 +67,18 @@ export default function SWPCalculator() {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Total Withdrawn</span>
-                            <p className="text-lg font-semibold">{formatCurrency(result.totalWithdrawn)}</p>
+                            <p className="text-lg font-semibold"><PriceDisplay amount={result.totalWithdrawn} /></p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Max Sustainable</span>
-                            <p className="text-lg font-semibold text-emerald-600">{formatCurrency(result.maxWithdrawal)}/mo</p>
+                            <p className="text-lg font-semibold text-emerald-600">
+                                <PriceDisplay amount={result.maxWithdrawal} />/mo
+                            </p>
                         </div>
                     </div>
                     {!result.sustainable && monthlyWithdrawal > result.maxWithdrawal && (
                         <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 text-sm text-amber-700">
-                            💡 Reduce withdrawal to {formatCurrency(result.maxWithdrawal)}/mo for perpetual income
+                            💡 Reduce withdrawal to <PriceDisplay amount={result.maxWithdrawal} />/mo for perpetual income
                         </div>
                     )}
                 </div>

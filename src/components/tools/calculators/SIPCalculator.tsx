@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { IndianRupee, TrendingUp, Calendar, PiggyBank } from 'lucide-react';
 
 interface SIPResult {
@@ -33,13 +34,7 @@ export default function SIPCalculator() {
         };
     }, [monthlyInvestment, expectedReturn, timePeriod]);
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 0
-        }).format(amount);
-    };
+
 
     return (
         <CalculatorLayout
@@ -52,7 +47,7 @@ export default function SIPCalculator() {
                     <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-xl">
                         <p className="text-sm text-slate-500 mb-1">Total Value</p>
                         <p className="text-4xl font-bold text-emerald-600">
-                            {formatCurrency(result.totalValue)}
+                            <PriceDisplay amount={result.totalValue} />
                         </p>
                     </div>
 
@@ -64,7 +59,7 @@ export default function SIPCalculator() {
                                 <span className="text-xs text-slate-500">Invested</span>
                             </div>
                             <p className="text-lg font-semibold text-slate-900 dark:text-white">
-                                {formatCurrency(result.investedAmount)}
+                                <PriceDisplay amount={result.investedAmount} />
                             </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
@@ -73,7 +68,7 @@ export default function SIPCalculator() {
                                 <span className="text-xs text-slate-500">Returns</span>
                             </div>
                             <p className="text-lg font-semibold text-emerald-600">
-                                {formatCurrency(result.estimatedReturns)}
+                                <PriceDisplay amount={result.estimatedReturns} />
                             </p>
                         </div>
                     </div>

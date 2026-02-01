@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { Scale, FileText, DollarSign, Calendar } from 'lucide-react';
 
 export default function ContractValueCalculator() {
@@ -44,8 +45,7 @@ export default function ContractValueCalculator() {
         };
     }, [baseValue, duration, escalation, discountRate, paymentFrequency]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
 
     return (
         <CalculatorLayout
@@ -57,18 +57,24 @@ export default function ContractValueCalculator() {
                     <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-xl">
                         <Scale className="w-8 h-8 text-blue-500 mx-auto mb-2" />
                         <p className="text-sm text-slate-500">Total Contract Value</p>
-                        <p className="text-4xl font-bold text-blue-600">{formatCurrency(results.totalNominal)}</p>
+                        <p className="text-4xl font-bold text-blue-600">
+                            <PriceDisplay amount={results.totalNominal} maximumFractionDigits={0} />
+                        </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Present Value</p>
-                            <p className="text-xl font-bold text-emerald-600">{formatCurrency(results.totalPV)}</p>
+                            <p className="text-xl font-bold text-emerald-600">
+                                <PriceDisplay amount={results.totalPV} maximumFractionDigits={0} />
+                            </p>
                             <p className="text-xs text-slate-400">@ {discountRate}% discount</p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Avg Monthly Value</p>
-                            <p className="text-xl font-bold text-purple-600">{formatCurrency(results.avgMonthlyValue)}</p>
+                            <p className="text-xl font-bold text-purple-600">
+                                <PriceDisplay amount={results.avgMonthlyValue} maximumFractionDigits={0} />
+                            </p>
                         </div>
                     </div>
 
@@ -86,7 +92,7 @@ export default function ContractValueCalculator() {
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Payment per Period</span>
                                 <span className="font-medium text-slate-700 dark:text-slate-300">
-                                    {formatCurrency(results.periodicPayment)}
+                                    <PriceDisplay amount={results.periodicPayment} maximumFractionDigits={0} />
                                 </span>
                             </div>
                             <div className="flex justify-between">
@@ -98,7 +104,7 @@ export default function ContractValueCalculator() {
                             <div className="flex justify-between">
                                 <span className="text-slate-500">NPV Discount</span>
                                 <span className="font-medium text-amber-600">
-                                    {formatCurrency(results.totalNominal - results.totalPV)}
+                                    <PriceDisplay amount={results.totalNominal - results.totalPV} maximumFractionDigits={0} />
                                 </span>
                             </div>
                         </div>

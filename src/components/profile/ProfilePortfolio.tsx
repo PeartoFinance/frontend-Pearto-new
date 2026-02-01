@@ -7,6 +7,9 @@ import { TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, Plus, Trash2
 import { getPortfolios, createPortfolio, addHolding, deleteHolding, type Portfolio, type PortfolioHolding } from '@/services/portfolioService';
 import { get } from '@/services/api';
 import { TableExportButton } from '@/components/common/TableExportButton';
+import PriceDisplay from '@/components/common/PriceDisplay';
+import HealthScore from '@/components/portfolio/HealthScore';
+import GoalSetting from '@/components/portfolio/GoalSetting';
 
 interface StockOption {
     symbol: string;
@@ -27,6 +30,9 @@ export default function ProfilePortfolio({ onAddHolding }: ProfilePortfolioProps
     const [newPortfolioName, setNewPortfolioName] = useState('My Portfolio');
     const [holdingData, setHoldingData] = useState({ symbol: '', name: '', shares: '', avgBuyPrice: '' });
     const [submitting, setSubmitting] = useState(false);
+
+    // Health Score State
+    const [showHealthSettings, setShowHealthSettings] = useState(false);
 
     // Stock search state
     const [stockSearch, setStockSearch] = useState('');
@@ -219,56 +225,67 @@ export default function ProfilePortfolio({ onAddHolding }: ProfilePortfolioProps
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-emerald-500/10 rounded-lg">
-                            <DollarSign className="w-5 h-5 text-emerald-500" />
-                        </div>
-                        <div>
-                            <h3 className="font-semibold text-gray-900 dark:text-white">Total Value</h3>
-                            <p className="text-sm text-gray-500 dark:text-slate-400">Current portfolio worth</p>
-                        </div>
-                    </div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                        ${selectedPortfolio.totalValue?.toLocaleString() || '0'}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+                {/* Health Score Card (Span 1) */}
+                <div className="md:col-span-1">
+                    <div className="h-full">
+                        <HealthScore compact onConfigure={() => setShowHealthSettings(true)} />
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-emerald-500/10 rounded-lg">
-                            {selectedPortfolio.totalGain >= 0 ? (
-                                <TrendingUp className="w-5 h-5 text-emerald-500" />
-                            ) : (
-                                <TrendingDown className="w-5 h-5 text-red-500" />
-                            )}
+                {/* Status Cards (Span 3) */}
+                <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6 flex flex-col justify-center">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-emerald-500/10 rounded-lg">
+                                <DollarSign className="w-5 h-5 text-emerald-500" />
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Total Value</h3>
+                                <p className="text-sm text-gray-500 dark:text-slate-400">Current portfolio worth</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="font-semibold text-gray-900 dark:text-white">Total Gain/Loss</h3>
-                            <p className="text-sm text-gray-500 dark:text-slate-400">Unrealized P&L</p>
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                            <PriceDisplay amount={selectedPortfolio.totalValue || 0} />
                         </div>
                     </div>
-                    <div className={`text-2xl font-bold ${selectedPortfolio.totalGain >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                        {selectedPortfolio.totalGain >= 0 ? '+' : ''}${selectedPortfolio.totalGain?.toLocaleString() || '0'}
-                    </div>
-                    <div className={`text-sm ${selectedPortfolio.totalGain >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {selectedPortfolio.totalGain >= 0 ? '+' : ''}{selectedPortfolio.totalGainPercent?.toFixed(2) || '0'}%
-                    </div>
-                </div>
 
-                <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-cyan-500/10 rounded-lg">
-                            <BarChart3 className="w-5 h-5 text-cyan-500" />
+                    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6 flex flex-col justify-center">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-emerald-500/10 rounded-lg">
+                                {selectedPortfolio.totalGain >= 0 ? (
+                                    <TrendingUp className="w-5 h-5 text-emerald-500" />
+                                ) : (
+                                    <TrendingDown className="w-5 h-5 text-red-500" />
+                                )}
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Total Gain/Loss</h3>
+                                <p className="text-sm text-gray-500 dark:text-slate-400">Unrealized P&L</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="font-semibold text-gray-900 dark:text-white">Holdings</h3>
-                            <p className="text-sm text-gray-500 dark:text-slate-400">Number of positions</p>
+                        <div className={`text-2xl font-bold ${selectedPortfolio.totalGain >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                            <PriceDisplay amount={selectedPortfolio.totalGain || 0} prefix={selectedPortfolio.totalGain >= 0 ? '+' : ''} />
+                        </div>
+                        <div className={`text-sm ${selectedPortfolio.totalGain >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {selectedPortfolio.totalGain >= 0 ? '+' : ''}{selectedPortfolio.totalGainPercent?.toFixed(2) || '0'}%
                         </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {selectedPortfolio.holdings?.length || 0}
+
+                    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6 flex flex-col justify-center">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-cyan-500/10 rounded-lg">
+                                <BarChart3 className="w-5 h-5 text-cyan-500" />
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Holdings</h3>
+                                <p className="text-sm text-gray-500 dark:text-slate-400">Number of positions</p>
+                            </div>
+                        </div>
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                            {selectedPortfolio.holdings?.length || 0}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -321,6 +338,35 @@ export default function ProfilePortfolio({ onAddHolding }: ProfilePortfolioProps
                     </div>
                 )}
             </div>
+
+            {/* Goal Setting Modal */}
+            {showHealthSettings && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                    <div className="relative w-full max-w-2xl">
+                        <button
+                            onClick={() => setShowHealthSettings(false)}
+                            className="absolute -top-10 right-0 text-white hover:text-gray-200 lg:hidden"
+                        >
+                            <X size={24} />
+                        </button>
+                        <div className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
+                            <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-slate-700 lg:hidden">
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Investment Strategy</h3>
+                                <button onClick={() => setShowHealthSettings(false)} className="text-gray-500 dark:text-slate-400">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <GoalSetting variant="clean" onComplete={() => setShowHealthSettings(false)} />
+                        </div>
+                        <button
+                            onClick={() => setShowHealthSettings(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hidden lg:block z-10"
+                        >
+                            <X size={24} />
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Add Holding Modal */}
             {showAddHoldingModal && (
@@ -446,13 +492,21 @@ function HoldingRow({ holding, portfolioId, onDelete }: { holding: PortfolioHold
                     </div>
                 </div>
             </td>
-            <td className="px-6 py-4 text-sm text-gray-700 dark:text-slate-300">{holding.shares?.toLocaleString()}</td>
-            <td className="px-6 py-4 text-sm text-gray-700 dark:text-slate-300">${holding.avgCost?.toFixed(2)}</td>
-            <td className="px-6 py-4 text-sm text-gray-700 dark:text-slate-300">${holding.currentPrice?.toFixed(2)}</td>
-            <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">${holding.totalValue?.toLocaleString()}</td>
+            <td className="px-6 py-4 text-sm text-gray-700 dark:text-slate-300">
+                <PriceDisplay amount={holding.shares} showSymbol={false} />
+            </td>
+            <td className="px-6 py-4 text-sm text-gray-700 dark:text-slate-300">
+                <PriceDisplay amount={holding.avgCost} />
+            </td>
+            <td className="px-6 py-4 text-sm text-gray-700 dark:text-slate-300">
+                <PriceDisplay amount={holding.currentPrice} />
+            </td>
+            <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                <PriceDisplay amount={holding.totalValue} />
+            </td>
             <td className="px-6 py-4">
                 <div className={`text-sm font-medium ${isGain ? 'text-emerald-500' : 'text-red-500'}`}>
-                    {isGain ? '+' : ''}${holding.gain?.toLocaleString()}
+                    <PriceDisplay amount={holding.gain} prefix={isGain ? '+' : ''} />
                 </div>
                 <div className={`text-xs ${isGain ? 'text-emerald-400' : 'text-red-400'}`}>
                     {isGain ? '+' : ''}{holding.gainPercent?.toFixed(2)}%

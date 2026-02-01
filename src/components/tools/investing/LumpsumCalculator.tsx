@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
 
 export default function LumpsumCalculator() {
@@ -22,11 +23,7 @@ export default function LumpsumCalculator() {
         };
     }, [principal, expectedReturn, timePeriod]);
 
-    const formatCurrency = (amount: number) => {
-        if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
-        if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-    };
+
 
     return (
         <CalculatorLayout
@@ -37,17 +34,23 @@ export default function LumpsumCalculator() {
                 <div className="space-y-6">
                     <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-xl">
                         <p className="text-sm text-slate-500 mb-1">Future Value</p>
-                        <p className="text-4xl font-bold text-emerald-600">{formatCurrency(result.futureValue)}</p>
+                        <p className="text-4xl font-bold text-emerald-600">
+                            <PriceDisplay amount={result.futureValue} />
+                        </p>
                         <p className="text-sm text-emerald-500 mt-1">{result.multiplier}x growth</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Invested</span>
-                            <p className="text-lg font-semibold text-blue-600">{formatCurrency(principal)}</p>
+                            <p className="text-lg font-semibold text-blue-600">
+                                <PriceDisplay amount={principal} />
+                            </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Returns</span>
-                            <p className="text-lg font-semibold text-emerald-600">{formatCurrency(result.totalReturns)}</p>
+                            <p className="text-lg font-semibold text-emerald-600">
+                                <PriceDisplay amount={result.totalReturns} />
+                            </p>
                         </div>
                     </div>
                     <div className="bg-white dark:bg-slate-800 rounded-xl p-4">

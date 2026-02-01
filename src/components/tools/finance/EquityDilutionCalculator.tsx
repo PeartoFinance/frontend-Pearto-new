@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { DollarSign, Users, Percent } from 'lucide-react';
 
 export default function EquityDilutionCalculator() {
@@ -33,11 +34,7 @@ export default function EquityDilutionCalculator() {
         };
     }, [currentShares, newShares, yourShares, preMoneyValuation]);
 
-    const formatCurrency = (amount: number) => {
-        if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
-        if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-    };
+
 
     return (
         <CalculatorLayout
@@ -55,22 +52,22 @@ export default function EquityDilutionCalculator() {
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Before</span>
                             <p className="text-lg font-semibold">{result.currentOwnership}%</p>
-                            <p className="text-sm text-slate-500">{formatCurrency(result.yourValueBefore)}</p>
+                            <p className="text-sm text-slate-500"><PriceDisplay amount={result.yourValueBefore} /></p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">After</span>
                             <p className="text-lg font-semibold text-emerald-600">{result.newOwnership}%</p>
-                            <p className="text-sm text-emerald-600">{formatCurrency(result.yourValueAfter)}</p>
+                            <p className="text-sm text-emerald-600"><PriceDisplay amount={result.yourValueAfter} /></p>
                         </div>
                     </div>
                     <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                         <div className="flex justify-between text-sm mb-2">
                             <span className="text-slate-500">Post-Money Valuation</span>
-                            <span className="font-semibold text-emerald-600">{formatCurrency(result.postMoneyValuation)}</span>
+                            <span className="font-semibold text-emerald-600"><PriceDisplay amount={result.postMoneyValuation} /></span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500">Investment Amount</span>
-                            <span className="font-semibold">{formatCurrency(result.investmentAmount)}</span>
+                            <span className="font-semibold"><PriceDisplay amount={result.investmentAmount} /></span>
                         </div>
                     </div>
                 </div>

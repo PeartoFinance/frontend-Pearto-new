@@ -1,40 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { HelpCircle, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-
-interface FAQ {
-    id: string;
-    question: string;
-    answer: string;
-    category: string;
-}
+import { useFAQ } from '@/hooks/useContentData';
 
 export default function FAQ() {
-    const [faqs, setFaqs] = useState<FAQ[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { data: faqs = [], isLoading: loading } = useFAQ(true);
     const [openId, setOpenId] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchFAQs = async () => {
-            try {
-                // Fetch FAQs marked for homepage, or just limit to a few
-                const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/content/faq?homepage=true`;
-                const res = await fetch(url);
-                if (res.ok) {
-                    const data = await res.json();
-                    setFaqs(data);
-                }
-            } catch (error) {
-                console.error('Failed to fetch Home FAQs', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchFAQs();
-    }, []);
 
     const toggleFAQ = (id: string) => {
         setOpenId(openId === id ? null : id);
@@ -67,8 +40,8 @@ export default function FAQ() {
                     <div
                         key={faq.id}
                         className={`rounded-xl border transition-all duration-200 overflow-hidden ${openId === faq.id
-                                ? 'bg-slate-50 dark:bg-slate-700/50 border-emerald-500 dark:border-emerald-500'
-                                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-slate-600'
+                            ? 'bg-slate-50 dark:bg-slate-700/50 border-emerald-500 dark:border-emerald-500'
+                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-slate-600'
                             }`}
                     >
                         <button

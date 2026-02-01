@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createChart, ColorType, CandlestickSeries, AreaSeries, LineSeries, HistogramSeries, type IChartApi } from 'lightweight-charts';
 import { type PriceHistoryPoint } from '@/services/marketService';
-import { Loader2, CandlestickChart, LineChart, AreaChart } from 'lucide-react';
+import { Loader2, CandlestickChart, LineChart, AreaChart, Maximize2 } from 'lucide-react';
+import Link from 'next/link';
 
 interface StockChartProps {
     data: PriceHistoryPoint[];
@@ -264,24 +265,34 @@ export default function StockChart({ data, loading = false, symbol }: StockChart
                 </div>
 
                 {/* Chart Type Selector */}
-                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
-                    {chartTypes.map((type) => {
-                        const Icon = type.icon;
-                        return (
-                            <button
-                                key={type.id}
-                                onClick={() => setChartType(type.id)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition ${chartType === type.id
-                                    ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-                                    }`}
-                                title={type.label}
-                            >
-                                <Icon size={16} />
-                                <span className="hidden sm:inline">{type.label}</span>
-                            </button>
-                        );
-                    })}
+                <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+                        {chartTypes.map((type) => {
+                            const Icon = type.icon;
+                            return (
+                                <button
+                                    key={type.id}
+                                    onClick={() => setChartType(type.id)}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition ${chartType === type.id
+                                        ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                                        }`}
+                                    title={type.label}
+                                >
+                                    <Icon size={16} />
+                                    <span className="hidden sm:inline">{type.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <Link
+                        href={`/chart/${symbol}`}
+                        target="_blank"
+                        className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition"
+                    >
+                        <Maximize2 size={12} />
+                        Advanced Chart
+                    </Link>
                 </div>
             </div>
 

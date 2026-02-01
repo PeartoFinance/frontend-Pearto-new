@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { Clock, TrendingUp, DollarSign, Calendar, Users } from 'lucide-react';
 import {
     createChart,
@@ -187,8 +188,7 @@ export default function SocialSecurityEstimator() {
         };
     }, [result, isDark]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
 
     return (
         <CalculatorLayout
@@ -201,9 +201,11 @@ export default function SocialSecurityEstimator() {
                     <div className="text-center p-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                         <DollarSign className="w-8 h-8 text-blue-500 mx-auto mb-2" />
                         <p className="text-sm text-slate-500">Estimated Monthly Benefit at Age {startAge}</p>
-                        <p className="text-4xl font-bold text-blue-600">{formatCurrency(result.monthlyBenefit)}</p>
+                        <p className="text-4xl font-bold text-blue-600">
+                            <PriceDisplay amount={result.monthlyBenefit} maximumFractionDigits={0} />
+                        </p>
                         <p className="text-sm text-slate-400 mt-1">
-                            {formatCurrency(result.annualBenefit)}/year
+                            <PriceDisplay amount={result.annualBenefit} maximumFractionDigits={0} />/year
                         </p>
                     </div>
 
@@ -214,7 +216,9 @@ export default function SocialSecurityEstimator() {
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">PIA (at FRA)</p>
-                            <p className="text-xl font-bold text-emerald-600">{formatCurrency(result.pia)}</p>
+                            <p className="text-xl font-bold text-emerald-600">
+                                <PriceDisplay amount={result.pia} maximumFractionDigits={0} />
+                            </p>
                         </div>
                     </div>
 
@@ -231,7 +235,7 @@ export default function SocialSecurityEstimator() {
                                     <div key={age} className={`flex justify-between items-center p-2 rounded ${isSelected ? 'bg-blue-100 dark:bg-blue-900/30' : ''}`}>
                                         <span className="text-sm text-slate-600 dark:text-slate-400">Age {age}</span>
                                         <span className={`font-bold ${isSelected ? 'text-blue-600' : 'text-slate-700 dark:text-slate-300'}`}>
-                                            {formatCurrency(data?.monthly || 0)}
+                                            <PriceDisplay amount={data?.monthly || 0} maximumFractionDigits={0} />
                                         </span>
                                     </div>
                                 );

@@ -2,7 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
-import { DollarSign, Percent, TrendingUp } from 'lucide-react';
+import PriceDisplay from '@/components/common/PriceDisplay';
+import { DollarSign, Calendar, TrendingUp } from 'lucide-react';
+import VendorList from '@/components/vendors/VendorList';
 
 export default function PPFCalculator() {
     const [yearlyDeposit, setYearlyDeposit] = useState(150000);
@@ -28,10 +30,7 @@ export default function PPFCalculator() {
         };
     }, [yearlyDeposit, interestRate, tenure]);
 
-    const formatCurrency = (amount: number) => {
-        if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-    };
+
 
     return (
         <CalculatorLayout
@@ -42,17 +41,23 @@ export default function PPFCalculator() {
                 <div className="space-y-6">
                     <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-xl">
                         <p className="text-sm text-slate-500 mb-1">Maturity Value</p>
-                        <p className="text-4xl font-bold text-emerald-600">{formatCurrency(result.maturityValue)}</p>
+                        <p className="text-4xl font-bold text-emerald-600">
+                            <PriceDisplay amount={result.maturityValue} />
+                        </p>
                         <p className="text-sm text-emerald-500 mt-1">Tax-free returns</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Total Deposit</span>
-                            <p className="text-lg font-semibold text-blue-600">{formatCurrency(result.totalDeposit)}</p>
+                            <p className="text-lg font-semibold text-blue-600">
+                                <PriceDisplay amount={result.totalDeposit} />
+                            </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Total Interest</span>
-                            <p className="text-lg font-semibold text-emerald-600">{formatCurrency(result.totalInterest)}</p>
+                            <p className="text-lg font-semibold text-emerald-600">
+                                <PriceDisplay amount={result.totalInterest} />
+                            </p>
                         </div>
                     </div>
                     <div className="p-4 bg-white dark:bg-slate-800 rounded-xl flex justify-between">
@@ -60,6 +65,13 @@ export default function PPFCalculator() {
                         <span className="font-semibold text-emerald-600">+{result.effectiveReturn}%</span>
                     </div>
                 </div>
+            }
+            rightColumn={
+                <VendorList
+                    category="Tax Services"
+                    title="PPF Specialists"
+                    description="Get help with PPF accounts"
+                />
             }
         >
             <div>

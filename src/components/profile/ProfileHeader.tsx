@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Edit2, Settings, Briefcase } from 'lucide-react';
 import { UserProfile } from '@/services/userService';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface ProfileHeaderProps {
     profile: UserProfile;
@@ -74,7 +75,7 @@ export default function ProfileHeader({ profile, netWorth, netWorthChangePercent
                         <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">Net Worth</p>
                         <div className="flex items-center gap-3">
                             <span className="text-xl font-bold">
-                                ${netWorth?.toLocaleString() || '0'}
+                                <PriceDisplay amount={netWorth || 0} />
                             </span>
                             {(netWorthChangePercent !== undefined && netWorthChangePercent !== null && netWorth !== null && netWorth !== 0) && (
                                 <span className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] font-medium border ${netWorthChangePercent >= 0

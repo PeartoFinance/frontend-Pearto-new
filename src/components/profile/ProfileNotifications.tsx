@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Mail, Bell, MessageSquare, Moon, Shield, TrendingUp, Newspaper, Calendar, Send, Clock } from 'lucide-react';
+import { Save, Mail, Bell, MessageSquare, Moon, Shield, TrendingUp, Newspaper, Calendar, Send, Clock, BarChart3 } from 'lucide-react';
 import { getNotificationPreferences, updateNotificationPreferences, type NotificationPreferences } from '@/services/userService';
 
 interface NotificationToggleProps {
@@ -17,8 +17,8 @@ interface NotificationToggleProps {
 function NotificationToggle({ label, description, checked, onChange, icon, disabled, badge }: NotificationToggleProps) {
     return (
         <div className={`flex items-center justify-between p-4 rounded-lg border transition ${disabled
-                ? 'bg-slate-800/30 border-slate-700/50 opacity-60'
-                : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
+            ? 'bg-slate-800/30 border-slate-700/50 opacity-60'
+            : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
             }`}>
             <div className="flex items-center gap-3">
                 {icon && (
@@ -61,6 +61,7 @@ export default function ProfileNotifications() {
         emailNews: true,
         emailMarketing: false,
         emailNewsletter: true,
+        emailPortfolioSummary: true, // NEW: Daily P&L summary default on
         pushSecurity: true,
         pushPriceAlerts: true,
         pushNews: true,
@@ -137,8 +138,8 @@ export default function ProfileNotifications() {
             {/* Message */}
             {message && (
                 <div className={`p-3 rounded-lg text-sm ${message.type === 'success'
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    : 'bg-red-500/10 text-red-400 border border-red-500/20'
                     }`}>
                     {message.text}
                 </div>
@@ -184,6 +185,14 @@ export default function ProfileNotifications() {
                         checked={preferences.emailDailyDigest}
                         onChange={(v) => handleChange('emailDailyDigest', v)}
                         icon={<Calendar size={16} className="text-purple-400" />}
+                    />
+                    <NotificationToggle
+                        label="Daily Portfolio Summary"
+                        description="Receive a daily email summary of your portfolio's performance (P&L)."
+                        checked={preferences.emailPortfolioSummary}
+                        onChange={(v) => handleChange('emailPortfolioSummary', v)}
+                        icon={<BarChart3 size={16} className="text-teal-400" />}
+                        badge="NEW"
                     />
                     <NotificationToggle
                         label="Earnings Reminders"

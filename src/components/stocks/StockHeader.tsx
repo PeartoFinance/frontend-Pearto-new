@@ -2,6 +2,7 @@
 
 import { type MarketStock } from '@/services/marketService';
 import { TrendingUp, TrendingDown, Globe, Building2 } from 'lucide-react';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface StockHeaderProps {
     stock: MarketStock;
@@ -68,10 +69,7 @@ export default function StockHeader({ stock }: StockHeaderProps) {
                 <div className="text-left lg:text-right">
                     <div className="flex items-baseline gap-2 lg:justify-end">
                         <span className="text-3xl font-bold text-slate-900 dark:text-white">
-                            ${formatNumber(stock.price)}
-                        </span>
-                        <span className="text-sm text-slate-500">
-                            {stock.currency || 'USD'}
+                            <PriceDisplay amount={stock.price} />
                         </span>
                     </div>
 
@@ -79,11 +77,11 @@ export default function StockHeader({ stock }: StockHeaderProps) {
                         }`}>
                         {isPositive ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
                         <span className="text-lg font-semibold">
-                            {isPositive ? '+' : ''}{formatNumber(stock.change)}
+                            <PriceDisplay amount={stock.change} prefix={isPositive ? '+' : ''} />
                         </span>
                         <span className={`px-2 py-0.5 rounded text-sm font-medium ${isPositive
-                                ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                                : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                            : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                             }`}>
                             {isPositive ? '+' : ''}{formatNumber(stock.changePercent)}%
                         </span>

@@ -203,7 +203,7 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
             try {
                 // Try to get user's country from localStorage or default to US
                 const userCountry = localStorage.getItem('userCountry') || 'US';
-                const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+                const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
                 const res = await fetch(`${API_BASE}/market/status`, {
                     headers: { 'X-User-Country': userCountry }
                 });
@@ -311,6 +311,12 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                                     </span>
                                 </div>
                             )}
+
+                            <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300">
+                                <Sun size={14} className="text-amber-500" />
+                                <span>7°C</span>
+                                <span className="text-slate-400 ml-1">Kathmandu</span>
+                            </div>
 
                             <button onClick={toggleDarkMode} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                                 {isDarkMode ? <Sun size={20} className="text-amber-400" /> : <Moon size={20} className="text-slate-700" />}

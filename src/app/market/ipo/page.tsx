@@ -7,6 +7,7 @@ import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
 import { getStockOffers, StockOffer } from '@/services/marketService';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import {
     ArrowLeft, FileText, Loader2, AlertCircle,
     RefreshCw, Calendar, DollarSign, Clock, CheckCircle, XCircle
@@ -186,7 +187,7 @@ export default function OfferingsPage() {
                             </div>
                             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
                                 <p className="text-sm text-slate-500 mb-1">Total Value</p>
-                                <p className="text-2xl font-bold text-blue-500">${formatLargeNumber(totalValue)}</p>
+                                <p className="text-2xl font-bold text-blue-500"><PriceDisplay amount={totalValue} options={{ notation: 'compact' }} /></p>
                             </div>
                         </div>
 
@@ -273,7 +274,7 @@ export default function OfferingsPage() {
                                                 <div className="text-center lg:text-right">
                                                     <p className="text-xs text-slate-500 mb-1">Price</p>
                                                     <p className="text-lg font-bold text-emerald-500">
-                                                        ${formatNumber(offer.offerPrice)}
+                                                        <PriceDisplay amount={offer.offerPrice} />
                                                     </p>
                                                 </div>
                                                 <div className="text-center lg:text-right">

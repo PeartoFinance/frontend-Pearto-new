@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowUpRight, ArrowDownRight, TrendingUp, Loader2, AlertCircle } from 'lucide-react';
 import { get } from '@/services/api';
 import { TableExportButton } from '@/components/common/TableExportButton';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface Transaction {
     id: number;
@@ -105,7 +106,7 @@ export default function BulkTransactions() {
                                     <td className="text-right px-4 py-3 text-slate-700 dark:text-slate-300">{tx.quantity?.toLocaleString() || '-'}</td>
                                     <td className="text-right px-4 py-3">
                                         <div className="flex items-center justify-end gap-2">
-                                            <span className="font-semibold text-slate-900 dark:text-white">${tx.price?.toFixed(2) || '0.00'}</span>
+                                            <span className="font-semibold text-slate-900 dark:text-white"><PriceDisplay amount={tx.price} /></span>
                                             {tx.changePercent != null && (
                                                 <span className={`flex items-center text-xs ${tx.changePercent >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
                                                     {tx.changePercent >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}

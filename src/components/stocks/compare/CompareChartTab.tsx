@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createChart, ColorType, LineSeries, type IChartApi } from 'lightweight-charts';
+import { Maximize2 } from 'lucide-react';
+import Link from 'next/link';
 import type { MarketStock, PriceHistoryPoint } from '@/services/marketService';
 
 interface CompareStock extends MarketStock {
@@ -147,6 +149,14 @@ export default function CompareChartTab({ stocks, period, onPeriodChange }: Comp
                         <span className={`text-xs ${stock.changePercent >= 0 ? 'text-teal-600' : 'text-red-500'}`}>
                             {stock.changePercent >= 0 ? '+' : ''}{stock.changePercent?.toFixed(2)}%
                         </span>
+                        <Link
+                            href={`/chart/${stock.symbol}`}
+                            target="_blank"
+                            className="text-slate-400 hover:text-blue-500 transition ml-1"
+                            title={`Advanced Chart for ${stock.symbol}`}
+                        >
+                            <Maximize2 size={12} />
+                        </Link>
                     </div>
                 ))}
             </div>

@@ -25,6 +25,7 @@ import {
     Home, Briefcase, BarChart3, Bookmark, Target, Bell, Shield, User, Settings as SettingsIcon, Gift
 } from 'lucide-react';
 import Calendar from './Calendar';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 type TabKey = 'overview' | 'portfolio' | 'insights' | 'watchlist' | 'alerts' | 'activity' | 'documents' | 'referrals' | 'verification' | 'preferences' | 'notifications' | 'security' | 'settings';
 
@@ -208,7 +209,7 @@ export default function ProfilePage() {
                                             <span className="text-sm text-slate-500">Hourly Rate</span>
                                             <div className="flex items-center gap-2">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                                <span className="text-white font-bold">${hourlyRate}/h</span>
+                                                <span className="text-white font-bold"><PriceDisplay amount={hourlyRate || 0} />/h</span>
                                             </div>
                                         </div>
                                         <div className="flex justify-between items-center">
@@ -217,7 +218,7 @@ export default function ProfilePage() {
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-sm text-slate-500">Net Worth</span>
-                                            <span className="text-white font-bold">${netWorth?.toLocaleString() || '0'}</span>
+                                            <span className="text-white font-bold"><PriceDisplay amount={netWorth || 0} /></span>
                                         </div>
                                     </div>
                                 </Card>

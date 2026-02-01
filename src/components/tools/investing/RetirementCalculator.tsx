@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { DollarSign, TrendingUp, Calendar, Target } from 'lucide-react';
 
 interface RetirementResult {
@@ -45,11 +46,7 @@ export default function RetirementCalculator() {
         };
     }, [currentAge, retirementAge, monthlyExpense, expectedReturn, inflation]);
 
-    const formatCurrency = (amount: number) => {
-        if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
-        if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-    };
+
 
     return (
         <CalculatorLayout
@@ -62,7 +59,7 @@ export default function RetirementCalculator() {
                     <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-xl">
                         <p className="text-sm text-slate-500 mb-1">Retirement Corpus Needed</p>
                         <p className="text-4xl font-bold text-emerald-600">
-                            {formatCurrency(result.totalCorpus)}
+                            <PriceDisplay amount={result.totalCorpus} />
                         </p>
                     </div>
 
@@ -74,7 +71,7 @@ export default function RetirementCalculator() {
                                 <span className="text-xs text-slate-500">Monthly SIP</span>
                             </div>
                             <p className="text-lg font-semibold text-slate-900 dark:text-white">
-                                {formatCurrency(result.monthlyNeeded)}
+                                <PriceDisplay amount={result.monthlyNeeded} />
                             </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
@@ -83,7 +80,7 @@ export default function RetirementCalculator() {
                                 <span className="text-xs text-slate-500">Yearly Expense</span>
                             </div>
                             <p className="text-lg font-semibold text-amber-600">
-                                {formatCurrency(result.yearlyExpense)}
+                                <PriceDisplay amount={result.yearlyExpense} />
                             </p>
                         </div>
                     </div>

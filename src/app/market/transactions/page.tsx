@@ -6,6 +6,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { get } from '@/services/api';
 import {
     ArrowLeft, TrendingUp, Loader2, AlertCircle,
@@ -129,11 +130,11 @@ export default function TransactionsPage() {
                             </div>
                             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
                                 <p className="text-sm text-slate-500 mb-1">Total Value</p>
-                                <p className="text-2xl font-bold text-emerald-500">${formatLargeNumber(totalValue)}</p>
+                                <p className="text-2xl font-bold text-emerald-500"><PriceDisplay amount={totalValue} options={{ notation: 'compact' }} /></p>
                             </div>
                             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
                                 <p className="text-sm text-slate-500 mb-1">Avg Price</p>
-                                <p className="text-2xl font-bold text-blue-500">${formatNumber(avgPrice)}</p>
+                                <p className="text-2xl font-bold text-blue-500"><PriceDisplay amount={avgPrice} /></p>
                             </div>
                         </div>
 
@@ -252,12 +253,11 @@ export default function TransactionsPage() {
                                                         {formatLargeNumber(tx.quantity)}
                                                     </td>
                                                     <td className="text-right px-4 py-4 font-medium text-slate-700 dark:text-slate-300">
-                                                        ${formatNumber(tx.price)}
+                                                        <PriceDisplay amount={tx.price} />
                                                     </td>
                                                     <td className="text-right px-4 py-4">
                                                         <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 dark:bg-slate-700 rounded text-sm font-bold text-slate-900 dark:text-white">
-                                                            <DollarSign size={12} />
-                                                            {formatLargeNumber((tx.quantity || 0) * (tx.price || 0))}
+                                                            <PriceDisplay amount={(tx.quantity || 0) * (tx.price || 0)} options={{ notation: 'compact' }} />
                                                         </span>
                                                     </td>
                                                 </tr>

@@ -1,41 +1,78 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useMemo, useState } from 'react';
 import { TrendingUp, TrendingDown, RefreshCw, Loader2, AlertCircle } from 'lucide-react';
-import { getMarketOverview, MarketOverviewData, MarketStock } from '@/services/marketService';
+import { useMarketOverview, useCryptoMarkets, useCommodities, MarketOverviewData, MarketStock } from '@/hooks/useMarketData';
 import { TableExportButton } from '@/components/common/TableExportButton';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 export default function MarketSnapshot() {
-    const [data, setData] = useState<MarketOverviewData | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'Top' | 'Gainers' | 'Losers'>('Top');
     const [assetType, setAssetType] = useState<'Crypto' | 'Stocks' | 'Metals'>('Stocks');
-    const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-            const result = await getMarketOverview();
-            setData(result);
-            setLastRefresh(new Date());
-            setError(null);
-        } catch (err) {
-            setError('Failed to load market data');
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
+    // Hooks for data
+    const { data: stocksData, isLoading: loadingStocks, refetch: refetchStocks } = useMarketOverview();
+    const { data: cryptoData, isLoading: loadingCrypto, refetch: refetchCrypto } = useCryptoMarkets(50);
+    const { data: commoditiesData, isLoading: loadingCommodities, refetch: refetchCommodities } = useCommodities();
+
+    const handleRefresh = () => {
+        if (assetType === 'Stocks') refetchStocks();
+        if (assetType === 'Crypto') refetchCrypto();
+        if (assetType === 'Metals') refetchCommodities();
     };
 
-    useEffect(() => {
-        fetchData();
-        // Auto-refresh every 60 seconds
-        const interval = setInterval(fetchData, 60000);
-        return () => clearInterval(interval);
-    }, []);
+    const data: MarketOverviewData | null = useMemo(() => {
+        if (assetType === 'Stocks') {
+            return stocksData || null;
+        }
 
+        if (assetType === 'Crypto') {
+            if (!cryptoData) return null;
+            return {
+                indices: [],
+                mostActive: cryptoData.slice(0, 10),
+                topGainers: [...cryptoData].sort((a, b) => (b.changePercent || 0) - (a.changePercent || 0)).slice(0, 10),
+                topLosers: [...cryptoData].sort((a, b) => (a.changePercent || 0) - (b.changePercent || 0)).slice(0, 10),
+                totalVolume: 0,
+                advancers: cryptoData.filter(c => (c.change || 0) > 0).length,
+                decliners: cryptoData.filter(c => (c.change || 0) < 0).length,
+                unchanged: cryptoData.filter(c => (c.change || 0) === 0).length
+            };
+        }
+
+        if (assetType === 'Metals') {
+            if (!commoditiesData) return null;
+            const mapped: MarketStock[] = commoditiesData.map(c => ({
+                id: c.id,
+                symbol: c.symbol,
+                name: c.name,
+                price: c.price,
+                change: c.change,
+                changePercent: c.changePercent,
+                volume: 0
+            }));
+            return {
+                indices: [],
+                mostActive: mapped,
+                topGainers: [...mapped].sort((a, b) => (b.changePercent || 0) - (a.changePercent || 0)).slice(0, 5),
+                topLosers: [...mapped].sort((a, b) => (a.changePercent || 0) - (b.changePercent || 0)).slice(0, 5),
+                totalVolume: 0,
+                advancers: mapped.filter(c => (c.change || 0) > 0).length,
+                decliners: mapped.filter(c => (c.change || 0) < 0).length,
+                unchanged: mapped.filter(c => (c.change || 0) === 0).length
+            };
+        }
+        return null;
+    }, [assetType, stocksData, cryptoData, commoditiesData]);
+
+    const loading = (assetType === 'Stocks' && loadingStocks) ||
+        (assetType === 'Crypto' && loadingCrypto) ||
+        (assetType === 'Metals' && loadingCommodities);
+
+    const error = null; // React Query handles errors, simplified for now
+
+    // Derived values
     const getDisplayData = (): MarketStock[] => {
         if (!data) return [];
         switch (activeTab) {
@@ -50,13 +87,7 @@ export default function MarketSnapshot() {
 
     const displayData = getDisplayData();
     const volume24h = data?.totalVolume ? (data.totalVolume / 1000000000).toFixed(2) : '0';
-
-    const timeSinceRefresh = () => {
-        const seconds = Math.floor((new Date().getTime() - lastRefresh.getTime()) / 1000);
-        return `${seconds}s ago`;
-    };
-
-    const hasNoData = !data || (data.topGainers?.length === 0 && data.topLosers?.length === 0 && data.mostActive?.length === 0);
+    const hasNoData = !loading && (!data || (data.topGainers?.length === 0 && data.topLosers?.length === 0 && data.mostActive?.length === 0));
 
     return (
         <section className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
@@ -151,10 +182,10 @@ export default function MarketSnapshot() {
                         variant="icon"
                     />
                     <div className="flex items-center gap-2 text-xs text-slate-500">
-                        <button onClick={fetchData} disabled={loading}>
+                        <button onClick={handleRefresh} disabled={loading}>
                             <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
                         </button>
-                        Auto-refresh • {timeSinceRefresh()}
+                        <span>Auto-refresh • Live</span>
                     </div>
                 </div>
             </div>
@@ -200,7 +231,7 @@ export default function MarketSnapshot() {
                                     </td>
                                     <td className="text-right py-3">
                                         <span className="text-sm font-medium text-slate-900 dark:text-white">
-                                            ${asset.price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                            <PriceDisplay amount={asset.price || 0} />
                                         </span>
                                     </td>
                                     <td className="text-right py-3">

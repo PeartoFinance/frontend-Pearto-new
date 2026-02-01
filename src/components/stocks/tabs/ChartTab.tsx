@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { StockChartWidget } from '@/components/charts';
+import AdvancedStockChart from '@/components/charts/AdvancedStockChart';
 import { getStockHistory } from '@/services/marketService';
 
 interface ChartTabProps {
@@ -84,23 +84,13 @@ export default function ChartTab({
     };
 
     return (
-        <StockChartWidget
+        <AdvancedStockChart
             data={data}
             symbol={symbol}
             loading={loading}
-            height={350}
-            showVolume={true}
-            showPriceInfoBar={true}
-            showHeader={true}
-            showChartTypeSelector={true}
-            showPeriodSelector={true}
-            periods={['1D', '2D', '5D', '1M', '3M', '6M', 'YTD', '1Y', '3Y', '5Y', 'All']}
+            height={420}
             period={period}
             onPeriodChange={handlePeriodChange}
-            initialChartType="area"
-            currentPrice={currentPrice}
-            change={change}
-            changePercent={changePercent}
         />
     );
 }

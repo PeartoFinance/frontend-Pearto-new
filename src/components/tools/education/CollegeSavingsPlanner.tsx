@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { PiggyBank, TrendingUp, DollarSign, Calendar, Target } from 'lucide-react';
 import {
     createChart,
@@ -144,8 +145,7 @@ export default function CollegeSavingsPlanner() {
         };
     }, [result, isDark]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
 
     return (
         <CalculatorLayout
@@ -163,11 +163,11 @@ export default function CollegeSavingsPlanner() {
                         )}
                         <p className="text-sm text-slate-500">Projected at College Start</p>
                         <p className={`text-4xl font-bold ${result.onTrack ? 'text-emerald-600' : 'text-amber-600'}`}>
-                            {formatCurrency(result.projectedSavings)}
+                            <PriceDisplay amount={result.projectedSavings} maximumFractionDigits={0} />
                         </p>
                         <p className="text-sm mt-1">
                             <span className={result.onTrack ? 'text-emerald-600' : 'text-amber-600'}>
-                                {result.onTrack ? '✓ On track!' : `${formatCurrency(result.shortfall)} shortfall`}
+                                {result.onTrack ? '✓ On track!' : <><PriceDisplay amount={result.shortfall} maximumFractionDigits={0} /> shortfall</>}
                             </span>
                         </p>
                     </div>
@@ -175,8 +175,10 @@ export default function CollegeSavingsPlanner() {
                     <div className="grid grid-cols-2 gap-3">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Total College Cost</p>
-                            <p className="text-xl font-bold text-blue-600">{formatCurrency(result.totalCollegeCost)}</p>
-                            <p className="text-xs text-slate-400">{yearsOfCollege} years × {formatCurrency(result.futureCostPerYear)}/yr</p>
+                            <p className="text-xl font-bold text-blue-600">
+                                <PriceDisplay amount={result.totalCollegeCost} maximumFractionDigits={0} />
+                            </p>
+                            <p className="text-xs text-slate-400">{yearsOfCollege} years × <PriceDisplay amount={result.futureCostPerYear} maximumFractionDigits={0} />/yr</p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Years Until College</p>
@@ -216,7 +218,7 @@ export default function CollegeSavingsPlanner() {
                                 💡 To fully fund college:
                             </p>
                             <p className="text-sm text-blue-700 dark:text-blue-400">
-                                Increase monthly contribution to {formatCurrency(result.requiredMonthly)}
+                                Increase monthly contribution to <PriceDisplay amount={result.requiredMonthly} maximumFractionDigits={0} />
                             </p>
                         </div>
                     )}

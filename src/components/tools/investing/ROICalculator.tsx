@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { DollarSign, TrendingUp, Percent } from 'lucide-react';
 
 interface ROIResult {
@@ -27,9 +28,7 @@ export default function ROICalculator() {
         };
     }, [initialInvestment, finalValue, years]);
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-    };
+
 
     const isProfit = result.netProfit >= 0;
 
@@ -56,7 +55,7 @@ export default function ROICalculator() {
                                 <span className="text-xs text-slate-500">Net {isProfit ? 'Profit' : 'Loss'}</span>
                             </div>
                             <p className={`text-lg font-semibold ${isProfit ? 'text-emerald-600' : 'text-red-600'}`}>
-                                {isProfit ? '+' : ''}{formatCurrency(result.netProfit)}
+                                {isProfit ? '+' : ''}<PriceDisplay amount={result.netProfit} />
                             </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
@@ -75,7 +74,7 @@ export default function ROICalculator() {
                         <div className="flex justify-between text-sm mb-2">
                             <span className="text-slate-500">Investment Growth</span>
                             <span className={`font-medium ${isProfit ? 'text-emerald-600' : 'text-red-600'}`}>
-                                {formatCurrency(initialInvestment)} → {formatCurrency(finalValue)}
+                                <PriceDisplay amount={initialInvestment} /> → <PriceDisplay amount={finalValue} />
                             </span>
                         </div>
                         <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">

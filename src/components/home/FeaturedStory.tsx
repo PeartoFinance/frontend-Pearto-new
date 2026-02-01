@@ -1,37 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Clock, ArrowRight, Loader2 } from 'lucide-react';
-import { getFeaturedArticles, Article } from '@/services/contentService';
+import { Article } from '@/services/contentService';
+import { useFeaturedArticles } from '@/hooks/useContentData';
 
 interface FeaturedStoryProps {
     initialArticle?: Article;
 }
 
 export default function FeaturedStory({ initialArticle }: FeaturedStoryProps) {
-    const [article, setArticle] = useState<Article | null>(initialArticle || null);
-    const [loading, setLoading] = useState(!initialArticle);
+    // Determine if we need to fetch data
+    const shouldFetch = !initialArticle;
 
-    useEffect(() => {
-        if (initialArticle) return;
+    const { data: articles, isLoading } = useFeaturedArticles(1);
 
-        const fetchFeatured = async () => {
-            try {
-                const articles = await getFeaturedArticles(1);
-                if (articles.length > 0) {
-                    setArticle(articles[0]);
-                }
-            } catch (err) {
-                console.error('Failed to fetch featured article:', err);
-                // No fallback - article stays null
-            } finally {
-                setLoading(false);
-            }
-        };
+    // Use initial data if provided, otherwise use fetched data
+    const article = initialArticle || (articles && articles.length > 0 ? articles[0] : null);
+    const loading = shouldFetch && isLoading;
 
-        fetchFeatured();
-    }, [initialArticle]);
+    // Prefetch next batch or similar logic could go here
+    // No useEffect needed for data fetching anymore
 
     const getTimeAgo = (dateStr?: string) => {
         if (!dateStr) return "Just now";

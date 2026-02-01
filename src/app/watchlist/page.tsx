@@ -9,6 +9,7 @@ import Header from '@/components/layout/Header';
 import { AIWidget } from '@/components/ai';
 import { getWatchlist, addToWatchlist, removeFromWatchlist, type WatchlistItem } from '@/services/portfolioService';
 import { searchStocks, type MarketStock } from '@/services/marketService';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import {
     Star, Plus, Trash2, TrendingUp, TrendingDown, Search, Loader2, X,
     Grid3X3, List, Bell, ExternalLink, AlertCircle
@@ -238,7 +239,7 @@ export default function WatchlistPage() {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-slate-900 dark:text-white font-medium">
-                                                    ${item.price?.toFixed(2) || '-'}
+                                                    <PriceDisplay amount={item.price} />
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className={`flex items-center gap-1 ${item.changePercent >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
@@ -375,7 +376,7 @@ function WatchlistCard({ item, onRemove, onClick }: { item: WatchlistItem; onRem
             <div className="flex items-end justify-between">
                 <div>
                     <p className="text-2xl font-bold text-slate-900 dark:text-white">
-                        ${item.price?.toFixed(2) || '-'}
+                        <PriceDisplay amount={item.price} />
                     </p>
                 </div>
                 <div className={`flex items-center gap-1 px-2 py-1 rounded-lg ${isPositive ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' : 'bg-red-100 dark:bg-red-900/30 text-red-600'}`}>

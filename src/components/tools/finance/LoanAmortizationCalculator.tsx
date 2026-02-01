@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { Coins, TrendingUp, Clock, DollarSign, Percent } from 'lucide-react';
 import {
     createChart,
@@ -171,8 +172,7 @@ export default function LoanAmortizationCalculator() {
         };
     }, [result, isDark]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
 
     return (
         <CalculatorLayout
@@ -185,10 +185,12 @@ export default function LoanAmortizationCalculator() {
                     <div className="text-center p-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                         <Coins className="w-8 h-8 text-blue-500 mx-auto mb-2" />
                         <p className="text-sm text-slate-500">Monthly Payment</p>
-                        <p className="text-4xl font-bold text-blue-600">{formatCurrency(result.monthlyPayment)}</p>
+                        <p className="text-4xl font-bold text-blue-600">
+                            <PriceDisplay amount={result.monthlyPayment} maximumFractionDigits={0} />
+                        </p>
                         {extraPayment > 0 && (
                             <p className="text-xs text-slate-500 mt-1">
-                                (Base: {formatCurrency(result.basePayment)} + Extra: {formatCurrency(extraPayment)})
+                                (Base: <PriceDisplay amount={result.basePayment} maximumFractionDigits={0} /> + Extra: <PriceDisplay amount={extraPayment} maximumFractionDigits={0} />)
                             </p>
                         )}
                     </div>
@@ -196,11 +198,15 @@ export default function LoanAmortizationCalculator() {
                     <div className="grid grid-cols-2 gap-3">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Total Interest</p>
-                            <p className="text-xl font-bold text-red-500">{formatCurrency(result.totalInterest)}</p>
+                            <p className="text-xl font-bold text-red-500">
+                                <PriceDisplay amount={result.totalInterest} maximumFractionDigits={0} />
+                            </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Total Paid</p>
-                            <p className="text-xl font-bold text-slate-700 dark:text-slate-300">{formatCurrency(result.totalPaid)}</p>
+                            <p className="text-xl font-bold text-slate-700 dark:text-slate-300">
+                                <PriceDisplay amount={result.totalPaid} maximumFractionDigits={0} />
+                            </p>
                         </div>
                     </div>
 
@@ -213,7 +219,7 @@ export default function LoanAmortizationCalculator() {
                         </p>
                         {extraPayment > 0 && result.interestSaved > 0 && (
                             <p className="text-xs text-emerald-600 mt-1">
-                                Save {formatCurrency(result.interestSaved)} in interest!
+                                Save <PriceDisplay amount={result.interestSaved} maximumFractionDigits={0} /> in interest!
                             </p>
                         )}
                     </div>
@@ -235,19 +241,19 @@ export default function LoanAmortizationCalculator() {
                             <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
                                 <p className="text-slate-500">Principal Paid</p>
                                 <p className="font-bold text-blue-600">
-                                    {formatCurrency(result.schedule.reduce((sum, s) => sum + s.principal, 0))}
+                                    <PriceDisplay amount={result.schedule.reduce((sum, s) => sum + s.principal, 0)} maximumFractionDigits={0} />
                                 </p>
                             </div>
                             <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded">
                                 <p className="text-slate-500">Interest Paid</p>
                                 <p className="font-bold text-red-500">
-                                    {formatCurrency(result.schedule.reduce((sum, s) => sum + s.interest, 0))}
+                                    <PriceDisplay amount={result.schedule.reduce((sum, s) => sum + s.interest, 0)} maximumFractionDigits={0} />
                                 </p>
                             </div>
                             <div className="p-2 bg-slate-50 dark:bg-slate-700 rounded">
                                 <p className="text-slate-500">Balance After</p>
                                 <p className="font-bold text-slate-700 dark:text-slate-300">
-                                    {formatCurrency(result.schedule[result.schedule.length - 1]?.balance || 0)}
+                                    <PriceDisplay amount={result.schedule[result.schedule.length - 1]?.balance || 0} maximumFractionDigits={0} />
                                 </p>
                             </div>
                         </div>
@@ -317,7 +323,7 @@ export default function LoanAmortizationCalculator() {
 
                 <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Extra Monthly Payment: {formatCurrency(extraPayment)}
+                        Extra Monthly Payment: <PriceDisplay amount={extraPayment} maximumFractionDigits={0} />
                     </label>
                     <input
                         type="range"

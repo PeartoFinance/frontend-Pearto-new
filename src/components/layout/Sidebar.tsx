@@ -32,6 +32,7 @@ const fallbackNavItems = [
     { href: '/markets', icon: 'TrendingUp', label: 'Markets' },
     { href: '/news', icon: 'Newspaper', label: 'News' },
     { href: '/learn', icon: 'GraduationCap', label: 'Learn' },
+    { href: '/vendors', icon: 'Briefcase', label: 'Partners' },
 ];
 
 const fallbackAuthItems = [

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { Plane, Shield, DollarSign, Calendar, Users, AlertTriangle } from 'lucide-react';
 
 type CoverageType = 'basic' | 'standard' | 'comprehensive';
@@ -73,8 +74,7 @@ export default function TravelInsuranceCalculator() {
         };
     }, [tripCost, tripDuration, coverageType, tripType, travelers, travelerAge, includeCancel, includeMedical, includeBaggage]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
 
     return (
         <CalculatorLayout
@@ -87,7 +87,9 @@ export default function TravelInsuranceCalculator() {
                     <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl">
                         <Shield className="w-8 h-8 text-blue-500 mx-auto mb-2" />
                         <p className="text-sm text-slate-500">Estimated Premium</p>
-                        <p className="text-4xl font-bold text-blue-600">{formatCurrency(result.totalPremium)}</p>
+                        <p className="text-4xl font-bold text-blue-600">
+                            <PriceDisplay amount={result.totalPremium} maximumFractionDigits={0} />
+                        </p>
                         <p className="text-sm text-slate-500 mt-1">
                             ${result.costPerDayPerPerson}/day per person • {result.percentOfTrip}% of trip
                         </p>
@@ -101,29 +103,39 @@ export default function TravelInsuranceCalculator() {
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Base Coverage</span>
-                                <span className="font-medium text-slate-700 dark:text-slate-300">{formatCurrency(result.basePremium)}</span>
+                                <span className="font-medium text-slate-700 dark:text-slate-300">
+                                    <PriceDisplay amount={result.basePremium} maximumFractionDigits={0} />
+                                </span>
                             </div>
                             {includeCancel && (
                                 <div className="flex justify-between">
                                     <span className="text-slate-500">Trip Cancellation</span>
-                                    <span className="font-medium text-slate-700 dark:text-slate-300">{formatCurrency(result.cancelCost)}</span>
+                                    <span className="font-medium text-slate-700 dark:text-slate-300">
+                                        <PriceDisplay amount={result.cancelCost} maximumFractionDigits={0} />
+                                    </span>
                                 </div>
                             )}
                             {includeMedical && (
                                 <div className="flex justify-between">
                                     <span className="text-slate-500">Medical Coverage</span>
-                                    <span className="font-medium text-slate-700 dark:text-slate-300">{formatCurrency(result.medicalCost)}</span>
+                                    <span className="font-medium text-slate-700 dark:text-slate-300">
+                                        <PriceDisplay amount={result.medicalCost} maximumFractionDigits={0} />
+                                    </span>
                                 </div>
                             )}
                             {includeBaggage && (
                                 <div className="flex justify-between">
                                     <span className="text-slate-500">Baggage Protection</span>
-                                    <span className="font-medium text-slate-700 dark:text-slate-300">{formatCurrency(result.baggageCost)}</span>
+                                    <span className="font-medium text-slate-700 dark:text-slate-300">
+                                        <PriceDisplay amount={result.baggageCost} maximumFractionDigits={0} />
+                                    </span>
                                 </div>
                             )}
                             <div className="flex justify-between pt-2 border-t border-slate-100 dark:border-slate-700">
                                 <span className="font-medium text-slate-700 dark:text-slate-300">Total</span>
-                                <span className="font-bold text-blue-600">{formatCurrency(result.totalPremium)}</span>
+                                <span className="font-bold text-blue-600">
+                                    <PriceDisplay amount={result.totalPremium} maximumFractionDigits={0} />
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -132,15 +144,21 @@ export default function TravelInsuranceCalculator() {
                     <div className="grid grid-cols-3 gap-3">
                         <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Medical</p>
-                            <p className="text-sm font-bold text-emerald-600">{formatCurrency(result.coverage.medical)}</p>
+                            <p className="text-sm font-bold text-emerald-600">
+                                <PriceDisplay amount={result.coverage.medical} maximumFractionDigits={0} />
+                            </p>
                         </div>
                         <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Baggage</p>
-                            <p className="text-sm font-bold text-purple-600">{formatCurrency(result.coverage.baggage)}</p>
+                            <p className="text-sm font-bold text-purple-600">
+                                <PriceDisplay amount={result.coverage.baggage} maximumFractionDigits={0} />
+                            </p>
                         </div>
                         <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Cancel</p>
-                            <p className="text-sm font-bold text-amber-600">{formatCurrency(result.coverage.cancel)}</p>
+                            <p className="text-sm font-bold text-amber-600">
+                                <PriceDisplay amount={result.coverage.cancel} maximumFractionDigits={0} />
+                            </p>
                         </div>
                     </div>
 

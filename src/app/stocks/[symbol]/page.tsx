@@ -10,6 +10,7 @@ import { MultiChart } from '@/components/charts';
 import StockCompareModal from '@/components/stocks/StockCompareModal';
 import { AIWidget } from '@/components/ai';
 import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import {
     StockTabs,
     MarketIssuesBanner,
@@ -168,14 +169,28 @@ export default function StockDetailPage() {
                                         { label: 'Market Cap', value: formatLargeNumber(stock.marketCap) },
                                         { label: 'Volume', value: formatLargeNumber(stock.volume) },
                                         { label: 'Avg Volume', value: formatLargeNumber(stock.avgVolume) },
-                                        { label: 'Open', value: `$${formatNumber(stock.open)}` },
-                                        { label: 'Previous Close', value: `$${formatNumber(stock.previousClose)}` },
-                                        { label: "Day's Range", value: stock.dayLow && stock.dayHigh ? `$${formatNumber(stock.dayLow)} - $${formatNumber(stock.dayHigh)}` : '-' },
-                                        { label: '52-Week Range', value: stock.low52w && stock.high52w ? `$${formatNumber(stock.low52w)} - $${formatNumber(stock.high52w)}` : '-' },
+                                        { label: 'Open', value: <PriceDisplay amount={stock.open} /> },
+                                        { label: 'Previous Close', value: <PriceDisplay amount={stock.previousClose} /> },
+                                        {
+                                            label: "Day's Range",
+                                            value: stock.dayLow && stock.dayHigh ? (
+                                                <div className="flex gap-1">
+                                                    <PriceDisplay amount={stock.dayLow} /> - <PriceDisplay amount={stock.dayHigh} />
+                                                </div>
+                                            ) : '-'
+                                        },
+                                        {
+                                            label: '52-Week Range',
+                                            value: stock.low52w && stock.high52w ? (
+                                                <div className="flex gap-1">
+                                                    <PriceDisplay amount={stock.low52w} /> - <PriceDisplay amount={stock.high52w} />
+                                                </div>
+                                            ) : '-'
+                                        },
                                     ].map((item, i) => (
                                         <div key={i} className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
                                             <span className="text-sm text-slate-500 dark:text-slate-400">{item.label}</span>
-                                            <span className="text-sm font-medium text-slate-900 dark:text-white">{item.value}</span>
+                                            <span className="text-sm font-medium text-slate-900 dark:text-white">{item.value as any}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -187,7 +202,7 @@ export default function StockDetailPage() {
                                     {[
                                         { label: 'P/E Ratio (TTM)', value: formatNumber(stock.peRatio) },
                                         { label: 'Forward P/E', value: formatNumber(stock.forwardPe) },
-                                        { label: 'EPS (TTM)', value: stock.eps ? `$${formatNumber(stock.eps)}` : '-' },
+                                        { label: 'EPS (TTM)', value: stock.eps ? <PriceDisplay amount={stock.eps} /> : '-' },
                                         { label: 'Beta', value: formatNumber(stock.beta) },
                                         { label: 'Dividend Yield', value: stock.dividendYield ? formatPercent(stock.dividendYield) : '-' },
                                     ].map((item, i) => (
@@ -200,7 +215,19 @@ export default function StockDetailPage() {
                             </div>
 
                             {/* Chart */}
-                            <div className="lg:col-span-2">
+                            <div className="lg:col-span-2 space-y-2">
+                                {/* Chart Header with Expand button */}
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Price Chart</span>
+                                    <Link
+                                        href={`/chart/${symbol}`}
+                                        target="_blank"
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition"
+                                    >
+                                        <ExternalLink size={12} />
+                                        Advanced Chart
+                                    </Link>
+                                </div>
                                 <MultiChart
                                     data={history?.data?.map(d => ({
                                         date: formatChartDate(d.date),
@@ -378,7 +405,7 @@ export default function StockDetailPage() {
                                             </p>
                                             <div className="flex items-baseline gap-3 mt-2">
                                                 <span className="text-3xl font-bold text-slate-900 dark:text-white">
-                                                    ${formatNumber(stock.price)}
+                                                    <PriceDisplay amount={stock.price} />
                                                 </span>
                                                 <div className={`flex items-center gap-1 text-base font-semibold ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
                                                     {isPositive ? <TrendingUp size={18} /> : <TrendingDown size={18} />}

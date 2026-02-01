@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Save, Globe, DollarSign, Languages, MapPin } from 'lucide-react';
 import { UserPreferences, updatePreferences, getPreferences } from '@/services/userService';
+import NewsPreferencesSection from './NewsPreferencesSection';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface ProfilePreferencesProps {
     initialPreferences?: UserPreferences;
@@ -58,6 +60,7 @@ const COUNTRIES = [
 ];
 
 export default function ProfilePreferences({ initialPreferences, onUpdate }: ProfilePreferencesProps) {
+    const { currency, setCurrency } = useCurrency();
     const [preferences, setPreferences] = useState<UserPreferences>({
         currency: 'USD',
         languagePref: 'en',
@@ -100,9 +103,9 @@ export default function ProfilePreferences({ initialPreferences, onUpdate }: Pro
             setMessage({ type: 'success', text: 'Preferences updated successfully!' });
             onUpdate?.(preferences);
         } catch (error: any) {
-            setMessage({ 
-                type: 'error', 
-                text: error.message || 'Failed to update preferences' 
+            setMessage({
+                type: 'error',
+                text: error.message || 'Failed to update preferences'
             });
         } finally {
             setSaving(false);
@@ -128,17 +131,15 @@ export default function ProfilePreferences({ initialPreferences, onUpdate }: Pro
 
             {/* Message */}
             {message && (
-                <div className={`p-3 rounded-lg text-sm ${
-                    message.type === 'success' 
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
-                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                }`}>
+                <div className={`p-3 rounded-lg text-sm ${message.type === 'success'
+                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    }`}>
                     {message.text}
                 </div>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Currency */}
                 <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="p-2 bg-emerald-500/10 rounded-lg">
@@ -150,13 +151,17 @@ export default function ProfilePreferences({ initialPreferences, onUpdate }: Pro
                         </div>
                     </div>
                     <select
-                        value={preferences.currency}
-                        onChange={(e) => handleChange('currency', e.target.value)}
+                        value={currency}
+                        onChange={(e) => {
+                            const newCurrency = e.target.value;
+                            setCurrency(newCurrency);
+                            handleChange('currency', newCurrency);
+                        }}
                         className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 transition"
                     >
-                        {CURRENCIES.map(currency => (
-                            <option key={currency.code} value={currency.code}>
-                                {currency.symbol} {currency.name} ({currency.code})
+                        {CURRENCIES.map(c => (
+                            <option key={c.code} value={c.code}>
+                                {c.symbol} {c.name} ({c.code})
                             </option>
                         ))}
                     </select>
@@ -251,6 +256,11 @@ export default function ProfilePreferences({ initialPreferences, onUpdate }: Pro
                     )}
                 </button>
             </div>
+
+            <div className="border-t border-slate-200 dark:border-slate-800 my-8"></div>
+
+            {/* News Preferences Section */}
+            <NewsPreferencesSection />
         </div>
     );
 }

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, X, TrendingUp, Bitcoin, Loader2, ArrowRight } from 'lucide-react';
 import { searchStocks, type MarketStock } from '@/services/marketService';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface SearchModalProps {
     isOpen: boolean;
@@ -153,13 +154,13 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                                         key={`${stock.symbol}-${index}`}
                                         onClick={() => navigateToStock(stock)}
                                         className={`w-full flex items-center gap-3 px-4 py-3 text-left transition ${index === selectedIndex
-                                                ? 'bg-slate-100 dark:bg-slate-800'
-                                                : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                            ? 'bg-slate-100 dark:bg-slate-800'
+                                            : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
                                             }`}
                                     >
                                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${stock.assetType === 'crypto'
-                                                ? 'bg-amber-500/10'
-                                                : 'bg-emerald-500/10'
+                                            ? 'bg-amber-500/10'
+                                            : 'bg-emerald-500/10'
                                             }`}>
                                             {stock.assetType === 'crypto'
                                                 ? <Bitcoin size={18} className="text-amber-500" />
@@ -180,10 +181,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                                         <div className="text-right">
                                             {stock.price && (
                                                 <p className="font-medium text-slate-900 dark:text-white">
-                                                    ${stock.price.toFixed(2)}
+                                                    <PriceDisplay amount={stock.price} />
                                                 </p>
                                             )}
-                                            {stock.changePercent !== undefined && (
+                                            {stock.changePercent != null && (
                                                 <p className={`text-sm ${stock.changePercent >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
                                                     {stock.changePercent >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
                                                 </p>

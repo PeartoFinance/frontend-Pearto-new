@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { CreditCard, DollarSign, TrendingDown, Calendar } from 'lucide-react';
 
 export default function DebtPayoffCalculator() {
@@ -44,8 +45,7 @@ export default function DebtPayoffCalculator() {
         };
     }, [balance, interestRate, monthlyPayment]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
 
     return (
         <CalculatorLayout
@@ -70,11 +70,15 @@ export default function DebtPayoffCalculator() {
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                                     <p className="text-xs text-slate-500 mb-1">Total Interest</p>
-                                    <p className="text-xl font-bold text-red-500">{formatCurrency(results.totalInterest)}</p>
+                                    <p className="text-xl font-bold text-red-500">
+                                        <PriceDisplay amount={results.totalInterest} maximumFractionDigits={0} />
+                                    </p>
                                 </div>
                                 <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                                     <p className="text-xs text-slate-500 mb-1">Total Payment</p>
-                                    <p className="text-xl font-bold text-blue-600">{formatCurrency(results.totalPayment)}</p>
+                                    <p className="text-xl font-bold text-blue-600">
+                                        <PriceDisplay amount={results.totalPayment} maximumFractionDigits={0} />
+                                    </p>
                                 </div>
                             </div>
 
@@ -86,7 +90,7 @@ export default function DebtPayoffCalculator() {
                                     <div className="flex justify-between">
                                         <span className="text-slate-500">Starting Balance</span>
                                         <span className="font-medium text-slate-700 dark:text-slate-300">
-                                            {formatCurrency(balance)}
+                                            <PriceDisplay amount={balance} maximumFractionDigits={0} />
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
@@ -98,7 +102,7 @@ export default function DebtPayoffCalculator() {
                                     <div className="flex justify-between">
                                         <span className="text-slate-500">Monthly Payment</span>
                                         <span className="font-medium text-emerald-600">
-                                            {formatCurrency(monthlyPayment)}
+                                            <PriceDisplay amount={monthlyPayment} maximumFractionDigits={0} />
                                         </span>
                                     </div>
                                     <div className="flex justify-between pt-2 border-t border-slate-100 dark:border-slate-700">
@@ -116,7 +120,7 @@ export default function DebtPayoffCalculator() {
                             <p className="text-lg font-bold text-red-600 mb-2">Payment Too Low</p>
                             <p className="text-sm text-red-600">
                                 Your payment doesn't cover the monthly interest.
-                                Minimum payment needed: {formatCurrency(results.minimumPayment)}
+                                Minimum payment needed: <PriceDisplay amount={results.minimumPayment} maximumFractionDigits={0} />
                             </p>
                         </div>
                     )}
@@ -162,7 +166,7 @@ export default function DebtPayoffCalculator() {
                         className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
                     />
                     <p className="text-xs text-slate-400 mt-1">
-                        Min payment to make progress: {formatCurrency(balance * interestRate / 100 / 12)}
+                        Min payment to make progress: <PriceDisplay amount={balance * interestRate / 100 / 12} maximumFractionDigits={0} />
                     </p>
                 </div>
 

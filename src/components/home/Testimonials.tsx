@@ -1,42 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Quote, Star, Loader2 } from 'lucide-react';
-
-interface Testimonial {
-    id: number;
-    name: string;
-    title: string;
-    company: string;
-    avatarUrl: string;
-    content: string;
-    rating: number;
-    createdAt: string;
-}
+import { useTestimonials } from '@/hooks/useContentData';
 
 export default function Testimonials() {
-    const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchTestimonials = async () => {
-            try {
-                // Fetch all active testimonials, not just featured ones
-                const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/content/testimonials?limit=6`;
-                const res = await fetch(url);
-                if (res.ok) {
-                    const data = await res.json();
-                    setTestimonials(data);
-                }
-            } catch (err) {
-                console.error('Failed to fetch testimonials', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchTestimonials();
-    }, []);
+    const { data: testimonials = [], isLoading: loading } = useTestimonials(6);
 
     if (!loading && testimonials.length === 0) return null;
 

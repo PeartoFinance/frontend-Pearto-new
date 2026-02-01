@@ -44,6 +44,7 @@ export interface NotificationPreferences {
     emailNews: boolean;
     emailMarketing: boolean;
     emailNewsletter: boolean;
+    emailPortfolioSummary: boolean; // NEW: Daily P&L summary
     // Push preferences
     pushSecurity: boolean;
     pushPriceAlerts: boolean;
@@ -209,6 +210,39 @@ export async function updateNotificationPreferences(
     );
 }
 
+// --- News Preferences ---
+
+export interface NewsPreferences {
+    id?: number;
+    userId?: number;
+    companies: string[];
+    categories: string[];
+    newsType: 'company' | 'independent';
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+/**
+ * Get user news preferences
+ */
+export async function getNewsPreferences(): Promise<NewsPreferences> {
+    return get<NewsPreferences>('/user/news-preferences');
+}
+
+/**
+ * Create user news preferences
+ */
+export async function createNewsPreferences(data: Partial<NewsPreferences>): Promise<NewsPreferences> {
+    return post<NewsPreferences>('/user/news-preferences', data);
+}
+
+/**
+ * Update user news preferences
+ */
+export async function updateNewsPreferences(data: Partial<NewsPreferences>): Promise<NewsPreferences> {
+    return put<NewsPreferences>('/user/news-preferences', data);
+}
+
 export default {
     getProfile,
     updateProfile,
@@ -218,4 +252,7 @@ export default {
     getFullProfile,
     getNotificationPreferences,
     updateNotificationPreferences,
+    getNewsPreferences,
+    createNewsPreferences,
+    updateNewsPreferences,
 };

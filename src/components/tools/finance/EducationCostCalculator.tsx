@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { GraduationCap, DollarSign, TrendingUp } from 'lucide-react';
 
 export default function EducationCostCalculator() {
@@ -31,11 +32,7 @@ export default function EducationCostCalculator() {
         };
     }, [currentCost, childAge, educationAge, inflation, investmentReturn]);
 
-    const formatCurrency = (amount: number) => {
-        if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
-        if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-    };
+
 
     return (
         <CalculatorLayout
@@ -47,17 +44,23 @@ export default function EducationCostCalculator() {
                     <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-xl">
                         <GraduationCap className="w-8 h-8 text-blue-500 mx-auto mb-2" />
                         <p className="text-sm text-slate-500 mb-1">Future Education Cost</p>
-                        <p className="text-4xl font-bold text-blue-600">{formatCurrency(result.futureCost)}</p>
+                        <p className="text-4xl font-bold text-blue-600">
+                            <PriceDisplay amount={result.futureCost} />
+                        </p>
                         <p className="text-sm text-slate-500 mt-1">in {result.yearsToEducation} years</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Monthly SIP Needed</span>
-                            <p className="text-lg font-semibold text-emerald-600">{formatCurrency(result.sipNeeded)}</p>
+                            <p className="text-lg font-semibold text-emerald-600">
+                                <PriceDisplay amount={result.sipNeeded} />
+                            </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Lumpsum Needed Today</span>
-                            <p className="text-lg font-semibold">{formatCurrency(result.lumpsumNeeded)}</p>
+                            <p className="text-lg font-semibold">
+                                <PriceDisplay amount={result.lumpsumNeeded} />
+                            </p>
                         </div>
                     </div>
                 </div>

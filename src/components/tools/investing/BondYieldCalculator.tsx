@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { Landmark, TrendingUp, DollarSign, BarChart3, Calendar } from 'lucide-react';
 import {
     createChart,
@@ -173,8 +174,7 @@ export default function BondYieldCalculator() {
         };
     }, [result, isDark]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+
 
     return (
         <CalculatorLayout
@@ -197,11 +197,11 @@ export default function BondYieldCalculator() {
 
                     {/* Bond Type Badge */}
                     <div className={`text-center p-3 rounded-xl ${result.bondType === 'discount' ? 'bg-emerald-50 dark:bg-emerald-900/20' :
-                            result.bondType === 'premium' ? 'bg-amber-50 dark:bg-amber-900/20' :
-                                'bg-slate-50 dark:bg-slate-800'
+                        result.bondType === 'premium' ? 'bg-amber-50 dark:bg-amber-900/20' :
+                            'bg-slate-50 dark:bg-slate-800'
                         }`}>
                         <span className={`text-sm font-medium ${result.bondType === 'discount' ? 'text-emerald-600' :
-                                result.bondType === 'premium' ? 'text-amber-600' : 'text-slate-600'
+                            result.bondType === 'premium' ? 'text-amber-600' : 'text-slate-600'
                             }`}>
                             {result.bondType === 'discount' ? '📈 Discount Bond (below par)' :
                                 result.bondType === 'premium' ? '📉 Premium Bond (above par)' :
@@ -236,22 +236,22 @@ export default function BondYieldCalculator() {
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Annual Coupon</span>
-                                <span>{formatCurrency(result.annualCoupon)}</span>
+                                <span><PriceDisplay amount={result.annualCoupon} /></span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Total Coupons</span>
-                                <span className="text-emerald-600">{formatCurrency(result.totalCoupons)}</span>
+                                <span className="text-emerald-600"><PriceDisplay amount={result.totalCoupons} /></span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Capital Gain/Loss</span>
                                 <span className={result.capitalGain >= 0 ? 'text-emerald-600' : 'text-red-500'}>
-                                    {formatCurrency(result.capitalGain)}
+                                    <PriceDisplay amount={result.capitalGain} />
                                 </span>
                             </div>
                             <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-700">
                                 <span className="font-medium">Total Return</span>
                                 <span className="font-bold text-purple-600">
-                                    {formatCurrency(result.totalReturn)} ({result.totalReturnPercent.toFixed(1)}%)
+                                    <PriceDisplay amount={result.totalReturn} /> ({result.totalReturnPercent.toFixed(1)}%)
                                 </span>
                             </div>
                         </div>

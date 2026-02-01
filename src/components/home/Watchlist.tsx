@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { TrendingUp, TrendingDown, Plus, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
-import { getWatchlist, WatchlistItem as WatchlistItemType } from '@/services/portfolioService';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface WatchlistItem {
     symbol: string;
@@ -13,49 +12,25 @@ interface WatchlistItem {
     changePercent: number;
 }
 
+import { useAuth } from '@/context/AuthContext';
+import { useWatchlist } from '@/hooks/usePortfolioData';
+// ... (imports)
+
 export default function Watchlist() {
-    const [items, setItems] = useState<WatchlistItem[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const { isAuthenticated } = useAuth();
 
-    useEffect(() => {
-        const fetchWatchlist = async () => {
-            // Check if user is authenticated
-            const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-            if (!token) {
-                setIsAuthenticated(false);
-                setLoading(false);
-                return;
-            }
+    // Only query if authenticated
+    const { data: rawItems = [], isLoading: loading, isError: error } = useWatchlist();
 
-            setIsAuthenticated(true);
-            try {
-                setLoading(true);
-                const data = await getWatchlist();
-                setItems(data.map(item => ({
-                    symbol: item.symbol,
-                    name: item.name,
-                    price: item.price,
-                    change: item.change,
-                    changePercent: item.changePercent
-                })));
-                setError(false);
-            } catch (err: any) {
-                // If 401, user is not authenticated - this is expected, don't log error
-                if (err?.status === 401) {
-                    setIsAuthenticated(false);
-                } else {
-                    console.error('Failed to fetch watchlist:', err);
-                    setError(true);
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchWatchlist();
-    }, []);
+    // Map raw API data to component format if needed, but looks like mapping was done in component
+    // Let's assume rawItems matches what we need or map it
+    const items: WatchlistItem[] = (rawItems || []).map((item: any) => ({
+        symbol: item.symbol,
+        name: item.name || item.symbol,
+        price: item.price || 0,
+        change: item.change || 0,
+        changePercent: item.changePercent || 0
+    }));
 
     return (
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
@@ -136,7 +111,7 @@ export default function Watchlist() {
                             {/* Price & Change */}
                             <div className="text-right">
                                 <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                                    ${item.price?.toFixed(2) || '0.00'}
+                                    <PriceDisplay amount={item.price} />
                                 </p>
                                 <div className={`flex items-center gap-1 justify-end ${(item.changePercent || 0) >= 0 ? 'text-emerald-500' : 'text-red-500'
                                     }`}>

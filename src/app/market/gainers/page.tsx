@@ -7,6 +7,7 @@ import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
 import { getTopMovers, type MarketStock } from '@/services/marketService';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { createChart, ColorType, HistogramSeries, type IChartApi } from 'lightweight-charts';
 import {
     ArrowLeft, TrendingUp, TrendingDown, Loader2, AlertCircle,
@@ -341,10 +342,10 @@ export default function MarketMoversPage() {
                                                             {stock.name || '-'}
                                                         </td>
                                                         <td className="text-right px-4 py-4 font-semibold text-slate-900 dark:text-white">
-                                                            ${formatNumber(stock.price)}
+                                                            <PriceDisplay amount={stock.price} />
                                                         </td>
                                                         <td className={`text-right px-4 py-4 font-medium ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
-                                                            {isPositive ? '+' : ''}{formatNumber(stock.change)}
+                                                            {isPositive ? '+' : ''}<PriceDisplay amount={Math.abs(stock.change || 0)} showSymbol={false} />
                                                         </td>
                                                         <td className="text-right px-4 py-4">
                                                             <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-bold ${isPositive
@@ -359,7 +360,7 @@ export default function MarketMoversPage() {
                                                             {formatLargeNumber(stock.volume)}
                                                         </td>
                                                         <td className="text-right px-4 py-4 text-slate-600 dark:text-slate-300">
-                                                            {formatLargeNumber(stock.marketCap)}
+                                                            <PriceDisplay amount={stock.marketCap} options={{ notation: 'compact' }} />
                                                         </td>
                                                     </tr>
                                                 );

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { IndianRupee, Percent, Calendar, CreditCard } from 'lucide-react';
 
 interface EMIResult {
@@ -49,13 +50,7 @@ export default function EMICalculator() {
         };
     }, [loanAmount, interestRate, tenure]);
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 0
-        }).format(amount);
-    };
+
 
     return (
         <CalculatorLayout
@@ -68,7 +63,7 @@ export default function EMICalculator() {
                     <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-xl">
                         <p className="text-sm text-slate-500 mb-1">Monthly EMI</p>
                         <p className="text-4xl font-bold text-emerald-600">
-                            {formatCurrency(result.emi)}
+                            <PriceDisplay amount={result.emi} />
                         </p>
                     </div>
 
@@ -77,13 +72,13 @@ export default function EMICalculator() {
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <p className="text-xs text-slate-500 mb-1">Principal</p>
                             <p className="text-lg font-semibold text-slate-900 dark:text-white">
-                                {formatCurrency(loanAmount)}
+                                <PriceDisplay amount={loanAmount} />
                             </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <p className="text-xs text-slate-500 mb-1">Total Interest</p>
                             <p className="text-lg font-semibold text-rose-600">
-                                {formatCurrency(result.totalInterest)}
+                                <PriceDisplay amount={result.totalInterest} />
                             </p>
                         </div>
                     </div>
@@ -93,7 +88,7 @@ export default function EMICalculator() {
                         <div className="flex justify-between items-center">
                             <span className="text-sm text-slate-500">Total Payment</span>
                             <span className="text-xl font-bold text-slate-900 dark:text-white">
-                                {formatCurrency(result.totalPayment)}
+                                <PriceDisplay amount={result.totalPayment} />
                             </span>
                         </div>
                         <div className="mt-3 flex h-4 rounded-full overflow-hidden">
@@ -121,8 +116,8 @@ export default function EMICalculator() {
                             {result.schedule.map(row => (
                                 <div key={row.month} className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-700">
                                     <span className="text-slate-500">Month {row.month}</span>
-                                    <span className="text-blue-600">P: {formatCurrency(row.principal)}</span>
-                                    <span className="text-rose-600">I: {formatCurrency(row.interest)}</span>
+                                    <span className="text-blue-600">P: <PriceDisplay amount={row.principal} /></span>
+                                    <span className="text-rose-600">I: <PriceDisplay amount={row.interest} /></span>
                                 </div>
                             ))}
                         </div>

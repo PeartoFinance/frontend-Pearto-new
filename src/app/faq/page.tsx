@@ -25,7 +25,7 @@ export default function FAQPage() {
     useEffect(() => {
         const fetchFAQs = async () => {
             try {
-                const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/content/faq`;
+                const url = `${process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com'}/api/content/faq`;
                 const res = await fetch(url);
                 if (res.ok) {
                     const data = await res.json();
@@ -95,8 +95,8 @@ export default function FAQPage() {
                                         key={cat}
                                         onClick={() => setActiveCategory(cat)}
                                         className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeCategory === cat
-                                                ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25'
-                                                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                                            ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25'
+                                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
                                             }`}
                                     >
                                         {cat}
@@ -120,8 +120,8 @@ export default function FAQPage() {
                                     <div
                                         key={faq.id}
                                         className={`bg-white dark:bg-slate-800 rounded-xl border transition-all duration-200 overflow-hidden ${openId === faq.id
-                                                ? 'border-emerald-500 dark:border-emerald-500 shadow-lg shadow-emerald-500/10'
-                                                : 'border-slate-200 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-900'
+                                            ? 'border-emerald-500 dark:border-emerald-500 shadow-lg shadow-emerald-500/10'
+                                            : 'border-slate-200 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-900'
                                             }`}
                                     >
                                         <button

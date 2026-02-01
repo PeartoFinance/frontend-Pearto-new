@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { createChart, ColorType, CandlestickSeries, AreaSeries, LineSeries, HistogramSeries, type IChartApi } from 'lightweight-charts';
 import { Loader2, CandlestickChart, LineChart, AreaChart, Maximize2, Minus, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 export interface StockChartDataPoint {
     date: string;
@@ -77,6 +79,7 @@ export function StockChartWidget({
     const volumeContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
     const volumeChartRef = useRef<IChartApi | null>(null);
+    const { formatPrice } = useCurrency();
 
     const [isDark, setIsDark] = useState(false);
     const [chartType, setChartType] = useState<ChartType>(initialChartType);
@@ -280,6 +283,11 @@ export function StockChartWidget({
     }, [isDark, data, chartType, height, showVolume, loading]);
 
     // Format helpers
+    const formatCurrencyValue = (num: number | undefined | null): string => {
+        if (num == null) return '-';
+        return formatPrice(num);
+    };
+
     const formatNumber = (num: number | undefined | null, decimals = 2): string => {
         if (num == null) return '-';
         return num.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
@@ -312,10 +320,14 @@ export function StockChartWidget({
             {showHeader && (
                 <div className="flex items-center justify-between px-4 py-2 bg-blue-600 text-white text-sm">
                     <span className="font-semibold">{symbol} Chart</span>
-                    <button className="flex items-center gap-1 hover:bg-blue-700 px-2 py-1 rounded transition">
+                    <Link
+                        href={`/chart/${symbol}`}
+                        target="_blank"
+                        className="flex items-center gap-1 hover:bg-blue-700 px-2 py-1 rounded transition"
+                    >
                         <Maximize2 size={14} />
-                        Full Screen
-                    </button>
+                        Advanced Chart
+                    </Link>
                 </div>
             )}
 
@@ -361,22 +373,22 @@ export function StockChartWidget({
                     <div className="flex items-center gap-3">
                         <span className="text-xl font-bold text-slate-900 dark:text-white">{symbol}</span>
                         <span className={`text-lg font-semibold ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
-                            {formatNumber(displayData?.close || currentPrice)}
+                            {formatCurrencyValue(displayData?.close || currentPrice)}
                         </span>
                         <span className={`text-sm ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
-                            {displayChange >= 0 ? '+' : ''}{formatNumber(displayChange)} ({displayChangePercent >= 0 ? '+' : ''}{formatNumber(displayChangePercent)}%)
+                            {displayChange >= 0 ? '+' : ''}{formatCurrencyValue(displayChange)} ({displayChangePercent >= 0 ? '+' : ''}{formatNumber(displayChangePercent)}%)
                         </span>
                     </div>
 
                     <div className="flex flex-wrap gap-4 text-xs ml-auto">
                         {[
-                            { label: 'PRICE', value: formatNumber(displayData?.close) },
+                            { label: 'PRICE', value: formatCurrencyValue(displayData?.close) },
                             { label: 'VOL', value: formatLargeNumber(displayData?.volume) },
-                            { label: 'OPEN', value: formatNumber(displayData?.open) },
-                            { label: 'HIGH', value: formatNumber(displayData?.high) },
-                            { label: 'CLOSE', value: formatNumber(displayData?.close) },
-                            { label: 'LOW', value: formatNumber(displayData?.low) },
-                            { label: 'CHANGE', value: formatNumber(displayChange) },
+                            { label: 'OPEN', value: formatCurrencyValue(displayData?.open) },
+                            { label: 'HIGH', value: formatCurrencyValue(displayData?.high) },
+                            { label: 'CLOSE', value: formatCurrencyValue(displayData?.close) },
+                            { label: 'LOW', value: formatCurrencyValue(displayData?.low) },
+                            { label: 'CHANGE', value: formatCurrencyValue(displayChange) },
                             { label: 'CHG %', value: `${formatNumber(displayChangePercent)}%` },
                         ].map((item) => (
                             <div key={item.label} className="flex flex-col">

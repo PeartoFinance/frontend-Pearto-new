@@ -2,6 +2,8 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { IndianRupee, TrendingUp, Calendar, PiggyBank, Landmark } from 'lucide-react';
 
 interface CompoundResult {
@@ -16,6 +18,7 @@ export default function CompoundCalculator() {
     const [rate, setRate] = useState(10);
     const [years, setYears] = useState(10);
     const [compoundFreq, setCompoundFreq] = useState(12); // Monthly
+    const { formatPrice } = useCurrency();
 
     const result = useMemo<CompoundResult>(() => {
         const n = compoundFreq;
@@ -42,13 +45,7 @@ export default function CompoundCalculator() {
         };
     }, [principal, rate, years, compoundFreq]);
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 0
-        }).format(amount);
-    };
+
 
     return (
         <CalculatorLayout
@@ -61,7 +58,7 @@ export default function CompoundCalculator() {
                     <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-xl">
                         <p className="text-sm text-slate-500 mb-1">Total Value</p>
                         <p className="text-4xl font-bold text-emerald-600">
-                            {formatCurrency(result.totalValue)}
+                            <PriceDisplay amount={result.totalValue} />
                         </p>
                     </div>
 
@@ -73,7 +70,7 @@ export default function CompoundCalculator() {
                                 <span className="text-xs text-slate-500">Principal</span>
                             </div>
                             <p className="text-lg font-semibold text-slate-900 dark:text-white">
-                                {formatCurrency(result.principal)}
+                                <PriceDisplay amount={result.principal} />
                             </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
@@ -82,7 +79,7 @@ export default function CompoundCalculator() {
                                 <span className="text-xs text-slate-500">Interest Earned</span>
                             </div>
                             <p className="text-lg font-semibold text-emerald-600">
-                                {formatCurrency(result.totalInterest)}
+                                <PriceDisplay amount={result.totalInterest} />
                             </p>
                         </div>
                     </div>
@@ -99,7 +96,7 @@ export default function CompoundCalculator() {
                                         height: `${(item.value / result.totalValue) * 100}%`,
                                         opacity: 0.5 + (idx / 20)
                                     }}
-                                    title={`Year ${item.year}: ${formatCurrency(item.value)}`}
+                                    title={`Year ${item.year}: ${formatPrice(item.value)}`}
                                 />
                             ))}
                         </div>

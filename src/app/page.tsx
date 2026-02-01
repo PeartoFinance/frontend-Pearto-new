@@ -20,7 +20,7 @@ import FeatureQuickGrid from '@/components/home/FeatureQuickGrid';
 import LiveRadioPreview from '@/components/home/LiveRadioPreview';
 import LiveTVPreview from '@/components/home/LiveTVPreview';
 import QuickMarkets from '@/components/home/QuickMarkets';
-import WeatherWidget from '@/components/home/WeatherWidget';
+import ExchangeRateWidget from '@/components/home/ExchangeRateWidget';
 import ForeignExchangeMarkets from '@/components/home/ForeignExchangeMarkets';
 import MarketSnapshot from '@/components/home/MarketSnapshot';
 import EducationalHub from '@/components/home/EducationalHub';
@@ -89,7 +89,7 @@ export default function HomePage() {
                 <QuickMarkets />
               </div>
               <div>
-                <WeatherWidget />
+                <ExchangeRateWidget />
               </div>
             </section>
 

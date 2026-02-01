@@ -1,15 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { TrendingUp, TrendingDown, Loader2, AlertCircle } from 'lucide-react';
-import { getMarketIndices, getCommodities, MarketIndex, Commodity } from '@/services/marketService';
+import { useMemo } from 'react';
+import { TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
+import { useMarketIndices, useCommodities } from '@/hooks/useMarketData';
+import { MarketIndex, Commodity } from '@/services/marketService';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface StatsCard {
     symbol: string;
     name: string;
-    price: string;
-    change: string;
-    changePercent: string;
+    // price can be a string (formatted) or number (for PriceDisplay)
+    price: string | number;
+    isCommodity?: boolean; // New flag to distinguish
+    change: number;
+    changePercent: number;
     isUp: boolean;
     color: string;
 }
@@ -33,80 +37,79 @@ const colorClasses: Record<string, { bg: string; bar: string }> = {
     },
 };
 
+// Loading skeleton component
+function SkeletonCard() {
+    return (
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800/50 dark:to-slate-700/30 p-5 border border-slate-200/50 dark:border-slate-700/50 animate-pulse">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-300 dark:bg-slate-600" />
+            <div className="flex items-start justify-between mb-3">
+                <div className="h-6 w-16 bg-slate-200 dark:bg-slate-600 rounded-md" />
+                <div className="h-8 w-8 bg-slate-200 dark:bg-slate-600 rounded-lg" />
+            </div>
+            <div className="h-4 w-24 bg-slate-200 dark:bg-slate-600 rounded mb-2" />
+            <div className="h-8 w-32 bg-slate-200 dark:bg-slate-600 rounded mb-2" />
+            <div className="h-4 w-20 bg-slate-200 dark:bg-slate-600 rounded" />
+        </div>
+    );
+}
+
 export default function StatsGrid() {
-    const [statsData, setStatsData] = useState<StatsCard[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
+    // Use shared React Query hooks (caches data across components)
+    const { data: indices, isLoading: indicesLoading, isError: indicesError } = useMarketIndices();
+    const { data: commodities, isLoading: commoditiesLoading, isError: commoditiesError } = useCommodities();
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const [indices, commodities] = await Promise.all([
-                    getMarketIndices(),
-                    getCommodities()
-                ]);
+    const loading = indicesLoading || commoditiesLoading;
+    const error = indicesError || commoditiesError;
 
-                const cards: StatsCard[] = [];
-                const colors = ['emerald', 'blue', 'amber', 'yellow'];
+    // Transform data into stats cards
+    const statsData = useMemo(() => {
+        const cards: StatsCard[] = [];
+        const colors = ['emerald', 'blue', 'amber', 'yellow'];
 
-                // Add top indices - using 'value' field from API
-                indices.slice(0, 2).forEach((idx: MarketIndex, i: number) => {
-                    const changePercent = idx.changePercent || 0;
-                    const change = idx.change || 0;
-                    const isUp = changePercent >= 0;
-                    cards.push({
-                        symbol: idx.symbol,
-                        name: idx.name || idx.symbol,
-                        price: idx.value?.toLocaleString(undefined, { maximumFractionDigits: 2 }) || '0',
-                        change: `${isUp ? '+' : ''}${change.toFixed(2)}`,
-                        changePercent: `${isUp ? '+' : ''}${changePercent.toFixed(2)}%`,
-                        isUp,
-                        color: colors[i % colors.length]
-                    });
+        if (indices) {
+            indices.slice(0, 2).forEach((idx: MarketIndex, i: number) => {
+                const changePercent = idx.changePercent || 0;
+                const change = idx.change || 0;
+                const isUp = changePercent >= 0;
+                cards.push({
+                    symbol: idx.symbol,
+                    name: idx.name || idx.symbol,
+                    price: idx.value?.toLocaleString(undefined, { maximumFractionDigits: 2 }) || '0',
+                    isCommodity: false,
+                    change: change,
+                    changePercent: changePercent,
+                    isUp,
+                    color: colors[i % colors.length]
                 });
+            });
+        }
 
-                // Add commodities - using 'price' field from API
-                commodities.slice(0, 2).forEach((c: Commodity, i: number) => {
-                    const changePercent = c.changePercent || 0;
-                    const change = c.change || 0;
-                    const isUp = changePercent >= 0;
-                    cards.push({
-                        symbol: c.symbol,
-                        name: c.name || c.symbol,
-                        price: `$${c.price?.toLocaleString(undefined, { maximumFractionDigits: 2 }) || 0}`,
-                        change: `${isUp ? '+' : ''}${change.toFixed(2)}`,
-                        changePercent: `${isUp ? '+' : ''}${changePercent.toFixed(2)}%`,
-                        isUp,
-                        color: colors[(i + 2) % colors.length]
-                    });
+        if (commodities) {
+            commodities.slice(0, 2).forEach((c: Commodity, i: number) => {
+                const changePercent = c.changePercent || 0;
+                const change = c.change || 0;
+                const isUp = changePercent >= 0;
+                cards.push({
+                    symbol: c.symbol,
+                    name: c.name || c.symbol,
+                    price: c.price || 0,
+                    isCommodity: true,
+                    change: change,
+                    changePercent: changePercent,
+                    isUp,
+                    color: colors[(i + 2) % colors.length]
                 });
+            });
+        }
 
-                if (cards.length > 0) {
-                    setStatsData(cards);
-                    setError(false);
-                } else {
-                    setError(true);
-                }
-            } catch (err) {
-                console.error('Failed to fetch stats data:', err);
-                setError(true);
-            } finally {
-                setLoading(false);
-            }
-        };
+        return cards;
+    }, [indices, commodities]);
 
-        fetchData();
-        // Refresh every 2 minutes
-        const interval = setInterval(fetchData, 120000);
-        return () => clearInterval(interval);
-    }, []);
-
+    // Show skeletons while loading
     if (loading) {
         return (
-            <div className="flex items-center justify-center py-12">
-                <Loader2 className="animate-spin text-emerald-500" size={24} />
-                <span className="ml-2 text-slate-500">Loading market data...</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map((i) => <SkeletonCard key={i} />)}
             </div>
         );
     }
@@ -150,17 +153,27 @@ export default function StatsGrid() {
 
                         {/* Name & Price */}
                         <h3 className="text-sm text-slate-500 dark:text-slate-400 mb-1">{stat.name}</h3>
-                        <p className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-                            {stat.price}
-                        </p>
+                        <div className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                            {stat.isCommodity ? (
+                                <PriceDisplay amount={stat.price as number} />
+                            ) : (
+                                stat.price
+                            )}
+                        </div>
 
+                        {/* Change */}
                         {/* Change */}
                         <div className="flex items-center gap-2">
                             <span className={`text-sm font-semibold ${stat.isUp ? 'text-emerald-600' : 'text-red-600'}`}>
-                                {stat.change}
+                                {stat.isUp ? '+' : ''}
+                                {stat.isCommodity ? (
+                                    <PriceDisplay amount={Math.abs(stat.change)} showSymbol={false} />
+                                ) : (
+                                    Math.abs(stat.change).toFixed(2)
+                                )}
                             </span>
                             <span className={`text-sm ${stat.isUp ? 'text-emerald-500' : 'text-red-500'}`}>
-                                {stat.changePercent}
+                                {stat.isUp ? '+' : ''}{stat.changePercent.toFixed(2)}%
                             </span>
                         </div>
 

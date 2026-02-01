@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Loader2, Target, TrendingUp } from 'lucide-react';
 import { getStockForecast, type DetailedForecast } from '@/services/marketService';
 import type { MarketStock, PriceHistoryPoint } from '@/services/marketService';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface CompareStock extends MarketStock {
     color: string;
@@ -99,7 +100,7 @@ export default function CompareForecastTab({ stocks }: CompareForecastTabProps) 
                                 <td className="py-3 px-4 text-sm text-slate-500">Current Price</td>
                                 {stockForecasts.map((sf) => (
                                     <td key={sf.symbol} className="py-3 px-4 text-right text-sm font-medium text-slate-900 dark:text-white">
-                                        {formatPrice(sf.forecast?.priceTarget?.current)}
+                                        <PriceDisplay amount={sf.forecast?.priceTarget?.current} />
                                     </td>
                                 ))}
                             </tr>
@@ -107,7 +108,7 @@ export default function CompareForecastTab({ stocks }: CompareForecastTabProps) 
                                 <td className="py-3 px-4 text-sm text-slate-500">Mean Target</td>
                                 {stockForecasts.map((sf) => (
                                     <td key={sf.symbol} className="py-3 px-4 text-right text-sm font-bold text-teal-600">
-                                        {formatPrice(sf.forecast?.priceTarget?.mean)}
+                                        <PriceDisplay amount={sf.forecast?.priceTarget?.mean} />
                                     </td>
                                 ))}
                             </tr>
@@ -129,7 +130,7 @@ export default function CompareForecastTab({ stocks }: CompareForecastTabProps) 
                                 <td className="py-3 px-4 text-sm text-slate-500">Low Target</td>
                                 {stockForecasts.map((sf) => (
                                     <td key={sf.symbol} className="py-3 px-4 text-right text-sm text-red-500">
-                                        {formatPrice(sf.forecast?.priceTarget?.low)}
+                                        <PriceDisplay amount={sf.forecast?.priceTarget?.low} />
                                     </td>
                                 ))}
                             </tr>
@@ -137,7 +138,7 @@ export default function CompareForecastTab({ stocks }: CompareForecastTabProps) 
                                 <td className="py-3 px-4 text-sm text-slate-500">High Target</td>
                                 {stockForecasts.map((sf) => (
                                     <td key={sf.symbol} className="py-3 px-4 text-right text-sm text-teal-600">
-                                        {formatPrice(sf.forecast?.priceTarget?.high)}
+                                        <PriceDisplay amount={sf.forecast?.priceTarget?.high} />
                                     </td>
                                 ))}
                             </tr>

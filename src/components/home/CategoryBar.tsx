@@ -16,7 +16,7 @@ export default function CategoryBar() {
             {categories.map((cat) => (
                 <Link
                     key={cat.name}
-                    href={`/${cat.name.toLowerCase()}`}
+                    href={`/news?category=${cat.name.toLowerCase()}`}
                     className={`px-4 py-2 bg-gradient-to-r ${cat.gradient} text-white rounded-xl hover:shadow-lg transition-shadow`}
                 >
                     <p className="font-bold text-sm">{cat.name}</p>

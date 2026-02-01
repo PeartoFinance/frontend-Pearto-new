@@ -11,6 +11,7 @@ import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
 import { MultiChart } from '@/components/charts';
 import { getHoldingDetail, addTransaction, type HoldingDetail } from '@/services/portfolioService';
 import { getStockHistory, type PriceHistoryPoint } from '@/services/marketService';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import {
     StockTabs, type TabId, FinancialsTab, DividendsTab, ForecastTab, ProfileTab, NewsTab
 } from '@/components/stocks/tabs';
@@ -205,12 +206,13 @@ export default function HoldingDetailPage({ params }: PageProps) {
                                 <div className="flex flex-col lg:items-end gap-3">
                                     <div className="text-right">
                                         <p className="text-3xl font-bold text-slate-900 dark:text-white">
-                                            ${formatNumber(holding.totalValue)}
+                                            <PriceDisplay amount={holding.totalValue} />
                                         </p>
                                         <div className={`flex items-center justify-end gap-2 ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
                                             {isPositive ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
-                                            <span className="text-lg font-semibold">
-                                                {isPositive ? '+' : ''}${formatNumber(holding.totalGain)} ({isPositive ? '+' : ''}{formatNumber(holding.gainPercent)}%)
+                                            <span className="text-lg font-semibold flex items-center gap-1">
+                                                <PriceDisplay amount={holding.totalGain} prefix={isPositive ? '+' : ''} />
+                                                <span>({isPositive ? '+' : ''}{formatNumber(holding.gainPercent)}%)</span>
                                             </span>
                                         </div>
                                     </div>
@@ -294,14 +296,14 @@ export default function HoldingDetailPage({ params }: PageProps) {
                                             <DollarSign size={14} />
                                             Avg Cost
                                         </div>
-                                        <p className="text-xl font-bold text-slate-900 dark:text-white">${formatNumber(holding.avgCost)}</p>
+                                        <p className="text-xl font-bold text-slate-900 dark:text-white"><PriceDisplay amount={holding.avgCost} /></p>
                                     </div>
                                     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
                                         <div className="flex items-center gap-2 text-slate-500 text-sm mb-2">
                                             <TrendingUp size={14} />
                                             Current Price
                                         </div>
-                                        <p className="text-xl font-bold text-slate-900 dark:text-white">${formatNumber(holding.currentPrice)}</p>
+                                        <p className="text-xl font-bold text-slate-900 dark:text-white"><PriceDisplay amount={holding.currentPrice} /></p>
                                     </div>
                                     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
                                         <div className="flex items-center gap-2 text-slate-500 text-sm mb-2">
@@ -381,7 +383,7 @@ export default function HoldingDetailPage({ params }: PageProps) {
                                                         </div>
                                                         <div className="text-right">
                                                             <p className="font-medium text-slate-900 dark:text-white">{tx.shares} shares</p>
-                                                            <p className="text-xs text-slate-500">@ ${formatNumber(tx.price)}</p>
+                                                            <p className="text-xs text-slate-500 flex items-center justify-end gap-1">@ <PriceDisplay amount={tx.price} /></p>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -404,11 +406,11 @@ export default function HoldingDetailPage({ params }: PageProps) {
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-500">52W High</span>
-                                                    <span className="font-medium text-slate-900 dark:text-white">${formatNumber(market.high52w)}</span>
+                                                    <span className="font-medium text-slate-900 dark:text-white"><PriceDisplay amount={market.high52w} /></span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-500">52W Low</span>
-                                                    <span className="font-medium text-slate-900 dark:text-white">${formatNumber(market.low52w)}</span>
+                                                    <span className="font-medium text-slate-900 dark:text-white"><PriceDisplay amount={market.low52w} /></span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-500">P/E Ratio</span>
@@ -573,7 +575,7 @@ export default function HoldingDetailPage({ params }: PageProps) {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-slate-500 mb-2">Price per Share ($)</label>
+                                    <label className="block text-sm text-slate-500 mb-2">Price per Share</label>
                                     <input
                                         type="number"
                                         step="0.01"
@@ -598,7 +600,7 @@ export default function HoldingDetailPage({ params }: PageProps) {
                                     <div className={`p-4 rounded-lg ${txType === 'buy' ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
                                         <p className="text-sm text-slate-500 mb-1">Total Amount</p>
                                         <p className={`text-2xl font-bold ${txType === 'buy' ? 'text-emerald-600' : 'text-red-600'}`}>
-                                            ${(parseFloat(txShares) * parseFloat(txPrice)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            <PriceDisplay amount={parseFloat(txShares) * parseFloat(txPrice)} />
                                         </p>
                                     </div>
                                 )}

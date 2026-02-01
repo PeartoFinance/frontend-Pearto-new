@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { Home, DollarSign, TrendingUp, Calculator } from 'lucide-react';
 
 export default function DownPaymentCalculator() {
@@ -46,8 +47,7 @@ export default function DownPaymentCalculator() {
         };
     }, [homePrice, downPaymentPercent, interestRate, loanTerm, monthlyIncome]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
 
     return (
         <CalculatorLayout
@@ -59,18 +59,24 @@ export default function DownPaymentCalculator() {
                     <div className="text-center p-6 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl">
                         <Home className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
                         <p className="text-sm text-slate-500">Down Payment Required</p>
-                        <p className="text-4xl font-bold text-emerald-600">{formatCurrency(results.downPayment)}</p>
-                        <p className="text-sm text-slate-500 mt-1">{downPaymentPercent}% of {formatCurrency(homePrice)}</p>
+                        <p className="text-4xl font-bold text-emerald-600">
+                            <PriceDisplay amount={results.downPayment} maximumFractionDigits={0} />
+                        </p>
+                        <p className="text-sm text-slate-500 mt-1">{downPaymentPercent}% of <PriceDisplay amount={homePrice} maximumFractionDigits={0} /></p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Loan Amount</p>
-                            <p className="text-xl font-bold text-blue-600">{formatCurrency(results.loanAmount)}</p>
+                            <p className="text-xl font-bold text-blue-600">
+                                <PriceDisplay amount={results.loanAmount} maximumFractionDigits={0} />
+                            </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Monthly Payment</p>
-                            <p className="text-xl font-bold text-purple-600">{formatCurrency(results.totalMonthly)}</p>
+                            <p className="text-xl font-bold text-purple-600">
+                                <PriceDisplay amount={results.totalMonthly} maximumFractionDigits={0} />
+                            </p>
                         </div>
                     </div>
 
@@ -82,30 +88,32 @@ export default function DownPaymentCalculator() {
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Principal & Interest</span>
                                 <span className="font-medium text-slate-700 dark:text-slate-300">
-                                    {formatCurrency(results.monthlyPayment)}
+                                    <PriceDisplay amount={results.monthlyPayment} maximumFractionDigits={0} />
                                 </span>
                             </div>
                             {results.needsPMI && (
                                 <div className="flex justify-between text-amber-600">
                                     <span>PMI (less than 20% down)</span>
-                                    <span>{formatCurrency(results.pmi)}</span>
+                                    <span><PriceDisplay amount={results.pmi} maximumFractionDigits={0} /></span>
                                 </div>
                             )}
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Property Tax (est.)</span>
                                 <span className="font-medium text-slate-700 dark:text-slate-300">
-                                    {formatCurrency(results.propertyTax)}
+                                    <PriceDisplay amount={results.propertyTax} maximumFractionDigits={0} />
                                 </span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Home Insurance (est.)</span>
                                 <span className="font-medium text-slate-700 dark:text-slate-300">
-                                    {formatCurrency(results.homeInsurance)}
+                                    <PriceDisplay amount={results.homeInsurance} maximumFractionDigits={0} />
                                 </span>
                             </div>
                             <div className="flex justify-between pt-2 border-t border-slate-100 dark:border-slate-700">
                                 <span className="font-medium text-slate-700 dark:text-slate-300">Total Monthly</span>
-                                <span className="font-bold text-emerald-600">{formatCurrency(results.totalMonthly)}</span>
+                                <span className="font-bold text-emerald-600">
+                                    <PriceDisplay amount={results.totalMonthly} maximumFractionDigits={0} />
+                                </span>
                             </div>
                         </div>
                     </div>

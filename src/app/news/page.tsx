@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
@@ -15,12 +16,51 @@ interface NewsPageProps {
     params?: { category?: string };
 }
 
-export default function NewsPage({ params }: NewsPageProps) {
+function NewsLoading() {
+    return (
+        <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
+            <Sidebar />
+            <main className="flex-1 flex flex-col min-h-screen">
+                <div className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-gray-50 dark:bg-slate-900">
+                    <TickerTape />
+                    <Header />
+                </div>
+                <div className="flex-1 pt-[112px] md:pt-[120px] px-4 lg:px-6 py-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                            <div key={i} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-pulse">
+                                <div className="aspect-video bg-slate-200 dark:bg-slate-800" />
+                                <div className="p-4 space-y-3">
+                                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
+                                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-full" />
+                                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-2/3" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </main>
+        </div>
+    );
+}
+
+function NewsContent({ params }: NewsPageProps) {
+    const searchParams = useSearchParams();
+    const categoryParam = searchParams.get('category');
+
     const [articles, setArticles] = useState<NewsArticle[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryParam);
+
+    useEffect(() => {
+        if (categoryParam) {
+            setSelectedCategory(categoryParam);
+        } else {
+            setSelectedCategory(null);
+        }
+    }, [categoryParam]);
 
     useEffect(() => {
         loadArticles();
@@ -231,5 +271,13 @@ export default function NewsPage({ params }: NewsPageProps) {
                 quickPrompts={["Latest market news", "Crypto updates"]}
             />
         </div>
+    );
+}
+
+export default function NewsPage(props: NewsPageProps) {
+    return (
+        <Suspense fallback={<NewsLoading />}>
+            <NewsContent {...props} />
+        </Suspense>
     );
 }

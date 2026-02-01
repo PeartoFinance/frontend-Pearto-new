@@ -5,6 +5,7 @@ import {
     TrendingUp, ArrowUp, ArrowDown, Calculator, BarChart3,
     DollarSign, Cloud
 } from 'lucide-react';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface StockData {
     symbol?: string;
@@ -67,7 +68,7 @@ export function StockCard({ data }: { data: StockData }) {
                 </div>
             </div>
             <div className="text-2xl font-bold text-white mb-3">
-                ${(data.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <PriceDisplay amount={data.price || 0} />
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="bg-slate-700/50 rounded-lg p-2">
@@ -76,7 +77,7 @@ export function StockCard({ data }: { data: StockData }) {
                 </div>
                 <div className="bg-slate-700/50 rounded-lg p-2">
                     <div className="text-slate-500">Mkt Cap</div>
-                    <div className="text-white font-medium">${((data.marketCap || 0) / 1e9).toFixed(1)}B</div>
+                    <div className="text-white font-medium"><PriceDisplay amount={(data.marketCap || 0) / 1e9} />B</div>
                 </div>
             </div>
         </div>
@@ -93,20 +94,20 @@ export function SIPCard({ data }: { data: CalculatorData }) {
             </div>
             <div className="bg-emerald-800/30 rounded-lg p-3 mb-3">
                 <div className="text-emerald-300 text-xs mb-1">Projected Value</div>
-                <div className="text-2xl font-bold text-emerald-400">${(data.totalValue || 0).toLocaleString()}</div>
+                <div className="text-2xl font-bold text-emerald-400"><PriceDisplay amount={data.totalValue || 0} /></div>
             </div>
             <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="text-center p-2 bg-slate-800/50 rounded-lg">
                     <div className="text-slate-400">Monthly</div>
-                    <div className="text-white font-medium">${data.monthlyInvestment?.toLocaleString()}</div>
+                    <div className="text-white font-medium"><PriceDisplay amount={data.monthlyInvestment || 0} /></div>
                 </div>
                 <div className="text-center p-2 bg-slate-800/50 rounded-lg">
                     <div className="text-slate-400">Invested</div>
-                    <div className="text-white font-medium">${data.totalInvested?.toLocaleString()}</div>
+                    <div className="text-white font-medium"><PriceDisplay amount={data.totalInvested || 0} /></div>
                 </div>
                 <div className="text-center p-2 bg-slate-800/50 rounded-lg">
                     <div className="text-slate-400">Returns</div>
-                    <div className="text-emerald-400 font-medium">${data.estimatedReturns?.toLocaleString()}</div>
+                    <div className="text-emerald-400 font-medium"><PriceDisplay amount={data.estimatedReturns || 0} /></div>
                 </div>
             </div>
         </div>
@@ -123,16 +124,16 @@ export function EMICard({ data }: { data: CalculatorData }) {
             </div>
             <div className="bg-blue-800/30 rounded-lg p-3 mb-3">
                 <div className="text-blue-300 text-xs mb-1">Monthly EMI</div>
-                <div className="text-2xl font-bold text-blue-400">${(data.emi || 0).toLocaleString()}</div>
+                <div className="text-2xl font-bold text-blue-400"><PriceDisplay amount={data.emi || 0} /></div>
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="p-2 bg-slate-800/50 rounded-lg">
                     <div className="text-slate-400">Principal</div>
-                    <div className="text-white font-medium">${(data.principal || 0).toLocaleString()}</div>
+                    <div className="text-white font-medium"><PriceDisplay amount={data.principal || 0} /></div>
                 </div>
                 <div className="p-2 bg-slate-800/50 rounded-lg">
                     <div className="text-slate-400">Total Interest</div>
-                    <div className="text-amber-400 font-medium">${(data.totalInterest || 0).toLocaleString()}</div>
+                    <div className="text-amber-400 font-medium"><PriceDisplay amount={data.totalInterest || 0} /></div>
                 </div>
             </div>
         </div>

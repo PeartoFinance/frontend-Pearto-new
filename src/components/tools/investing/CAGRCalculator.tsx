@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { TrendingUp, Calendar, DollarSign } from 'lucide-react';
 
 export default function CAGRCalculator() {
@@ -21,10 +22,7 @@ export default function CAGRCalculator() {
         };
     }, [beginningValue, endingValue, years]);
 
-    const formatCurrency = (amount: number) => {
-        if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-    };
+
 
     const isPositive = result.cagr >= 0;
 
@@ -52,7 +50,7 @@ export default function CAGRCalculator() {
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Absolute Gain</span>
                             <p className={`text-lg font-semibold ${isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
-                                {isPositive ? '+' : ''}{formatCurrency(result.absoluteGain)}
+                                {isPositive ? '+' : ''}<PriceDisplay amount={result.absoluteGain} />
                             </p>
                         </div>
                     </div>

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { TrendingUp, DollarSign, PieChart, BarChart2 } from 'lucide-react';
 
 export default function ROASCalculator() {
@@ -32,8 +33,7 @@ export default function ROASCalculator() {
         };
     }, [adSpend, revenue, cogs, targetROAS]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
 
     return (
         <CalculatorLayout
@@ -43,8 +43,8 @@ export default function ROASCalculator() {
             results={
                 <div className="space-y-4">
                     <div className={`text-center p-6 rounded-xl ${results.meetsTarget
-                            ? 'bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20'
-                            : 'bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20'
+                        ? 'bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20'
+                        : 'bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20'
                         }`}>
                         <TrendingUp className={`w-8 h-8 mx-auto mb-2 ${results.meetsTarget ? 'text-emerald-500' : 'text-red-500'}`} />
                         <p className="text-sm text-slate-500">Return on Ad Spend</p>
@@ -60,7 +60,7 @@ export default function ROASCalculator() {
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Net Profit</p>
                             <p className={`text-xl font-bold ${results.isProfit ? 'text-emerald-600' : 'text-red-500'}`}>
-                                {formatCurrency(results.profit)}
+                                <PriceDisplay amount={results.profit} maximumFractionDigits={0} />
                             </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
@@ -76,20 +76,20 @@ export default function ROASCalculator() {
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Revenue</span>
-                                <span className="font-medium text-emerald-600">{formatCurrency(revenue)}</span>
+                                <span className="font-medium text-emerald-600"><PriceDisplay amount={revenue} maximumFractionDigits={0} /></span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Ad Spend</span>
-                                <span className="font-medium text-red-500">-{formatCurrency(adSpend)}</span>
+                                <span className="font-medium text-red-500">-<PriceDisplay amount={adSpend} maximumFractionDigits={0} /></span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Cost of Goods</span>
-                                <span className="font-medium text-amber-600">-{formatCurrency(cogs)}</span>
+                                <span className="font-medium text-amber-600">-<PriceDisplay amount={cogs} maximumFractionDigits={0} /></span>
                             </div>
                             <div className="flex justify-between pt-2 border-t border-slate-100 dark:border-slate-700">
                                 <span className="text-slate-700 dark:text-slate-300 font-medium">Net Profit</span>
                                 <span className={`font-bold ${results.isProfit ? 'text-emerald-600' : 'text-red-500'}`}>
-                                    {formatCurrency(results.profit)}
+                                    <PriceDisplay amount={results.profit} maximumFractionDigits={0} />
                                 </span>
                             </div>
                         </div>
@@ -98,10 +98,10 @@ export default function ROASCalculator() {
                     <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
                         <p className="text-xs text-slate-500 mb-2">To achieve {targetROAS}x ROAS:</p>
                         <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                            Generate {formatCurrency(results.revenueNeeded)} in revenue
+                            Generate <PriceDisplay amount={results.revenueNeeded} maximumFractionDigits={0} /> in revenue
                         </p>
                         <p className="text-xs text-slate-400 mt-1">
-                            Current: {formatCurrency(revenue)} ({results.meetsTarget ? 'Target met! ✓' : `${formatCurrency(results.revenueNeeded - revenue)} more needed`})
+                            Current: <PriceDisplay amount={revenue} maximumFractionDigits={0} /> ({results.meetsTarget ? 'Target met! ✓' : <><PriceDisplay amount={results.revenueNeeded - revenue} maximumFractionDigits={0} /> more needed</>})
                         </p>
                     </div>
                 </div>

@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { Building2, TrendingUp, DollarSign, Percent, Home } from 'lucide-react';
 import {
     createChart,
@@ -160,8 +161,7 @@ export default function RentalYieldCalculator() {
         };
     }, [result, isDark]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
 
     return (
         <CalculatorLayout
@@ -187,7 +187,7 @@ export default function RentalYieldCalculator() {
                         <DollarSign className={`w-6 h-6 mx-auto mb-1 ${result.monthlyCashFlow >= 0 ? 'text-emerald-500' : 'text-red-500'}`} />
                         <p className="text-sm text-slate-500">Monthly Cash Flow</p>
                         <p className={`text-3xl font-bold ${result.monthlyCashFlow >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                            {formatCurrency(result.monthlyCashFlow)}
+                            <PriceDisplay amount={result.monthlyCashFlow} maximumFractionDigits={0} />
                         </p>
                     </div>
 
@@ -198,7 +198,9 @@ export default function RentalYieldCalculator() {
                         </div>
                         <div className="p-3 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Annual NOI</p>
-                            <p className="text-lg font-bold text-emerald-600">{formatCurrency(result.noi)}</p>
+                            <p className="text-lg font-bold text-emerald-600">
+                                <PriceDisplay amount={result.noi} maximumFractionDigits={0} />
+                            </p>
                         </div>
                         <div className="p-3 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Total ROI</p>
@@ -222,23 +224,23 @@ export default function RentalYieldCalculator() {
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Property Taxes</span>
-                                <span>{formatCurrency(result.expenseBreakdown.taxes)}</span>
+                                <span><PriceDisplay amount={result.expenseBreakdown.taxes} maximumFractionDigits={0} /></span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Insurance</span>
-                                <span>{formatCurrency(result.expenseBreakdown.insurance)}</span>
+                                <span><PriceDisplay amount={result.expenseBreakdown.insurance} maximumFractionDigits={0} /></span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Maintenance</span>
-                                <span>{formatCurrency(result.expenseBreakdown.maintenance)}</span>
+                                <span><PriceDisplay amount={result.expenseBreakdown.maintenance} maximumFractionDigits={0} /></span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Management</span>
-                                <span>{formatCurrency(result.expenseBreakdown.management)}</span>
+                                <span><PriceDisplay amount={result.expenseBreakdown.management} maximumFractionDigits={0} /></span>
                             </div>
                             <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-700">
                                 <span className="text-slate-500 font-medium">Mortgage</span>
-                                <span className="font-medium">{formatCurrency(result.expenseBreakdown.mortgage)}</span>
+                                <span className="font-medium"><PriceDisplay amount={result.expenseBreakdown.mortgage} maximumFractionDigits={0} /></span>
                             </div>
                         </div>
                     </div>

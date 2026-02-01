@@ -1,6 +1,7 @@
 'use client';
 
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface PriceTargetCardProps {
     low: number | null;
@@ -12,10 +13,11 @@ interface PriceTargetCardProps {
 
 export function PriceTargetCard({ low, mean, high, current, upside }: PriceTargetCardProps) {
     const isPositive = (upside ?? 0) >= 0;
+    const { formatPrice: currencyFormatPrice } = useCurrency();
 
     const formatPrice = (price: number | null) => {
         if (price == null) return '-';
-        return `$${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        return currencyFormatPrice(price);
     };
 
     // Calculate marker position for current price

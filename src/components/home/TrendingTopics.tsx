@@ -1,16 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Flame, ChevronRight, Loader2 } from 'lucide-react';
-import { get } from '@/services/api';
-
-interface Topic {
-    id: number;
-    title: string;
-    category?: string;
-    rank: number;
-}
+import { useTrendingTopics } from '@/hooks/useMediaData';
 
 const tagColors: Record<string, string> = {
     Tech: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
@@ -24,25 +16,7 @@ const tagColors: Record<string, string> = {
 };
 
 export default function TrendingTopics() {
-    const [topics, setTopics] = useState<Topic[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchTopics = async () => {
-            try {
-                setLoading(true);
-                const data = await get<Topic[]>('/content/trending', { limit: 5 });
-                setTopics(data || []);
-            } catch (err) {
-                console.error('Failed to fetch trending topics:', err);
-                setTopics([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchTopics();
-    }, []);
+    const { data: topics = [], isLoading: loading } = useTrendingTopics(5);
 
     const getTagColor = (category?: string) => {
         return tagColors[category || ''] || tagColors.default;

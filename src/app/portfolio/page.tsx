@@ -1,13 +1,17 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, Plus, Trash2, X, RefreshCw, Search, ChevronDown } from 'lucide-react';
-import { getPortfolios, createPortfolio, addHolding, deleteHolding, type Portfolio, type PortfolioHolding } from '@/services/portfolioService';
+import { TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, Plus, Trash2, X, RefreshCw, Search, ChevronDown, Activity } from 'lucide-react';
+import { getPortfolios, createPortfolio, addHolding, deleteHolding, type Portfolio, type PortfolioHolding, type PortfolioAnalytics } from '@/services/portfolioService';
 import { get } from '@/services/api';
 import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import { TableExportButton } from '@/components/common/TableExportButton';
+import PriceDisplay from '@/components/common/PriceDisplay';
+import HealthScore from '@/components/portfolio/HealthScore';
+import GoalSetting from '@/components/portfolio/GoalSetting';
+import FinancialGoals from '@/components/portfolio/FinancialGoals';
 
 interface StockOption {
     symbol: string;
@@ -24,6 +28,9 @@ export default function PortfolioPage() {
     const [newPortfolioName, setNewPortfolioName] = useState('My Portfolio');
     const [holdingData, setHoldingData] = useState({ symbol: '', name: '', shares: '', avgBuyPrice: '' });
     const [submitting, setSubmitting] = useState(false);
+
+    // Health Score State
+    const [showHealthSettings, setShowHealthSettings] = useState(false);
 
     // Stock search state
     const [stockSearch, setStockSearch] = useState('');
@@ -192,6 +199,32 @@ export default function PortfolioPage() {
                             </div>
                         </div>
 
+                        {/* Health Score Section */}
+                        <section>
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <Activity className="text-emerald-500" /> Portfolio Health
+                                </h2>
+                                {showHealthSettings && (
+                                    <button
+                                        onClick={() => setShowHealthSettings(false)}
+                                        className="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition"
+                                    >
+                                        Cancel editing
+                                    </button>
+                                )}
+                            </div>
+
+                            {showHealthSettings ? (
+                                <GoalSetting onComplete={() => setShowHealthSettings(false)} />
+                            ) : (
+                                <HealthScore onConfigure={() => setShowHealthSettings(true)} />
+                            )}
+                        </section>
+
+                        {/* Financial Goals Section */}
+                        <FinancialGoals />
+
                         {/* Portfolio Tabs */}
                         {portfolios.length > 0 && (
                             <div className="flex gap-2 overflow-x-auto pb-2">
@@ -238,7 +271,7 @@ export default function PortfolioPage() {
                                             <span className="text-sm text-gray-500 dark:text-slate-400">Total Value</span>
                                         </div>
                                         <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                                            ${selectedPortfolio.totalValue?.toLocaleString() || '0'}
+                                            <PriceDisplay amount={selectedPortfolio.totalValue || 0} />
                                         </div>
                                     </div>
 
@@ -254,7 +287,7 @@ export default function PortfolioPage() {
                                             <span className="text-sm text-gray-500 dark:text-slate-400">Total Gain/Loss</span>
                                         </div>
                                         <div className={`text-2xl font-bold ${selectedPortfolio.totalGain >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                                            {selectedPortfolio.totalGain >= 0 ? '+' : ''}${selectedPortfolio.totalGain?.toLocaleString() || '0'}
+                                            <PriceDisplay amount={selectedPortfolio.totalGain || 0} prefix={selectedPortfolio.totalGain >= 0 ? '+' : ''} />
                                         </div>
                                         <div className={`text-sm ${selectedPortfolio.totalGain >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                                             {selectedPortfolio.totalGain >= 0 ? '+' : ''}{selectedPortfolio.totalGainPercent?.toFixed(2) || '0'}%
@@ -343,13 +376,21 @@ export default function PortfolioPage() {
                                                                     </div>
                                                                 </div>
                                                             </td>
-                                                            <td className="px-6 py-4 text-gray-700 dark:text-slate-300">{holding.shares?.toLocaleString()}</td>
-                                                            <td className="px-6 py-4 text-gray-700 dark:text-slate-300">${holding.avgCost?.toFixed(2)}</td>
-                                                            <td className="px-6 py-4 text-gray-700 dark:text-slate-300">${holding.currentPrice?.toFixed(2)}</td>
-                                                            <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">${holding.totalValue?.toLocaleString()}</td>
+                                                            <td className="px-6 py-4 text-gray-700 dark:text-slate-300">
+                                                                <PriceDisplay amount={holding.shares} showSymbol={false} />
+                                                            </td>
+                                                            <td className="px-6 py-4 text-gray-700 dark:text-slate-300">
+                                                                <PriceDisplay amount={holding.avgCost} />
+                                                            </td>
+                                                            <td className="px-6 py-4 text-gray-700 dark:text-slate-300">
+                                                                <PriceDisplay amount={holding.currentPrice} />
+                                                            </td>
+                                                            <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                                                <PriceDisplay amount={holding.totalValue} />
+                                                            </td>
                                                             <td className="px-6 py-4">
                                                                 <div className={`font-medium ${holding.gain >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                                                                    {holding.gain >= 0 ? '+' : ''}${holding.gain?.toLocaleString()}
+                                                                    <PriceDisplay amount={holding.gain} prefix={holding.gain >= 0 ? '+' : ''} />
                                                                 </div>
                                                                 <div className={`text-xs ${holding.gain >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                                                                     {holding.gain >= 0 ? '+' : ''}{holding.gainPercent?.toFixed(2)}%
@@ -486,7 +527,7 @@ export default function PortfolioPage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm text-gray-500 dark:text-slate-400 mb-2">Average Buy Price ($)</label>
+                                <label className="block text-sm text-gray-500 dark:text-slate-400 mb-2">Average Buy Price</label>
                                 <input
                                     type="number"
                                     step="0.01"

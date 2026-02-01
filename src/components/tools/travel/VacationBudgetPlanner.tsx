@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { Snowflake, Sun, Calendar, DollarSign } from 'lucide-react';
 
 export default function VacationBudgetPlanner() {
@@ -47,8 +48,7 @@ export default function VacationBudgetPlanner() {
         };
     }, [nights, travelers, accommodationType, includeFlights, flightCost, dailyFood, dailyActivities]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
 
     const categories = [
         { name: 'Accommodation', amount: results.totalAccommodation, color: 'bg-blue-500' },
@@ -69,16 +69,20 @@ export default function VacationBudgetPlanner() {
                     <div className="text-center p-6 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-xl">
                         <Sun className="w-8 h-8 text-amber-500 mx-auto mb-2" />
                         <p className="text-sm text-slate-500">Estimated Total Budget</p>
-                        <p className="text-4xl font-bold text-blue-600">{formatCurrency(results.total)}</p>
+                        <p className="text-4xl font-bold text-blue-600">
+                            <PriceDisplay amount={results.total} maximumFractionDigits={0} />
+                        </p>
                         <p className="text-sm text-slate-400 mt-1">
-                            {formatCurrency(results.perPerson)} per person
+                            <PriceDisplay amount={results.perPerson} maximumFractionDigits={0} /> per person
                         </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Per Night</p>
-                            <p className="text-xl font-bold text-emerald-600">{formatCurrency(results.perDay)}</p>
+                            <p className="text-xl font-bold text-emerald-600">
+                                <PriceDisplay amount={results.perDay} maximumFractionDigits={0} />
+                            </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Duration</p>
@@ -99,7 +103,7 @@ export default function VacationBudgetPlanner() {
                                         {cat.name}
                                     </span>
                                     <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                        {formatCurrency(cat.amount)}
+                                        <PriceDisplay amount={cat.amount} maximumFractionDigits={0} />
                                     </span>
                                     <span className="text-xs text-slate-400 w-12 text-right">
                                         {((cat.amount / results.total) * 100).toFixed(0)}%
@@ -161,8 +165,8 @@ export default function VacationBudgetPlanner() {
                                 key={type}
                                 onClick={() => setAccommodationType(type)}
                                 className={`py-2 text-sm font-medium rounded-lg transition ${accommodationType === type
-                                        ? 'bg-emerald-500 text-white'
-                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                                    ? 'bg-emerald-500 text-white'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                                     }`}
                             >
                                 {type.charAt(0).toUpperCase() + type.slice(1)}

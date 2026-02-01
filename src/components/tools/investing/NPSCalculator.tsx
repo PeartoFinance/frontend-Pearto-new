@@ -2,7 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
-import { DollarSign, Percent, TrendingUp } from 'lucide-react';
+import PriceDisplay from '@/components/common/PriceDisplay';
+import { DollarSign, Calendar, TrendingUp } from 'lucide-react';
+import VendorList from '@/components/vendors/VendorList';
 
 export default function NPSCalculator() {
     const [currentAge, setCurrentAge] = useState(30);
@@ -43,11 +45,7 @@ export default function NPSCalculator() {
         };
     }, [currentAge, retirementAge, monthlyInvestment, expectedReturn, annuityRate]);
 
-    const formatCurrency = (amount: number) => {
-        if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
-        if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-    };
+
 
     return (
         <CalculatorLayout
@@ -58,23 +56,36 @@ export default function NPSCalculator() {
                 <div className="space-y-6">
                     <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-xl">
                         <p className="text-sm text-slate-500 mb-1">Total Corpus at {retirementAge}</p>
-                        <p className="text-4xl font-bold text-emerald-600">{formatCurrency(result.corpusAtRetirement)}</p>
+                        <p className="text-4xl font-bold text-emerald-600">
+                            <PriceDisplay amount={result.corpusAtRetirement} />
+                        </p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Lumpsum ({100 - annuityRate}%)</span>
-                            <p className="text-lg font-semibold">{formatCurrency(result.lumpsum)}</p>
+                            <p className="text-lg font-semibold"><PriceDisplay amount={result.lumpsum} /></p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Monthly Pension</span>
-                            <p className="text-lg font-semibold text-emerald-600">{formatCurrency(result.monthlyPension)}</p>
+                            <p className="text-lg font-semibold text-emerald-600">
+                                <PriceDisplay amount={result.monthlyPension} />
+                            </p>
                         </div>
                     </div>
                     <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
                         <p className="text-sm text-emerald-700 dark:text-emerald-400">Yearly Tax Savings (80CCD)</p>
-                        <p className="text-lg font-bold text-emerald-600">{formatCurrency(result.yearlyTaxSaving)}</p>
+                        <p className="text-lg font-bold text-emerald-600">
+                            <PriceDisplay amount={result.yearlyTaxSaving} />
+                        </p>
                     </div>
                 </div>
+            }
+            rightColumn={
+                <VendorList
+                    category="Tax Services"
+                    title="NPS Consultants"
+                    description="Retirement planning experts"
+                />
             }
         >
             <div className="grid grid-cols-2 gap-4">

@@ -2,7 +2,7 @@
 
 import { LucideIcon, LayoutGrid, BarChart3, LineChart, Wallet, TrendingUp, Building2, Newspaper, CandlestickChart, History } from 'lucide-react';
 
-export type TabId = 'overview' | 'financials' | 'chart' | 'history' | 'dividends' | 'forecast' | 'profile' | 'news';
+export type TabId = 'overview' | 'financials' | 'chart' | 'history' | 'dividends' | 'forecast' | 'profile' | 'news' | 'analysis';
 
 interface Tab {
     id: TabId;

@@ -75,10 +75,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 if (!localToken) {
                     console.log('Firebase user found but no token. Syncing with backend...');
                     try {
+                        const idToken = await firebaseUser.getIdToken();
                         const response = await fetch(`${API_BASE}/auth/google-signin`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
+                                idToken,
                                 firebase_uid: firebaseUser.uid,
                                 name: firebaseUser.displayName,
                                 email: firebaseUser.email,
@@ -145,10 +147,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                     // Sync with backend
                     try {
+                        const idToken = await firebaseUser.getIdToken();
                         const response = await fetch(`${API_BASE}/auth/google-signin`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
+                                idToken,
                                 firebase_uid: firebaseUser.uid,
                                 name: firebaseUser.displayName,
                                 email: firebaseUser.email,
@@ -232,10 +236,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             // Sync with backend
             try {
+                const idToken = await firebaseUser.getIdToken();
                 const response = await fetch(`${API_BASE}/auth/google-signin`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        idToken,
                         firebase_uid: firebaseUser.uid,
                         name: firebaseUser.displayName,
                         email: firebaseUser.email,

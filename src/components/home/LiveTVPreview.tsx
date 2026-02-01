@@ -1,44 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ExternalLink, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
-import { get } from '@/services/api';
-
-interface TVChannel {
-    id: number;
-    name: string;
-    logoUrl?: string;
-    category?: string;
-    countryCode?: string;
-    language?: string;
-    streamUrl?: string;
-    isLive?: boolean;
-}
+import { useTVChannels } from '@/hooks/useMediaData';
 
 export default function LiveTVPreview() {
-    const [channels, setChannels] = useState<TVChannel[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-
-    useEffect(() => {
-        const fetchChannels = async () => {
-            try {
-                setLoading(true);
-                const data = await get<TVChannel[]>('/content/tv', { limit: 8 });
-                setChannels(data || []);
-                setError(false);
-            } catch (err) {
-                console.error('Failed to fetch TV channels:', err);
-                setError(true);
-                setChannels([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchChannels();
-    }, []);
+    const { data: channels = [], isLoading: loading, isError: error } = useTVChannels(8);
 
     const getChannelIcon = (name: string) => {
         const icons: Record<string, string> = {

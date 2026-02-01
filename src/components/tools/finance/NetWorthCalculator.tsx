@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { DollarSign, TrendingUp, Wallet } from 'lucide-react';
 
 export default function NetWorthCalculator() {
@@ -36,11 +37,7 @@ export default function NetWorthCalculator() {
         };
     }, [assets, liabilities]);
 
-    const formatCurrency = (amount: number) => {
-        if (Math.abs(amount) >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
-        if (Math.abs(amount) >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-    };
+
 
     const isPositive = result.netWorth >= 0;
 
@@ -55,17 +52,21 @@ export default function NetWorthCalculator() {
                         <Wallet className={`w-8 h-8 mx-auto mb-2 ${isPositive ? 'text-emerald-500' : 'text-red-500'}`} />
                         <p className="text-sm text-slate-500 mb-1">Your Net Worth</p>
                         <p className={`text-4xl font-bold ${isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
-                            {formatCurrency(result.netWorth)}
+                            <PriceDisplay amount={result.netWorth} />
                         </p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Total Assets</span>
-                            <p className="text-lg font-semibold text-emerald-600">{formatCurrency(result.totalAssets)}</p>
+                            <p className="text-lg font-semibold text-emerald-600">
+                                <PriceDisplay amount={result.totalAssets} />
+                            </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <span className="text-xs text-slate-500">Total Liabilities</span>
-                            <p className="text-lg font-semibold text-red-600">{formatCurrency(result.totalLiabilities)}</p>
+                            <p className="text-lg font-semibold text-red-600">
+                                <PriceDisplay amount={result.totalLiabilities} />
+                            </p>
                         </div>
                     </div>
                     <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
