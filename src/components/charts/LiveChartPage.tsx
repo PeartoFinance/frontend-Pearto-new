@@ -47,6 +47,12 @@ import {
     calculateSMA,
     calculateEMA,
     calculateBollingerBands,
+    calculateRSI,
+    calculateMACD,
+    calculateStochastic,
+    calculateATR,
+    calculateVWAP,
+    calculateOBV,
     type OHLCData
 } from '@/utils/indicators';
 import ComparisonMode, { type ComparisonSymbol } from './ComparisonMode';
@@ -101,7 +107,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
     const seriesRef = useRef<ISeriesApi<'Candlestick' | 'Area' | 'Line'> | null>(null);
     const volumeSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null);
     const svgRef = useRef<SVGSVGElement>(null);
-    const indicatorSeriesRef = useRef<Map<string, ISeriesApi<'Line'>>>(new Map());
+    const indicatorSeriesRef = useRef<Map<string, ISeriesApi<any> | ISeriesApi<any>[]>>(new Map());
     const comparisonSeriesRef = useRef<Map<string, ISeriesApi<'Line'>>>(new Map());
     const lastDataPointRef = useRef<PriceHistoryPoint | null>(null);
 
@@ -583,49 +589,186 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
             }));
 
         const currentIds = new Set(activeIndicators.map(i => i.id));
-        indicatorSeriesRef.current.forEach((series, id) => {
+
+        // Cleanup removed indicators
+        indicatorSeriesRef.current.forEach((seriesList, id) => {
             if (!currentIds.has(id)) {
-                try {
-                    chart.removeSeries(series);
-                } catch (e) { }
+                if (Array.isArray(seriesList)) {
+                    seriesList.forEach(s => {
+                        try { chart.removeSeries(s); } catch (e) { }
+                    });
+                } else {
+                    // Backward compatibility if it was a single series
+                    try { chart.removeSeries(seriesList); } catch (e) { }
+                }
                 indicatorSeriesRef.current.delete(id);
             }
         });
 
         activeIndicators.forEach(indicator => {
+            console.log('Processing indicator:', indicator.id, indicator.type, indicator.isActive);
             if (!indicator.isActive) return;
 
             if (indicatorSeriesRef.current.has(indicator.id)) {
+                console.log('Indicator already exists:', indicator.id);
                 return;
             }
 
-            let indicatorData: { time: string | number; value: number }[] = [];
+            const seriesList: ISeriesApi<any>[] = [];
+            const isOverlay = ['sma', 'ema', 'bollinger', 'vwap'].includes(indicator.type);
+            const priceScaleId = isOverlay ? undefined : indicator.id;
 
-            switch (indicator.type) {
-                case 'sma':
-                    indicatorData = calculateSMA(ohlcData, indicator.params.period || 20);
-                    break;
-                case 'ema':
-                    indicatorData = calculateEMA(ohlcData, indicator.params.period || 20);
-                    break;
-                case 'bollinger': {
-                    const bb = calculateBollingerBands(ohlcData, indicator.params.period || 20, indicator.params.stdDev || 2);
-                    indicatorData = bb.map(b => ({ time: b.time, value: b.middle }));
-                    break;
-                }
-                default:
-                    return;
+            // Configure scale for oscillators to appear at the bottom
+            if (!isOverlay) {
+                // Squeeze main chart to top 70%
+                chart.priceScale('right').applyOptions({
+                    scaleMargins: { top: 0.1, bottom: 0.3 }
+                });
+
+                // Place oscillator in bottom 30%
+                chart.priceScale(indicator.id).applyOptions({
+                    scaleMargins: { top: 0.75, bottom: 0 },
+                    visible: true,
+                    borderColor: '#334155'
+                });
+            } else {
+                // Reset main chart if only overlays (optional, but good for UX)
+                // We'd need to check if *any* other oscillator is active. 
+                // For now, let's assume if we add an overlay we don't reset unless we track all.
+                // But if we add an oscillator, we squeeze.
             }
 
-            if (indicatorData.length > 0) {
-                const series = chart.addSeries(LineSeries, {
-                    color: indicator.color,
-                    lineWidth: 2,
-                    priceLineVisible: false,
-                    lastValueVisible: false
-                });
-                series.setData(indicatorData as any);
-                indicatorSeriesRef.current.set(indicator.id, series);
+            try {
+                switch (indicator.type) {
+                    case 'sma': {
+                        const smaData = calculateSMA(ohlcData, indicator.params.period || 20);
+                        const series = chart.addSeries(LineSeries, {
+                            color: indicator.color,
+                            lineWidth: 2,
+                            priceLineVisible: false,
+                            lastValueVisible: false,
+                            title: `SMA ${indicator.params.period}`
+                        });
+                        series.setData(smaData as any);
+                        seriesList.push(series);
+                        break;
+                    }
+                    case 'ema': {
+                        const emaData = calculateEMA(ohlcData, indicator.params.period || 20);
+                        const series = chart.addSeries(LineSeries, {
+                            color: indicator.color,
+                            lineWidth: 2,
+                            priceLineVisible: false,
+                            lastValueVisible: false,
+                            title: `EMA ${indicator.params.period}`
+                        });
+                        series.setData(emaData as any);
+                        seriesList.push(series);
+                        break;
+                    }
+                    case 'bollinger': {
+                        const bbData = calculateBollingerBands(ohlcData, indicator.params.period || 20, indicator.params.stdDev || 2);
+                        // Upper
+                        const upperSeries = chart.addSeries(LineSeries, { color: indicator.color, lineWidth: 1, title: 'BB Upper' });
+                        upperSeries.setData(bbData.map(d => ({ time: d.time, value: d.upper })) as any);
+                        seriesList.push(upperSeries);
+
+                        // Middle
+                        const middleSeries = chart.addSeries(LineSeries, { color: indicator.color, lineWidth: 1, lineStyle: 2, title: 'BB Middle' });
+                        middleSeries.setData(bbData.map(d => ({ time: d.time, value: d.middle })) as any);
+                        seriesList.push(middleSeries);
+
+                        // Lower
+                        const lowerSeries = chart.addSeries(LineSeries, { color: indicator.color, lineWidth: 1, title: 'BB Lower' });
+                        lowerSeries.setData(bbData.map(d => ({ time: d.time, value: d.lower })) as any);
+                        seriesList.push(lowerSeries);
+                        break;
+                    }
+                    case 'rsi': {
+                        const rsiData = calculateRSI(ohlcData, indicator.params.period || 14);
+                        console.log('RSI Data:', rsiData.slice(-5));
+                        const series = chart.addSeries(LineSeries, {
+                            color: indicator.color,
+                            lineWidth: 2,
+                            priceScaleId,
+                            title: `RSI ${indicator.params.period}`
+                        });
+                        series.setData(rsiData as any);
+                        seriesList.push(series);
+
+                        // Add 70/30 lines reference? (Not easy with simple series, maybe just the line for now)
+                        break;
+                    }
+                    case 'macd': {
+                        const macdData = calculateMACD(ohlcData,
+                            indicator.params.fastPeriod || 12,
+                            indicator.params.slowPeriod || 26,
+                            indicator.params.signalPeriod || 9
+                        );
+                        console.log('MACD Data:', macdData.slice(-5));
+
+                        // MACD Line
+                        const macdSeries = chart.addSeries(LineSeries, { color: indicator.color, lineWidth: 2, priceScaleId, title: 'MACD' });
+                        macdSeries.setData(macdData.map(d => ({ time: d.time, value: d.macd })) as any);
+                        seriesList.push(macdSeries);
+
+                        // Signal Line
+                        const signalSeries = chart.addSeries(LineSeries, { color: '#FF5252', lineWidth: 2, priceScaleId, title: 'Signal' });
+                        signalSeries.setData(macdData.map(d => ({ time: d.time, value: d.signal })) as any);
+                        seriesList.push(signalSeries);
+
+                        // Histogram
+                        const histSeries = chart.addSeries(HistogramSeries, { color: '#26a69a', priceScaleId, title: 'Hist' });
+                        histSeries.setData(macdData.map(d => ({
+                            time: d.time,
+                            value: d.histogram,
+                            color: d.histogram >= 0 ? '#26a69a' : '#ef5350'
+                        })) as any);
+                        seriesList.push(histSeries);
+                        break;
+                    }
+                    case 'stochastic': {
+                        const stochData = calculateStochastic(ohlcData, indicator.params.kPeriod || 14, indicator.params.dPeriod || 3);
+                        console.log('Stoch Data:', stochData.slice(-5));
+                        // %K
+                        const kSeries = chart.addSeries(LineSeries, { color: indicator.color, lineWidth: 2, priceScaleId, title: '%K' });
+                        kSeries.setData(stochData.map(d => ({ time: d.time, value: d.k })) as any);
+                        seriesList.push(kSeries);
+
+                        // %D
+                        const dSeries = chart.addSeries(LineSeries, { color: '#FF5252', lineWidth: 1, priceScaleId, title: '%D' });
+                        dSeries.setData(stochData.map(d => ({ time: d.time, value: d.d })) as any);
+                        seriesList.push(dSeries);
+                        break;
+                    }
+                    case 'vwap': {
+                        const vwapData = calculateVWAP(ohlcData);
+                        const series = chart.addSeries(LineSeries, { color: indicator.color, lineWidth: 2, title: 'VWAP' });
+                        series.setData(vwapData as any);
+                        seriesList.push(series);
+                        break;
+                    }
+                    case 'atr': {
+                        const atrData = calculateATR(ohlcData, indicator.params.period || 14);
+                        const series = chart.addSeries(LineSeries, { color: indicator.color, lineWidth: 2, priceScaleId, title: 'ATR' });
+                        series.setData(atrData as any);
+                        seriesList.push(series);
+                        break;
+                    }
+                    case 'obv': {
+                        const obvData = calculateOBV(ohlcData);
+                        const series = chart.addSeries(LineSeries, { color: indicator.color, lineWidth: 2, priceScaleId, title: 'OBV' });
+                        series.setData(obvData as any);
+                        seriesList.push(series);
+                        break;
+                    }
+                }
+            } catch (err) {
+                console.error(`Error calculating ${indicator.type}:`, err);
+            }
+
+            if (seriesList.length > 0) {
+                indicatorSeriesRef.current.set(indicator.id, seriesList as any);
             }
         });
     }, [activeIndicators, data]);

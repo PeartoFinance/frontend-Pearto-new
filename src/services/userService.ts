@@ -255,4 +255,20 @@ export default {
     getNewsPreferences,
     createNewsPreferences,
     updateNewsPreferences,
+    getUserWatchlist,
 };
+
+export interface UserWatchlistItem {
+    symbol: string;
+    addedAt: string | null;
+    price: number | null;
+    change: number | null;
+    changePercent: number | null;
+}
+
+/**
+ * Get user watchlist
+ */
+export async function getUserWatchlist(): Promise<{ items: UserWatchlistItem[] }> {
+    return get<{ items: UserWatchlistItem[] }>('/user/watchlist');
+}

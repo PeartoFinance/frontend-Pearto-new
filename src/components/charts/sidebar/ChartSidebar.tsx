@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
@@ -11,7 +9,11 @@ import {
     Flame,
     BarChart3
 } from 'lucide-react';
-import { getTopMovers, type MarketStock } from '@/services/marketService';
+import { getTopMovers, getQuotes, type MarketStock } from '@/services/marketService';
+import {
+    getUserWatchlist,
+    UserWatchlistItem
+} from '@/services/userService';
 import { useAuth } from '@/context/AuthContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
@@ -30,10 +32,10 @@ interface TrendingTicker {
 export default function ChartSidebar({ symbol }: ChartSidebarProps) {
     const { user, isAuthenticated } = useAuth();
     const { formatPrice } = useCurrency();
-    const [watchlist, setWatchlist] = useState<TrendingTicker[]>([]);
+    const [watchlist, setWatchlist] = useState<UserWatchlistItem[]>([]);
     const [recentlyViewed, setRecentlyViewed] = useState<string[]>([]);
     const [trending, setTrending] = useState<MarketStock[]>([]);
-    const [futures, setFutures] = useState<TrendingTicker[]>([]);
+    const [futures, setFutures] = useState<MarketStock[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -50,29 +52,41 @@ export default function ChartSidebar({ symbol }: ChartSidebarProps) {
         const updated = [symbol, ...(recentlyViewed.filter(s => s !== symbol))].slice(0, 10);
         localStorage.setItem('pearto_recently_viewed', JSON.stringify(updated));
 
-        // Fetch trending
-        const fetchTrending = async () => {
+        // Fetch all data
+        const fetchData = async () => {
             try {
-                const data = await getTopMovers('both', 5);
-                if (data.gainers) {
-                    setTrending(data.gainers.slice(0, 5));
+                // 1. Trending
+                const trendingData = await getTopMovers('both', 5);
+                if (trendingData.gainers) {
+                    setTrending(trendingData.gainers.slice(0, 5));
                 }
+
+                // 2. Futures
+                // Use standard tickers that are likely to exist in the system or be auto-imported
+                // ES=F (S&P 500), YM=F (Dow), NQ=F (Nasdaq), RTY=F (Russell), CL=F (Crude), GC=F (Gold)
+                const futuresSymbols = ['ES=F', 'YM=F', 'NQ=F', 'RTY=F', 'GC=F'];
+                const futuresData = await getQuotes(futuresSymbols);
+                setFutures(futuresData);
+
+                // 3. Watchlist (if authenticated)
+                if (isAuthenticated) {
+                    const watchlistRes = await getUserWatchlist(); // Changed getWatchlist to getUserWatchlist
+                    setWatchlist(watchlistRes.items || []);
+                }
+
             } catch (e) {
-                console.error('Failed to fetch trending:', e);
+                console.error('Failed to fetch sidebar data:', e);
             } finally {
                 setLoading(false);
             }
         };
-        fetchTrending();
 
-        // Mock futures data
-        setFutures([
-            { symbol: 'ES=F', name: 'S&P 500 Futures', price: 6075.50, change: -17.50, changePercent: -0.29 },
-            { symbol: 'YM=F', name: 'Dow Futures', price: 43063.00, change: -117.00, changePercent: -0.27 },
-            { symbol: 'NQ=F', name: 'Nasdaq Futures', price: 21859.25, change: -40.00, changePercent: -0.18 },
-            { symbol: 'RTY=F', name: 'Russell 2000', price: 2533.50, change: -30.60, changePercent: -1.19 }
-        ]);
-    }, [symbol]);
+        fetchData();
+
+        // Refresh every 30 seconds
+        const interval = setInterval(fetchData, 30000);
+        return () => clearInterval(interval);
+    }, [symbol, isAuthenticated]);
 
     const formatChange = (change: number) => change >= 0 ? `+${change.toFixed(2)}` : change.toFixed(2);
     const formatPercent = (pct: number) => pct >= 0 ? `+${pct.toFixed(2)}%` : `${pct.toFixed(2)}%`;
@@ -83,7 +97,12 @@ export default function ChartSidebar({ symbol }: ChartSidebarProps) {
             <div className="p-4 border-b border-slate-800">
                 <div className="flex items-center justify-between">
                     <h2 className="font-semibold text-sm">My Portfolio & Markets</h2>
-                    <button className="text-xs text-blue-400 hover:text-blue-300">Customize</button>
+                    <Link
+                        href="/portfolio"
+                        className="text-xs text-blue-400 hover:text-blue-300"
+                    >
+                        Customize
+                    </Link>
                 </div>
             </div>
 
@@ -108,9 +127,12 @@ export default function ChartSidebar({ symbol }: ChartSidebarProps) {
                                         className="flex items-center justify-between px-2 py-1.5 rounded hover:bg-slate-800 transition text-sm"
                                     >
                                         <span className="text-blue-400 font-medium">{item.symbol}</span>
-                                        <span className={item.changePercent >= 0 ? 'text-emerald-400' : 'text-red-400'}>
-                                            {item.changePercent >= 0 ? '+' : ''}{item.changePercent.toFixed(2)}%
-                                        </span>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-slate-300 text-xs">{formatPrice(item.price || 0)}</span>
+                                            <span className={`text-xs ${item.changePercent && item.changePercent >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                {formatPercent(item.changePercent || 0)}
+                                            </span>
+                                        </div>
                                     </Link>
                                 ))
                             ) : (
@@ -182,8 +204,7 @@ export default function ChartSidebar({ symbol }: ChartSidebarProps) {
                             <thead>
                                 <tr className="text-slate-500">
                                     <th className="text-left py-1">Symbol</th>
-                                    <th className="text-right py-1">Last Price</th>
-                                    <th className="text-right py-1">Change</th>
+                                    <th className="text-right py-1">Price</th>
                                     <th className="text-right py-1">% Change</th>
                                 </tr>
                             </thead>
@@ -196,9 +217,6 @@ export default function ChartSidebar({ symbol }: ChartSidebarProps) {
                                             </Link>
                                         </td>
                                         <td className="text-right">{formatPrice(t.price)}</td>
-                                        <td className={`text-right ${t.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                            {formatChange(t.change)}
-                                        </td>
                                         <td className={`text-right ${t.changePercent >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                                             {formatPercent(t.changePercent)}
                                         </td>
@@ -214,38 +232,40 @@ export default function ChartSidebar({ symbol }: ChartSidebarProps) {
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                             <BarChart3 size={14} className="text-blue-400" />
-                            <span className="text-sm font-medium">Futures</span>
+                            <span className="text-sm font-medium">Futures & Commodities</span>
                         </div>
                         <ChevronRight size={14} className="text-slate-500" />
                     </div>
-                    <table className="w-full text-xs">
-                        <thead>
-                            <tr className="text-slate-500">
-                                <th className="text-left py-1">Symbol</th>
-                                <th className="text-right py-1">Last Price</th>
-                                <th className="text-right py-1">Change</th>
-                                <th className="text-right py-1">% Change</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {futures.map(f => (
-                                <tr key={f.symbol} className="hover:bg-slate-800/50">
-                                    <td className="py-1.5">
-                                        <Link href={`/chart/${f.symbol}`} className="text-blue-400 hover:underline font-medium">
-                                            {f.symbol.replace('=F', '')}
-                                        </Link>
-                                    </td>
-                                    <td className="text-right">{formatPrice(f.price)}</td>
-                                    <td className={`text-right ${f.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                        {formatChange(f.change)}
-                                    </td>
-                                    <td className={`text-right ${f.changePercent >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                        {formatPercent(f.changePercent)}
-                                    </td>
+                    {futures.length > 0 ? (
+                        <table className="w-full text-xs">
+                            <thead>
+                                <tr className="text-slate-500">
+                                    <th className="text-left py-1">Symbol</th>
+                                    <th className="text-right py-1">Price</th>
+                                    <th className="text-right py-1">% Change</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {futures.map(f => (
+                                    <tr key={f.symbol} className="hover:bg-slate-800/50">
+                                        <td className="py-1.5">
+                                            <Link href={`/chart/${f.symbol}`} className="text-blue-400 hover:underline font-medium">
+                                                {f.symbol.replace('=F', '')}
+                                            </Link>
+                                        </td>
+                                        <td className="text-right">{formatPrice(f.price)}</td>
+                                        <td className={`text-right ${f.changePercent >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                            {formatPercent(f.changePercent)}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <div className="text-xs text-slate-500 text-center py-2">
+                            {loading ? 'Loading...' : 'No futures data available'}
+                        </div>
+                    )}
                 </section>
             </div>
         </aside>
