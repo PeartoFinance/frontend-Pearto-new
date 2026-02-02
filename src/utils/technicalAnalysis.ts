@@ -1,5 +1,5 @@
 export interface PriceData {
-    time: string;
+    time: string | number;
     open: number;
     high: number;
     low: number;
@@ -8,7 +8,7 @@ export interface PriceData {
 }
 
 export interface ChartMarker {
-    time: string;
+    time: string | number;
     position: 'aboveBar' | 'belowBar' | 'inBar';
     color: string;
     shape: 'circle' | 'square' | 'arrowUp' | 'arrowDown';
@@ -18,8 +18,8 @@ export interface ChartMarker {
 /**
  * Calculate Simple Moving Average (SMA)
  */
-export function calculateSMA(data: PriceData[], period: number): { time: string; value: number }[] {
-    const result: { time: string; value: number }[] = [];
+export function calculateSMA(data: PriceData[], period: number): { time: string | number; value: number }[] {
+    const result: { time: string | number; value: number }[] = [];
     for (let i = period - 1; i < data.length; i++) {
         const slice = data.slice(i - period + 1, i + 1);
         const sum = slice.reduce((acc, curr) => acc + curr.close, 0);
@@ -34,8 +34,8 @@ export function calculateSMA(data: PriceData[], period: number): { time: string;
 /**
  * Calculate Exponential Moving Average (EMA)
  */
-export function calculateEMA(data: PriceData[], period: number): { time: string; value: number }[] {
-    const result: { time: string; value: number }[] = [];
+export function calculateEMA(data: PriceData[], period: number): { time: string | number; value: number }[] {
+    const result: { time: string | number; value: number }[] = [];
     const k = 2 / (period + 1);
 
     // Start with SMA
@@ -56,8 +56,8 @@ export function calculateEMA(data: PriceData[], period: number): { time: string;
 /**
  * Calculate Relative Strength Index (RSI)
  */
-export function calculateRSI(data: PriceData[], period: number = 14): { time: string; value: number }[] {
-    const result: { time: string; value: number }[] = [];
+export function calculateRSI(data: PriceData[], period: number = 14): { time: string | number; value: number }[] {
+    const result: { time: string | number; value: number }[] = [];
     let gains = 0;
     let losses = 0;
 

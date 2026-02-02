@@ -177,12 +177,63 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                     if (resources?.length) setResourcesItems(resources.map(i => ({ href: i.url, label: i.label, icon: i.icon })));
                     if (featured?.length) setFeaturedItems(featured.map(i => ({ href: i.url, label: i.label, css_class: i.css_class || undefined })));
                 }
+
+                // Also fetch custom pages for header and resources
+                const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+                const userCountry = localStorage.getItem('userCountry') || 'US';
+                const [headerPagesRes, resourcesPagesRes] = await Promise.all([
+                    fetch(`${API_BASE}/pages?placement=header&status=published`, {
+                        headers: { 'X-User-Country': userCountry }
+                    }),
+                    fetch(`${API_BASE}/pages?placement=resources&status=published`, {
+                        headers: { 'X-User-Country': userCountry }
+                    })
+                ]);
+
+                // Track added page IDs to avoid duplicates
+                const addedPageIds = new Set<string>();
+
+                if (headerPagesRes.ok) {
+                    const headerData = await headerPagesRes.json();
+                    if (headerData.pages?.length) {
+                        setFeaturedItems(prev => [
+                            ...prev,
+                            ...headerData.pages.map((p: { id: string; slug: string; title: string }) => {
+                                addedPageIds.add(p.id);
+                                return {
+                                    href: `/p/${p.slug}`,
+                                    label: p.title,
+                                    css_class: 'bg-gradient-to-br from-slate-600 to-slate-700'
+                                };
+                            })
+                        ]);
+                    }
+                }
+
+                if (resourcesPagesRes.ok) {
+                    const resourcesData = await resourcesPagesRes.json();
+                    if (resourcesData.pages?.length) {
+                        // Filter out pages already added to header
+                        const newPages = resourcesData.pages.filter((p: { id: string }) => !addedPageIds.has(p.id));
+                        if (newPages.length) {
+                            setResourcesItems(prev => [
+                                ...prev,
+                                ...newPages.map((p: { slug: string; title: string }) => ({
+                                    href: `/p/${p.slug}`,
+                                    label: p.title,
+                                    icon: 'FileText'
+                                }))
+                            ]);
+                        }
+                    }
+                }
             } catch (error) {
                 console.error('Failed to load navigation:', error);
             }
         };
         loadNavigation();
     }, []);
+
 
     // Handle dark mode
     useEffect(() => {

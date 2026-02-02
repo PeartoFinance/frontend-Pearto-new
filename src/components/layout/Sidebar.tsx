@@ -90,6 +90,29 @@ export default function Sidebar({ collapsible = true }: SidebarProps) {
                     setToolItems(nav.navigation['sidebar_tools'] || []);
                     setCommunityItems(nav.navigation['sidebar_community'] || []);
                 }
+
+                // Also fetch custom pages for sidebar
+                const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+                const userCountry = typeof window !== 'undefined' ? localStorage.getItem('userCountry') || 'US' : 'US';
+                const sidebarPagesRes = await fetch(`${API_BASE}/pages?placement=sidebar&status=published`, {
+                    headers: { 'X-User-Country': userCountry }
+                });
+
+                if (sidebarPagesRes.ok) {
+                    const sidebarData = await sidebarPagesRes.json();
+                    if (sidebarData.pages?.length) {
+                        // Add custom pages to main items
+                        setMainItems(prev => [
+                            ...prev,
+                            ...sidebarData.pages.map((p: { slug: string; title: string }) => ({
+                                url: `/p/${p.slug}`,
+                                label: p.title,
+                                icon: 'FileText'
+                            }))
+                        ]);
+                    }
+                }
+
                 setLoaded(true);
             } catch (error) {
                 console.error('Failed to load navigation:', error);
@@ -98,6 +121,7 @@ export default function Sidebar({ collapsible = true }: SidebarProps) {
         };
         loadNavigation();
     }, []);
+
 
     // Use dynamic or fallback items
     const navItems = loaded && mainItems.length > 0

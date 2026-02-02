@@ -71,14 +71,28 @@ export default function ChartAlertPanel({
 
     const handleCreateAlert = async () => {
         try {
-            const created = await createAlert({
+            const response = await createAlert({
                 symbol: symbol.toUpperCase(),
                 condition: newAlert.condition,
                 targetValue: newAlert.targetValue,
                 notifyEmail: newAlert.notifyEmail,
                 notifyPush: newAlert.notifyPush
             });
-            setAlerts(prev => [...prev, created]);
+            // Construct a proper Alert object from the response + local data
+            const newAlertObj: Alert = {
+                id: response.id,
+                symbol: symbol.toUpperCase(),
+                alertType: 'price',
+                condition: newAlert.condition,
+                targetValue: newAlert.targetValue,
+                isActive: true,
+                isTriggered: false,
+                triggeredAt: null,
+                notifyEmail: newAlert.notifyEmail,
+                notifyPush: newAlert.notifyPush,
+                createdAt: new Date().toISOString()
+            };
+            setAlerts(prev => [...prev, newAlertObj]);
             setIsCreating(false);
             setNewAlert({
                 condition: 'above',
@@ -102,8 +116,11 @@ export default function ChartAlertPanel({
 
     const handleToggleAlert = async (alertId: string) => {
         try {
-            const updated = await toggleAlert(alertId);
-            setAlerts(prev => prev.map(a => a.id === alertId ? updated : a));
+            const response = await toggleAlert(alertId);
+            // Update only the isActive field from the response
+            setAlerts(prev => prev.map(a =>
+                a.id === alertId ? { ...a, isActive: response.isActive } : a
+            ));
         } catch (error) {
             console.error('Failed to toggle alert:', error);
         }

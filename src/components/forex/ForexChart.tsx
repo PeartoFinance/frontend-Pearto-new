@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createChart, ColorType, IChartApi, CandlestickSeries } from 'lightweight-charts';
-import { ArrowUp, ArrowDown, Loader2, Maximize2 } from 'lucide-react';
+import { ArrowUp, ArrowDown, Loader2, Maximize2, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { getForexHistory } from '@/services/marketService';
 
@@ -99,8 +99,17 @@ export default function ForexChart() {
                 const data = await getForexHistory(selectedPair, period, interval);
 
                 if (seriesRef.current && data.length > 0) {
+                    // Use Unix timestamp for intraday (1H), date string for daily+
+                    const isIntraday = timeframe === '1H';
+                    const getTimeKey = (date: string): string | number => {
+                        if (isIntraday && date.includes('T')) {
+                            return Math.floor(new Date(date).getTime() / 1000);
+                        }
+                        return date.split('T')[0];
+                    };
+
                     const chartData = data.map(item => ({
-                        time: item.date.split('T')[0], // Lightweight charts prefers YYYY-MM-DD for daily
+                        time: getTimeKey(item.date),
                         open: item.open,
                         high: item.high,
                         low: item.low,
@@ -225,6 +234,14 @@ export default function ForexChart() {
                 >
                     <Maximize2 size={14} />
                     Advanced Chart
+                </Link>
+                <Link
+                    href={`/live?symbol=${selectedPair}`}
+                    target="_blank"
+                    className="px-3 py-2 bg-emerald-600 text-white text-xs font-medium rounded-lg hover:bg-emerald-700 transition flex items-center gap-1"
+                >
+                    <Activity size={14} />
+                    Live Chart
                 </Link>
             </div>
 

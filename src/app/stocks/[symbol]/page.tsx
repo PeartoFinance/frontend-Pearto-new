@@ -34,7 +34,7 @@ import {
 import { getNewsByStock } from '@/services/newsService';
 import {
     ArrowLeft, Loader2, AlertCircle, TrendingUp, TrendingDown,
-    Globe, Building2, Star, BarChart2, ExternalLink, Newspaper, Clock
+    Globe, Building2, Star, BarChart2, ExternalLink, Newspaper, Clock, Activity
 } from 'lucide-react';
 
 type Period = '1m' | '1d' | '5d' | '1mo' | '3mo' | '6mo' | '1y' | '5y';
@@ -219,14 +219,24 @@ export default function StockDetailPage() {
                                 {/* Chart Header with Expand button */}
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Price Chart</span>
-                                    <Link
-                                        href={`/chart/${symbol}`}
-                                        target="_blank"
-                                        className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition"
-                                    >
-                                        <ExternalLink size={12} />
-                                        Advanced Chart
-                                    </Link>
+                                    <div className="flex items-center gap-2">
+                                        <Link
+                                            href={`/live?symbol=${symbol}`}
+                                            target="_blank"
+                                            className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition"
+                                        >
+                                            <Activity size={12} />
+                                            Live Chart
+                                        </Link>
+                                        <Link
+                                            href={`/chart/${symbol}`}
+                                            target="_blank"
+                                            className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition"
+                                        >
+                                            <ExternalLink size={12} />
+                                            Advanced Chart
+                                        </Link>
+                                    </div>
                                 </div>
                                 <MultiChart
                                     data={history?.data?.map(d => ({

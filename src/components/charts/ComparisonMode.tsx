@@ -25,6 +25,8 @@ interface ComparisonModeProps {
     primaryData: PriceHistoryPoint[];
     onComparisonDataChange: (symbols: ComparisonSymbol[]) => void;
     className?: string;
+    period?: string;
+    interval?: string;
 }
 
 const COMPARISON_COLORS = [
@@ -41,13 +43,47 @@ export default function ComparisonMode({
     primarySymbol,
     primaryData,
     onComparisonDataChange,
-    className = ''
+    className = '',
+    period = '1y',
+    interval = '1d'
 }: ComparisonModeProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [comparisons, setComparisons] = useState<ComparisonSymbol[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState<string[]>([]);
+
+    // Refetch comparisons when period changes
+    useEffect(() => {
+        const updateComparisons = async () => {
+            if (comparisons.length === 0) return;
+
+            const updated = await Promise.all(comparisons.map(async (comp) => {
+                try {
+                    const response = await getStockHistory(comp.symbol, period, interval);
+                    const historyData = response.data || [];
+
+                    if (historyData.length === 0) return comp;
+
+                    const normalizedData = normalizeData(historyData);
+                    return {
+                        ...comp,
+                        data: normalizedData,
+                        baseValue: historyData[0].close ?? 0
+                    };
+                } catch (e) {
+                    console.error(`Failed to update comparison for ${comp.symbol}`, e);
+                    return comp;
+                }
+            }));
+
+            setComparisons(updated);
+            onComparisonDataChange(updated);
+        };
+
+        updateComparisons();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [period, interval]);
 
     // Popular comparison symbols
     const popularSymbols = ['SPY', 'QQQ', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'BTC-USD'];
@@ -59,7 +95,7 @@ export default function ComparisonMode({
         if (baseValue === 0) return [];
 
         return data.map(d => ({
-            time: d.date.split('T')[0],
+            time: d.date, // Keep full date string for proper parsing in parent
             value: ((d.close ?? 0) - baseValue) / baseValue * 100
         }));
     }, []);
@@ -71,9 +107,8 @@ export default function ComparisonMode({
         if (comparisons.length >= 5) return; // Max 5 comparisons
 
         try {
-            // Get period from primary data
-            const period = '1y'; // Default to 1 year for comparison
-            const response = await getStockHistory(symbol, period, '1d');
+            // Use passed period/interval
+            const response = await getStockHistory(symbol, period, interval);
             const historyData = response.data;
 
             if (!historyData || historyData.length === 0) return;

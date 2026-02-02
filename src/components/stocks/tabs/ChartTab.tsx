@@ -59,8 +59,10 @@ export default function ChartTab({
             const { period: p, interval } = periodMap[period];
             const response = await getStockHistory(symbol, p, interval);
             if (response?.data) {
+                // Use full timestamp for intraday periods (1D, 2D, 5D), date-only for daily+
+                const isIntraday = ['1D', '2D', '5D'].includes(period);
                 setData(response.data.map((d: any) => ({
-                    date: d.date.split('T')[0],
+                    date: isIntraday ? d.date : d.date.split('T')[0],
                     open: d.open,
                     high: d.high,
                     low: d.low,

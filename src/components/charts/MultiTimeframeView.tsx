@@ -119,19 +119,30 @@ export default function MultiTimeframeView({
                 height: container.clientHeight
             });
 
-            // Prepare data - use Map for robust deduplication by date
-            const dataMap = new Map<string, PriceHistoryPoint>();
+            // Prepare data - use Map for robust deduplication
+            // For intraday timeframes (1D, 5D), use Unix timestamp; for daily+, use date string
+            const dataMap = new Map<string | number, PriceHistoryPoint>();
+            const isIntraday = pane.timeframe === '1D' || pane.timeframe === '5D';
+
+            // Helper to get time key
+            const getTimeKey = (date: string): string | number => {
+                if (isIntraday) {
+                    return Math.floor(new Date(date).getTime() / 1000);
+                }
+                return date.split('T')[0];
+            };
+
             [...pane.data]
                 .filter(d => d.date && d.close != null)
                 .sort((a, b) => a.date.localeCompare(b.date))
                 .forEach(d => {
-                    const timeKey = d.date.split('T')[0];
-                    // Keep the last entry for each date (most complete data)
+                    const timeKey = getTimeKey(d.date);
+                    // Keep the last entry for each time (most complete data)
                     dataMap.set(timeKey, d);
                 });
 
             const uniqueData = Array.from(dataMap.entries())
-                .sort(([a], [b]) => a.localeCompare(b))
+                .sort(([a], [b]) => String(a).localeCompare(String(b)))
                 .map(([time, d]) => ({ time, ...d }));
 
             if (uniqueData.length === 0) {

@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 import StatsGrid from '@/components/home/StatsGrid';
 import FeaturedStory from '@/components/home/FeaturedStory';
 import TrendingTopics from '@/components/home/TrendingTopics';
@@ -170,6 +171,9 @@ export default function HomePage() {
             </section>
           </div>
         </div>
+
+        {/* Footer */}
+        <Footer />
       </main>
 
       {/* Floating AI Widget */}

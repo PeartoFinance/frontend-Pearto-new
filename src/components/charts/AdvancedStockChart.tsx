@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { createChart, ColorType, CandlestickSeries, AreaSeries, LineSeries, HistogramSeries, type IChartApi, type ISeriesApi, CrosshairMode } from 'lightweight-charts';
-import { Loader2, Plus, Minus, Maximize2, Settings, Download, ExternalLink } from 'lucide-react';
+import { Loader2, Plus, Minus, Maximize2, Settings, Download, ExternalLink, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useChartDrawings, type Drawing, type DrawingPoint } from '@/hooks/useChartDrawings';
@@ -115,9 +115,18 @@ export default function AdvancedStockChart({
 
         const sortedData = [...data].sort((a, b) => a.date.localeCompare(b.date));
 
+        // Helper for time format: Unix timestamp for intraday, YYYY-MM-DD for daily+
+        const isIntraday = ['1D', '1W', '5D'].includes(period);
+        const getTimeKey = (date: string): string | number => {
+            if (isIntraday && date.includes('T')) {
+                return Math.floor(new Date(date).getTime() / 1000);
+            }
+            return date.split('T')[0];
+        };
+
         // Map to Candle format
         const candleData = sortedData.filter(d => d.open && d.high && d.low && d.close).map(d => ({
-            time: d.date,
+            time: getTimeKey(d.date),
             open: d.open!,
             high: d.high!,
             low: d.low!,
@@ -309,6 +318,17 @@ export default function AdvancedStockChart({
                     >
                         <Maximize2 size={14} />
                         <span className="hidden sm:inline">Expand</span>
+                    </Link>
+
+                    {/* Live Chart Link */}
+                    <Link
+                        href={`/live?symbol=${symbol}`}
+                        target="_blank"
+                        className="text-xs px-2 py-1 rounded text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 ml-1 flex-shrink-0 flex items-center gap-1"
+                        title="Open Live Chart"
+                    >
+                        <Activity size={14} />
+                        <span className="hidden sm:inline">Live</span>
                     </Link>
 
                     {/* Indicators Placeholder */}

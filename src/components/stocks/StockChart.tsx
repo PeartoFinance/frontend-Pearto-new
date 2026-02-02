@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createChart, ColorType, CandlestickSeries, AreaSeries, LineSeries, HistogramSeries, type IChartApi } from 'lightweight-charts';
 import { type PriceHistoryPoint } from '@/services/marketService';
-import { Loader2, CandlestickChart, LineChart, AreaChart, Maximize2 } from 'lucide-react';
+import { Loader2, CandlestickChart, LineChart, AreaChart, Maximize2, Activity } from 'lucide-react';
 import Link from 'next/link';
 
 interface StockChartProps {
@@ -292,6 +292,14 @@ export default function StockChart({ data, loading = false, symbol }: StockChart
                     >
                         <Maximize2 size={12} />
                         Advanced Chart
+                    </Link>
+                    <Link
+                        href={`/live?symbol=${symbol}`}
+                        target="_blank"
+                        className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition"
+                    >
+                        <Activity size={12} />
+                        Live Chart
                     </Link>
                 </div>
             </div>

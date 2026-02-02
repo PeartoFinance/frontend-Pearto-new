@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { createChart, ColorType, CandlestickSeries, AreaSeries, LineSeries, HistogramSeries, type IChartApi } from 'lightweight-charts';
-import { Loader2, CandlestickChart, LineChart, AreaChart, Maximize2, Minus, Plus } from 'lucide-react';
+import { Loader2, CandlestickChart, LineChart, AreaChart, Maximize2, Minus, Plus, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
@@ -114,6 +114,15 @@ export function StockChartWidget({
         // Sort data
         const sortedData = [...data].sort((a, b) => a.date.localeCompare(b.date));
 
+        // Helper for time format: Unix timestamp for intraday, YYYY-MM-DD for daily+
+        const isIntraday = ['1D', '2D', '5D'].includes(period);
+        const getTimeKey = (date: string): string | number => {
+            if (isIntraday && date.includes('T')) {
+                return Math.floor(new Date(date).getTime() / 1000);
+            }
+            return date.split('T')[0];
+        };
+
         // Main price chart
         const chart = createChart(container, {
             layout: {
@@ -154,7 +163,7 @@ export function StockChartWidget({
                 lineWidth: 2,
             });
             areaSeries.setData(sortedData.filter(d => d.close != null).map(d => ({
-                time: d.date,
+                time: getTimeKey(d.date),
                 value: d.close!,
             })) as any);
         } else if (chartType === 'candle') {
@@ -166,7 +175,7 @@ export function StockChartWidget({
                 wickDownColor: '#ef4444',
             });
             candleSeries.setData(sortedData.filter(d => d.open && d.high && d.low && d.close).map(d => ({
-                time: d.date,
+                time: getTimeKey(d.date),
                 open: d.open!,
                 high: d.high!,
                 low: d.low!,
@@ -178,7 +187,7 @@ export function StockChartWidget({
                 lineWidth: 2,
             });
             lineSeries.setData(sortedData.filter(d => d.close != null).map(d => ({
-                time: d.date,
+                time: getTimeKey(d.date),
                 value: d.close!,
             })) as any);
         }
@@ -214,7 +223,7 @@ export function StockChartWidget({
             });
 
             volumeSeries.setData(sortedData.filter(d => d.volume != null).map(d => ({
-                time: d.date,
+                time: getTimeKey(d.date),
                 value: d.volume!,
                 color: (d.close ?? 0) >= (d.open ?? 0)
                     ? 'rgba(16, 185, 129, 0.6)'
@@ -225,10 +234,10 @@ export function StockChartWidget({
 
             // Sync crosshairs
             chart.subscribeCrosshairMove((param) => {
-                if (param.time) {
-                    volumeChart.setCrosshairPosition(0, param.time, volumeSeries);
-                    const timeStr = param.time.toString();
-                    const dataPoint = sortedData.find(d => d.date === timeStr);
+                const time = param.time;
+                if (time) {
+                    volumeChart.setCrosshairPosition(0, time, volumeSeries);
+                    const dataPoint = sortedData.find(d => getTimeKey(d.date) === time || getTimeKey(d.date).toString() === time.toString());
                     if (dataPoint) setHoveredData(dataPoint);
                 } else {
                     setHoveredData(null);
@@ -236,9 +245,9 @@ export function StockChartWidget({
             });
 
             volumeChart.subscribeCrosshairMove((param) => {
-                if (param.time) {
-                    const timeStr = param.time.toString();
-                    const dataPoint = sortedData.find(d => d.date === timeStr);
+                const time = param.time;
+                if (time) {
+                    const dataPoint = sortedData.find(d => getTimeKey(d.date) === time || getTimeKey(d.date).toString() === time.toString());
                     if (dataPoint) setHoveredData(dataPoint);
                 } else {
                     setHoveredData(null);
@@ -247,9 +256,9 @@ export function StockChartWidget({
         } else {
             // Just crosshair tracking without volume
             chart.subscribeCrosshairMove((param) => {
-                if (param.time) {
-                    const timeStr = param.time.toString();
-                    const dataPoint = sortedData.find(d => d.date === timeStr);
+                const time = param.time;
+                if (time) {
+                    const dataPoint = sortedData.find(d => getTimeKey(d.date) === time || getTimeKey(d.date).toString() === time.toString());
                     if (dataPoint) setHoveredData(dataPoint);
                 } else {
                     setHoveredData(null);
@@ -320,14 +329,24 @@ export function StockChartWidget({
             {showHeader && (
                 <div className="flex items-center justify-between px-4 py-2 bg-blue-600 text-white text-sm">
                     <span className="font-semibold">{symbol} Chart</span>
-                    <Link
-                        href={`/chart/${symbol}`}
-                        target="_blank"
-                        className="flex items-center gap-1 hover:bg-blue-700 px-2 py-1 rounded transition"
-                    >
-                        <Maximize2 size={14} />
-                        Advanced Chart
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            href={`/live?symbol=${symbol}`}
+                            target="_blank"
+                            className="flex items-center gap-1 hover:bg-blue-700 px-2 py-1 rounded transition"
+                        >
+                            <Activity size={14} />
+                            Live Chart
+                        </Link>
+                        <Link
+                            href={`/chart/${symbol}`}
+                            target="_blank"
+                            className="flex items-center gap-1 hover:bg-blue-700 px-2 py-1 rounded transition"
+                        >
+                            <Maximize2 size={14} />
+                            Advanced Chart
+                        </Link>
+                    </div>
                 </div>
             )}
 

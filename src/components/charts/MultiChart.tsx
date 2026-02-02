@@ -136,6 +136,15 @@ export function MultiChart({
         const sortedData = prepareData();
         if (sortedData.length === 0) return;
 
+        // Helper for time format: Unix timestamp for intraday, YYYY-MM-DD for daily+
+        const isIntraday = ['1m', '1d', '5d'].includes(period);
+        const getTimeKey = (date: string): string | number => {
+            if (isIntraday) {
+                return Math.floor(new Date(date).getTime() / 1000);
+            }
+            return date.split('T')[0];
+        };
+
         // Remove existing chart
         if (chartRef.current) {
             chartRef.current.remove();
@@ -200,7 +209,7 @@ export function MultiChart({
             });
 
             const areaData = sortedData.map(d => ({
-                time: d.date,
+                time: getTimeKey(d.date),
                 value: d.close ?? d.value ?? 0,
             }));
 
@@ -220,7 +229,7 @@ export function MultiChart({
             const candleData = sortedData
                 .filter(d => d.open != null && d.high != null && d.low != null && d.close != null)
                 .map(d => ({
-                    time: d.date,
+                    time: getTimeKey(d.date),
                     open: d.open!,
                     high: d.high!,
                     low: d.low!,
@@ -237,7 +246,7 @@ export function MultiChart({
             });
 
             const lineData = sortedData.map(d => ({
-                time: d.date,
+                time: getTimeKey(d.date),
                 value: d.close ?? d.value ?? 0,
             }));
 
@@ -256,7 +265,7 @@ export function MultiChart({
             });
 
             const mountainData = sortedData.map(d => ({
-                time: d.date,
+                time: getTimeKey(d.date),
                 value: d.close ?? d.value ?? 0,
             }));
 
@@ -274,7 +283,7 @@ export function MultiChart({
             const barsData = sortedData
                 .filter(d => d.open != null && d.high != null && d.low != null && d.close != null)
                 .map(d => ({
-                    time: d.date,
+                    time: getTimeKey(d.date),
                     open: d.open!,
                     high: d.high!,
                     low: d.low!,
@@ -300,7 +309,7 @@ export function MultiChart({
             });
 
             const baselineData = sortedData.map(d => ({
-                time: d.date,
+                time: getTimeKey(d.date),
                 value: d.close ?? d.value ?? 0,
             }));
 
@@ -317,7 +326,7 @@ export function MultiChart({
                 const prevClose = i > 0 ? (arr[i - 1].close ?? arr[i - 1].value ?? 0) : (d.close ?? d.value ?? 0);
                 const currentClose = d.close ?? d.value ?? 0;
                 return {
-                    time: d.date,
+                    time: getTimeKey(d.date),
                     value: currentClose,
                     color: currentClose >= prevClose ? positiveColor : negativeColor,
                 };

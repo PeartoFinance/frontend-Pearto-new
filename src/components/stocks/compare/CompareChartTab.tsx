@@ -73,6 +73,15 @@ export default function CompareChartTab({ stocks, period, onPeriodChange }: Comp
 
             const firstPrice = sortedData[0]?.close || 1;
 
+            // Use Unix timestamp for intraday periods (1d, 5d), date string for daily+
+            const isIntraday = ['1d', '5d'].includes(period);
+            const getTimeKey = (date: string): string | number => {
+                if (isIntraday && date.includes('T')) {
+                    return Math.floor(new Date(date).getTime() / 1000);
+                }
+                return date.split('T')[0];
+            };
+
             const series = chart.addSeries(LineSeries, {
                 color: stock.color,
                 lineWidth: 2,
@@ -82,7 +91,7 @@ export default function CompareChartTab({ stocks, period, onPeriodChange }: Comp
             const normalizedData = sortedData
                 .filter(d => d.close != null)
                 .map(d => ({
-                    time: d.date.split('T')[0],
+                    time: getTimeKey(d.date),
                     value: ((d.close! - firstPrice) / firstPrice) * 100,
                 }));
 

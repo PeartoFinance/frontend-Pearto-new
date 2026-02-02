@@ -31,9 +31,13 @@ import {
     Plus,
     Search,
     Bell,
-    Menu
+    Menu,
+    Pause,
+    Play,
+    Zap
 } from 'lucide-react';
 import { getStockHistory, getStockProfile, getCryptoHistory, getForexHistory, type PriceHistoryPoint, type MarketStock } from '@/services/marketService';
+import { getLiveQuote, getLiveQuotes, getLiveIntraday, type LiveQuote, type IntradayPoint } from '@/services/liveChartService';
 import ChartToolbar from './toolbar/ChartToolbar';
 import { useChartDrawings, type Drawing, type DrawingPoint } from '@/hooks/useChartDrawings';
 import { detectPatterns, type ChartMarker } from '@/utils/technicalAnalysis';
@@ -49,14 +53,14 @@ import ComparisonMode, { type ComparisonSymbol } from './ComparisonMode';
 import MultiTimeframeView from './MultiTimeframeView';
 import { ChartGridLayout, ChartLayoutSelector, type ChartLayout } from './layout';
 
-interface AdvancedChartPageProps {
-    symbol: string;
+interface LiveChartPageProps {
+    symbol?: string;
     assetType?: 'stock' | 'crypto' | 'forex';
 }
 
-type ChartType = 'candle' | 'area' | 'line' | 'bar';
-type Period = '1D' | '5D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | '5Y' | 'All';
-type Interval = '1m' | '5m' | '15m' | '30m' | '1h' | '1d' | '1wk' | '1mo';
+export type ChartType = 'candle' | 'area' | 'line' | 'bar';
+export type Period = '1D' | '5D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | '5Y' | 'All';
+export type Interval = '1m' | '5m' | '15m' | '30m' | '1h' | '1d' | '1wk' | '1mo';
 
 const PERIODS: { id: Period; label: string }[] = [
     { id: '1D', label: '1D' },
@@ -88,7 +92,7 @@ const CHART_TYPES: { id: ChartType; icon: typeof BarChart2; label: string }[] = 
     { id: 'bar', icon: Activity, label: 'OHLC Bars' }
 ];
 
-export default function AdvancedChartPage({ symbol, assetType = 'stock' }: AdvancedChartPageProps) {
+export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetType = 'stock' }: LiveChartPageProps) {
     const router = useRouter();
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const volumeContainerRef = useRef<HTMLDivElement>(null);
@@ -99,12 +103,15 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
     const svgRef = useRef<SVGSVGElement>(null);
     const indicatorSeriesRef = useRef<Map<string, ISeriesApi<'Line'>>>(new Map());
     const comparisonSeriesRef = useRef<Map<string, ISeriesApi<'Line'>>>(new Map());
+    const lastDataPointRef = useRef<PriceHistoryPoint | null>(null);
 
+    const [symbol, setSymbol] = useState(initialSymbol);
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState<PriceHistoryPoint[]>([]);
     const [profile, setProfile] = useState<MarketStock | null>(null);
+    const [liveQuote, setLiveQuote] = useState<LiveQuote | null>(null);
     const [period, setPeriod] = useState<Period>('1D');
-    const [interval, setInterval] = useState<Interval>('1m');
+    const [chartInterval, setChartInterval] = useState<Interval>('1m');
     const [chartType, setChartType] = useState<ChartType>('area');
     const [layout, setLayout] = useState<ChartLayout>('1x1');
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -116,6 +123,11 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
     const [showMultiTimeframe, setShowMultiTimeframe] = useState(false);
     const [crosshairData, setCrosshairData] = useState<{ time: string; price: number; change: number; volume: number } | null>(null);
     const { formatPrice } = useCurrency();
+
+    // Live data state
+    const [isLive, setIsLive] = useState(true);
+    const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+    const [chartVersion, setChartVersion] = useState(0); // Used to force chart recreation when needed
 
     // Drawing tools
     const { drawings, activeTool, startDrawingTool, clearAll } = useChartDrawings(symbol);
@@ -160,14 +172,34 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
         return map[p] || { period: '1mo', interval: '1d' };
     }, []);
 
-    // Fetch data
+    // Fetch historical data
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             const { period: apiPeriod, interval: apiInterval } = getPeriodParams(period);
             let historyData: PriceHistoryPoint[] = [];
 
-            if (assetType === 'crypto') {
+            // For 1D period, use live intraday API for real-time data
+            if (period === '1D') {
+                try {
+                    const liveResponse = await getLiveIntraday(symbol);
+                    if (liveResponse.data && liveResponse.data.length > 0) {
+                        historyData = liveResponse.data.map(d => ({
+                            date: d.date,
+                            open: d.open,
+                            high: d.high,
+                            low: d.low,
+                            close: d.close,
+                            volume: d.volume
+                        }));
+                    }
+                } catch (liveError) {
+                    console.warn('Live intraday fetch failed, falling back to stock history:', liveError);
+                    // Fallback to regular history
+                    const response = await getStockHistory(symbol, apiPeriod, apiInterval);
+                    historyData = response.data;
+                }
+            } else if (assetType === 'crypto') {
                 const response = await getCryptoHistory(symbol, apiPeriod, apiInterval);
                 historyData = response.data;
             } else if (assetType === 'forex') {
@@ -175,14 +207,19 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
             } else {
                 const response = await getStockHistory(symbol, apiPeriod, apiInterval);
                 historyData = response.data;
-                // Also fetch profile
-                try {
-                    const p = await getStockProfile(symbol);
-                    setProfile(p);
-                } catch { }
             }
 
+            // Also fetch profile for stock info
+            try {
+                const p = await getStockProfile(symbol);
+                setProfile(p);
+            } catch { }
+
             setData(historyData || []);
+            setChartVersion(v => v + 1); // Trigger chart recreation for new data
+            if (historyData && historyData.length > 0) {
+                lastDataPointRef.current = historyData[historyData.length - 1];
+            }
         } catch (e) {
             console.error('Failed to fetch chart data:', e);
         } finally {
@@ -194,8 +231,104 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
         fetchData();
     }, [fetchData]);
 
+    // Live quote polling - update chart smoothly without full redraw
+    // Live quote polling - update chart smoothly without full redraw
+    useEffect(() => {
+        if (!isLive || period !== '1D') return; // Only live update for intraday
+
+        const updateLiveData = async () => {
+            try {
+                // Collect all symbols to fetch
+                const symbolsToFetch = [symbol];
+                const activeComparisons = comparisonSymbols.filter(c => c.visible);
+                activeComparisons.forEach(c => symbolsToFetch.push(c.symbol));
+
+                // Fetch quotes for all symbols
+                const quotes = await getLiveQuotes(symbolsToFetch);
+
+                // Find main symbol quote
+                const mainQuote = quotes.find(q => q.symbol === symbol.toUpperCase());
+
+                if (mainQuote) {
+                    setLiveQuote(mainQuote);
+                    setLastUpdate(new Date());
+
+                    // Smooth update: append or update the last data point
+                    if (mainQuote.price && seriesRef.current && chartRef.current) {
+                        const now = Math.floor(Date.now() / 1000); // Unix timestamp in seconds
+
+                        if (chartType === 'candle' || chartType === 'bar') {
+                            // Update candlestick
+                            seriesRef.current.update({
+                                time: now as any,
+                                open: mainQuote.open ?? mainQuote.price,
+                                high: mainQuote.dayHigh ?? mainQuote.price,
+                                low: mainQuote.dayLow ?? mainQuote.price,
+                                close: mainQuote.price
+                            } as any);
+                        } else {
+                            // Update line/area
+                            seriesRef.current.update({
+                                time: now as any,
+                                value: mainQuote.price
+                            } as any);
+                        }
+
+                        // Update volume
+                        if (volumeSeriesRef.current && mainQuote.volume) {
+                            volumeSeriesRef.current.update({
+                                time: now as any,
+                                value: mainQuote.volume,
+                                color: (mainQuote.change ?? 0) >= 0 ? '#10b98180' : '#ef444480'
+                            } as any);
+                        }
+                    }
+                }
+
+                // Update comparison symbols
+                const now = Math.floor(Date.now() / 1000);
+                activeComparisons.forEach(comp => {
+                    const quote = quotes.find(q => q.symbol === comp.symbol.toUpperCase());
+                    if (quote && quote.price && comp.baseValue) {
+                        const series = comparisonSeriesRef.current.get(comp.symbol);
+                        if (series) {
+                            // Calculate percentage change relative to base value
+                            // Formula: ((Current - Base) / Base) * 100
+                            const pctValue = ((quote.price - comp.baseValue) / comp.baseValue) * 100;
+
+                            series.update({
+                                time: now as any,
+                                value: pctValue
+                            } as any);
+                        }
+                    }
+                });
+
+            } catch (e) {
+                console.error('Live quote update failed:', e);
+            }
+        };
+
+        // Initial update
+        updateLiveData();
+
+        // Poll every 5 seconds
+        const interval = setInterval(updateLiveData, 5000);
+        return () => clearInterval(interval);
+    }, [symbol, isLive, period, chartType, comparisonSymbols]);
+
     // Calculate current stats
     const stats = useMemo(() => {
+        if (liveQuote) {
+            return {
+                price: liveQuote.price ?? 0,
+                change: liveQuote.change ?? 0,
+                changePercent: liveQuote.changePercent ?? 0,
+                high: liveQuote.dayHigh ?? 0,
+                low: liveQuote.dayLow ?? 0,
+                volume: liveQuote.volume ?? 0
+            };
+        }
         if (data.length === 0) return null;
         const latest = data[data.length - 1];
         const first = data[0];
@@ -209,7 +342,7 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
             low: Math.min(...data.filter(d => d.low).map(d => d.low ?? Infinity)),
             volume: data.reduce((sum, d) => sum + (d.volume ?? 0), 0)
         };
-    }, [data]);
+    }, [data, liveQuote]);
 
     // Initialize/update chart
     useEffect(() => {
@@ -262,7 +395,6 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
         chartRef.current = chart;
 
         // Prepare data - deduplicate by time key
-        // For intraday periods (1D, 5D), use full timestamp; for daily+, use date only
         const dataMap = new Map<string, typeof data[0]>();
         const isIntraday = period === '1D' || period === '5D';
 
@@ -270,22 +402,19 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
             .filter(d => d.date && d.close != null)
             .sort((a, b) => a.date.localeCompare(b.date))
             .forEach(d => {
-                // Use full timestamp for intraday, date-only for daily+
                 const timeKey = isIntraday ? d.date : d.date.split('T')[0];
-                dataMap.set(timeKey, d); // Last value for each time wins
+                dataMap.set(timeKey, d);
             });
         const sortedData = Array.from(dataMap.values());
 
         // Create series based on chart type
         let mainSeries: ISeriesApi<'Candlestick' | 'Area' | 'Line'>;
 
-        // Helper to get time key for chart data
-        // For intraday: use Unix timestamp (seconds). For daily+: use YYYY-MM-DD string.
         const getTimeKey = (date: string): string | number => {
             if (isIntraday) {
-                return Math.floor(new Date(date).getTime() / 1000); // Unix timestamp in seconds
+                return Math.floor(new Date(date).getTime() / 1000);
             }
-            return date.split('T')[0]; // YYYY-MM-DD
+            return date.split('T')[0];
         };
 
         if (chartType === 'candle' || chartType === 'bar') {
@@ -419,7 +548,8 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                 volumeChartRef.current = null;
             }
         };
-    }, [data, chartType, stats, period]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [chartVersion, chartType, period, formatPrice]); // Use chartVersion instead of data to prevent reset on live updates
 
     // Render indicators when activeIndicators change
     useEffect(() => {
@@ -427,12 +557,24 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
 
         const chart = chartRef.current;
 
-        // Convert data to OHLC format
-        const ohlcData: OHLCData[] = data
-            .filter(d => d.date && d.close != null)
+        const isIntraday = ['1D', '5D', '1W'].includes(period);
+        const getTimeKey = (date: string): string | number => {
+            if (isIntraday) {
+                return Math.floor(new Date(date).getTime() / 1000);
+            }
+            return date.split('T')[0];
+        };
+
+        // Deduplicate data by time key
+        const dataMap = new Map<string | number, typeof data[0]>();
+        data.filter(d => d.date && d.close != null).forEach(d => {
+            dataMap.set(getTimeKey(d.date), d);
+        });
+
+        const ohlcData: OHLCData[] = Array.from(dataMap.values())
             .sort((a, b) => a.date.localeCompare(b.date))
             .map(d => ({
-                time: d.date.split('T')[0],
+                time: getTimeKey(d.date),
                 open: d.open ?? d.close!,
                 high: d.high ?? d.close!,
                 low: d.low ?? d.close!,
@@ -440,24 +582,19 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                 volume: d.volume ?? 0
             }));
 
-        // Remove old indicator series that are no longer active
         const currentIds = new Set(activeIndicators.map(i => i.id));
         indicatorSeriesRef.current.forEach((series, id) => {
             if (!currentIds.has(id)) {
                 try {
                     chart.removeSeries(series);
-                } catch (e) {
-                    // Series may already be removed
-                }
+                } catch (e) { }
                 indicatorSeriesRef.current.delete(id);
             }
         });
 
-        // Add or update indicator series
         activeIndicators.forEach(indicator => {
             if (!indicator.isActive) return;
 
-            // Skip if already rendered with same params
             if (indicatorSeriesRef.current.has(indicator.id)) {
                 return;
             }
@@ -473,12 +610,10 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                     break;
                 case 'bollinger': {
                     const bb = calculateBollingerBands(ohlcData, indicator.params.period || 20, indicator.params.stdDev || 2);
-                    // For Bollinger, we add middle band as main line
                     indicatorData = bb.map(b => ({ time: b.time, value: b.middle }));
                     break;
                 }
                 default:
-                    // For other indicators, skip for now (can add later)
                     return;
             }
 
@@ -499,49 +634,62 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
     useEffect(() => {
         if (!chartRef.current) return;
         const chart = chartRef.current;
+        const isIntraday = period === '1D' || period === '5D';
 
-        // Remove old comparison series that are no longer active
         const currentSymbols = new Set(comparisonSymbols.filter(c => c.visible).map(c => c.symbol));
         comparisonSeriesRef.current.forEach((series, symbol) => {
             if (!currentSymbols.has(symbol)) {
                 try {
                     chart.removeSeries(series);
-                } catch (e) {
-                    // Series may already be removed
-                }
+                } catch (e) { }
                 comparisonSeriesRef.current.delete(symbol);
             }
         });
 
-        // Add or update comparison series
         comparisonSymbols.forEach(comparison => {
             if (!comparison.visible || comparison.data.length === 0) return;
 
-            // Skip if already rendered
             if (comparisonSeriesRef.current.has(comparison.symbol)) return;
 
-            // Create new line series for this comparison
             const series = chart.addSeries(LineSeries, {
                 color: comparison.color,
                 lineWidth: 2,
-                priceScaleId: 'comparison', // Separate scale for normalized percentages
+                priceScaleId: 'comparison',
                 lastValueVisible: true,
                 priceLineVisible: false,
                 title: comparison.symbol
             });
 
-            // Deduplicate by time
-            const dataMap = new Map<string, number>();
-            comparison.data.forEach(d => dataMap.set(d.time, d.value));
+            const dataMap = new Map<string | number, number>();
+            comparison.data.forEach(d => {
+                // Determine if we need to parse the time based on current main chart period
+                const timeKey = isIntraday ? (typeof d.time === 'string' && d.time.includes('T') ? Math.floor(new Date(d.time).getTime() / 1000) : d.time) : d.time;
+                // If main chart is intraday but comparison data is daily YYYY-MM-DD, we need to handle it.
+                // Ideally comparison data should match the period. But if not, we try to parse.
+                // If d.time is YYYY-MM-DD string and we need number, we convert.
+                let finalTime: string | number = timeKey;
+                if (isIntraday && typeof timeKey === 'string' && !timeKey.includes('T')) {
+                    // e.g. 2023-01-01 -> timestamp at 00:00?
+                    finalTime = Math.floor(new Date(timeKey).getTime() / 1000);
+                } else if (!isIntraday && typeof timeKey === 'number') {
+                    // Timestamp to string YYYY-MM-DD
+                    finalTime = new Date(timeKey * 1000).toISOString().split('T')[0];
+                }
+
+                dataMap.set(finalTime, d.value);
+            });
+
             const uniqueData = Array.from(dataMap.entries())
-                .sort(([a], [b]) => a.localeCompare(b))
+                .sort(([a], [b]) => {
+                    if (typeof a === 'number' && typeof b === 'number') return a - b;
+                    return String(a).localeCompare(String(b));
+                })
                 .map(([time, value]) => ({ time, value }));
 
             series.setData(uniqueData as any);
             comparisonSeriesRef.current.set(comparison.symbol, series);
         });
 
-        // Configure comparison price scale if we have comparisons
         if (comparisonSymbols.filter(c => c.visible).length > 0) {
             chart.priceScale('comparison').applyOptions({
                 scaleMargins: { top: 0.1, bottom: 0.1 },
@@ -583,6 +731,15 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                     </button>
 
                     <div className="flex items-center gap-3">
+                        {/* Live indicator */}
+                        <div className="flex items-center gap-2 px-2 py-1 bg-green-500/20 rounded-lg">
+                            <span className="relative flex h-2 w-2">
+                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isLive ? 'bg-green-400' : 'bg-yellow-400'} opacity-75`}></span>
+                                <span className={`relative inline-flex rounded-full h-2 w-2 ${isLive ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                            </span>
+                            <span className="text-xs font-medium text-green-400">LIVE</span>
+                        </div>
+
                         <span className="text-xl font-bold">{symbol}</span>
                         {profile && (
                             <span className="text-sm text-slate-400 hidden sm:inline">{profile.name}</span>
@@ -608,6 +765,20 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
 
                 {/* Right: Actions */}
                 <div className="flex items-center gap-2">
+                    {lastUpdate && (
+                        <span className="text-xs text-slate-500 mr-2">
+                            Updated: {lastUpdate.toLocaleTimeString()}
+                        </span>
+                    )}
+
+                    <button
+                        onClick={() => setIsLive(!isLive)}
+                        className={`p-2 rounded-lg transition ${isLive ? 'text-green-400 bg-green-400/10' : 'text-yellow-400 bg-yellow-400/10'}`}
+                        title={isLive ? 'Pause live updates' : 'Resume live updates'}
+                    >
+                        {isLive ? <Pause size={20} /> : <Play size={20} />}
+                    </button>
+
                     <button
                         onClick={() => setIsInWatchlist(!isInWatchlist)}
                         className={`p-2 rounded-lg transition ${isInWatchlist ? 'text-yellow-400 bg-yellow-400/10' : 'hover:bg-slate-800'}`}
@@ -665,7 +836,7 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                             onClick={() => { setShowIntervalDropdown(!showIntervalDropdown); setShowChartTypeDropdown(false); }}
                             className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-sm"
                         >
-                            {INTERVALS.find(i => i.id === interval)?.label || interval}
+                            {INTERVALS.find(i => i.id === chartInterval)?.label || chartInterval}
                             <ChevronDown size={14} />
                         </button>
                         {showIntervalDropdown && (
@@ -673,8 +844,8 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                                 {INTERVALS.map(i => (
                                     <button
                                         key={i.id}
-                                        onClick={() => { setInterval(i.id); setShowIntervalDropdown(false); }}
-                                        className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-700 ${interval === i.id ? 'text-blue-400' : ''}`}
+                                        onClick={() => { setChartInterval(i.id); setShowIntervalDropdown(false); }}
+                                        className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-700 ${chartInterval === i.id ? 'text-blue-400' : ''}`}
                                     >
                                         {i.label}
                                     </button>
@@ -733,6 +904,8 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                         primarySymbol={symbol}
                         primaryData={data}
                         onComparisonDataChange={setComparisonSymbols}
+                        period={getPeriodParams(period).period}
+                        interval={getPeriodParams(period).interval}
                     />
 
                     {/* Multi-Timeframe Toggle */}
@@ -742,14 +915,6 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                     >
                         Multi-TF
                     </button>
-
-                    {/* Layout Selector */}
-                    <div className="flex items-center gap-2 border-l border-slate-700/50 pl-3 ml-1">
-                        <ChartLayoutSelector
-                            layout={layout}
-                            onLayoutChange={setLayout}
-                        />
-                    </div>
                 </div>
             </div>
 
@@ -796,9 +961,10 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                             primarySymbol={symbol}
                             chartType={chartType}
                             period={period}
-                            isLive={false}
+                            isLive={isLive}
                             onMaximizePanel={(s) => {
-                                router.push(`/stock/${s}`);
+                                setSymbol(s);
+                                setLayout('1x1');
                             }}
                         />
                     )}
@@ -813,14 +979,18 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
             {/* Bottom Status Bar */}
             <footer className="h-8 border-t border-slate-800 flex items-center justify-between px-4 text-xs text-slate-500 bg-slate-900/50">
                 <div className="flex items-center gap-4">
-                    <span>O: {data.length > 0 && crosshairData?.time ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time || Math.floor(new Date(d.date).getTime() / 1000) === (crosshairData.time as any))?.open ?? 0) : '-'}</span>
-                    <span>H: {data.length > 0 && crosshairData?.time ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time || Math.floor(new Date(d.date).getTime() / 1000) === (crosshairData.time as any))?.high ?? 0) : '-'}</span>
-                    <span>L: {data.length > 0 && crosshairData?.time ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time || Math.floor(new Date(d.date).getTime() / 1000) === (crosshairData.time as any))?.low ?? 0) : '-'}</span>
+                    <span className="flex items-center gap-1">
+                        <Zap size={12} className={isLive ? 'text-green-500' : 'text-yellow-500'} />
+                        {isLive ? 'Live Data' : 'Paused'}
+                    </span>
+                    <span>O: {crosshairData ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time)?.open ?? 0) : '-'}</span>
+                    <span>H: {crosshairData ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time)?.high ?? 0) : '-'}</span>
+                    <span>L: {crosshairData ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time)?.low ?? 0) : '-'}</span>
                     <span>C: {crosshairData ? formatPrice(crosshairData.price) : '-'}</span>
                     <span>Vol: {crosshairData ? formatNumber(crosshairData.volume) : '-'}</span>
                 </div>
                 <div className="flex items-center gap-4">
-                    <span>Data by Yahoo Finance</span>
+                    <span>Auto-refresh: {isLive ? '5s' : 'Off'}</span>
                     <span>© 2026 Pearto Finance</span>
                 </div>
             </footer>
