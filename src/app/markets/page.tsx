@@ -9,8 +9,10 @@ import BulkTransactions from '@/components/widgets/BulkTransactions';
 import ProposedDividends from '@/components/widgets/ProposedDividends';
 import PublicOfferings from '@/components/widgets/PublicOfferings';
 import MarketOverview from '@/components/widgets/MarketOverview';
+import MarketAnalysisCharts from '@/components/markets/MarketAnalysisCharts';
 import { AIWidget } from '@/components/ai';
 import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import {
     getMarketOverview,
     getStocks,
@@ -24,7 +26,7 @@ import {
 import { createChart, ColorType, AreaSeries, type IChartApi } from 'lightweight-charts';
 import {
     TrendingUp, TrendingDown, Activity, BarChart2, Loader2,
-    ArrowUpRight, ArrowDownRight, RefreshCw, Clock, LineChart, PieChart, Coins
+    ArrowUpRight, ArrowDownRight, RefreshCw, Clock, LineChart, PieChart, Coins, Zap
 } from 'lucide-react';
 import { TableExportButton } from '@/components/common/TableExportButton';
 
@@ -37,6 +39,7 @@ export default function MarketPage() {
     const [cryptoData, setCryptoData] = useState<MarketStock[]>([]);
     const [loading, setLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+    const { formatPrice } = useCurrency();
 
     // Load data
     const loadData = useCallback(async () => {
@@ -106,6 +109,13 @@ export default function MarketPage() {
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Live market data and analytics</p>
                             </div>
                             <div className="hidden md:flex items-center gap-6">
+                                <Link
+                                    href="/markets/live"
+                                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-400 text-white rounded-lg font-medium hover:scale-105 transition-transform shadow-lg shadow-emerald-500/25"
+                                >
+                                    <Zap size={16} className="animate-pulse" />
+                                    Go Live
+                                </Link>
                                 <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                     <span className="text-sm text-gray-500">Market Open</span>
@@ -249,7 +259,7 @@ export default function MarketPage() {
                                                                 {stock.name}
                                                             </td>
                                                             <td className="px-4 py-3 text-right font-semibold text-slate-900 dark:text-white">
-                                                                ${formatNumber(stock.price)}
+                                                                {formatPrice(stock.price || 0)}
                                                             </td>
                                                             <td className={`px-4 py-3 text-right font-medium ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
                                                                 {isPositive ? '+' : ''}{formatNumber(stock.change)}
@@ -418,6 +428,9 @@ export default function MarketPage() {
                         {/* Analysis Tab */}
                         {activeTab === 'analysis' && overview && (
                             <div className="space-y-6">
+                                {/* Sector Analysis Charts - Pie charts and bar charts */}
+                                <MarketAnalysisCharts />
+
                                 {/* Market Breadth */}
                                 <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
                                     <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center gap-2">

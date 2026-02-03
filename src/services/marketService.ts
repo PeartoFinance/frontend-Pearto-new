@@ -15,6 +15,7 @@ export interface MarketStock {
     change: number;
     changePercent: number;
     volume: number;
+    turnover?: number;  // Volume * Price
     marketCap?: number;
     peRatio?: number;
     high52w?: number;
@@ -186,6 +187,40 @@ export async function getCryptoMarkets(limit = 100, page = 1, sortBy = 'market_c
  */
 export async function getMarketStats() {
     return get<{ advancers: number; decliners: number; unchanged: number; totalVolume: number; totalCount: number }>('/market/stats');
+}
+
+/**
+ * Sector analysis data for market visualization
+ */
+export interface SectorAnalysisData {
+    sector: string;
+    turnover: number;
+    turnoverPercent: number;
+    volume: number;
+    volumePercent: number;
+    transactions: number;
+    transactionsPercent: number;
+    avgChangePercent: number;
+    advancers: number;
+    decliners: number;
+    unchanged: number;
+}
+
+export interface SectorAnalysisResponse {
+    sectors: SectorAnalysisData[];
+    totals: {
+        turnover: number;
+        volume: number;
+        transactions: number;
+        sectorCount: number;
+    };
+}
+
+/**
+ * Get comprehensive sector analysis for pie charts and bar charts
+ */
+export async function getSectorAnalysis(): Promise<SectorAnalysisResponse> {
+    return get<SectorAnalysisResponse>('/market/sector-analysis');
 }
 
 /**
@@ -481,6 +516,7 @@ export default {
     getStocks,
     getCryptoMarkets,
     getMarketStats,
+    getSectorAnalysis,
     getSectorPerformance,
     getStockHistory,
     getStockProfile,
