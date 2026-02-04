@@ -69,53 +69,53 @@ export function MarkdownRenderer({ content, compact = false, className = '' }: M
                     ),
                     // Tables
                     table: ({ children }) => (
-                        <div className="my-4 overflow-x-auto rounded-lg border border-slate-700">
+                        <div className="my-4 overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
                             <table className="w-full text-sm">
                                 {children}
                             </table>
                         </div>
                     ),
                     thead: ({ children }) => (
-                        <thead className="bg-emerald-900/40">
+                        <thead className="bg-emerald-50 dark:bg-emerald-900/40">
                             {children}
                         </thead>
                     ),
                     th: ({ children }) => (
-                        <th className="px-3 py-2 text-left font-semibold text-emerald-300 border-b border-slate-700">
+                        <th className="px-3 py-2 text-left font-semibold text-emerald-700 dark:text-emerald-300 border-b border-slate-200 dark:border-slate-700">
                             {children}
                         </th>
                     ),
                     td: ({ children }) => (
-                        <td className="px-3 py-2 border-b border-slate-800">
+                        <td className="px-3 py-2 border-b border-slate-100 dark:border-slate-800">
                             {children}
                         </td>
                     ),
                     // Horizontal rule
                     hr: () => (
-                        <hr className="my-4 border-t-2 border-slate-700" />
+                        <hr className="my-4 border-t-2 border-slate-200 dark:border-slate-700" />
                     ),
                     // Code
                     code: ({ children, className }) => {
                         const isInline = !className;
                         return isInline ? (
-                            <code className="px-1.5 py-0.5 rounded bg-emerald-900/50 text-emerald-300 text-xs font-mono">
+                            <code className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs font-mono">
                                 {children}
                             </code>
                         ) : (
-                            <code className="block p-3 rounded-lg bg-slate-800 text-xs font-mono overflow-x-auto">
+                            <code className="block p-3 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono overflow-x-auto">
                                 {children}
                             </code>
                         );
                     },
                     // Blockquotes
                     blockquote: ({ children }) => (
-                        <blockquote className="my-3 pl-4 border-l-4 border-emerald-700 bg-emerald-900/20 py-2 italic text-slate-400">
+                        <blockquote className="my-3 pl-4 border-l-4 border-emerald-500 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 py-2 italic text-slate-600 dark:text-slate-400">
                             {children}
                         </blockquote>
                     ),
                     // Links
                     a: ({ href, children }) => (
-                        <a href={href} className="text-emerald-400 hover:text-emerald-300 underline" target="_blank" rel="noopener noreferrer">
+                        <a href={href} className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 underline" target="_blank" rel="noopener noreferrer">
                             {children}
                         </a>
                     ),

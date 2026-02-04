@@ -85,7 +85,7 @@ export default function MyCourseDetailPage({ params }: PageProps) {
 
     if (authLoading || loading) {
         return (
-            <div className="flex h-screen bg-slate-900">
+            <div className="flex h-screen bg-gray-50 dark:bg-slate-900">
                 <Sidebar />
                 <div className="flex-1 flex items-center justify-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500" />
@@ -96,11 +96,11 @@ export default function MyCourseDetailPage({ params }: PageProps) {
 
     if (!courseData) {
         return (
-            <div className="flex h-screen bg-slate-900">
+            <div className="flex h-screen bg-gray-50 dark:bg-slate-900">
                 <Sidebar />
                 <div className="flex-1 flex items-center justify-center">
                     <div className="text-center">
-                        <h2 className="text-xl text-white mb-4">Course not found</h2>
+                        <h2 className="text-xl text-slate-900 dark:text-white mb-4">Course not found</h2>
                         <button onClick={() => router.push('/my-courses')} className="text-emerald-500">
                             Back to My Courses
                         </button>
@@ -113,7 +113,7 @@ export default function MyCourseDetailPage({ params }: PageProps) {
     const { course, enrollment } = courseData;
 
     return (
-        <div className="flex h-screen bg-slate-900">
+        <div className="flex h-screen bg-gray-50 dark:bg-slate-900">
             <Sidebar />
 
             <div className="flex-1 flex flex-col overflow-hidden">
@@ -124,7 +124,7 @@ export default function MyCourseDetailPage({ params }: PageProps) {
                         {/* Back button */}
                         <button
                             onClick={() => router.push('/my-courses')}
-                            className="flex items-center gap-2 text-slate-400 hover:text-white mb-6"
+                            className="flex items-center gap-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white mb-6"
                         >
                             <ArrowLeft size={20} />
                             Back to My Courses
@@ -134,7 +134,7 @@ export default function MyCourseDetailPage({ params }: PageProps) {
                             {/* Video Player / Content Area */}
                             <div className="lg:col-span-2 space-y-4">
                                 {/* Video Player */}
-                                <div className="bg-slate-800 rounded-xl overflow-hidden aspect-video">
+                                <div className="bg-black rounded-xl overflow-hidden aspect-video">
                                     <VideoPlayer
                                         url={selectedModule?.videoUrl || course.videoUrl}
                                         thumbnail={course.thumbnailUrl}
@@ -166,11 +166,11 @@ export default function MyCourseDetailPage({ params }: PageProps) {
 
                                 {/* Module Info */}
                                 {selectedModule && (
-                                    <div className="bg-slate-800 rounded-xl p-6">
+                                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
                                         <div className="flex items-start justify-between mb-4">
                                             <div>
-                                                <h2 className="text-xl font-bold text-white">{selectedModule.title}</h2>
-                                                <div className="flex items-center gap-4 mt-2 text-sm text-slate-400">
+                                                <h2 className="text-xl font-bold text-slate-900 dark:text-white">{selectedModule.title}</h2>
+                                                <div className="flex items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400">
                                                     <span className="flex items-center gap-1">
                                                         <Clock size={14} />
                                                         {selectedModule.durationMinutes} min
@@ -191,27 +191,27 @@ export default function MyCourseDetailPage({ params }: PageProps) {
                                             </button>
                                         </div>
                                         {selectedModule.description && (
-                                            <p className="text-slate-400">{selectedModule.description}</p>
+                                            <p className="text-slate-500 dark:text-slate-400">{selectedModule.description}</p>
                                         )}
                                     </div>
                                 )}
 
                                 {/* Course Description */}
-                                <div className="bg-slate-800 rounded-xl p-6">
-                                    <h3 className="text-lg font-semibold text-white mb-3">About This Course</h3>
-                                    <p className="text-slate-400">{course.description}</p>
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+                                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">About This Course</h3>
+                                    <p className="text-slate-500 dark:text-slate-400">{course.description}</p>
                                 </div>
                             </div>
 
                             {/* Sidebar - Modules */}
                             <div className="space-y-4">
                                 {/* Progress Card */}
-                                <div className="bg-slate-800 rounded-xl p-4">
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-slate-400">Your Progress</span>
-                                        <span className="text-emerald-400 font-bold">{enrollment.progress}%</span>
+                                        <span className="text-slate-500 dark:text-slate-400">Your Progress</span>
+                                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">{enrollment.progress}%</span>
                                     </div>
-                                    <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
+                                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                         <div
                                             className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all"
                                             style={{ width: `${enrollment.progress}%` }}
@@ -226,9 +226,9 @@ export default function MyCourseDetailPage({ params }: PageProps) {
                                 </div>
 
                                 {/* Modules List */}
-                                <div className="bg-slate-800 rounded-xl overflow-hidden">
-                                    <div className="p-4 border-b border-slate-700">
-                                        <h3 className="font-semibold text-white">
+                                <div className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+                                    <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+                                        <h3 className="font-semibold text-slate-900 dark:text-white">
                                             Course Content ({course.modules?.length || 0} modules)
                                         </h3>
                                     </div>
@@ -243,17 +243,17 @@ export default function MyCourseDetailPage({ params }: PageProps) {
                                                 <button
                                                     key={module.id}
                                                     onClick={() => setSelectedModule(module)}
-                                                    className={`w-full text-left p-4 border-b border-slate-700 last:border-0 transition ${isSelected
-                                                        ? 'bg-emerald-500/10'
-                                                        : 'hover:bg-slate-700/50'
+                                                    className={`w-full text-left p-4 border-b border-slate-200 dark:border-slate-700 last:border-0 transition ${isSelected
+                                                        ? 'bg-emerald-50 dark:bg-emerald-500/10'
+                                                        : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'
                                                         }`}
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isCompleted
                                                             ? 'bg-emerald-500 text-black'
                                                             : isSelected
-                                                                ? 'bg-emerald-500/20 text-emerald-400 ring-2 ring-emerald-500'
-                                                                : 'bg-slate-700 text-slate-400'
+                                                                ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 ring-2 ring-emerald-500'
+                                                                : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                                                             }`}>
                                                             {isCompleted ? (
                                                                 <CheckCircle size={16} />
@@ -262,7 +262,7 @@ export default function MyCourseDetailPage({ params }: PageProps) {
                                                             )}
                                                         </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <p className={`text-sm font-medium truncate ${isSelected ? 'text-emerald-400' : 'text-white'
+                                                            <p className={`text-sm font-medium truncate ${isSelected ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-900 dark:text-white'
                                                                 }`}>
                                                                 {module.title}
                                                             </p>
@@ -281,14 +281,14 @@ export default function MyCourseDetailPage({ params }: PageProps) {
 
                                 {/* Instructor */}
                                 {course.instructor && (
-                                    <div className="bg-slate-800 rounded-xl p-4">
-                                        <h3 className="font-semibold text-white mb-3">Instructor</h3>
+                                    <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                                        <h3 className="font-semibold text-slate-900 dark:text-white mb-3">Instructor</h3>
                                         <div className="flex items-center gap-3">
                                             {course.instructor.avatarUrl ? (
                                                 <img
                                                     src={course.instructor.avatarUrl}
                                                     alt={course.instructor.name}
-                                                    className="w-12 h-12 rounded-full object-cover border-2 border-slate-600"
+                                                    className="w-12 h-12 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600"
                                                 />
                                             ) : (
                                                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-lg">
@@ -296,9 +296,9 @@ export default function MyCourseDetailPage({ params }: PageProps) {
                                                 </div>
                                             )}
                                             <div>
-                                                <p className="font-medium text-white">{course.instructor.name}</p>
+                                                <p className="font-medium text-slate-900 dark:text-white">{course.instructor.name}</p>
                                                 {course.instructor.title && (
-                                                    <p className="text-sm text-slate-400">{course.instructor.title}</p>
+                                                    <p className="text-sm text-slate-500 dark:text-slate-400">{course.instructor.title}</p>
                                                 )}
                                             </div>
                                         </div>

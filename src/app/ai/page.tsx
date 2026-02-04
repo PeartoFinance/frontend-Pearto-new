@@ -78,11 +78,11 @@ function ToolCategory({
         <div className="border-b border-slate-700/50 last:border-0">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-800/50 transition-colors"
+                className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
             >
                 <div className="flex items-center gap-3">
                     <span className={category.color}>{category.icon}</span>
-                    <span className="text-sm text-white font-medium">{category.title}</span>
+                    <span className="text-sm text-slate-700 dark:text-white font-medium">{category.title}</span>
                 </div>
                 <ChevronRight className={`w-4 h-4 text-slate-500 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
             </button>
@@ -92,7 +92,7 @@ function ToolCategory({
                         <button
                             key={idx}
                             onClick={() => onSelect(item.prompt)}
-                            className="w-full text-left px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
+                            className="w-full text-left px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-lg transition-colors"
                         >
                             {item.text}
                         </button>
@@ -113,7 +113,7 @@ export default function AIPage() {
     };
 
     return (
-        <div className="flex h-screen bg-slate-900">
+        <div className="flex h-screen bg-gray-50 dark:bg-slate-900">
             <Sidebar />
 
             <div className="flex-1 flex flex-col overflow-hidden">
@@ -129,13 +129,13 @@ export default function AIPage() {
                                     <Sparkles className="w-5 h-5 text-white" />
                                 </div>
                                 <div>
-                                    <h1 className="text-xl font-bold text-white">Pearto AI</h1>
-                                    <p className="text-xs text-slate-400">Your Financial AI Assistant</p>
+                                    <h1 className="text-xl font-bold text-slate-900 dark:text-white">Pearto AI</h1>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">Your Financial AI Assistant</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setShowPanel(!showPanel)}
-                                className="lg:hidden p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition"
+                                className="lg:hidden p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
                             >
                                 <Lightbulb className="w-5 h-5" />
                             </button>
@@ -153,11 +153,11 @@ export default function AIPage() {
                     </div>
 
                     {/* Right Panel - Desktop */}
-                    <aside className="hidden lg:flex flex-col w-80 border-l border-slate-700/50 bg-slate-800/30">
-                        <div className="flex-shrink-0 px-4 py-3 border-b border-slate-700/50">
+                    <aside className="hidden lg:flex flex-col w-80 border-l border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/30">
+                        <div className="flex-shrink-0 px-4 py-3 border-b border-slate-200 dark:border-slate-700/50">
                             <div className="flex items-center gap-2">
                                 <Lightbulb className="w-4 h-4 text-amber-400" />
-                                <span className="font-semibold text-white text-sm">Quick Suggestions</span>
+                                <span className="font-semibold text-slate-900 dark:text-white text-sm">Quick Suggestions</span>
                             </div>
                             <p className="text-xs text-slate-500 mt-1">Click a suggestion to try it</p>
                         </div>
@@ -168,7 +168,7 @@ export default function AIPage() {
                         </div>
 
                         {/* AI Insights Panel - Similar to Screener Insights in Stocks */}
-                        <div className="flex-shrink-0 p-3 border-t border-slate-700/50">
+                        <div className="flex-shrink-0 p-3 border-t border-slate-200 dark:border-slate-700/50">
                             <AIAnalysisPanel
                                 title="AI Quick Insights"
                                 pageType="ai-assistant"
@@ -186,12 +186,12 @@ export default function AIPage() {
                                 className="mb-3"
                             />
 
-                            <div className="bg-emerald-900/30 rounded-xl p-3 border border-emerald-700/30">
+                            <div className="bg-emerald-50 dark:bg-emerald-900/30 rounded-xl p-3 border border-emerald-100 dark:border-emerald-700/30">
                                 <div className="flex items-center gap-2 mb-2">
-                                    <Sparkles className="w-4 h-4 text-emerald-400" />
-                                    <span className="text-xs font-semibold text-emerald-300 uppercase">Pro Tip</span>
+                                    <Sparkles className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-300 uppercase">Pro Tip</span>
                                 </div>
-                                <p className="text-xs text-slate-400 leading-relaxed">
+                                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                                     Try natural queries like "AAPL stock", "Calculate SIP for $1000/month", or "weather in Tokyo"
                                 </p>
                             </div>
@@ -202,10 +202,10 @@ export default function AIPage() {
                     {showPanel && (
                         <div className="lg:hidden fixed inset-0 z-50 flex">
                             <div className="flex-1 bg-black/50" onClick={() => setShowPanel(false)} />
-                            <aside className="w-80 h-full bg-slate-900 flex flex-col">
-                                <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50">
-                                    <span className="font-semibold text-white text-sm">Suggestions</span>
-                                    <button onClick={() => setShowPanel(false)} className="p-1 hover:bg-slate-700/50 rounded">
+                            <aside className="w-80 h-full bg-white dark:bg-slate-900 flex flex-col">
+                                <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700/50">
+                                    <span className="font-semibold text-slate-900 dark:text-white text-sm">Suggestions</span>
+                                    <button onClick={() => setShowPanel(false)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded">
                                         <X className="w-4 h-4 text-slate-400" />
                                     </button>
                                 </div>

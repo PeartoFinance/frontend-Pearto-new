@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import i18n from '@/i18n';
 import { CountryProvider } from '@/context/CountryContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { SubscriptionProvider } from '@/context/SubscriptionContext';
+import { FeatureFlagsProvider } from '@/context/FeatureFlagsContext';
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
 import { MobileAppPrompt } from '@/components/common/MobileAppPrompt';
 
@@ -24,19 +26,25 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     return (
         <I18nextProvider i18n={i18n}>
             <QueryClientProvider client={queryClient}>
-                <AuthProvider>
-                    <CountryProvider>
-                        <CurrencyProvider>
-                            {children}
-                            <MobileAppPrompt
-                                appName="Pearto Finance"
-                                iosAppUrl="https://apps.apple.com/app/pearto-finance"
-                                androidAppUrl="https://play.google.com/store/apps/details?id=com.pearto.finance"
-                            />
-                        </CurrencyProvider>
-                    </CountryProvider>
-                </AuthProvider>
+                <FeatureFlagsProvider>
+                    <AuthProvider>
+                        <SubscriptionProvider>
+                            <CountryProvider>
+                                <CurrencyProvider>
+                                    {children}
+                                    <MobileAppPrompt
+                                        appName="Pearto Finance"
+                                        iosAppUrl="https://apps.apple.com/app/pearto-finance"
+                                        androidAppUrl="https://play.google.com/store/apps/details?id=com.pearto.finance"
+                                    />
+                                </CurrencyProvider>
+                            </CountryProvider>
+                        </SubscriptionProvider>
+                    </AuthProvider>
+                </FeatureFlagsProvider>
             </QueryClientProvider>
         </I18nextProvider>
     );
 }
+
+

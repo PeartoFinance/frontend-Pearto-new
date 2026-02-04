@@ -34,8 +34,8 @@ export default function FeaturedStory({ initialArticle }: FeaturedStoryProps) {
 
     if (loading) {
         return (
-            <div className="relative rounded-3xl aspect-[21/9] min-h-[280px] bg-slate-800 flex items-center justify-center">
-                <Loader2 className="animate-spin text-emerald-500" size={32} />
+            <div className="relative rounded-3xl aspect-[21/9] min-h-[280px] bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+                <Loader2 className="animate-spin text-emerald-600 dark:text-emerald-500" size={32} />
             </div>
         );
     }
@@ -54,34 +54,34 @@ export default function FeaturedStory({ initialArticle }: FeaturedStoryProps) {
             />
 
             {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/70 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-50 via-gray-50/80 to-transparent dark:from-slate-900 dark:via-slate-900/80 dark:to-transparent" />
 
             {/* Content */}
             <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
                 {/* Category Badge */}
-                <span className="inline-block px-3 py-1 mb-4 text-xs font-bold tracking-wide text-white bg-emerald-500 rounded-full">
+                <span className="inline-block px-3 py-1 mb-4 text-xs font-bold tracking-wide text-white bg-emerald-500 rounded-full shadow-sm">
                     {article.category?.toUpperCase() || 'NEWS'}
                 </span>
 
                 {/* Title */}
-                <h2 className="text-2xl lg:text-3xl font-bold text-white mb-3 leading-tight group-hover:text-emerald-300 transition-colors">
+                <h2 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-3 leading-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                     {article.title}
                 </h2>
 
                 {/* Description */}
-                <p className="text-slate-300 text-sm lg:text-base mb-4 line-clamp-2 max-w-3xl">
+                <p className="text-slate-600 dark:text-slate-300 text-sm lg:text-base mb-4 line-clamp-2 max-w-3xl font-medium">
                     {article.summary}
                 </p>
 
                 {/* Footer */}
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-slate-400 text-sm">
+                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm font-medium">
                         <Clock size={14} />
                         <span>{getTimeAgo(article.publishedAt)}</span>
                         {article.author && <span>• {article.author}</span>}
                     </div>
 
-                    <span className="flex items-center gap-1 text-emerald-400 font-medium text-sm group-hover:gap-2 transition-all">
+                    <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold text-sm group-hover:gap-2 transition-all">
                         Read Story <ArrowRight size={16} />
                     </span>
                 </div>

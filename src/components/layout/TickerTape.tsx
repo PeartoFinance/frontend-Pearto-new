@@ -58,8 +58,8 @@ export default function TickerTape() {
     // Don't render if no data and error
     if (error && tickerData.length === 0) {
         return (
-            <div className="bg-slate-900 text-white py-2 text-xs font-medium border-b border-slate-800">
-                <div className="flex items-center justify-center gap-2 text-slate-400">
+            <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-xs font-medium border-b border-slate-200 dark:border-slate-800">
+                <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400">
                     <span>Market data unavailable</span>
                     <span className="text-xs">• Import data from admin panel</span>
                 </div>
@@ -69,22 +69,22 @@ export default function TickerTape() {
 
     if (loading && tickerData.length === 0) {
         return (
-            <div className="bg-slate-900 text-white py-2 text-xs font-medium border-b border-slate-800">
+            <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-xs font-medium border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center justify-center gap-2">
                     <Loader2 className="animate-spin" size={12} />
-                    <span className="text-slate-400">Loading market data...</span>
+                    <span className="text-slate-500 dark:text-slate-400">Loading market data...</span>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-slate-900 text-white py-2 text-xs font-medium overflow-hidden border-b border-slate-800">
+        <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-xs font-medium overflow-hidden border-b border-slate-200 dark:border-slate-800">
             <div className="flex items-center gap-8 animate-marquee hover:pause-animation">
                 {/* First set of tickers */}
                 {tickerData.map((ticker, index) => (
                     <div key={index} className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-slate-400">{ticker.symbol}</span>
+                        <span className="text-slate-500 dark:text-slate-400">{ticker.symbol}</span>
                         <span className="font-semibold">
                             {ticker.isCurrency ? <PriceDisplay amount={ticker.value as number} /> : ticker.value}
                         </span>
@@ -100,7 +100,7 @@ export default function TickerTape() {
                 {/* Duplicate for seamless loop */}
                 {tickerData.map((ticker, index) => (
                     <div key={`dup-${index}`} className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-slate-400">{ticker.symbol}</span>
+                        <span className="text-slate-500 dark:text-slate-400">{ticker.symbol}</span>
                         <span className="font-semibold">
                             {ticker.isCurrency ? <PriceDisplay amount={ticker.value as number} /> : ticker.value}
                         </span>

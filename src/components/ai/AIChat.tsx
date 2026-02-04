@@ -8,6 +8,8 @@ import {
 import { post } from '@/services/api';
 import { ToolResultCard } from './ToolResultCard';
 import { MarkdownRenderer } from './MarkdownRenderer';
+import { useSubscription } from '@/context/SubscriptionContext';
+import { UsageLimitBanner, UpgradeModal } from '@/components/subscription/FeatureGating';
 
 interface Message {
     id: string;
@@ -169,8 +171,10 @@ export function AIChat({
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
+    const { trackUsage, isPro, usage } = useSubscription();
 
     const scrollToBottom = useCallback(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -194,6 +198,15 @@ export function AIChat({
 
     const sendMessage = async (messageText: string) => {
         if (!messageText.trim() || isLoading) return;
+
+        // Check usage limit before sending (Free users only)
+        if (!isPro) {
+            const result = await trackUsage('ai_queries_limit');
+            if (!result.allowed) {
+                setShowUpgradeModal(true);
+                return;
+            }
+        }
 
         const userMessage: Message = {
             id: `user-${Date.now()}`,
@@ -329,10 +342,28 @@ export function AIChat({
                             <SuggestionCategory key={idx} category={cat} onSelect={sendMessage} />
                         ))}
                     </div>
+                    {/* Usage limit banner in sidebar for free users */}
+                    {!isPro && (
+                        <div className="p-2 border-t border-slate-700/50">
+                            <UsageLimitBanner
+                                featureKey="ai_queries_limit"
+                                featureLabel="AI Queries"
+                                compact
+                            />
+                        </div>
+                    )}
                 </aside>
             )}
+
+            {/* Upgrade Modal */}
+            <UpgradeModal
+                isOpen={showUpgradeModal}
+                onClose={() => setShowUpgradeModal(false)}
+                featureKey="ai_queries_limit"
+            />
         </div>
     );
 }
 
 export default AIChat;
+

@@ -10,6 +10,7 @@ import { MultiChart } from '@/components/charts';
 import StockCompareModal from '@/components/stocks/StockCompareModal';
 import { AIWidget } from '@/components/ai';
 import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
+import { AIColumnWrapper } from '@/components/ai/AIColumnWrapper';
 import PriceDisplay from '@/components/common/PriceDisplay';
 import {
     StockTabs,
@@ -455,7 +456,7 @@ export default function StockDetailPage() {
                                     </div>
 
                                     {/* Right Column: AI Widget (Desktop only) */}
-                                    <div className="hidden xl:block w-[320px] flex-shrink-0">
+                                    <AIColumnWrapper>
                                         <div className="sticky top-[130px]">
                                             <AIAnalysisPanel
                                                 title={`${symbol} Analysis`}
@@ -477,7 +478,7 @@ export default function StockDetailPage() {
                                                 className="h-fit"
                                             />
                                         </div>
-                                    </div>
+                                    </AIColumnWrapper>
                                 </div>
                             </>
                         )}

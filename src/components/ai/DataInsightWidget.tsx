@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, TrendingUp, Lightbulb, ChevronRight, Loader2, Maximize2 } from 'lucide-react';
+import { Sparkles, TrendingUp, Lightbulb, ChevronRight, Loader2, Maximize2, Lock } from 'lucide-react';
 import { post } from '@/services/api';
 import { AISidepanel } from './AISidepanel';
+import { useAIEnabled } from '@/context/FeatureFlagsContext';
+import { useSubscription } from '@/context/SubscriptionContext';
+import { UpgradeModal } from '@/components/subscription/FeatureGating';
 
 interface DataInsightWidgetProps {
     /** Data to analyze */
@@ -28,20 +31,39 @@ export function DataInsightWidget({
     position = 'inline',
     className = ''
 }: DataInsightWidgetProps) {
+    // Feature Flags & Subscription
+    const { isAIEnabled, isLoading: flagsLoading } = useAIEnabled();
+    const { isPro, isLoading: subLoading, trackUsage } = useSubscription();
+
     const [insights, setInsights] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [hasAnalyzed, setHasAnalyzed] = useState(false);
 
+    // Initial Auto-Analyze Only for Pro Users
     useEffect(() => {
-        generateInsights();
-    }, [data, dataType]);
+        if (isPro && !hasAnalyzed && data) {
+            generateInsights();
+        }
+    }, [data, dataType, isPro, hasAnalyzed]);
+
+    const handleManualGenerate = async () => {
+        const result = await trackUsage('ai_queries_limit');
+        if (result.allowed) {
+            generateInsights();
+        } else {
+            setShowUpgradeModal(true);
+        }
+    };
 
     const generateInsights = async () => {
         if (!data) return;
 
         setLoading(true);
         setError(null);
+        setHasAnalyzed(true);
 
         try {
             const response = await post<{ success: boolean; insights?: string[]; analysis?: string }>('/ai/analyze', {
@@ -63,15 +85,49 @@ export function DataInsightWidget({
         }
     };
 
-    // Don't render if no insights
-    if (insights.length === 0 && !loading) {
+    // If disabled by admin, hide completely
+    if (!flagsLoading && !isAIEnabled) {
         return null;
     }
 
-    // Loading state
+    // Positions
+    const positionStyles = {
+        'top-right': 'absolute top-4 right-4 max-w-sm z-10',
+        'bottom': 'mt-4',
+        'inline': 'my-4'
+    };
+
+    // Render Logic for Non-Pro / Unanalyzed state
+    if (!hasAnalyzed && !loading && insights.length === 0) {
+        // For Pro users, it auto-runs so this state is transient.
+        // For non-Pro, we show the "Get AI Insights" CTA.
+        if (isPro || subLoading) return null; // Don't flash CTA for Pro users while loading
+
+        return (
+            <>
+                <div className={`bg-gradient-to-br from-emerald-900/10 to-teal-900/10 border border-emerald-700/20 rounded-xl p-3 flex items-center justify-between gap-4 ${positionStyles[position]} ${className}`}>
+                    <div className="flex items-center gap-2">
+                        <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                            <Sparkles className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-medium text-slate-700 dark:text-emerald-100">Get AI Insights for this view</span>
+                    </div>
+                    <button
+                        onClick={handleManualGenerate}
+                        className="text-xs px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow-sm transition flex items-center gap-1.5 whitespace-nowrap"
+                    >
+                        Analyze <span className="opacity-75 text-[10px]">(1 Credit)</span>
+                    </button>
+                    <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} featureKey="ai_queries_limit" />
+                </div>
+            </>
+        );
+    }
+
+    // Loading State
     if (loading && insights.length === 0) {
         return (
-            <div className={`bg-gradient-to-br from-emerald-900/20 to-teal-900/20 border border-emerald-700/30 rounded-xl p-4 ${className}`}>
+            <div className={`bg-gradient-to-br from-emerald-900/20 to-teal-900/20 border border-emerald-700/30 rounded-xl p-4 ${positionStyles[position]} ${className}`}>
                 <div className="flex items-center gap-2 text-emerald-400">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span className="text-sm">Analyzing data with AI...</span>
@@ -80,12 +136,12 @@ export function DataInsightWidget({
         );
     }
 
-    const positionStyles = {
-        'top-right': 'absolute top-4 right-4 max-w-sm z-10',
-        'bottom': 'mt-4',
-        'inline': 'my-4'
-    };
+    // Don't render empty results if not loading
+    if (insights.length === 0 && hasAnalyzed) {
+        return null;
+    }
 
+    // Results State
     return (
         <>
             <div className={`bg-gradient-to-br from-emerald-900/20 via-teal-900/20 to-cyan-900/20 border border-emerald-700/30 rounded-xl shadow-sm hover:shadow-md transition-all ${positionStyles[position]} ${className}`}>
@@ -143,6 +199,8 @@ export function DataInsightWidget({
                 pageType={dataType}
                 pageData={data}
             />
+
+            <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} featureKey="ai_queries_limit" />
         </>
     );
 }

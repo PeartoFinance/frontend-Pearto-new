@@ -38,7 +38,7 @@ export default function MyCoursesPage() {
 
     if (authLoading || loading) {
         return (
-            <div className="flex h-screen bg-slate-900">
+            <div className="flex h-screen bg-gray-50 dark:bg-slate-900">
                 <Sidebar />
                 <div className="flex-1 flex items-center justify-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500" />
@@ -48,7 +48,7 @@ export default function MyCoursesPage() {
     }
 
     return (
-        <div className="flex h-screen bg-slate-900">
+        <div className="flex h-screen bg-gray-50 dark:bg-slate-900">
             <Sidebar />
 
             <div className="flex-1 flex flex-col overflow-hidden">
@@ -59,11 +59,11 @@ export default function MyCoursesPage() {
                         {/* Header */}
                         <div className="flex items-center justify-between mb-8">
                             <div>
-                                <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+                                <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                                     <BookOpen className="text-emerald-500" />
                                     My Courses
                                 </h1>
-                                <p className="text-slate-400 mt-2">Continue your learning journey</p>
+                                <p className="text-slate-500 dark:text-slate-400 mt-2">Continue your learning journey</p>
                             </div>
                             <button
                                 onClick={() => router.push('/learn')}
@@ -101,10 +101,10 @@ export default function MyCoursesPage() {
 
                         {/* Course Grid */}
                         {courses.length === 0 ? (
-                            <div className="text-center py-20 bg-slate-800 rounded-2xl border border-slate-700">
-                                <BookOpen className="w-16 h-16 text-slate-500 mx-auto mb-4" />
-                                <h3 className="text-xl font-semibold text-white mb-2">No courses enrolled yet</h3>
-                                <p className="text-slate-400 mb-6">Start learning today!</p>
+                            <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+                                <BookOpen className="w-16 h-16 text-slate-400 dark:text-slate-500 mx-auto mb-4" />
+                                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">No courses enrolled yet</h3>
+                                <p className="text-slate-500 dark:text-slate-400 mb-6">Start learning today!</p>
                                 <button
                                     onClick={() => router.push('/learn')}
                                     className="px-6 py-3 bg-emerald-500 text-black font-medium rounded-lg"
@@ -128,12 +128,12 @@ export default function MyCoursesPage() {
 
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number | string }) {
     return (
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
             <div className="flex items-center gap-3">
-                <div className="p-2 bg-slate-700 rounded-lg">{icon}</div>
+                <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">{icon}</div>
                 <div>
-                    <p className="text-2xl font-bold text-white">{value}</p>
-                    <p className="text-sm text-slate-400">{label}</p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{value}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
                 </div>
             </div>
         </div>
@@ -151,9 +151,9 @@ function MyCourseCard({ course }: { course: EnrolledCourse }) {
     };
 
     return (
-        <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden hover:border-slate-600 transition group">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden hover:border-slate-300 dark:hover:border-slate-600 transition group">
             {/* Thumbnail */}
-            <div className="relative aspect-video bg-slate-700">
+            <div className="relative aspect-video bg-slate-200 dark:bg-slate-700">
                 {course.thumbnailUrl ? (
                     <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
                 ) : (
@@ -162,7 +162,7 @@ function MyCourseCard({ course }: { course: EnrolledCourse }) {
                     </div>
                 )}
                 {/* Progress overlay */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-600">
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-300 dark:bg-slate-600">
                     <div
                         className="h-full bg-emerald-500 transition-all"
                         style={{ width: `${course.progress}%` }}
@@ -173,23 +173,23 @@ function MyCourseCard({ course }: { course: EnrolledCourse }) {
             {/* Content */}
             <div className="p-4">
                 <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-semibold text-white line-clamp-2">{course.title}</h3>
+                    <h3 className="font-semibold text-slate-900 dark:text-white line-clamp-2">{course.title}</h3>
                     <span className={`px-2 py-0.5 text-xs rounded border ${statusColors[course.status]}`}>
                         {course.status.replace('_', ' ')}
                     </span>
                 </div>
 
-                <p className="text-sm text-slate-400 mb-3">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
                     by {course.instructor?.name || 'Unknown'}
                 </p>
 
                 {/* Progress bar */}
                 <div className="mb-4">
                     <div className="flex justify-between text-sm mb-1">
-                        <span className="text-slate-400">Progress</span>
-                        <span className="text-emerald-400 font-medium">{course.progress}%</span>
+                        <span className="text-slate-500 dark:text-slate-400">Progress</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">{course.progress}%</span>
                     </div>
-                    <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                    <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                         <div
                             className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all"
                             style={{ width: `${course.progress}%` }}

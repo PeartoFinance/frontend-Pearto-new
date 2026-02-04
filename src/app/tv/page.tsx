@@ -8,18 +8,19 @@ import Sidebar from '@/components/layout/Sidebar';
 const TVContent = dynamic(() => import('@/components/tv/TVContent'), {
     ssr: false,
     loading: () => (
-        <div className="flex-1 bg-slate-900 flex items-center justify-center">
+        <div className="flex-1 bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-emerald-500" />
-        </div>
+        </div >
     )
+
 });
 
 export default function TVPage() {
     return (
-        <div className="flex min-h-screen bg-slate-900">
+        <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
             <Sidebar />
             <Suspense fallback={
-                <div className="flex-1 bg-slate-900 flex items-center justify-center">
+                <div className="flex-1 bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-emerald-500" />
                 </div>
             }>

@@ -89,7 +89,7 @@ export default function EducationalHubCards() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {courses.slice(0, 2).map((course, index) => (
-                    <div key={course.id} className="card p-6 relative overflow-hidden hover:border-emerald-500 transition-all group">
+                    <div key={course.id} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm p-6 relative overflow-hidden hover:border-emerald-500 transition-all group">
                         <div className="absolute top-0 right-0 p-4 opacity-10">
                             {index === 0 ? (
                                 <BookOpen className="w-20 h-20 text-emerald-500" />

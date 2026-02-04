@@ -8,6 +8,9 @@ import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import { AIWidget } from '@/components/ai';
 import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
+import { AIColumnWrapper } from '@/components/ai/AIColumnWrapper';
+import { useSubscription } from '@/context/SubscriptionContext';
+import { UpgradeModal } from '@/components/subscription/FeatureGating';
 import {
     getStockProfile,
     getStockHistory,
@@ -116,9 +119,19 @@ function StockCompareContent() {
         }
     };
 
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const { trackUsage } = useSubscription();
+
     // Add stock
     const addStock = async (stock: MarketStock) => {
         if (stocks.length >= 5) return;
+
+        // Check usage limit
+        const { allowed } = await trackUsage('comparison_limit');
+        if (!allowed) {
+            setShowUpgradeModal(true);
+            return;
+        }
 
         setLoading(true);
         try {
@@ -278,7 +291,7 @@ function StockCompareContent() {
                                     </div>
 
                                     {/* Right Column: AI Widget (Desktop only) */}
-                                    <div className="hidden xl:block w-[320px] flex-shrink-0">
+                                    <AIColumnWrapper>
                                         <div className="sticky top-[130px]">
                                             <AIAnalysisPanel
                                                 title="Comparison Analysis"
@@ -304,7 +317,7 @@ function StockCompareContent() {
                                                 className="h-fit"
                                             />
                                         </div>
-                                    </div>
+                                    </AIColumnWrapper>
                                 </div>
                             </>
                         )}
@@ -321,6 +334,15 @@ function StockCompareContent() {
                     quickPrompts={["Compare these stocks"]}
                 />
             </div>
+
+            {showUpgradeModal && (
+                <UpgradeModal
+                    isOpen={showUpgradeModal}
+                    onClose={() => setShowUpgradeModal(false)}
+                    message="You have reached your daily comparison limit. Upgrade to Pro for unlimited stock comparisons."
+                    featureKey="comparison_limit"
+                />
+            )}
         </div>
     );
 }

@@ -320,11 +320,11 @@ export default function LiveMarketsPage() {
     );
 
     return (
-        <div className="flex min-h-screen bg-slate-950">
+        <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
             <Sidebar />
 
             <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
-                <div className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-slate-950">
+                <div className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md">
                     <TickerTape />
                     <Header />
                 </div>
@@ -342,17 +342,17 @@ export default function LiveMarketsPage() {
                                 ].map((item, idx) => {
                                     const isPositive = (item.changePercent || 0) >= 0;
                                     return (
-                                        <div key={`${item.symbol}-${idx}`} className="bg-slate-900 border border-slate-800 rounded-lg p-3 hover:border-slate-700 transition">
+                                        <div key={`${item.symbol}-${idx}`} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 hover:border-slate-300 dark:hover:border-slate-700 transition shadow-sm dark:shadow-none">
                                             <div className="flex justify-between items-start mb-1">
-                                                <p className="text-xs text-slate-400 truncate font-medium">{item.name || item.symbol}</p>
-                                                {item.assetType === 'crypto' && <Coins size={10} className="text-slate-500" />}
-                                                {item.assetType === 'commodity' && <DollarSign size={10} className="text-slate-500" />}
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate font-medium">{item.name || item.symbol}</p>
+                                                {item.assetType === 'crypto' && <Coins size={10} className="text-slate-400 dark:text-slate-500" />}
+                                                {item.assetType === 'commodity' && <DollarSign size={10} className="text-slate-400 dark:text-slate-500" />}
                                             </div>
-                                            <p className={`text-lg font-bold ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
+                                            <p className={`text-lg font-bold ${isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
                                                 {formatPrice(item.price || 0)}
                                             </p>
                                             <div className="flex items-center gap-2 text-xs">
-                                                <span className={isPositive ? 'text-emerald-400' : 'text-red-400'}>
+                                                <span className={isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}>
                                                     {isPositive ? '↗' : '↘'} {formatNumber(item.changePercent)}%
                                                 </span>
                                             </div>
@@ -367,7 +367,7 @@ export default function LiveMarketsPage() {
                             {/* Left Section - Live Table */}
                             <div className="lg:col-span-3 space-y-4">
                                 {/* Header with Search and Stats */}
-                                <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
+                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-sm dark:shadow-none">
                                     {/* Header Title Row */}
                                     <div className="flex items-center justify-between mb-6">
                                         <div>
@@ -376,32 +376,32 @@ export default function LiveMarketsPage() {
                                                     <Activity size={20} className="text-white" />
                                                 </div>
                                                 <div>
-                                                    <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+                                                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                                         Live Markets
                                                     </h1>
-                                                    <p className="text-sm text-slate-400">Real-time prices across all markets</p>
+                                                    <p className="text-sm text-slate-500 dark:text-slate-400">Real-time prices across all markets</p>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div className="flex items-center gap-4">
-                                            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-bold border border-emerald-500/20">
+                                            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full text-xs font-bold border border-emerald-500/20">
                                                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                                 LIVE
                                             </span>
 
-                                            <div className="flex items-center gap-2 bg-slate-800 rounded-lg p-1 border border-slate-700">
+                                            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg p-1 border border-slate-200 dark:border-slate-700">
                                                 <RefreshCw size={14} className={`text-slate-400 ml-2 ${loading ? 'animate-spin' : ''}`} />
                                                 <select
                                                     value={refreshRate}
                                                     onChange={(e) => setRefreshRate(Number(e.target.value))}
-                                                    className="bg-transparent border-none text-xs font-medium text-slate-300 focus:ring-0 py-1 pl-1 pr-6 cursor-pointer"
+                                                    className="bg-transparent border-none text-xs font-medium text-slate-700 dark:text-slate-300 focus:ring-0 py-1 pl-1 pr-6 cursor-pointer"
                                                 >
                                                     <option value={5}>5s</option>
                                                     <option value={10}>10s</option>
                                                     <option value={30}>30s</option>
                                                 </select>
-                                                <div className="h-4 w-px bg-slate-700 mx-1"></div>
+                                                <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-1"></div>
                                                 <span className="text-xs text-slate-500 pr-3">
                                                     {lastUpdate ? lastUpdate.toLocaleTimeString() : '--:--:--'}
                                                 </span>
@@ -409,7 +409,7 @@ export default function LiveMarketsPage() {
 
                                             <Link
                                                 href="/markets"
-                                                className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-lg border border-slate-700 transition"
+                                                className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 transition"
                                             >
                                                 <BarChart2 size={16} />
                                                 Markets
@@ -426,16 +426,16 @@ export default function LiveMarketsPage() {
                                                 placeholder="Search stocks, crypto, indices, commodities..."
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                                className="w-full pl-11 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-sm"
+                                                className="w-full pl-11 pr-4 py-3 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-sm"
                                             />
                                         </div>
 
-                                        <div className="flex bg-slate-800 p-1 rounded-xl border border-slate-700 overflow-x-auto">
+                                        <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
                                             <button
                                                 onClick={() => { setActiveTab('All'); setSelectedSector('All'); }}
                                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === 'All'
-                                                    ? 'bg-slate-700 text-white shadow-sm'
-                                                    : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                                                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50'
                                                     }`}
                                             >
                                                 <Activity size={14} />
@@ -444,8 +444,8 @@ export default function LiveMarketsPage() {
                                             <button
                                                 onClick={() => { setActiveTab('Stocks'); setSelectedSector('All'); }}
                                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === 'Stocks'
-                                                    ? 'bg-emerald-500/10 text-emerald-500 shadow-sm'
-                                                    : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 shadow-sm'
+                                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50'
                                                     }`}
                                             >
                                                 <TrendingUp size={14} />
@@ -454,8 +454,8 @@ export default function LiveMarketsPage() {
                                             <button
                                                 onClick={() => { setActiveTab('Crypto'); setSelectedSector('All'); }}
                                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === 'Crypto'
-                                                    ? 'bg-purple-500/10 text-purple-500 shadow-sm'
-                                                    : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                                                    ? 'bg-purple-500/10 text-purple-600 dark:text-purple-500 shadow-sm'
+                                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50'
                                                     }`}
                                             >
                                                 <Coins size={14} />
@@ -464,8 +464,8 @@ export default function LiveMarketsPage() {
                                             <button
                                                 onClick={() => { setActiveTab('Indices'); setSelectedSector('All'); }}
                                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === 'Indices'
-                                                    ? 'bg-blue-500/10 text-blue-500 shadow-sm'
-                                                    : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                                                    ? 'bg-blue-500/10 text-blue-600 dark:text-blue-500 shadow-sm'
+                                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50'
                                                     }`}
                                             >
                                                 <BarChart2 size={14} />
@@ -474,8 +474,8 @@ export default function LiveMarketsPage() {
                                             <button
                                                 onClick={() => { setActiveTab('Commodities'); setSelectedSector('All'); }}
                                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === 'Commodities'
-                                                    ? 'bg-amber-500/10 text-amber-500 shadow-sm'
-                                                    : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                                                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-500 shadow-sm'
+                                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50'
                                                     }`}
                                             >
                                                 <DollarSign size={14} />
@@ -514,9 +514,9 @@ export default function LiveMarketsPage() {
                                         </div>
                                     </div>
                                 ) : (activeTab !== 'Indices' && activeTab !== 'Commodities') && (
-                                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 mb-4">
+                                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6 mb-4 shadow-sm dark:shadow-none">
                                         <div className="flex items-center justify-between mb-4">
-                                            <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                                            <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                                                 <PieChart size={18} className="text-emerald-500" />
                                                 Market Composition
                                             </h3>
@@ -535,21 +535,21 @@ export default function LiveMarketsPage() {
                                                 valueKey="volume"
                                                 percentKey="volumePercent"
                                             />
-                                            <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-col justify-center gap-4">
-                                                <h4 className="text-sm font-semibold text-slate-300 text-center">Market Summary</h4>
+                                            <div className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex flex-col justify-center gap-4">
+                                                <h4 className="text-sm font-semibold text-slate-600 dark:text-slate-300 text-center">Market Summary</h4>
                                                 <div className="space-y-3">
                                                     <div className="flex justify-between items-center text-sm">
-                                                        <span className="text-slate-400">Total Turnover</span>
-                                                        <span className="font-bold text-white">{formatLargeNumber(sectorAnalysis.reduce((acc, s) => acc + s.turnover, 0))}</span>
+                                                        <span className="text-slate-500 dark:text-slate-400">Total Turnover</span>
+                                                        <span className="font-bold text-slate-900 dark:text-white">{formatLargeNumber(sectorAnalysis.reduce((acc, s) => acc + s.turnover, 0))}</span>
                                                     </div>
                                                     <div className="flex justify-between items-center text-sm">
-                                                        <span className="text-slate-400">Total Volume</span>
-                                                        <span className="font-bold text-white">{formatLargeNumber(sectorAnalysis.reduce((acc, s) => acc + s.volume, 0))}</span>
+                                                        <span className="text-slate-500 dark:text-slate-400">Total Volume</span>
+                                                        <span className="font-bold text-slate-900 dark:text-white">{formatLargeNumber(sectorAnalysis.reduce((acc, s) => acc + s.volume, 0))}</span>
                                                     </div>
-                                                    <div className="w-full h-px bg-slate-700 my-2"></div>
+                                                    <div className="w-full h-px bg-slate-300 dark:bg-slate-700 my-2"></div>
                                                     <div className="flex justify-between items-center text-sm">
-                                                        <span className="text-slate-400">Active Sectors</span>
-                                                        <span className="font-bold text-white">{sectorAnalysis.length}</span>
+                                                        <span className="text-slate-500 dark:text-slate-400">Active Sectors</span>
+                                                        <span className="font-bold text-slate-900 dark:text-white">{sectorAnalysis.length}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -561,7 +561,7 @@ export default function LiveMarketsPage() {
 
                                 {/* Market Stats Row */}
                                 {loading ? (
-                                    <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-slate-800">
+                                    <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
                                         {[1, 2, 3, 4, 5].map((i) => (
                                             <div key={i} className="flex items-center gap-2">
                                                 <Skeleton className="h-4 w-16" />
@@ -570,9 +570,9 @@ export default function LiveMarketsPage() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-slate-800">
+                                    <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm text-slate-400">Advanced</span>
+                                            <span className="text-sm text-slate-500 dark:text-slate-400">Advanced</span>
                                             <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded text-sm font-bold">
                                                 {marketStats.advancers}
                                             </span>
@@ -606,15 +606,15 @@ export default function LiveMarketsPage() {
 
 
                                 {/* Live Data Table */}
-                                <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
+                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm dark:shadow-none">
                                     <div className="overflow-x-auto">
                                         <table className="w-full">
                                             <thead>
-                                                <tr className="bg-slate-800/50 text-xs text-slate-400 uppercase">
-                                                    <th className="px-4 py-3 text-left cursor-pointer hover:text-white" onClick={() => handleSort('symbol')}>
+                                                <tr className="bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-500 dark:text-slate-400 uppercase">
+                                                    <th className="px-4 py-3 text-left cursor-pointer hover:text-slate-900 dark:hover:text-white" onClick={() => handleSort('symbol')}>
                                                         Symbol <SortIcon field="symbol" />
                                                     </th>
-                                                    <th className="px-4 py-3 text-right cursor-pointer hover:text-white" onClick={() => handleSort('price')}>
+                                                    <th className="px-4 py-3 text-right cursor-pointer hover:text-slate-900 dark:hover:text-white" onClick={() => handleSort('price')}>
                                                         LTP <SortIcon field="price" />
                                                     </th>
                                                     <th className="px-4 py-3 text-right cursor-pointer hover:text-white" onClick={() => handleSort('change')}>
@@ -643,10 +643,10 @@ export default function LiveMarketsPage() {
                                                     </th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-slate-800">
+                                            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                                                 {loading ? (
                                                     Array.from({ length: 15 }).map((_, idx) => (
-                                                        <tr key={idx} className="hover:bg-slate-800/50 transition">
+                                                        <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
                                                             <td className="px-4 py-3"><Skeleton className="h-4 w-16" /></td>
                                                             <td className="px-4 py-3 text-right"><Skeleton className="h-4 w-12 ml-auto" /></td>
                                                             <td className="px-4 py-3 text-right"><Skeleton className="h-4 w-12 ml-auto" /></td>
@@ -665,21 +665,21 @@ export default function LiveMarketsPage() {
                                                         const isNeutral = (stock.changePercent || 0) === 0;
 
                                                         return (
-                                                            <tr key={stock.symbol} className="hover:bg-slate-800/50 transition">
+                                                            <tr key={stock.symbol} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
                                                                 <td className="px-4 py-3">
                                                                     <Link href={`/stocks/${stock.symbol}`} className="flex items-center gap-2">
-                                                                        <div className="w-6 h-6 rounded bg-slate-700 flex items-center justify-center text-[10px] text-slate-300">
+                                                                        <div className="w-6 h-6 rounded bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[10px] text-slate-600 dark:text-slate-300">
                                                                             {stock.symbol.slice(0, 2)}
                                                                         </div>
-                                                                        <span className="font-medium text-blue-400 hover:text-blue-300">
+                                                                        <span className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
                                                                             {stock.symbol}
                                                                         </span>
                                                                     </Link>
                                                                 </td>
-                                                                <td className="px-4 py-3 text-right font-medium text-white">
+                                                                <td className="px-4 py-3 text-right font-medium text-slate-900 dark:text-white">
                                                                     {formatPrice(stock.price || 0)}
                                                                 </td>
-                                                                <td className={`px-4 py-3 text-right font-medium ${isNeutral ? 'text-slate-400' : isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                                <td className={`px-4 py-3 text-right font-medium ${isNeutral ? 'text-slate-500 dark:text-slate-400' : isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
                                                                     {isPositive && !isNeutral ? '+' : ''}{formatNumber(stock.change)}
                                                                 </td>
                                                                 <td className="px-4 py-3 text-right">
@@ -690,22 +690,22 @@ export default function LiveMarketsPage() {
                                                                         {formatNumber(stock.changePercent)}%
                                                                     </span>
                                                                 </td>
-                                                                <td className="px-4 py-3 text-right text-slate-300">
+                                                                <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
                                                                     {formatPrice(stock.open || 0)}
                                                                 </td>
-                                                                <td className="px-4 py-3 text-right text-slate-300">
+                                                                <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
                                                                     {formatPrice(stock.dayHigh || 0)}
                                                                 </td>
-                                                                <td className="px-4 py-3 text-right text-slate-300">
+                                                                <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
                                                                     {formatPrice(stock.dayLow || 0)}
                                                                 </td>
-                                                                <td className="px-4 py-3 text-right text-slate-300">
+                                                                <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
                                                                     {formatLargeNumber(stock.volume)}
                                                                 </td>
-                                                                <td className="px-4 py-3 text-right text-slate-300">
+                                                                <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
                                                                     {formatLargeNumber(stock.turnover || ((stock.volume || 0) * (stock.price || 0)))}
                                                                 </td>
-                                                                <td className="px-4 py-3 text-right text-slate-300">
+                                                                <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
                                                                     {formatPrice(stock.previousClose || 0)}
                                                                 </td>
                                                             </tr>
@@ -717,7 +717,7 @@ export default function LiveMarketsPage() {
 
                                     {/* Row count */}
                                     {/* Pagination Controls */}
-                                    <div className="px-4 py-3 bg-slate-800/50 text-xs text-slate-400 border-t border-slate-800 flex items-center justify-between">
+                                    <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
                                         <span>
                                             Showing {Math.min((currentPage - 1) * itemsPerPage + 1, filteredStocks.length)} to {Math.min(currentPage * itemsPerPage, filteredStocks.length)} of {filteredStocks.length} entries
                                         </span>
@@ -749,40 +749,40 @@ export default function LiveMarketsPage() {
                                 {/* Market Stats Cards */}
                                 {/* Market Indices Small Cards */}
                                 <div className="grid grid-cols-2 gap-2">
-                                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-3">
-                                        <div className="flex items-center gap-2 text-slate-400 text-xs mb-1">
+                                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 shadow-sm dark:shadow-none">
+                                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs mb-1">
                                             <Banknote size={14} />
                                             Total Turnover Rs:
                                         </div>
                                         {loading ? <Skeleton className="h-6 w-24 mt-1" /> : (
-                                            <p className="text-lg font-bold text-white">{formatLargeNumber(marketStats.totalTurnover)}</p>
+                                            <p className="text-lg font-bold text-slate-900 dark:text-white">{formatLargeNumber(marketStats.totalTurnover)}</p>
                                         )}
                                     </div>
-                                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-3">
-                                        <div className="flex items-center gap-2 text-slate-400 text-xs mb-1">
+                                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 shadow-sm dark:shadow-none">
+                                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs mb-1">
                                             <Layers size={14} />
                                             Total Traded Shares
                                         </div>
                                         {loading ? <Skeleton className="h-6 w-24 mt-1" /> : (
-                                            <p className="text-lg font-bold text-white">{formatLargeNumber(marketStats.totalVolume)}</p>
+                                            <p className="text-lg font-bold text-slate-900 dark:text-white">{formatLargeNumber(marketStats.totalVolume)}</p>
                                         )}
                                     </div>
-                                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-3">
-                                        <div className="flex items-center gap-2 text-slate-400 text-xs mb-1">
+                                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 shadow-sm dark:shadow-none">
+                                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs mb-1">
                                             <Activity size={14} />
                                             Total Transactions
                                         </div>
                                         {loading ? <Skeleton className="h-6 w-24 mt-1" /> : (
-                                            <p className="text-lg font-bold text-white">{marketStats.totalTransactions.toLocaleString()}</p>
+                                            <p className="text-lg font-bold text-slate-900 dark:text-white">{marketStats.totalTransactions.toLocaleString()}</p>
                                         )}
                                     </div>
-                                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-3">
-                                        <div className="flex items-center gap-2 text-slate-400 text-xs mb-1">
+                                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 shadow-sm dark:shadow-none">
+                                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs mb-1">
                                             <PieChart size={14} />
                                             Total Scrips Traded
                                         </div>
                                         {loading ? <Skeleton className="h-6 w-24 mt-1" /> : (
-                                            <p className="text-lg font-bold text-white">{stocks.length}</p>
+                                            <p className="text-lg font-bold text-slate-900 dark:text-white">{stocks.length}</p>
                                         )}
                                     </div>
                                 </div>
@@ -790,18 +790,18 @@ export default function LiveMarketsPage() {
                                 {/* Top Gainers */}
                                 {/* Top Gainers */}
                                 {loading || dashboard ? (
-                                    <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
-                                        <div className="px-4 py-3 bg-slate-800/50 flex items-center justify-between">
+                                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm dark:shadow-none">
+                                        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                <TrendingUp size={16} className="text-emerald-400" />
-                                                <span className="font-semibold text-white text-sm">Top Gainers</span>
+                                                <TrendingUp size={16} className="text-emerald-500 dark:text-emerald-400" />
+                                                <span className="font-semibold text-slate-900 dark:text-white text-sm">Top Gainers</span>
                                             </div>
-                                            <Link href="/markets" className="text-slate-400 hover:text-white">
+                                            <Link href="/markets" className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                                                 →
                                             </Link>
                                         </div>
                                         <div className="text-xs">
-                                            <div className="grid grid-cols-4 gap-2 px-3 py-2 bg-slate-800/30 text-slate-400">
+                                            <div className="grid grid-cols-4 gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400">
                                                 <span>SYMBOL</span>
                                                 <span className="text-right">CH</span>
                                                 <span className="text-right">CH %</span>
@@ -821,21 +821,21 @@ export default function LiveMarketsPage() {
                                                     <Link
                                                         key={stock.symbol}
                                                         href={`/stocks/${stock.symbol}`}
-                                                        className="grid grid-cols-4 gap-2 px-3 py-2 hover:bg-slate-800/50 transition items-center"
+                                                        className="grid grid-cols-4 gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition items-center"
                                                     >
                                                         <div className="flex items-center gap-1">
-                                                            <div className="w-5 h-5 rounded bg-slate-700 flex items-center justify-center text-[8px] text-slate-300">
+                                                            <div className="w-5 h-5 rounded bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[8px] text-slate-600 dark:text-slate-300">
                                                                 {stock.symbol.slice(0, 2)}
                                                             </div>
-                                                            <span className="text-blue-400">{stock.symbol}</span>
+                                                            <span className="text-blue-600 dark:text-blue-400">{stock.symbol}</span>
                                                         </div>
-                                                        <span className="text-right text-emerald-400">+{formatNumber(stock.change)}</span>
+                                                        <span className="text-right text-emerald-600 dark:text-emerald-400">+{formatNumber(stock.change)}</span>
                                                         <span className="text-right">
-                                                            <span className="bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded text-[10px]">
+                                                            <span className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded text-[10px]">
                                                                 ↑ {formatNumber(stock.changePercent)}%
                                                             </span>
                                                         </span>
-                                                        <span className="text-right text-white">{formatPrice(stock.price || 0)}</span>
+                                                        <span className="text-right text-slate-900 dark:text-white">{formatPrice(stock.price || 0)}</span>
                                                     </Link>
                                                 ))
                                             )}
@@ -846,18 +846,18 @@ export default function LiveMarketsPage() {
                                 {/* Top Losers */}
                                 {/* Top Losers */}
                                 {loading || dashboard ? (
-                                    <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
-                                        <div className="px-4 py-3 bg-slate-800/50 flex items-center justify-between">
+                                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm dark:shadow-none">
+                                        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                <TrendingDown size={16} className="text-red-400" />
-                                                <span className="font-semibold text-white text-sm">Top Losers</span>
+                                                <TrendingDown size={16} className="text-red-500 dark:text-red-400" />
+                                                <span className="font-semibold text-slate-900 dark:text-white text-sm">Top Losers</span>
                                             </div>
-                                            <Link href="/markets" className="text-slate-400 hover:text-white">
+                                            <Link href="/markets" className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                                                 →
                                             </Link>
                                         </div>
                                         <div className="text-xs">
-                                            <div className="grid grid-cols-4 gap-2 px-3 py-2 bg-slate-800/30 text-slate-400">
+                                            <div className="grid grid-cols-4 gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400">
                                                 <span>SYMBOL</span>
                                                 <span className="text-right">CH</span>
                                                 <span className="text-right">CH %</span>
@@ -877,21 +877,21 @@ export default function LiveMarketsPage() {
                                                     <Link
                                                         key={stock.symbol}
                                                         href={`/stocks/${stock.symbol}`}
-                                                        className="grid grid-cols-4 gap-2 px-3 py-2 hover:bg-slate-800/50 transition items-center"
+                                                        className="grid grid-cols-4 gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition items-center"
                                                     >
                                                         <div className="flex items-center gap-1">
-                                                            <div className="w-5 h-5 rounded bg-slate-700 flex items-center justify-center text-[8px] text-slate-300">
+                                                            <div className="w-5 h-5 rounded bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[8px] text-slate-600 dark:text-slate-300">
                                                                 {stock.symbol.slice(0, 2)}
                                                             </div>
-                                                            <span className="text-blue-400">{stock.symbol}</span>
+                                                            <span className="text-blue-600 dark:text-blue-400">{stock.symbol}</span>
                                                         </div>
-                                                        <span className="text-right text-red-400">{formatNumber(stock.change)}</span>
+                                                        <span className="text-right text-red-500 dark:text-red-400">{formatNumber(stock.change)}</span>
                                                         <span className="text-right">
-                                                            <span className="bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded text-[10px]">
+                                                            <span className="bg-red-500/20 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded text-[10px]">
                                                                 ↓ {formatNumber(stock.changePercent)}%
                                                             </span>
                                                         </span>
-                                                        <span className="text-right text-white">{formatPrice(stock.price || 0)}</span>
+                                                        <span className="text-right text-slate-900 dark:text-white">{formatPrice(stock.price || 0)}</span>
                                                     </Link>
                                                 ))
                                             )}
@@ -902,18 +902,18 @@ export default function LiveMarketsPage() {
                                 {/* Most Active */}
                                 {/* Most Active */}
                                 {loading || dashboard ? (
-                                    <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
-                                        <div className="px-4 py-3 bg-slate-800/50 flex items-center justify-between">
+                                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm dark:shadow-none">
+                                        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                <Activity size={16} className="text-cyan-400" />
-                                                <span className="font-semibold text-white text-sm">Most Active</span>
+                                                <Activity size={16} className="text-cyan-500 dark:text-cyan-400" />
+                                                <span className="font-semibold text-slate-900 dark:text-white text-sm">Most Active</span>
                                             </div>
-                                            <Link href="/markets" className="text-slate-400 hover:text-white">
+                                            <Link href="/markets" className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                                                 →
                                             </Link>
                                         </div>
                                         <div className="text-xs">
-                                            <div className="grid grid-cols-4 gap-2 px-3 py-2 bg-slate-800/30 text-slate-400">
+                                            <div className="grid grid-cols-4 gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400">
                                                 <span>SYMBOL</span>
                                                 <span className="text-right">VOLUME</span>
                                                 <span className="text-right">CH %</span>
@@ -935,22 +935,22 @@ export default function LiveMarketsPage() {
                                                         <Link
                                                             key={stock.symbol}
                                                             href={`/stocks/${stock.symbol}`}
-                                                            className="grid grid-cols-4 gap-2 px-3 py-2 hover:bg-slate-800/50 transition items-center"
+                                                            className="grid grid-cols-4 gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition items-center"
                                                         >
                                                             <div className="flex items-center gap-1">
-                                                                <div className="w-5 h-5 rounded bg-slate-700 flex items-center justify-center text-[8px] text-slate-300">
+                                                                <div className="w-5 h-5 rounded bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[8px] text-slate-600 dark:text-slate-300">
                                                                     {stock.symbol.slice(0, 2)}
                                                                 </div>
-                                                                <span className="text-blue-400">{stock.symbol}</span>
+                                                                <span className="text-blue-600 dark:text-blue-400">{stock.symbol}</span>
                                                             </div>
-                                                            <span className="text-right text-slate-300">{formatLargeNumber(stock.volume)}</span>
+                                                            <span className="text-right text-slate-600 dark:text-slate-300">{formatLargeNumber(stock.volume)}</span>
                                                             <span className="text-right">
-                                                                <span className={`px-1.5 py-0.5 rounded text-[10px] ${isPositive ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                                                                <span className={`px-1.5 py-0.5 rounded text-[10px] ${isPositive ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/20 text-red-600 dark:text-red-400'
                                                                     }`}>
                                                                     {isPositive ? '↑' : '↓'} {formatNumber(stock.changePercent)}%
                                                                 </span>
                                                             </span>
-                                                            <span className="text-right text-white">{formatPrice(stock.price || 0)}</span>
+                                                            <span className="text-right text-slate-900 dark:text-white">{formatPrice(stock.price || 0)}</span>
                                                         </Link>
                                                     );
                                                 })

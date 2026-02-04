@@ -130,8 +130,8 @@ export function DonutChart({
     };
 
     return (
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-            <h3 className="text-center text-sm font-semibold text-slate-300 mb-4">{title}</h3>
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
+            <h3 className="text-center text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">{title}</h3>
 
             <div className="relative">
                 <svg width="320" height="320" viewBox="0 0 320 320" className="mx-auto">
@@ -148,9 +148,8 @@ export function DonutChart({
                                 <path
                                     d={getArcPath(sector.startAngle, sector.endAngle, radius, innerRadius)}
                                     fill={sector.color}
-                                    stroke="#1e293b"
+                                    className="stroke-white dark:stroke-slate-800 hover:opacity-80 transition cursor-pointer"
                                     strokeWidth="2"
-                                    className="hover:opacity-80 transition cursor-pointer"
                                 />
                                 {/* Labels for larger segments */}
                                 {sector[percentKey] > 5 && (() => {
@@ -170,7 +169,7 @@ export function DonutChart({
                                                 x={x}
                                                 y={y - 8}
                                                 textAnchor="middle"
-                                                className="text-[10px] fill-slate-300 font-medium"
+                                                className="text-[10px] fill-slate-500 dark:fill-slate-300 font-medium"
                                             >
                                                 {getSectorShortName(sector.sector)}
                                             </text>
@@ -212,8 +211,8 @@ function ChangeBarChart({
     const maxAbsChange = Math.max(...sortedData.map(d => Math.abs(d.avgChangePercent)), 30);
 
     return (
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-            <h3 className="text-center text-sm font-semibold text-slate-300 mb-4">{title}</h3>
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
+            <h3 className="text-center text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">{title}</h3>
 
             <div className="space-y-2 max-h-[200px] overflow-y-auto">
                 {sortedData.map((sector) => {
@@ -229,9 +228,9 @@ function ChangeBarChart({
                             <span className="w-20 truncate text-slate-400" title={sector.sector}>
                                 {getSectorShortName(sector.sector)}
                             </span>
-                            <div className="flex-1 h-4 bg-slate-700 rounded overflow-hidden relative">
+                            <div className="flex-1 h-4 bg-slate-100 dark:bg-slate-700 rounded overflow-hidden relative">
                                 {/* Center line */}
-                                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-500" />
+                                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-300 dark:bg-slate-500" />
                                 {/* Bar */}
                                 <div
                                     className={`absolute top-0 h-full ${isPositive ? 'bg-emerald-500' : 'bg-red-500'}`}
@@ -256,7 +255,7 @@ function ChangeBarChart({
 // Color Legend Component
 function ColorLegend({ data }: { data: SectorAnalysisData[] }) {
     return (
-        <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-slate-400">
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-slate-500 dark:text-slate-400">
             {data.filter(d => d.turnoverPercent > 1).map((sector) => (
                 <div key={sector.sector} className="flex items-center gap-1">
                     <span
@@ -293,16 +292,16 @@ export default function MarketAnalysisCharts() {
 
     if (loading) {
         return (
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-8 flex items-center justify-center">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-8 flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
-                <span className="ml-3 text-slate-400">Loading market analysis...</span>
+                <span className="ml-3 text-slate-600 dark:text-slate-400">Loading market analysis...</span>
             </div>
         );
     }
 
     if (error || !sectorData) {
         return (
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-8 text-center text-slate-400">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center text-slate-500 dark:text-slate-400">
                 {error || 'No data available'}
             </div>
         );
@@ -315,7 +314,7 @@ export default function MarketAnalysisCharts() {
             {/* Section Title */}
             <div className="flex items-center gap-3">
                 <PieChart size={24} className="text-emerald-500" />
-                <h2 className="text-xl font-bold text-white">Market % Analysis</h2>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Market % Analysis</h2>
             </div>
 
             {/* Pie Charts Row */}
@@ -341,7 +340,7 @@ export default function MarketAnalysisCharts() {
             </div>
 
             {/* Color Legend */}
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
                 <ColorLegend data={sectors} />
             </div>
 
@@ -366,9 +365,9 @@ export default function MarketAnalysisCharts() {
 
             {/* Summary Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 text-center">
-                    <p className="text-slate-400 text-xs mb-1">Total Turnover</p>
-                    <p className="text-lg font-bold text-white">
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-center">
+                    <p className="text-slate-500 dark:text-slate-400 text-xs mb-1">Total Turnover</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">
                         {totals.turnover >= 1e9
                             ? `${(totals.turnover / 1e9).toFixed(2)} Arab`
                             : totals.turnover >= 1e7
@@ -376,21 +375,21 @@ export default function MarketAnalysisCharts() {
                                 : totals.turnover.toLocaleString()}
                     </p>
                 </div>
-                <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 text-center">
-                    <p className="text-slate-400 text-xs mb-1">Total Volume</p>
-                    <p className="text-lg font-bold text-white">
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-center">
+                    <p className="text-slate-500 dark:text-slate-400 text-xs mb-1">Total Volume</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">
                         {totals.volume >= 1e6
                             ? `${(totals.volume / 1e6).toFixed(2)}M`
                             : totals.volume.toLocaleString()}
                     </p>
                 </div>
-                <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 text-center">
-                    <p className="text-slate-400 text-xs mb-1">Total Transactions</p>
-                    <p className="text-lg font-bold text-white">{totals.transactions.toLocaleString()}</p>
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-center">
+                    <p className="text-slate-500 dark:text-slate-400 text-xs mb-1">Total Transactions</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">{totals.transactions.toLocaleString()}</p>
                 </div>
-                <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 text-center">
-                    <p className="text-slate-400 text-xs mb-1">Sectors</p>
-                    <p className="text-lg font-bold text-white">{totals.sectorCount}</p>
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-center">
+                    <p className="text-slate-500 dark:text-slate-400 text-xs mb-1">Sectors</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">{totals.sectorCount}</p>
                 </div>
             </div>
         </div>

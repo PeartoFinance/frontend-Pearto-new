@@ -91,14 +91,15 @@ export default function CourseDetailPage() {
 
     if (loading) {
         return (
-            <div className="flex h-screen bg-slate-900">
+
+            <div className="flex h-screen bg-gray-50 dark:bg-slate-900">
                 <Sidebar />
                 <div className="flex-1 flex flex-col overflow-hidden">
                     <Header />
                     <main className="flex-1 overflow-y-auto flex items-center justify-center">
                         <div className="text-center">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4" />
-                            <p className="text-slate-400">Loading course...</p>
+                            <p className="text-slate-500 dark:text-slate-400">Loading course...</p>
                         </div>
                     </main>
                 </div>
@@ -108,16 +109,17 @@ export default function CourseDetailPage() {
 
     if (!course) {
         return (
-            <div className="flex h-screen bg-slate-900">
+
+            <div className="flex h-screen bg-gray-50 dark:bg-slate-900">
                 <Sidebar />
                 <div className="flex-1 flex flex-col overflow-hidden">
                     <Header />
                     <main className="flex-1 overflow-y-auto flex items-center justify-center">
                         <div className="text-center">
-                            <GraduationCap className="h-16 w-16 text-slate-600 mx-auto mb-4" />
-                            <h2 className="text-2xl font-bold text-white mb-2">Course Not Found</h2>
-                            <p className="text-slate-400 mb-4">The course you're looking for doesn't exist.</p>
-                            <Link href="/learn" className="text-emerald-400 hover:text-emerald-300 flex items-center justify-center gap-2">
+                            <GraduationCap className="h-16 w-16 text-slate-400 dark:text-slate-600 mx-auto mb-4" />
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Course Not Found</h2>
+                            <p className="text-slate-500 dark:text-slate-400 mb-4">The course you're looking for doesn't exist.</p>
+                            <Link href="/learn" className="text-emerald-500 hover:text-emerald-400 dark:text-emerald-400 dark:hover:text-emerald-300 flex items-center justify-center gap-2">
                                 <ArrowLeft className="h-4 w-4" /> Back to Courses
                             </Link>
                         </div>
@@ -128,7 +130,7 @@ export default function CourseDetailPage() {
     }
 
     return (
-        <div className="flex h-screen bg-slate-900">
+        <div className="flex h-screen bg-gray-50 dark:bg-slate-900">
             <Sidebar />
 
             <div className="flex-1 flex flex-col overflow-hidden">
@@ -136,12 +138,12 @@ export default function CourseDetailPage() {
 
                 <main className="flex-1 overflow-y-auto">
                     {/* Hero Section */}
-                    <div className="bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 border-b border-slate-700/50">
+                    <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-slate-800 dark:via-slate-800 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700/50">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                             {/* Back button */}
                             <Link
                                 href="/learn"
-                                className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition group"
+                                className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white mb-6 transition group"
                             >
                                 <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
                                 Back to Courses
@@ -161,12 +163,12 @@ export default function CourseDetailPage() {
                                     </div>
 
                                     {/* Title */}
-                                    <h1 className="text-2xl md:text-3xl font-bold text-white leading-tight">
+                                    <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white leading-tight">
                                         {course.title}
                                     </h1>
 
                                     {/* Description */}
-                                    <p className="text-slate-400 leading-relaxed">
+                                    <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
                                         {course.description}
                                     </p>
 
@@ -174,17 +176,17 @@ export default function CourseDetailPage() {
                                     <div className="flex flex-wrap items-center gap-4 text-sm">
                                         {course.rating > 0 && (
                                             <div className="flex items-center gap-1.5">
-                                                <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
-                                                <span className="font-semibold text-white">{course.rating.toFixed(1)}</span>
+                                                <Star className="h-4 w-4 text-amber-500 dark:text-amber-400 fill-amber-500 dark:fill-amber-400" />
+                                                <span className="font-semibold text-slate-900 dark:text-white">{course.rating.toFixed(1)}</span>
                                                 <span className="text-slate-500">({course.ratingCount} reviews)</span>
                                             </div>
                                         )}
-                                        <div className="flex items-center gap-1.5 text-slate-400">
+                                        <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
                                             <Users className="h-4 w-4" />
                                             <span>{course.enrollmentCount.toLocaleString()} students</span>
                                         </div>
                                         {course.durationHours && (
-                                            <div className="flex items-center gap-1.5 text-slate-400">
+                                            <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
                                                 <Clock className="h-4 w-4" />
                                                 <span>{course.durationHours} hours</span>
                                             </div>
@@ -202,7 +204,7 @@ export default function CourseDetailPage() {
                                                 </div>
                                             )}
                                             <div>
-                                                <p className="font-medium text-white text-sm">{course.instructor.name}</p>
+                                                <p className="font-medium text-slate-900 dark:text-white text-sm">{course.instructor.name}</p>
                                                 <p className="text-slate-500 text-xs">{course.instructor.title}</p>
                                             </div>
                                         </div>
@@ -211,10 +213,10 @@ export default function CourseDetailPage() {
 
                                 {/* Course Card */}
                                 <div className="lg:col-span-1">
-                                    <div className="bg-slate-800/80 backdrop-blur rounded-2xl border border-slate-700/50 overflow-hidden shadow-xl">
+                                    <div className="bg-white dark:bg-slate-800/80 backdrop-blur rounded-2xl border border-slate-200 dark:border-slate-700/50 overflow-hidden shadow-xl">
                                         {/* Video Preview */}
                                         {/* Video/Image Preview */}
-                                        <div className="aspect-video bg-slate-900 flex items-center justify-center cursor-pointer group relative overflow-hidden">
+                                        <div className="aspect-video bg-slate-200 dark:bg-slate-900 flex items-center justify-center cursor-pointer group relative overflow-hidden">
                                             {course.thumbnailUrl ? (
                                                 <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                                             ) : (
@@ -232,10 +234,10 @@ export default function CourseDetailPage() {
                                             {/* Price */}
                                             <div>
                                                 {course.isFree ? (
-                                                    <span className="text-2xl font-bold text-emerald-400">Free</span>
+                                                    <span className="text-2xl font-bold text-emerald-500 dark:text-emerald-400">Free</span>
                                                 ) : (
                                                     <div className="flex items-baseline gap-2">
-                                                        <span className="text-2xl font-bold text-white">
+                                                        <span className="text-2xl font-bold text-slate-900 dark:text-white">
                                                             ${course.discountPrice || course.price}
                                                         </span>
                                                         {course.discountPrice && (
@@ -270,27 +272,27 @@ export default function CourseDetailPage() {
                                             </button>
 
                                             {/* Course Info */}
-                                            <div className="space-y-3 text-sm pt-2 border-t border-slate-700/50">
+                                            <div className="space-y-3 text-sm pt-2 border-t border-slate-200 dark:border-slate-700/50">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-slate-400">Level</span>
-                                                    <span className="font-medium text-white">{course.level}</span>
+                                                    <span className="text-slate-500 dark:text-slate-400">Level</span>
+                                                    <span className="font-medium text-slate-900 dark:text-white">{course.level}</span>
                                                 </div>
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-slate-400">Duration</span>
-                                                    <span className="font-medium text-white">{course.durationHours} hours</span>
+                                                    <span className="text-slate-500 dark:text-slate-400">Duration</span>
+                                                    <span className="font-medium text-slate-900 dark:text-white">{course.durationHours} hours</span>
                                                 </div>
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-slate-400">Certificate</span>
+                                                    <span className="text-slate-500 dark:text-slate-400">Certificate</span>
                                                     <Award className="h-4 w-4 text-amber-400" />
                                                 </div>
                                             </div>
 
                                             {/* Actions */}
-                                            <div className="flex items-center justify-center gap-4 pt-2 border-t border-slate-700/50">
-                                                <button className="p-2 text-slate-400 hover:text-rose-400 transition" title="Wishlist">
+                                            <div className="flex items-center justify-center gap-4 pt-2 border-t border-slate-200 dark:border-slate-700/50">
+                                                <button className="p-2 text-slate-500 hover:text-rose-500 dark:text-slate-400 dark:hover:text-rose-400 transition" title="Wishlist">
                                                     <Heart className="h-5 w-5" />
                                                 </button>
-                                                <button className="p-2 text-slate-400 hover:text-emerald-400 transition" title="Share">
+                                                <button className="p-2 text-slate-500 hover:text-emerald-500 dark:text-slate-400 dark:hover:text-emerald-400 transition" title="Share">
                                                     <Share2 className="h-5 w-5" />
                                                 </button>
                                             </div>
@@ -307,14 +309,14 @@ export default function CourseDetailPage() {
                             {/* Main Content */}
                             <div className="lg:col-span-2">
                                 {/* Tab Navigation */}
-                                <div className="flex gap-1 mb-8 bg-slate-800/50 p-1 rounded-xl w-fit">
+                                <div className="flex gap-1 mb-8 bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl w-fit">
                                     {(['overview', 'curriculum', 'instructor'] as const).map(tab => (
                                         <button
                                             key={tab}
                                             onClick={() => setActiveTab(tab)}
                                             className={`px-5 py-2 rounded-lg text-sm font-medium capitalize transition-all ${activeTab === tab
                                                 ? 'bg-emerald-600 text-white shadow-lg'
-                                                : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700/50'
                                                 }`}
                                         >
                                             {tab}
@@ -326,47 +328,49 @@ export default function CourseDetailPage() {
                                 {activeTab === 'overview' && (
                                     <div className="space-y-8">
                                         {(course.longDescription || course.description) && (
-                                            <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50">
-                                                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                                                    <BookOpen className="h-5 w-5 text-emerald-400" />
+                                            <div className="bg-white dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-700/50">
+                                                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                                                    <BookOpen className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />
                                                     About This Course
                                                 </h3>
-                                                <p className="text-slate-300 leading-relaxed">
+                                                <p className="text-slate-500 dark:text-slate-300 leading-relaxed">
                                                     {course.longDescription || course.description}
                                                 </p>
                                             </div>
                                         )}
 
                                         {course.whatYouLearn && course.whatYouLearn.length > 0 && (
-                                            <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50">
-                                                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                                                    <Zap className="h-5 w-5 text-amber-400" />
+                                            <div className="bg-white dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-700/50">
+                                                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                                                    <Zap className="h-5 w-5 text-amber-500 dark:text-amber-400" />
                                                     What You'll Learn
                                                 </h3>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                     {course.whatYouLearn.map((item, index) => (
                                                         <div key={index} className="flex items-start gap-3">
-                                                            <CheckCircle className="h-5 w-5 text-emerald-400 mt-0.5 flex-shrink-0" />
-                                                            <span className="text-slate-300 text-sm">{item}</span>
+                                                            <CheckCircle className="h-5 w-5 text-emerald-500 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
+                                                            <span className="text-slate-600 dark:text-slate-300 text-sm">{item}</span>
                                                         </div>
                                                     ))}
                                                 </div>
                                             </div>
                                         )}
 
+
                                         {course.requirements && course.requirements.length > 0 && (
-                                            <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50">
-                                                <h3 className="text-lg font-semibold text-white mb-4">Requirements</h3>
+                                            <div className="bg-white dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-700/50">
+                                                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Requirements</h3>
                                                 <ul className="space-y-2">
                                                     {course.requirements.map((item, index) => (
-                                                        <li key={index} className="text-slate-300 text-sm flex items-start gap-2">
-                                                            <span className="text-emerald-400 mt-1">•</span>
+                                                        <li key={index} className="text-slate-600 dark:text-slate-300 text-sm flex items-start gap-2">
+                                                            <span className="text-emerald-500 dark:text-emerald-400 mt-1">•</span>
                                                             <span>{item}</span>
                                                         </li>
                                                     ))}
                                                 </ul>
                                             </div>
                                         )}
+
                                     </div>
                                 )}
 
@@ -374,9 +378,9 @@ export default function CourseDetailPage() {
                                 {activeTab === 'curriculum' && (
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between mb-6">
-                                            <h3 className="text-lg font-semibold text-white">Course Curriculum</h3>
+                                            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Course Curriculum</h3>
                                             {course.modules && (
-                                                <span className="text-sm text-slate-400">{course.modules.length} modules</span>
+                                                <span className="text-sm text-slate-500 dark:text-slate-400">{course.modules.length} modules</span>
                                             )}
                                         </div>
 
@@ -385,7 +389,7 @@ export default function CourseDetailPage() {
                                                 {course.modules.map((module, index) => (
                                                     <div
                                                         key={module.id}
-                                                        className="bg-slate-800/50 rounded-xl border border-slate-700/50 overflow-hidden hover:border-emerald-500/30 transition"
+                                                        className="bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/50 overflow-hidden hover:border-emerald-500/30 transition"
                                                     >
                                                         <div className="p-4 flex items-center justify-between">
                                                             <div className="flex items-center gap-4">
@@ -393,13 +397,13 @@ export default function CourseDetailPage() {
                                                                     {index + 1}
                                                                 </span>
                                                                 <div>
-                                                                    <h4 className="font-medium text-white">{module.title}</h4>
+                                                                    <h4 className="font-medium text-slate-900 dark:text-white">{module.title}</h4>
                                                                     {module.description && (
-                                                                        <p className="text-slate-400 text-sm mt-0.5">{module.description}</p>
+                                                                        <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">{module.description}</p>
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <div className="flex items-center gap-3 text-sm text-slate-400">
+                                                            <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
                                                                 {module.durationMinutes && (
                                                                     <span className="flex items-center gap-1">
                                                                         <Clock className="h-4 w-4" />
@@ -407,7 +411,7 @@ export default function CourseDetailPage() {
                                                                     </span>
                                                                 )}
                                                                 {module.isFree ? (
-                                                                    <span className="text-emerald-400 text-xs font-medium">Free</span>
+                                                                    <span className="text-emerald-500 dark:text-emerald-400 text-xs font-medium">Free</span>
                                                                 ) : (
                                                                     <Lock className="h-4 w-4" />
                                                                 )}
@@ -417,9 +421,9 @@ export default function CourseDetailPage() {
                                                 ))}
                                             </div>
                                         ) : (
-                                            <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-8 text-center">
-                                                <BookOpen className="h-12 w-12 text-slate-600 mx-auto mb-3" />
-                                                <p className="text-slate-400">Curriculum coming soon...</p>
+                                            <div className="bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/50 p-8 text-center">
+                                                <BookOpen className="h-12 w-12 text-slate-400 dark:text-slate-600 mx-auto mb-3" />
+                                                <p className="text-slate-500 dark:text-slate-400">Curriculum coming soon...</p>
                                             </div>
                                         )}
                                     </div>
@@ -427,22 +431,22 @@ export default function CourseDetailPage() {
 
                                 {/* Instructor Tab */}
                                 {activeTab === 'instructor' && course.instructor && (
-                                    <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50">
+                                    <div className="bg-white dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-700/50">
                                         <div className="flex items-start gap-5">
                                             {course.instructor.avatarUrl ? (
-                                                <img src={course.instructor.avatarUrl} alt={course.instructor.name} className="h-20 w-20 rounded-2xl object-cover border-2 border-slate-700/50 flex-shrink-0" />
+                                                <img src={course.instructor.avatarUrl} alt={course.instructor.name} className="h-20 w-20 rounded-2xl object-cover border-2 border-slate-200 dark:border-slate-700/50 flex-shrink-0" />
                                             ) : (
                                                 <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
                                                     {course.instructor.name.split(' ').map(n => n[0]).join('')}
                                                 </div>
                                             )}
                                             <div className="flex-1">
-                                                <h3 className="text-xl font-semibold text-white">{course.instructor.name}</h3>
-                                                <p className="text-slate-400">{course.instructor.title}</p>
+                                                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">{course.instructor.name}</h3>
+                                                <p className="text-slate-500 dark:text-slate-400">{course.instructor.title}</p>
                                                 {course.instructor.rating && (
                                                     <div className="flex items-center gap-2 mt-2">
-                                                        <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
-                                                        <span className="text-white font-medium">{course.instructor.rating.toFixed(1)}</span>
+                                                        <Star className="h-4 w-4 text-amber-500 dark:text-amber-400 fill-amber-500 dark:fill-amber-400" />
+                                                        <span className="text-slate-900 dark:text-white font-medium">{course.instructor.rating.toFixed(1)}</span>
                                                         <span className="text-slate-500 text-sm">instructor rating</span>
                                                     </div>
                                                 )}
@@ -450,9 +454,9 @@ export default function CourseDetailPage() {
                                         </div>
 
                                         {course.instructor.bio && (
-                                            <div className="mt-6 pt-6 border-t border-slate-700/50">
-                                                <h4 className="font-medium text-white mb-3">About</h4>
-                                                <p className="text-slate-300 leading-relaxed">{course.instructor.bio}</p>
+                                            <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700/50">
+                                                <h4 className="font-medium text-slate-900 dark:text-white mb-3">About</h4>
+                                                <p className="text-slate-600 dark:text-slate-300 leading-relaxed">{course.instructor.bio}</p>
                                             </div>
                                         )}
                                     </div>
@@ -461,38 +465,38 @@ export default function CourseDetailPage() {
 
                             {/* Sidebar - Course Includes */}
                             <div className="lg:col-span-1">
-                                <div className="bg-slate-800/50 rounded-2xl border border-slate-700/50 p-6 sticky top-6">
-                                    <h4 className="font-semibold text-white mb-5">Course Includes</h4>
+                                <div className="bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 sticky top-6">
+                                    <h4 className="font-semibold text-slate-900 dark:text-white mb-5">Course Includes</h4>
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-3 text-sm">
                                             <div className="p-2 bg-emerald-500/10 rounded-lg">
-                                                <Play className="h-4 w-4 text-emerald-400" />
+                                                <Play className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                                             </div>
-                                            <span className="text-slate-300">{course.durationHours || '10'}+ hours of video content</span>
+                                            <span className="text-slate-600 dark:text-slate-300">{course.durationHours || '10'}+ hours of video content</span>
                                         </div>
                                         <div className="flex items-center gap-3 text-sm">
                                             <div className="p-2 bg-emerald-500/10 rounded-lg">
-                                                <BookOpen className="h-4 w-4 text-emerald-400" />
+                                                <BookOpen className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                                             </div>
-                                            <span className="text-slate-300">{course.modules?.length || 0} modules</span>
+                                            <span className="text-slate-600 dark:text-slate-300">{course.modules?.length || 0} modules</span>
                                         </div>
                                         <div className="flex items-center gap-3 text-sm">
                                             <div className="p-2 bg-emerald-500/10 rounded-lg">
-                                                <Award className="h-4 w-4 text-emerald-400" />
+                                                <Award className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                                             </div>
-                                            <span className="text-slate-300">Certificate of completion</span>
+                                            <span className="text-slate-600 dark:text-slate-300">Certificate of completion</span>
                                         </div>
                                         <div className="flex items-center gap-3 text-sm">
                                             <div className="p-2 bg-emerald-500/10 rounded-lg">
-                                                <Clock className="h-4 w-4 text-emerald-400" />
+                                                <Clock className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                                             </div>
-                                            <span className="text-slate-300">Lifetime access</span>
+                                            <span className="text-slate-600 dark:text-slate-300">Lifetime access</span>
                                         </div>
                                         <div className="flex items-center gap-3 text-sm">
                                             <div className="p-2 bg-emerald-500/10 rounded-lg">
-                                                <Download className="h-4 w-4 text-emerald-400" />
+                                                <Download className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                                             </div>
-                                            <span className="text-slate-300">Downloadable resources</span>
+                                            <span className="text-slate-600 dark:text-slate-300">Downloadable resources</span>
                                         </div>
                                     </div>
                                 </div>

@@ -8,6 +8,7 @@ import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import { MultiChart } from '@/components/charts';
 import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
+import { AIColumnWrapper } from '@/components/ai/AIColumnWrapper';
 import PriceDisplay from '@/components/common/PriceDisplay';
 import {
     StockTabs,
@@ -454,7 +455,7 @@ export default function CryptoDetailPage() {
                                     </div>
 
                                     {/* Right Sidebar AI */}
-                                    <div className="hidden xl:block w-[320px] flex-shrink-0">
+                                    <AIColumnWrapper>
                                         <div className="sticky top-[130px]">
                                             <AIAnalysisPanel
                                                 title="Crypto Insight"
@@ -468,7 +469,7 @@ export default function CryptoDetailPage() {
                                                 className="h-fit"
                                             />
                                         </div>
-                                    </div>
+                                    </AIColumnWrapper>
                                 </div>
                             </>
                         )}

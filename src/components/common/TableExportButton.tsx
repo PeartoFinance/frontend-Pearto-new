@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Download, FileSpreadsheet, FileJson, FileText, ChevronDown, Loader2 } from 'lucide-react';
 import { useTableExport, type ExportColumn } from '@/hooks/useTableExport';
+import { useSubscription } from '@/context/SubscriptionContext';
+import { UpgradeModal } from '@/components/subscription/FeatureGating';
 
 export interface TableExportButtonProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,6 +66,8 @@ export function TableExportButton({
     const [exporting, setExporting] = useState<ExportFormat | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const { exportData } = useTableExport();
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const { trackUsage } = useSubscription();
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -78,6 +82,13 @@ export function TableExportButton({
 
     const handleExport = async (format: ExportFormat) => {
         if (data.length === 0) return;
+
+        // Check usage limit
+        const { allowed } = await trackUsage('download_reports_limit');
+        if (!allowed) {
+            setShowUpgradeModal(true);
+            return;
+        }
 
         setExporting(format);
         try {
@@ -94,9 +105,9 @@ export function TableExportButton({
 
     const isDisabled = disabled || data.length === 0;
 
-    if (variant === 'icon') {
-        return (
-            <div className="relative" ref={dropdownRef}>
+    const renderButton = () => {
+        if (variant === 'icon') {
+            return (
                 <button
                     onClick={() => setIsOpen(!isOpen)}
                     disabled={isDisabled}
@@ -108,21 +119,11 @@ export function TableExportButton({
                 >
                     <Download size={18} />
                 </button>
+            );
+        }
 
-                {isOpen && !isDisabled && (
-                    <DropdownMenu
-                        options={FORMAT_OPTIONS}
-                        exporting={exporting}
-                        onSelect={handleExport}
-                    />
-                )}
-            </div>
-        );
-    }
-
-    if (variant === 'compact') {
-        return (
-            <div className="relative" ref={dropdownRef}>
+        if (variant === 'compact') {
+            return (
                 <button
                     onClick={() => setIsOpen(!isOpen)}
                     disabled={isDisabled}
@@ -135,6 +136,31 @@ export function TableExportButton({
                     Export
                     <ChevronDown size={14} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                 </button>
+            );
+        }
+
+        return (
+            <>
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    disabled={isDisabled}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${isDisabled
+                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                        : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                        } ${className}`}
+                >
+                    <Download size={16} />
+                    Export
+                    <ChevronDown size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                </button>
+            </>
+        );
+    };
+
+    return (
+        <>
+            <div className="relative" ref={dropdownRef}>
+                {renderButton()}
 
                 {isOpen && !isDisabled && (
                     <DropdownMenu
@@ -144,33 +170,16 @@ export function TableExportButton({
                     />
                 )}
             </div>
-        );
-    }
 
-    // Default variant
-    return (
-        <div className="relative" ref={dropdownRef}>
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                disabled={isDisabled}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${isDisabled
-                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
-                    : 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                    } ${className}`}
-            >
-                <Download size={16} />
-                Export
-                <ChevronDown size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {isOpen && !isDisabled && (
-                <DropdownMenu
-                    options={FORMAT_OPTIONS}
-                    exporting={exporting}
-                    onSelect={handleExport}
+            {showUpgradeModal && (
+                <UpgradeModal
+                    isOpen={showUpgradeModal}
+                    onClose={() => setShowUpgradeModal(false)}
+                    message="You have reached your usage limit for this feature. Upgrade to Pro for unlimited access."
+                    featureKey="download_reports_limit"
                 />
             )}
-        </div>
+        </>
     );
 }
 

@@ -27,7 +27,7 @@ const settingsSections = [
     {
         title: 'Billing',
         items: [
-            { name: 'Subscription', description: 'Manage your subscription plan', icon: CreditCard, href: '/profile/settings' },
+            { name: 'Subscription', description: 'Manage your subscription plan', icon: CreditCard, href: '/settings/billing' },
         ]
     },
 ];

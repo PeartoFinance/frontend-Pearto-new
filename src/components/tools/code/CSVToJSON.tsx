@@ -75,8 +75,8 @@ Alice Brown,29,Seattle,Developer`);
                                     {copied ? 'Copied!' : 'Copy JSON'}
                                 </button>
                             </div>
-                            <div className="p-4 bg-slate-900 rounded-xl max-h-80 overflow-auto">
-                                <pre className="text-sm text-emerald-400 font-mono whitespace-pre-wrap">{jsonOutput}</pre>
+                            <div className="p-4 bg-slate-100 dark:bg-slate-900 rounded-xl max-h-80 overflow-auto border border-slate-200 dark:border-slate-800">
+                                <pre className="text-sm text-emerald-700 dark:text-emerald-400 font-mono whitespace-pre-wrap">{jsonOutput}</pre>
                             </div>
                         </>
                     ) : (

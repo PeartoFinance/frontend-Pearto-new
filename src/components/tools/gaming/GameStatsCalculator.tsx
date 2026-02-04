@@ -95,8 +95,8 @@ export default function GameStatsCalculator() {
                         </div>
                     </div>
 
-                    <div className="p-4 bg-slate-900 rounded-xl text-center">
-                        <p className="text-xs text-slate-400 mb-1">Performance Rating</p>
+                    <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-center">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Performance Rating</p>
                         <p className={`text-5xl font-bold ${getRatingColor(stats.rating)}`}>
                             {stats.rating.toFixed(0)}
                         </p>

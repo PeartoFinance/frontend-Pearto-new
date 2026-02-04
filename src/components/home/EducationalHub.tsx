@@ -73,7 +73,7 @@ export default function EducationalHub() {
                         <Link
                             key={course.id}
                             href={`/learn/${course.slug || course.id}`}
-                            className="card p-5 hover:border-emerald-500 transition-all group relative"
+                            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:border-emerald-500 transition-all group relative shadow-sm hover:shadow-md"
                         >
                             {/* Level badge */}
                             <div className="flex gap-2 mb-3">
@@ -127,17 +127,17 @@ export default function EducationalHub() {
 
             {/* Stats Bar */}
             <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 card">
+                <div className="text-center p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalCourses}+</p>
-                    <p className="text-sm text-gray-500">Courses Available</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Courses Available</p>
                 </div>
-                <div className="text-center p-4 card">
+                <div className="text-center p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">{(stats.totalStudents / 1000).toFixed(0)}K+</p>
-                    <p className="text-sm text-gray-500">Active Learners</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Active Learners</p>
                 </div>
-                <div className="text-center p-4 card">
+                <div className="text-center p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.avgCompletionRate}%</p>
-                    <p className="text-sm text-gray-500">Completion Rate</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Completion Rate</p>
                 </div>
                 <div className="text-center p-4 bg-emerald-500 text-white rounded-lg">
                     <p className="text-2xl font-bold">24/7</p>
