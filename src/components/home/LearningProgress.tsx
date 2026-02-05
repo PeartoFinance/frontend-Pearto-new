@@ -57,9 +57,9 @@ export default function LearningProgress() {
     // Show loading while checking auth
     if (authLoading || loading) {
         return (
-            <div className="card p-5">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">Continue Learning</h3>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Continue Learning</h3>
                 </div>
                 <div className="flex items-center justify-center py-8">
                     <Loader2 className="animate-spin text-emerald-500" size={20} />
@@ -71,9 +71,9 @@ export default function LearningProgress() {
     // No enrolled courses
     if (courses.length === 0) {
         return (
-            <div className="card p-5">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">Continue Learning</h3>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Continue Learning</h3>
                     <Link
                         href="/learn"
                         className="text-sm text-emerald-500 hover:text-emerald-600 flex items-center gap-1"
@@ -82,8 +82,8 @@ export default function LearningProgress() {
                     </Link>
                 </div>
                 <div className="flex flex-col items-center justify-center py-8 gap-2">
-                    <AlertCircle size={24} className="text-slate-400" />
-                    <p className="text-sm text-slate-500">No enrolled courses yet</p>
+                    <AlertCircle size={24} className="text-slate-400 dark:text-slate-500" />
+                    <p className="text-sm text-slate-500 dark:text-slate-400">No enrolled courses yet</p>
                     <Link
                         href="/learn"
                         className="text-sm text-emerald-500 hover:text-emerald-600 font-medium"
@@ -99,9 +99,9 @@ export default function LearningProgress() {
     const courseData = courses[0];
 
     return (
-        <div className="card p-5">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Continue Learning</h3>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Continue Learning</h3>
                 <Link
                     href="/learn"
                     className="text-sm text-emerald-500 hover:text-emerald-600 flex items-center gap-1"

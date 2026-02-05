@@ -60,7 +60,7 @@ export default function Watchlist() {
             ) : !isAuthenticated ? (
                 <div className="flex flex-col items-center justify-center py-8 gap-2">
                     <AlertCircle size={24} className="text-slate-400" />
-                    <p className="text-sm text-slate-500 text-center">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
                         Sign in to view your watchlist
                     </p>
                     <Link
@@ -73,7 +73,7 @@ export default function Watchlist() {
             ) : error || items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 gap-2">
                     <AlertCircle size={24} className="text-slate-400" />
-                    <p className="text-sm text-slate-500 text-center">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
                         {error ? 'Failed to load watchlist' : 'Your watchlist is empty'}
                     </p>
                     <Link

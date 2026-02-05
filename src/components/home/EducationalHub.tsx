@@ -60,10 +60,10 @@ export default function EducationalHub() {
             {loading ? (
                 <div className="flex items-center justify-center py-12">
                     <Loader2 className="animate-spin text-emerald-500" size={24} />
-                    <span className="ml-2 text-slate-500">Loading courses...</span>
+                    <span className="ml-2 text-slate-500 dark:text-slate-400">Loading courses...</span>
                 </div>
             ) : error && courses.length === 0 ? (
-                <div className="flex items-center justify-center py-12 text-slate-500">
+                <div className="flex items-center justify-center py-12 text-slate-500 dark:text-slate-400">
                     <AlertCircle size={20} className="mr-2" />
                     <span>Failed to load courses</span>
                 </div>

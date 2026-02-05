@@ -48,11 +48,22 @@ import {
 import ComparisonMode, { type ComparisonSymbol } from './ComparisonMode';
 import MultiTimeframeView from './MultiTimeframeView';
 import { ChartGridLayout, ChartLayoutSelector, type ChartLayout } from './layout';
+import RiskAnalysisPanel from './RiskAnalysisPanel';
 
 interface AdvancedChartPageProps {
     symbol: string;
-    assetType?: 'stock' | 'crypto' | 'forex';
+    assetType?: 'stock' | 'crypto' | 'forex' | 'commodity';
 }
+
+// ... (code omitted for brevity if not strictly needed, but I should probably just replace the block)
+
+// Actually, I can use the tool to replace smaller chunks?
+// The tool requires context.
+// Let's replace the Interface and the fetchData block.
+
+// Interface replacement not shown here as I need to be careful with line numbers.
+// I will just replace the specific blocks.
+
 
 type ChartType = 'candle' | 'area' | 'line' | 'bar';
 type Period = '1D' | '5D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | '5Y' | 'All';
@@ -114,6 +125,7 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
     const [isInWatchlist, setIsInWatchlist] = useState(false);
     const [showSidebar, setShowSidebar] = useState(true);
     const [showMultiTimeframe, setShowMultiTimeframe] = useState(false);
+    const [showRiskPanel, setShowRiskPanel] = useState(false);
     const [crosshairData, setCrosshairData] = useState<{ time: string; price: number; change: number; volume: number } | null>(null);
     const { formatPrice } = useCurrency();
 
@@ -172,6 +184,9 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                 historyData = response.data;
             } else if (assetType === 'forex') {
                 historyData = await getForexHistory(symbol, apiPeriod, apiInterval);
+            } else if (assetType === 'commodity') {
+                const response = await getStockHistory(symbol, apiPeriod, apiInterval);
+                historyData = response.data;
             } else {
                 const response = await getStockHistory(symbol, apiPeriod, apiInterval);
                 historyData = response.data;
@@ -720,6 +735,14 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                         Patterns
                     </button>
 
+                    {/* Risk Analysis Toggle */}
+                    <button
+                        onClick={() => setShowRiskPanel(!showRiskPanel)}
+                        className={`px-3 py-1.5 text-sm rounded transition flex items-center gap-1 ${showRiskPanel ? 'bg-orange-600/20 text-orange-400 border border-orange-500/30' : 'bg-slate-800 hover:bg-slate-700'}`}
+                    >
+                        Risk
+                    </button>
+
                     {/* Indicators Panel */}
                     <IndicatorPanel
                         activeIndicators={activeIndicators}
@@ -824,6 +847,13 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                     <span>© 2026 Pearto Finance</span>
                 </div>
             </footer>
+
+            {/* Risk Analysis Panel */}
+            <RiskAnalysisPanel
+                symbol={symbol}
+                isOpen={showRiskPanel}
+                onClose={() => setShowRiskPanel(false)}
+            />
 
             {/* Multi-Timeframe View Modal */}
             <MultiTimeframeView

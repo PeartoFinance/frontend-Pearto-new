@@ -18,6 +18,7 @@ import {
     getCryptoMarkets,
     getMarketIndices,
     getCommodities,
+    getForexRates,
     type MarketStock,
     type SectorAnalysisData
 } from '@/services/marketService';
@@ -45,7 +46,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 type SortField = 'symbol' | 'price' | 'change' | 'changePercent' | 'open' | 'high' | 'low' | 'volume' | 'turnover' | 'previousClose';
 type SortDirection = 'asc' | 'desc';
-type TabType = 'All' | 'Stocks' | 'Crypto' | 'Indices' | 'Commodities';
+type TabType = 'All' | 'Stocks' | 'Crypto' | 'Indices' | 'Commodities' | 'Forex';
 
 export default function LiveMarketsPage() {
     // Currency formatting
@@ -193,6 +194,24 @@ export default function LiveMarketsPage() {
                     volume: 0
                 } as unknown as MarketStock));
                 newStocks = [...newStocks, ...mappedComm];
+            }
+            if (activeTab === 'All' || activeTab === 'Forex') {
+                const forex = await getForexRates();
+                const mappedForex = forex.map(f => ({
+                    id: 0, // Placeholder
+                    symbol: f.pair,
+                    name: f.pair,
+                    price: f.rate,
+                    change: f.change,
+                    changePercent: f.changePercent,
+                    dayHigh: f.high,
+                    dayLow: f.low,
+                    sector: 'Forex',
+                    assetType: 'forex',
+                    volume: 0,
+                    turnover: 0
+                } as unknown as MarketStock));
+                newStocks = [...newStocks, ...mappedForex];
             }
 
             setStocks(newStocks);
@@ -480,6 +499,16 @@ export default function LiveMarketsPage() {
                                             >
                                                 <DollarSign size={14} />
                                                 Commodities
+                                            </button>
+                                            <button
+                                                onClick={() => { setActiveTab('Forex'); setSelectedSector('All'); }}
+                                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeTab === 'Forex'
+                                                    ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-500 shadow-sm'
+                                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50'
+                                                    }`}
+                                            >
+                                                <DollarSign size={14} />
+                                                Forex
                                             </button>
                                         </div>
                                     </div>

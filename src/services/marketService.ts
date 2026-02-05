@@ -79,6 +79,18 @@ export interface Commodity {
     dayLow?: number;
     unit?: string;
     currency?: string;
+    category?: string;
+}
+
+export interface ForexRate {
+    pair: string;
+    rate: number;
+    change: number;
+    changePercent: number;
+    high: number;
+    low: number;
+    baseCurrency: string;
+    targetCurrency: string;
 }
 
 export interface StockOffer {
@@ -152,11 +164,15 @@ export async function searchStocks(query: string, limit = 10): Promise<MarketSto
     return get<MarketStock[]>('/stocks/search', { q: query, limit });
 }
 
-/**
- * Get commodities data
- */
 export async function getCommodities(): Promise<Commodity[]> {
     return get<Commodity[]>('/market/commodities');
+}
+
+/**
+ * Get forex rates
+ */
+export async function getForexRates(base = 'USD'): Promise<ForexRate[]> {
+    return get<ForexRate[]>('/content/forex', { base });
 }
 
 /**
@@ -504,6 +520,38 @@ export async function getForexHistory(symbol: string, period = '1mo', interval =
     return get<PriceHistoryPoint[]>(`/market/forex/history/${symbol}`, { period, interval });
 }
 
+/**
+ * Technical Analysis Response
+ */
+export interface TechnicalAnalysisResponse {
+    symbol: string;
+    price: number;
+    summary: {
+        score: number;
+        signal: string;
+        oscillatorsScore: number;
+        movingAveragesScore: number;
+        counts: {
+            oscillators: { buy: number; sell: number; neutral: number };
+            movingAverages: { buy: number; sell: number; neutral: number };
+        };
+    };
+    indicators: {
+        rsi: { value: number; signal: string };
+        stoch: { k: number; signal: string };
+        macd: { value: number; signal: string };
+        cci: { value: number; signal: string };
+        movingAverages: { name: string; value: number | null; signal: string }[];
+    };
+}
+
+/**
+ * Get technical analysis (Risk Analyzer)
+ */
+export async function getTechnicalAnalysis(symbol: string): Promise<TechnicalAnalysisResponse> {
+    return get<TechnicalAnalysisResponse>(`/market/technical-analysis/${symbol}`);
+}
+
 export default {
     getMarketOverview,
     getMarketIndices,
@@ -532,4 +580,6 @@ export default {
     getStockForecast,
     getStockStatistics,
     getStockDividends,
+    // Technical Analysis
+    getTechnicalAnalysis,
 };

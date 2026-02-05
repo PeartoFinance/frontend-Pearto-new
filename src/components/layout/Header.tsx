@@ -88,7 +88,7 @@ function DropdownMenu({ label, icon, items, isOpen, onToggle, onClose }: Dropdow
         <div className="relative" ref={ref}>
             <button
                 onClick={onToggle}
-                className={`inline-flex items-center gap-2 h-9 px-3 rounded-full border transition text-sm font-medium ${isOpen
+                className={`inline-flex items-center gap-2 h-9 px-3 rounded-full border transition text-sm font-medium text-slate-700 dark:text-slate-200 ${isOpen
                     ? 'bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600'
                     : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700'
                     }`}
@@ -491,7 +491,7 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                         </div>
 
                         <div className="p-4 space-y-4">
-                            <button className="w-full flex items-center gap-3 h-12 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-500">
+                            <button className="w-full flex items-center gap-3 h-12 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
                                 <Search size={18} />
                                 <span>Search stocks, crypto...</span>
                             </button>
@@ -510,8 +510,8 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                                         {pillarsItems.map((item) => {
                                             const Icon = iconMap[item.icon] || TrendingUp;
                                             return (
-                                                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-                                                    <Icon size={16} className="text-slate-500" />
+                                                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition text-slate-700 dark:text-slate-200">
+                                                    <Icon size={16} className="text-slate-500 dark:text-slate-400" />
                                                     {item.label}
                                                 </Link>
                                             );
@@ -539,8 +539,8 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                                         {toolsItems.map((item) => {
                                             const Icon = iconMap[item.icon] || Calculator;
                                             return (
-                                                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition text-sm">
-                                                    <Icon size={16} className="text-slate-500" />
+                                                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition text-sm text-slate-700 dark:text-slate-200">
+                                                    <Icon size={16} className="text-slate-500 dark:text-slate-400" />
                                                     {item.label}
                                                 </Link>
                                             );
@@ -559,8 +559,8 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                                         {resourcesItems.map((item) => {
                                             const Icon = iconMap[item.icon] || BookOpen;
                                             return (
-                                                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition text-sm">
-                                                    <Icon size={16} className="text-slate-500" />
+                                                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition text-sm text-slate-700 dark:text-slate-200">
+                                                    <Icon size={16} className="text-slate-500 dark:text-slate-400" />
                                                     {item.label}
                                                 </Link>
                                             );

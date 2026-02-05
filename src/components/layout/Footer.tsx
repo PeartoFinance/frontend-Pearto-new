@@ -126,7 +126,7 @@ export default function Footer() {
     ];
 
     return (
-        <footer className="bg-slate-900 text-white relative">
+        <footer className="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 relative transition-colors">
             {/* Scroll to Top Button */}
             {showScrollTop && (
                 <button
@@ -144,11 +144,11 @@ export default function Footer() {
                     {/* Brand Section */}
                     <div className="col-span-2 md:col-span-4 lg:col-span-1 space-y-4">
                         <Link href="/" className="inline-block">
-                            <span className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                            <span className="text-2xl font-bold bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">
                                 Pearto
                             </span>
                         </Link>
-                        <p className="text-slate-400 text-sm leading-relaxed">
+                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
                             Your premier destination for real-time market data, investment tools, and financial insights.
                         </p>
 
@@ -162,7 +162,7 @@ export default function Footer() {
                                         href={social.href}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="p-2 bg-slate-800 hover:bg-emerald-600 rounded-lg transition-colors"
+                                        className="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-500 rounded-lg transition-colors"
                                         aria-label={social.label}
                                     >
                                         <Icon size={18} />
@@ -175,7 +175,7 @@ export default function Footer() {
                     {/* Link Sections */}
                     {sections.map((section) => (
                         <div key={section.title}>
-                            <h3 className="font-semibold text-white mb-4">{section.title}</h3>
+                            <h3 className="font-semibold text-slate-900 dark:text-white mb-4">{section.title}</h3>
                             <ul className="space-y-2">
                                 {section.links.map((link) => (
                                     <li key={link.href + link.label}>
@@ -184,7 +184,7 @@ export default function Footer() {
                                                 href={link.href}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-slate-400 hover:text-emerald-400 text-sm flex items-center gap-1 transition-colors"
+                                                className="text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 text-sm flex items-center gap-1 transition-colors"
                                             >
                                                 {link.label}
                                                 <ExternalLink size={12} />
@@ -192,7 +192,7 @@ export default function Footer() {
                                         ) : (
                                             <Link
                                                 href={link.href}
-                                                className="text-slate-400 hover:text-emerald-400 text-sm transition-colors"
+                                                className="text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 text-sm transition-colors"
                                             >
                                                 {link.label}
                                             </Link>
@@ -205,13 +205,13 @@ export default function Footer() {
                 </div>
 
                 {/* Contact Info */}
-                <div className="mt-12 pt-8 border-t border-slate-800">
-                    <div className="flex flex-wrap gap-6 text-sm text-slate-400">
-                        <a href="mailto:support@pearto.com" className="flex items-center gap-2 hover:text-emerald-400 transition-colors">
+                <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800">
+                    <div className="flex flex-wrap gap-6 text-sm text-slate-600 dark:text-slate-400">
+                        <a href="mailto:support@pearto.com" className="flex items-center gap-2 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                             <Mail size={16} />
                             support@pearto.com
                         </a>
-                        <a href="tel:+1234567890" className="flex items-center gap-2 hover:text-emerald-400 transition-colors">
+                        <a href="tel:+1234567890" className="flex items-center gap-2 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                             <Phone size={16} />
                             +1 (234) 567-890
                         </a>
@@ -224,24 +224,25 @@ export default function Footer() {
             </div>
 
             {/* Bottom Bar */}
-            <div className="border-t border-slate-800">
-                <div className="max-w-7xl mx-auto px-4 lg:px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-slate-500 text-sm text-center md:text-left">
+            <div className="border-t border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/50">
+                <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p className="text-slate-500 dark:text-slate-500 text-sm text-center md:text-left">
                         © {new Date().getFullYear()} Pearto Finance. All rights reserved.
                     </p>
-                    <div className="flex gap-4 text-sm text-slate-500">
-                        <Link href="/p/privacy" className="hover:text-emerald-400 transition-colors">
+                    <div className="flex gap-6 text-sm text-slate-500 dark:text-slate-500">
+                        <Link href="/p/privacy" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                             Privacy
                         </Link>
-                        <Link href="/p/terms" className="hover:text-emerald-400 transition-colors">
+                        <Link href="/p/terms" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                             Terms
                         </Link>
-                        <Link href="/sitemap.xml" className="hover:text-emerald-400 transition-colors">
+                        <Link href="/sitemap.xml" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                             Sitemap
                         </Link>
                     </div>
                 </div>
             </div>
         </footer>
+
     );
 }

@@ -116,7 +116,7 @@ export default function StatsGrid() {
 
     if (error || statsData.length === 0) {
         return (
-            <div className="flex items-center justify-center py-12 text-slate-500">
+            <div className="flex items-center justify-center py-12 text-slate-500 dark:text-slate-400">
                 <AlertCircle size={20} className="mr-2" />
                 <span>No market data available. Import data from admin panel.</span>
             </div>

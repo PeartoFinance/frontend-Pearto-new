@@ -37,6 +37,9 @@ import {
     ArrowLeft, Loader2, AlertCircle, TrendingUp, TrendingDown,
     Globe, Building2, Star, BarChart2, ExternalLink, Newspaper, Clock, Activity
 } from 'lucide-react';
+import RiskAnalysisWidget from '@/components/stocks/RiskAnalysisWidget';
+import LiveModeToggle from '@/components/widgets/LiveModeToggle';
+import { LiveModeProvider, useLiveMode } from '@/context/LiveModeContext';
 
 type Period = '1m' | '1d' | '5d' | '1mo' | '3mo' | '6mo' | '1y' | '5y';
 
@@ -45,7 +48,17 @@ interface StockWithExtras extends MarketStock {
     news?: NewsArticle[];
 }
 
+// Main export wraps with LiveModeProvider
 export default function StockDetailPage() {
+    return (
+        <LiveModeProvider>
+            <StockDetailContent />
+        </LiveModeProvider>
+    );
+}
+
+// This component consumes LiveModeContext
+function StockDetailContent() {
     const params = useParams();
     const symbol = (params?.symbol as string)?.toUpperCase() || '';
 
@@ -59,6 +72,8 @@ export default function StockDetailPage() {
     const [newsLoading, setNewsLoading] = useState(false);
     const [showCompareModal, setShowCompareModal] = useState(false);
     const [activeTab, setActiveTab] = useState<TabId>('overview');
+
+    const { isLive, refreshTrigger } = useLiveMode();
 
     const loadStock = useCallback(async () => {
         if (!symbol) return;
@@ -75,11 +90,9 @@ export default function StockDetailPage() {
             setStock(profileData);
             setHistory(historyData);
 
-            // Set news from profile response if available
             if (profileData.news) {
                 setNews(profileData.news);
             } else {
-                // Fallback: Load news separately
                 try {
                     setNewsLoading(true);
                     const newsData = await getNewsByStock(symbol, 6);
@@ -115,9 +128,11 @@ export default function StockDetailPage() {
         }
     }, [symbol]);
 
+    // Refresh on live mode trigger
     useEffect(() => {
         loadStock();
-    }, [loadStock]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [symbol, period, isLive && refreshTrigger]);
 
     // Helper functions
     const formatNumber = (num: number | undefined | null, decimals = 2): string => {
@@ -144,13 +159,12 @@ export default function StockDetailPage() {
 
     const isPositive = (stock?.changePercent ?? 0) >= 0;
 
-    // Format ISO date to yyyy-mm-dd for MultiChart
     const formatChartDate = (dateStr: string): string => {
         if (!dateStr) return '';
         return dateStr.split('T')[0];
     };
 
-    // Render tab content based on active tab
+    // Render tab content
     const renderTabContent = () => {
         if (!stock) return null;
 
@@ -158,9 +172,7 @@ export default function StockDetailPage() {
             case 'overview':
                 return (
                     <>
-                        {/* Stats + Chart Grid */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                            {/* Key Stats */}
                             <div className="lg:col-span-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
                                 <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
                                     Key Statistics
@@ -215,9 +227,7 @@ export default function StockDetailPage() {
                                 </div>
                             </div>
 
-                            {/* Chart */}
                             <div className="lg:col-span-2 space-y-2">
-                                {/* Chart Header with Expand button */}
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Price Chart</span>
                                     <div className="flex items-center gap-2">
@@ -259,61 +269,65 @@ export default function StockDetailPage() {
                             </div>
                         </div>
 
-                        {/* About & Quick News */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-5">
-                            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
-                                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">
-                                    About {stock.name}
-                                </h3>
-                                {stock.description ? (
-                                    <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-4">
-                                        {stock.description}
-                                    </p>
-                                ) : (
-                                    <p className="text-sm text-slate-400">No description available.</p>
-                                )}
-                                <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                                    {stock.sector && (
-                                        <div className="flex items-center gap-2 text-sm text-slate-500">
-                                            <Building2 size={14} />
-                                            <span>{stock.sector}</span>
-                                        </div>
-                                    )}
-                                    {stock.industry && (
-                                        <span className="text-sm text-slate-400">• {stock.industry}</span>
-                                    )}
-                                </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5">
+                            <div className="lg:col-span-1">
+                                <RiskAnalysisWidget symbol={symbol} />
                             </div>
 
-                            {/* Quick News Preview */}
-                            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                                        <Newspaper size={18} className="text-blue-500" />
-                                        Latest News
+                            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5 h-full">
+                                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">
+                                        About {stock.name}
                                     </h3>
-                                    <button
-                                        onClick={() => setActiveTab('news')}
-                                        className="text-sm text-blue-600 hover:text-blue-500"
-                                    >
-                                        View All →
-                                    </button>
-                                </div>
-                                {news.length > 0 ? (
-                                    <div className="space-y-3">
-                                        {news.slice(0, 3).map((article) => (
-                                            <a
-                                                key={article.id}
-                                                href={article.link || article.url || `/news/${article.slug}`}
-                                                className="block text-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 transition line-clamp-1"
-                                            >
-                                                • {article.title}
-                                            </a>
-                                        ))}
+                                    {stock.description ? (
+                                        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-4">
+                                            {stock.description}
+                                        </p>
+                                    ) : (
+                                        <p className="text-sm text-slate-400">No description available.</p>
+                                    )}
+                                    <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                                        {stock.sector && (
+                                            <div className="flex items-center gap-2 text-sm text-slate-500">
+                                                <Building2 size={14} />
+                                                <span>{stock.sector}</span>
+                                            </div>
+                                        )}
+                                        {stock.industry && (
+                                            <span className="text-sm text-slate-400">• {stock.industry}</span>
+                                        )}
                                     </div>
-                                ) : (
-                                    <p className="text-sm text-slate-400">No news available.</p>
-                                )}
+                                </div>
+
+                                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5 h-full">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                                            <Newspaper size={18} className="text-blue-500" />
+                                            Latest News
+                                        </h3>
+                                        <button
+                                            onClick={() => setActiveTab('news')}
+                                            className="text-sm text-blue-600 hover:text-blue-500"
+                                        >
+                                            View All →
+                                        </button>
+                                    </div>
+                                    {news.length > 0 ? (
+                                        <div className="space-y-3">
+                                            {news.slice(0, 3).map((article) => (
+                                                <a
+                                                    key={article.id}
+                                                    href={article.link || article.url || `/news/${article.slug}`}
+                                                    className="block text-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 transition line-clamp-1"
+                                                >
+                                                    • {article.title}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-slate-400">No news available.</p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </>
@@ -369,7 +383,6 @@ export default function StockDetailPage() {
 
                 <div className="flex-1 pt-[112px] md:pt-[120px] overflow-x-hidden">
                     <div className="p-2 lg:p-3 space-y-3 w-full">
-                        {/* Back Button */}
                         <Link
                             href="/stocks"
                             className="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-colors text-sm"
@@ -378,14 +391,12 @@ export default function StockDetailPage() {
                             <span>Back to Stocks</span>
                         </Link>
 
-                        {/* Loading State */}
                         {loading && (
                             <div className="flex items-center justify-center py-20">
                                 <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
                             </div>
                         )}
 
-                        {/* Error State */}
                         {error && !loading && (
                             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 text-center">
                                 <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
@@ -396,15 +407,12 @@ export default function StockDetailPage() {
                             </div>
                         )}
 
-                        {/* Stock Content */}
                         {stock && !loading && (
                             <>
-                                {/* Market Issues Banner - Full Width */}
                                 {stock.marketIssues && stock.marketIssues.length > 0 && (
                                     <MarketIssuesBanner issues={stock.marketIssues} />
                                 )}
 
-                                {/* Company Header - Full Width */}
                                 <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
                                     <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
                                         <div>
@@ -430,6 +438,7 @@ export default function StockDetailPage() {
                                             </p>
                                         </div>
                                         <div className="flex gap-2">
+                                            <LiveModeToggle />
                                             <button className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-medium">
                                                 <Star size={14} />
                                                 Watchlist
@@ -445,17 +454,13 @@ export default function StockDetailPage() {
                                     </div>
                                 </div>
 
-                                {/* Tab Navigation - Full Width */}
                                 <StockTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-                                {/* Tab Content + AI Widget - 2 Column Layout */}
                                 <div className="flex gap-3">
-                                    {/* Main Tab Content */}
                                     <div className="flex-1 min-w-0">
                                         {renderTabContent()}
                                     </div>
 
-                                    {/* Right Column: AI Widget (Desktop only) */}
                                     <AIColumnWrapper>
                                         <div className="sticky top-[130px]">
                                             <AIAnalysisPanel
@@ -486,7 +491,6 @@ export default function StockDetailPage() {
                 </div>
             </main>
 
-            {/* Floating AI Widget (Mobile/Tablet only) */}
             <div className="xl:hidden">
                 <AIWidget
                     type="floating"
@@ -497,7 +501,6 @@ export default function StockDetailPage() {
                 />
             </div>
 
-            {/* Compare Modal */}
             <StockCompareModal
                 isOpen={showCompareModal}
                 onClose={() => setShowCompareModal(false)}

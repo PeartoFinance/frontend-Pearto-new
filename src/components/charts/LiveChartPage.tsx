@@ -58,10 +58,11 @@ import {
 import ComparisonMode, { type ComparisonSymbol } from './ComparisonMode';
 import MultiTimeframeView from './MultiTimeframeView';
 import { ChartGridLayout, ChartLayoutSelector, type ChartLayout } from './layout';
+import RiskAnalysisPanel from './RiskAnalysisPanel';
 
 interface LiveChartPageProps {
     symbol?: string;
-    assetType?: 'stock' | 'crypto' | 'forex';
+    assetType?: 'stock' | 'crypto' | 'forex' | 'commodity';
 }
 
 export type ChartType = 'candle' | 'area' | 'line' | 'bar';
@@ -127,6 +128,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
     const [isInWatchlist, setIsInWatchlist] = useState(false);
     const [showSidebar, setShowSidebar] = useState(true);
     const [showMultiTimeframe, setShowMultiTimeframe] = useState(false);
+    const [showRiskPanel, setShowRiskPanel] = useState(false);
     const [crosshairData, setCrosshairData] = useState<{ time: string; price: number; change: number; volume: number } | null>(null);
     const { formatPrice } = useCurrency();
 
@@ -210,6 +212,12 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                 historyData = response.data;
             } else if (assetType === 'forex') {
                 historyData = await getForexHistory(symbol, apiPeriod, apiInterval);
+            } else if (assetType === 'commodity') {
+                // Commodities (like Gold GC=F) are handled as stocks in yfinance wrapper
+                // but we might want to ensure they are fetched correctly.
+                // getStockHistory works fine for them if symbol is correct.
+                const response = await getStockHistory(symbol, apiPeriod, apiInterval);
+                historyData = response.data;
             } else {
                 const response = await getStockHistory(symbol, apiPeriod, apiInterval);
                 historyData = response.data;
@@ -1026,12 +1034,19 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                         )}
                     </div>
 
-                    {/* Pattern Toggle */}
                     <button
                         onClick={() => setShowPatterns(!showPatterns)}
                         className={`px-3 py-1.5 text-sm rounded transition ${showPatterns ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30' : 'bg-slate-800 hover:bg-slate-700'}`}
                     >
                         Patterns
+                    </button>
+
+                    {/* Risk Analysis Toggle */}
+                    <button
+                        onClick={() => setShowRiskPanel(!showRiskPanel)}
+                        className={`px-3 py-1.5 text-sm rounded transition flex items-center gap-1 ${showRiskPanel ? 'bg-orange-600/20 text-orange-400 border border-orange-500/30' : 'bg-slate-800 hover:bg-slate-700'}`}
+                    >
+                        Risk
                     </button>
 
                     {/* Indicators Panel */}
@@ -1137,6 +1152,13 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                     <span>© 2026 Pearto Finance</span>
                 </div>
             </footer>
+
+            {/* Risk Analysis Panel */}
+            <RiskAnalysisPanel
+                symbol={symbol}
+                isOpen={showRiskPanel}
+                onClose={() => setShowRiskPanel(false)}
+            />
 
             {/* Multi-Timeframe View Modal */}
             <MultiTimeframeView

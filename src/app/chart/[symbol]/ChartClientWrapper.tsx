@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { FeatureLock } from '@/components/subscription/FeatureGating';
 import { useSubscription } from '@/context/SubscriptionContext';
@@ -24,6 +25,9 @@ interface ChartClientWrapperProps {
 
 export default function ChartClientWrapper({ symbol }: ChartClientWrapperProps) {
     const { isPro, trackUsage } = useSubscription();
+    const searchParams = useSearchParams();
+    const assetType = (searchParams?.get('type') as 'stock' | 'crypto' | 'forex' | 'commodity') || 'stock';
+
     const [isAllowed, setIsAllowed] = useState<boolean | null>(null);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
@@ -66,7 +70,7 @@ export default function ChartClientWrapper({ symbol }: ChartClientWrapperProps) 
             )}
 
             {isAllowed ? (
-                <AdvancedChartPage symbol={symbol} />
+                <AdvancedChartPage symbol={symbol} assetType={assetType} />
             ) : (
                 <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
                     <FeatureLock

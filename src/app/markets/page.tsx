@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
@@ -18,25 +19,41 @@ import {
     getStocks,
     getStockHistory,
     getCryptoMarkets,
+    getCommodities,
     type MarketOverviewData,
     type MarketStock,
     type MarketIndex,
-    type PriceHistoryPoint
+    type PriceHistoryPoint,
+    type Commodity,
+    type ForexRate,
+    getForexRates
 } from '@/services/marketService';
 import { createChart, ColorType, AreaSeries, type IChartApi } from 'lightweight-charts';
 import {
     TrendingUp, TrendingDown, Activity, BarChart2, Loader2,
-    ArrowUpRight, ArrowDownRight, RefreshCw, Clock, LineChart, PieChart, Coins, Zap
+    ArrowUpRight, ArrowDownRight, RefreshCw, Clock, LineChart, PieChart, Coins, Zap, Globe, Hammer
 } from 'lucide-react';
 import { TableExportButton } from '@/components/common/TableExportButton';
 
-type TabType = 'overview' | 'live' | 'crypto' | 'floorsheet' | 'charts' | 'analysis';
+// Dynamic imports for performance
+const ForexTab = dynamic(() => import('@/components/markets/ForexTab'), { loading: () => <LoadingTab /> });
+const CommoditiesTab = dynamic(() => import('@/components/markets/CommoditiesTab'), { loading: () => <LoadingTab /> });
+
+const LoadingTab = () => (
+    <div className="flex items-center justify-center py-20">
+        <Loader2 className="animate-spin text-emerald-500" size={32} />
+    </div>
+);
+
+type TabType = 'overview' | 'live' | 'crypto' | 'forex' | 'commodities' | 'floorsheet' | 'charts' | 'analysis';
 
 export default function MarketPage() {
     const [activeTab, setActiveTab] = useState<TabType>('overview');
     const [overview, setOverview] = useState<MarketOverviewData | null>(null);
     const [allStocks, setAllStocks] = useState<MarketStock[]>([]);
     const [cryptoData, setCryptoData] = useState<MarketStock[]>([]);
+    const [commoditiesData, setCommoditiesData] = useState<Commodity[]>([]);
+    const [forexData, setForexData] = useState<ForexRate[]>([]);
     const [loading, setLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
     const { formatPrice } = useCurrency();
@@ -45,14 +62,18 @@ export default function MarketPage() {
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
-            const [overviewData, stocksData, crypto] = await Promise.all([
+            const [overviewData, stocksData, crypto, commodities, forex] = await Promise.all([
                 getMarketOverview(),
                 getStocks(undefined, 50),
-                getCryptoMarkets(100)
+                getCryptoMarkets(100),
+                getCommodities(),
+                getForexRates('USD')
             ]);
             setOverview(overviewData);
             setAllStocks(stocksData);
             setCryptoData(crypto);
+            setCommoditiesData(commodities);
+            setForexData(forex);
             setLastUpdated(new Date());
         } catch (err) {
             console.error('Failed to load market data:', err);
@@ -81,13 +102,15 @@ export default function MarketPage() {
         return num.toLocaleString();
     };
 
-    const tabs: { id: TabType; label: string }[] = [
-        { id: 'overview', label: 'Overview' },
-        { id: 'live', label: 'Live Market' },
-        { id: 'crypto', label: 'Crypto' },
-        { id: 'floorsheet', label: 'Floorsheet' },
-        { id: 'charts', label: 'Charts' },
-        { id: 'analysis', label: 'Analysis' },
+    const tabs: { id: TabType; label: string; icon?: React.ReactNode }[] = [
+        { id: 'overview', label: 'Overview', icon: <Activity size={16} /> },
+        { id: 'live', label: 'Live Market', icon: <TrendingUp size={16} /> },
+        { id: 'crypto', label: 'Crypto', icon: <Coins size={16} /> },
+        { id: 'forex', label: 'Forex', icon: <Globe size={16} /> },
+        { id: 'commodities', label: 'Commodities', icon: <Hammer size={16} /> },
+        { id: 'floorsheet', label: 'Floorsheet', icon: <BarChart2 size={16} /> },
+        { id: 'charts', label: 'Charts', icon: <LineChart size={16} /> },
+        { id: 'analysis', label: 'Analysis', icon: <PieChart size={16} /> },
     ];
 
     return (
@@ -95,9 +118,10 @@ export default function MarketPage() {
             <Sidebar />
 
             <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
-                <div className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-gray-50 dark:bg-slate-900">
+                <div className="fixed top-0 right-0 left-0 lg:left-64 z-50 bg-gray-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
                     <TickerTape />
                     <Header />
+
                 </div>
 
                 <div className="flex-1 pt-[112px] md:pt-[120px] overflow-x-hidden">
@@ -152,6 +176,10 @@ export default function MarketPage() {
                             ))}
                         </div>
 
+                        {/* Forex Tab */}
+                        {activeTab === 'forex' && (
+                            <ForexTab initialRates={forexData} isLoading={loading} />
+                        )}
                         {/* Overview Tab - Use existing widgets */}
                         {activeTab === 'overview' && (
                             <>
@@ -191,6 +219,11 @@ export default function MarketPage() {
                                 </div>
                                 <PublicOfferings />
                             </>
+                        )}
+
+                        {/* Commodities Tab */}
+                        {activeTab === 'commodities' && (
+                            <CommoditiesTab commodities={commoditiesData} isLoading={loading} />
                         )}
 
                         {/* Live Market Tab */}
