@@ -118,13 +118,12 @@ export default function MarketPage() {
             <Sidebar />
 
             <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
-                <div className="fixed top-0 right-0 left-0 lg:left-64 z-50 bg-gray-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+                <div className="sticky top-0 z-40 bg-gray-50/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
                     <TickerTape />
                     <Header />
-
                 </div>
 
-                <div className="flex-1 pt-[112px] md:pt-[120px] overflow-x-hidden">
+                <div className="flex-1 overflow-x-hidden">
                     <div className="p-4 lg:p-6 space-y-6 w-full">
                         {/* Header */}
                         <div className="flex items-center justify-between">
@@ -394,10 +393,10 @@ export default function MarketPage() {
                                                                 {coin.name}
                                                             </td>
                                                             <td className="px-4 py-3 text-right font-semibold text-slate-900 dark:text-white">
-                                                                ${formatNumber(coin.price)}
+                                                                {formatPrice(coin.price)}
                                                             </td>
                                                             <td className={`px-4 py-3 text-right font-medium ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
-                                                                {isPositive ? '+' : ''}{formatNumber(coin.change)}
+                                                                {isPositive ? '+' : ''}{formatPrice(coin.change)}
                                                             </td>
                                                             <td className="px-4 py-3 text-right">
                                                                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${isPositive
@@ -527,7 +526,7 @@ export default function MarketPage() {
                                                         </div>
                                                     </div>
                                                     <div className="text-right">
-                                                        <p className="font-semibold text-slate-900 dark:text-white">${formatNumber(stock.price)}</p>
+                                                        <p className="font-semibold text-slate-900 dark:text-white">{formatPrice(stock.price)}</p>
                                                         <p className="text-sm text-emerald-500">+{formatNumber(stock.changePercent)}%</p>
                                                     </div>
                                                 </Link>
@@ -552,7 +551,7 @@ export default function MarketPage() {
                                                         </div>
                                                     </div>
                                                     <div className="text-right">
-                                                        <p className="font-semibold text-slate-900 dark:text-white">${formatNumber(stock.price)}</p>
+                                                        <p className="font-semibold text-slate-900 dark:text-white">{formatPrice(stock.price)}</p>
                                                         <p className="text-sm text-red-500">{formatNumber(stock.changePercent)}%</p>
                                                     </div>
                                                 </Link>

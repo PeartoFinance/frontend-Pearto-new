@@ -50,7 +50,7 @@ type TabType = 'All' | 'Stocks' | 'Crypto' | 'Indices' | 'Commodities' | 'Forex'
 
 export default function LiveMarketsPage() {
     // Currency formatting
-    const { formatPrice } = useCurrency();
+    const { formatPrice, symbol } = useCurrency();
 
     // State
     const [dashboard, setDashboard] = useState<LiveDashboardData | null>(null);
@@ -279,9 +279,12 @@ export default function LiveMarketsPage() {
                     transactions: 0,
                     transactionsPercent: 0,
                     avgChangePercent: 0,
+                    avgYtdReturn: 0,
+                    weight: 0,
                     advancers: 0,
                     decliners: 0,
-                    unchanged: 0
+                    unchanged: 0,
+                    stockCount: 0
                 };
             }
 
@@ -289,9 +292,11 @@ export default function LiveMarketsPage() {
             analysis[sector].turnover += turnover;
             analysis[sector].volume += (stock.volume || 0);
             analysis[sector].transactions += 1; // Simplification
+            analysis[sector].stockCount += 1;
 
             // Accumulate change percent for average calculation (temporarily store sum)
             analysis[sector].avgChangePercent += (stock.changePercent || 0);
+            analysis[sector].avgYtdReturn += (stock.ytdReturn || 0);
 
             totalTurnover += turnover;
             totalVolume += (stock.volume || 0);
@@ -307,10 +312,13 @@ export default function LiveMarketsPage() {
             const count = s.advancers + s.decliners + s.unchanged;
             return {
                 ...s,
+                transactionsPercent: totalTransactions ? (s.transactions / totalTransactions) * 100 : 0,
                 turnoverPercent: totalTurnover ? (s.turnover / totalTurnover) * 100 : 0,
                 volumePercent: totalVolume ? (s.volume / totalVolume) * 100 : 0,
-                transactionsPercent: totalTransactions ? (s.transactions / totalTransactions) * 100 : 0,
-                avgChangePercent: count > 0 ? (s.avgChangePercent / count) : 0
+                avgChangePercent: count > 0 ? (s.avgChangePercent / count) : 0,
+                avgYtdReturn: count > 0 ? (s.avgYtdReturn / count) : 0,
+                weight: totalTurnover ? (s.turnover / totalTurnover) * 100 : 0, // Using turnover weight as proxy for now
+                stockCount: s.stockCount
             };
         }).sort((a, b) => b.turnoverPercent - a.turnoverPercent);
     }, [filteredStocks, activeTab]);
@@ -781,7 +789,7 @@ export default function LiveMarketsPage() {
                                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 shadow-sm dark:shadow-none">
                                         <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs mb-1">
                                             <Banknote size={14} />
-                                            Total Turnover Rs:
+                                            Total Turnover ({symbol}):
                                         </div>
                                         {loading ? <Skeleton className="h-6 w-24 mt-1" /> : (
                                             <p className="text-lg font-bold text-slate-900 dark:text-white">{formatLargeNumber(marketStats.totalTurnover)}</p>

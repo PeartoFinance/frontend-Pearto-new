@@ -47,6 +47,7 @@ export interface MarketStock {
     logoUrl?: string;
     website?: string;
     description?: string;
+    ytdReturn?: number;
 }
 
 // Types matching backend MarketIndices.to_dict()
@@ -217,9 +218,12 @@ export interface SectorAnalysisData {
     transactions: number;
     transactionsPercent: number;
     avgChangePercent: number;
+    avgYtdReturn: number;
+    weight: number;
     advancers: number;
     decliners: number;
     unchanged: number;
+    stockCount: number;
 }
 
 export interface SectorAnalysisResponse {

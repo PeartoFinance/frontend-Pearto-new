@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.16",
+    "@types/recharts": "^1.8.29",
     "file-saver": "^2.0.5",
     "firebase": "^12.7.0",
     "i18next": "^25.7.3",
@@ -23,6 +24,7 @@
     "react-dom": "19.2.3",
     "react-i18next": "^16.5.1",
     "react-markdown": "^10.1.0",
+    "recharts": "^3.7.0",
     "remark-gfm": "^4.0.1",
     "xlsx": "^0.18.5"
   },

@@ -9,8 +9,9 @@ import {
     Bitcoin, DollarSign, BarChart3, Calculator, PiggyBank, Landmark,
     GraduationCap, FileText, HelpCircle, Tv, Radio, Newspaper, LucideIcon,
     LayoutDashboard, Briefcase, Star, Zap, Home, Mail, Phone, Globe,
-    Shield, Lock, Key, Heart, Filter, List, Clock
+    Shield, Lock, Key, Heart, Filter, List, Clock, ChevronRight
 } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useSubscription } from '@/context/SubscriptionContext';
 import SearchModal from './SearchModal';
@@ -137,6 +138,14 @@ interface FeaturedItem {
     label: string;
     css_class?: string;
 }
+
+// Simple Portal Component
+const Portal = ({ children }: { children: React.ReactNode }) => {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
+    if (!mounted) return null;
+    return createPortal(children, document.body);
+};
 
 export default function Header({ isFixed = false, customBg }: { isFixed?: boolean; customBg?: string }) {
     const { t } = useTranslation();
@@ -473,110 +482,141 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
 
             {/* Mobile Menu */}
             {mobileOpen && (
-                <>
-                    <div className="lg:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setMobileOpen(false)} />
-                    <div className="lg:hidden fixed inset-y-0 left-0 w-80 max-w-[85vw] z-50 bg-white dark:bg-slate-900 overflow-auto shadow-2xl">
-                        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
-                            <Link href="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
-                                    <span className="text-white font-bold text-sm">P</span>
-                                </div>
-                                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-cyan-500">
-                                    Pearto
-                                </span>
-                            </Link>
-                            <button onClick={() => setMobileOpen(false)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
-                                <X size={20} className="text-slate-600 dark:text-slate-300" />
-                            </button>
-                        </div>
-
-                        <div className="p-4 space-y-4">
-                            <button className="w-full flex items-center gap-3 h-12 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                                <Search size={18} />
-                                <span>Search stocks, crypto...</span>
-                            </button>
-
-                            <Link href="/ai" onClick={() => setMobileOpen(false)} className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-white bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 shadow">
-                                <Sparkles size={18} />
-                                AI Assistant
-                            </Link>
-
-                            <div className="space-y-4">
-                                <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4">
-                                    <div className="text-xs uppercase tracking-wide text-slate-500 mb-3 flex items-center gap-2">
-                                        <Layers size={14} /> Pillars
+                <Portal>
+                    <div className="fixed inset-0 z-[100]">
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
+                        <div className="absolute inset-y-0 left-0 w-80 max-w-[85vw] bg-white dark:bg-slate-900 overflow-y-auto shadow-2xl animate-in slide-in-from-left duration-300">
+                            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 sticky top-0 z-10 backdrop-blur">
+                                <Link href="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
+                                        <span className="text-white font-bold text-sm">P</span>
                                     </div>
-                                    <div className="space-y-1">
-                                        {pillarsItems.map((item) => {
-                                            const Icon = iconMap[item.icon] || TrendingUp;
-                                            return (
-                                                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition text-slate-700 dark:text-slate-200">
-                                                    <Icon size={16} className="text-slate-500 dark:text-slate-400" />
-                                                    {item.label}
+                                    <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-cyan-500">
+                                        Pearto
+                                    </span>
+                                </Link>
+                                <button onClick={() => setMobileOpen(false)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                    <X size={20} className="text-slate-600 dark:text-slate-300" />
+                                </button>
+                            </div>
+
+                            <div className="p-4 space-y-6 pb-20">
+                                {/* Search */}
+                                <button
+                                    onClick={() => { setMobileOpen(false); setSearchOpen(true); }}
+                                    className="w-full flex items-center gap-3 h-12 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:border-emerald-500/50 transition-colors"
+                                >
+                                    <Search size={18} />
+                                    <span>Search stocks, crypto...</span>
+                                </button>
+
+                                {/* AI Button */}
+                                <Link href="/ai" onClick={() => setMobileOpen(false)} className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl font-bold text-white bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-600 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 transition-all active:scale-[0.98]">
+                                    <Sparkles size={18} />
+                                    AI Assistant
+                                </Link>
+
+                                <div className="space-y-6">
+                                    {/* Pillars */}
+                                    <div className="space-y-3">
+                                        <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2 px-2">
+                                            <Layers size={14} /> Pillars
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {pillarsItems.map((item) => {
+                                                const Icon = iconMap[item.icon] || TrendingUp;
+                                                return (
+                                                    <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800 transition-all text-center">
+                                                        <Icon size={20} className="text-emerald-500" />
+                                                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{item.label}</span>
+                                                    </Link>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Featured */}
+                                    <div className="space-y-2">
+                                        {featuredItems.map((item) => (
+                                            <Link
+                                                key={item.href}
+                                                href={item.href}
+                                                onClick={() => setMobileOpen(false)}
+                                                className={`flex items-center justify-center w-full py-3 rounded-xl font-bold text-white shadow hover:shadow-md transition active:scale-[0.98] ${item.css_class || 'bg-gradient-to-br from-emerald-500 to-cyan-500'}`}
+                                            >
+                                                {item.label}
+                                            </Link>
+                                        ))}
+                                    </div>
+
+                                    {/* Tools */}
+                                    <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-1">
+                                        <button
+                                            onClick={() => handleDropdownToggle('mobile-tools')}
+                                            className="w-full flex items-center justify-between p-3 text-sm font-medium text-slate-700 dark:text-slate-200"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <Wrench size={16} className="text-slate-400" />
+                                                Tools
+                                            </div>
+                                            <ChevronDown size={16} className={`text-slate-400 transition-transform ${openDropdown === 'mobile-tools' ? 'rotate-180' : ''}`} />
+                                        </button>
+                                        {openDropdown === 'mobile-tools' && (
+                                            <div className="px-3 pb-3 space-y-1 animate-in slide-in-from-top-2">
+                                                {toolsItems.map((item) => {
+                                                    const Icon = iconMap[item.icon] || Calculator;
+                                                    return (
+                                                        <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition text-sm text-slate-600 dark:text-slate-300">
+                                                            <Icon size={16} />
+                                                            {item.label}
+                                                        </Link>
+                                                    );
+                                                })}
+                                                <Link href="/tools" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                                                    View All Tools <ChevronRight size={14} />
                                                 </Link>
-                                            );
-                                        })}
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
 
-                                {/* Dynamic featured buttons */}
-                                {featuredItems.map((item) => (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        onClick={() => setMobileOpen(false)}
-                                        className={`flex items-center justify-center w-full py-3 rounded-xl font-bold text-white shadow ${item.css_class || 'bg-gradient-to-br from-emerald-500 to-cyan-500'}`}
-                                    >
-                                        {item.label}
-                                    </Link>
-                                ))}
-
-                                <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4">
-                                    <div className="text-xs uppercase tracking-wide text-slate-500 mb-3 flex items-center gap-2">
-                                        <Wrench size={14} /> Tools
-                                    </div>
-                                    <div className="space-y-1">
-                                        {toolsItems.map((item) => {
-                                            const Icon = iconMap[item.icon] || Calculator;
-                                            return (
-                                                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition text-sm text-slate-700 dark:text-slate-200">
-                                                    <Icon size={16} className="text-slate-500 dark:text-slate-400" />
-                                                    {item.label}
-                                                </Link>
-                                            );
-                                        })}
-                                        <Link href="/tools" onClick={() => setMobileOpen(false)} className="text-sm text-emerald-600 dark:text-emerald-400 px-3 py-2 hover:underline">
-                                            View All Tools →
-                                        </Link>
-                                    </div>
-                                </div>
-
-                                <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4">
-                                    <div className="text-xs uppercase tracking-wide text-slate-500 mb-3 flex items-center gap-2">
-                                        <BookOpen size={14} /> Resources
-                                    </div>
-                                    <div className="space-y-1">
-                                        {resourcesItems.map((item) => {
-                                            const Icon = iconMap[item.icon] || BookOpen;
-                                            return (
-                                                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition text-sm text-slate-700 dark:text-slate-200">
-                                                    <Icon size={16} className="text-slate-500 dark:text-slate-400" />
-                                                    {item.label}
-                                                </Link>
-                                            );
-                                        })}
+                                    {/* Resources */}
+                                    <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-1">
+                                        <button
+                                            onClick={() => handleDropdownToggle('mobile-resources')}
+                                            className="w-full flex items-center justify-between p-3 text-sm font-medium text-slate-700 dark:text-slate-200"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <BookOpen size={16} className="text-slate-400" />
+                                                Resources
+                                            </div>
+                                            <ChevronDown size={16} className={`text-slate-400 transition-transform ${openDropdown === 'mobile-resources' ? 'rotate-180' : ''}`} />
+                                        </button>
+                                        {openDropdown === 'mobile-resources' && (
+                                            <div className="px-3 pb-3 space-y-1 animate-in slide-in-from-top-2">
+                                                {resourcesItems.map((item) => {
+                                                    const Icon = iconMap[item.icon] || BookOpen;
+                                                    return (
+                                                        <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition text-sm text-slate-600 dark:text-slate-300">
+                                                            <Icon size={16} />
+                                                            {item.label}
+                                                        </Link>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="pt-4 border-t border-slate-200 dark:border-slate-700 space-y-3">
+                            {/* Mobile User Section */}
+                            <div className="border-t border-slate-200 dark:border-slate-700 p-4 bg-slate-50 dark:bg-slate-800/50">
                                 {isAuthenticated ? (
-                                    <>
-                                        <div className="flex items-center gap-3 px-2">
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-3">
                                             {user?.avatarUrl ? (
-                                                <img src={user.avatarUrl} alt={user.name} className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500" />
+                                                <img src={user.avatarUrl} alt={user.name} className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500 shadow-sm" />
                                             ) : (
-                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
+                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-sm">
                                                     <span className="text-white font-bold">{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
                                                 </div>
                                             )}
@@ -584,32 +624,38 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                                                 <p className="font-medium text-slate-900 dark:text-white truncate">{user?.name}</p>
                                                 <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                                             </div>
+                                            <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${isPro
+                                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                                : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                                                }`}>
+                                                {isPro ? 'Pro' : 'Free'}
+                                            </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-3">
-                                            <Link href="/profile" onClick={() => setMobileOpen(false)} className="flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-sm font-medium">
+                                            <Link href="/profile" onClick={() => setMobileOpen(false)} className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-600 transition">
                                                 <User size={16} /> Profile
                                             </Link>
-                                            <Link href="/settings" onClick={() => setMobileOpen(false)} className="flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-sm font-medium">
+                                            <Link href="/settings" onClick={() => setMobileOpen(false)} className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-600 transition">
                                                 <Settings size={16} /> Settings
                                             </Link>
                                         </div>
                                         <button
                                             onClick={() => { logout(); setMobileOpen(false); }}
-                                            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 font-medium"
+                                            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 font-medium hover:bg-red-100 dark:hover:bg-red-900/20 transition"
                                         >
                                             <LogOut size={18} /> Sign Out
                                         </button>
-                                    </>
+                                    </div>
                                 ) : (
                                     <div className="flex gap-3">
-                                        <Link href="/login" onClick={() => setMobileOpen(false)} className="flex-1 py-3 text-center rounded-xl border border-slate-200 dark:border-slate-700 font-medium">Sign in</Link>
-                                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="flex-1 py-3 text-center rounded-xl text-white bg-gradient-to-r from-emerald-500 to-cyan-500 font-medium">Sign up</Link>
+                                        <Link href="/login" onClick={() => setMobileOpen(false)} className="flex-1 py-3 text-center rounded-xl border border-slate-200 dark:border-slate-700 font-medium bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition">Log in</Link>
+                                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="flex-1 py-3 text-center rounded-xl text-white bg-gradient-to-r from-emerald-500 to-cyan-500 font-medium shadow hover:shadow-lg transition">Sign up</Link>
                                     </div>
                                 )}
                             </div>
                         </div>
                     </div>
-                </>
+                </Portal>
             )}
 
             {/* Search Modal */}

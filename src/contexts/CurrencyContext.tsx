@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 
 interface CurrencyContextType {
     currency: string;
+    symbol: string;
     rates: Record<string, number>;
     loading: boolean;
     setCurrency: (code: string) => Promise<void>;
@@ -92,8 +93,15 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         }).format(converted);
     };
 
+    const symbol = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }).formatToParts(0).find(x => x.type === 'currency')?.value || currency;
+
     return (
-        <CurrencyContext.Provider value={{ currency, rates, loading, setCurrency, convertPrice, formatPrice }}>
+        <CurrencyContext.Provider value={{ currency, symbol, rates, loading, setCurrency, convertPrice, formatPrice }}>
             {children}
         </CurrencyContext.Provider>
     );
