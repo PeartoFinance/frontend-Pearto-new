@@ -4,7 +4,7 @@
  */
 
 // Use same API_BASE pattern as api.ts for consistency
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com/api';
 
 function getAuthToken(): string | null {
     if (typeof window === 'undefined') return null;

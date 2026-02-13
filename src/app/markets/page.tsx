@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Sidebar from '@/components/layout/Sidebar';
@@ -11,6 +12,7 @@ import ProposedDividends from '@/components/widgets/ProposedDividends';
 import PublicOfferings from '@/components/widgets/PublicOfferings';
 import MarketOverview from '@/components/widgets/MarketOverview';
 import MarketAnalysisCharts from '@/components/markets/MarketAnalysisCharts';
+import RelatedTools from '@/components/tools/RelatedTools';
 import { AIWidget } from '@/components/ai';
 import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -20,17 +22,19 @@ import {
     getStockHistory,
     getCryptoMarkets,
     getCommodities,
+    getFloorsheet,
     type MarketOverviewData,
     type MarketStock,
     type MarketIndex,
     type PriceHistoryPoint,
     type Commodity,
     type ForexRate,
+    type FloorsheetTrade,
     getForexRates
 } from '@/services/marketService';
 import { createChart, ColorType, AreaSeries, type IChartApi } from 'lightweight-charts';
 import {
-    TrendingUp, TrendingDown, Activity, BarChart2, Loader2,
+    TrendingUp, TrendingDown, Activity, BarChart2, Loader2, Search,
     ArrowUpRight, ArrowDownRight, RefreshCw, Clock, LineChart, PieChart, Coins, Zap, Globe, Hammer
 } from 'lucide-react';
 import { TableExportButton } from '@/components/common/TableExportButton';
@@ -44,6 +48,120 @@ const LoadingTab = () => (
         <Loader2 className="animate-spin text-emerald-500" size={32} />
     </div>
 );
+
+// ── Floorsheet Section ─────────────────────────────────────────────
+function FloorsheetSection() {
+    const [symbolFilter, setSymbolFilter] = useState('');
+    const { formatPrice } = useCurrency();
+
+    const { data, isLoading, refetch } = useQuery({
+        queryKey: ['floorsheet', symbolFilter],
+        queryFn: () => getFloorsheet(200, symbolFilter || undefined),
+        staleTime: 30 * 1000,
+        refetchInterval: 60 * 1000,
+    });
+
+    const trades = data?.trades ?? [];
+
+    return (
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <div className="flex items-center gap-2">
+                    <BarChart2 size={18} className="text-emerald-500" />
+                    <span className="font-semibold text-slate-900 dark:text-white">Transaction Floorsheet</span>
+                    {data?.source && (
+                        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${data.source === 'live'
+                            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600'
+                            : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600'
+                            }`}>
+                            {data.source === 'live' ? '● LIVE' : '● DB'}
+                        </span>
+                    )}
+                </div>
+                <div className="flex items-center gap-2 ml-auto">
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                        <input
+                            type="text"
+                            placeholder="Filter symbol…"
+                            value={symbolFilter}
+                            onChange={(e) => setSymbolFilter(e.target.value.toUpperCase())}
+                            className="pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 w-36"
+                        />
+                    </div>
+                    <button onClick={() => refetch()} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                        <RefreshCw size={14} className="text-slate-500" />
+                    </button>
+                </div>
+            </div>
+
+            {/* Table */}
+            {isLoading ? (
+                <div className="flex items-center justify-center py-16">
+                    <Loader2 className="animate-spin text-emerald-500" size={28} />
+                </div>
+            ) : trades.length === 0 ? (
+                <div className="p-8 text-center">
+                    <BarChart2 size={40} className="mx-auto text-slate-300 dark:text-slate-600 mb-3" />
+                    <p className="text-slate-500">No transactions found{symbolFilter ? ` for ${symbolFilter}` : ''}.</p>
+                </div>
+            ) : (
+                <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+                    <table className="w-full text-sm">
+                        <thead className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-10">
+                            <tr className="border-b border-slate-200 dark:border-slate-700 text-xs text-slate-500 uppercase tracking-wider">
+                                <th className="px-4 py-2.5 text-left">Time</th>
+                                <th className="px-4 py-2.5 text-left">Symbol</th>
+                                <th className="px-4 py-2.5 text-center">Side</th>
+                                <th className="px-4 py-2.5 text-right">Price</th>
+                                <th className="px-4 py-2.5 text-right">Qty</th>
+                                <th className="px-4 py-2.5 text-right">Amount</th>
+                                <th className="px-4 py-2.5 text-right">High</th>
+                                <th className="px-4 py-2.5 text-right">Low</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
+                            {trades.map((t: FloorsheetTrade, idx: number) => {
+                                const isBuy = t.side === 'buy';
+                                const time = t.transactionDate
+                                    ? new Date(t.transactionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                                    : '—';
+                                return (
+                                    <tr key={t.id || idx} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                                        <td className="px-4 py-2 text-xs text-slate-500 font-mono whitespace-nowrap">{time}</td>
+                                        <td className="px-4 py-2 font-semibold text-slate-900 dark:text-white whitespace-nowrap">{t.symbol}</td>
+                                        <td className="px-4 py-2 text-center">
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isBuy
+                                                ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                                                : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                                                }`}>
+                                                {isBuy ? 'BUY' : 'SELL'}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-2 text-right font-mono text-slate-700 dark:text-slate-300">{formatPrice(t.price)}</td>
+                                        <td className="px-4 py-2 text-right text-slate-600 dark:text-slate-400">{t.quantity?.toLocaleString()}</td>
+                                        <td className="px-4 py-2 text-right font-medium text-slate-700 dark:text-slate-300">{formatPrice(t.amount)}</td>
+                                        <td className="px-4 py-2 text-right text-xs text-slate-500">{t.high != null ? formatPrice(t.high) : '—'}</td>
+                                        <td className="px-4 py-2 text-right text-xs text-slate-500">{t.low != null ? formatPrice(t.low) : '—'}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {/* Footer */}
+            {trades.length > 0 && (
+                <div className="px-5 py-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between text-xs text-slate-400">
+                    <span>{trades.length} transactions</span>
+                    <span>{data?.source === 'live' ? 'Intraday 1-min data' : 'Database records'}</span>
+                </div>
+            )}
+        </div>
+    );
+}
 
 type TabType = 'overview' | 'live' | 'crypto' | 'forex' | 'commodities' | 'floorsheet' | 'charts' | 'analysis';
 
@@ -177,7 +295,10 @@ export default function MarketPage() {
 
                         {/* Forex Tab */}
                         {activeTab === 'forex' && (
-                            <ForexTab initialRates={forexData} isLoading={loading} />
+                            <div className="space-y-8">
+                                <ForexTab initialRates={forexData} isLoading={loading} />
+                                <RelatedTools category="Utilities" title="Forex Tools & Converters" limit={4} layout="grid" />
+                            </div>
                         )}
                         {/* Overview Tab - Use existing widgets */}
                         {activeTab === 'overview' && (
@@ -217,6 +338,8 @@ export default function MarketPage() {
                                     <ProposedDividends />
                                 </div>
                                 <PublicOfferings />
+
+                                <RelatedTools category="Investing" title="Market Analysis Tools" limit={4} layout="grid" />
                             </>
                         )}
 
@@ -329,115 +452,108 @@ export default function MarketPage() {
 
                         {/* Crypto Tab */}
                         {activeTab === 'crypto' && (
-                            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
-                                <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Coins size={18} className="text-amber-500" />
-                                        <span className="font-semibold text-slate-900 dark:text-white">Crypto Market</span>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex items-center gap-2 text-xs text-slate-500">
-                                            <Clock size={12} />
-                                            Real-time prices • Auto-updates every 60s
+                            <>
+                                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                                    <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <Coins size={18} className="text-amber-500" />
+                                            <span className="font-semibold text-slate-900 dark:text-white">Crypto Market</span>
                                         </div>
-                                        <TableExportButton
-                                            data={cryptoData}
-                                            columns={[
-                                                { key: 'symbol', label: 'Symbol' },
-                                                { key: 'name', label: 'Name' },
-                                                { key: 'price', label: 'Price', format: 'currency' },
-                                                { key: 'change', label: 'Change', format: 'currency' },
-                                                { key: 'changePercent', label: 'Change %', format: 'percent' },
-                                                { key: 'volume', label: 'Volume', format: 'largeNumber' },
-                                                { key: 'marketCap', label: 'Market Cap', format: 'largeNumber' },
-                                            ]}
-                                            filename="crypto-market"
-                                            title="Crypto Market Data"
-                                            variant="compact"
-                                        />
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-2 text-xs text-slate-500">
+                                                <Clock size={12} />
+                                                Real-time prices • Auto-updates every 60s
+                                            </div>
+                                            <TableExportButton
+                                                data={cryptoData}
+                                                columns={[
+                                                    { key: 'symbol', label: 'Symbol' },
+                                                    { key: 'name', label: 'Name' },
+                                                    { key: 'price', label: 'Price', format: 'currency' },
+                                                    { key: 'change', label: 'Change', format: 'currency' },
+                                                    { key: 'changePercent', label: 'Change %', format: 'percent' },
+                                                    { key: 'volume', label: 'Volume', format: 'largeNumber' },
+                                                    { key: 'marketCap', label: 'Market Cap', format: 'largeNumber' },
+                                                ]}
+                                                filename="crypto-market"
+                                                title="Crypto Market Data"
+                                                variant="compact"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
 
-                                {loading && !cryptoData.length ? (
-                                    <div className="flex items-center justify-center py-12">
-                                        <Loader2 className="animate-spin text-emerald-500" size={24} />
-                                    </div>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full">
-                                            <thead>
-                                                <tr className="border-b border-slate-200 dark:border-slate-700">
-                                                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Symbol</th>
-                                                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Name</th>
-                                                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Price</th>
-                                                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Change</th>
-                                                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">% Change</th>
-                                                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Volume</th>
-                                                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Market Cap</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
-                                                {cryptoData.map((coin) => {
-                                                    const isPositive = (coin.changePercent || 0) >= 0;
-                                                    return (
-                                                        <tr key={coin.symbol} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
-                                                            <td className="px-4 py-3">
-                                                                <Link href={`/crypto/${coin.symbol}`} className="flex items-center gap-2 hover:underline">
-                                                                    <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-xs font-bold text-amber-600 dark:text-amber-400">
-                                                                        {coin.symbol?.slice(0, 3)}
-                                                                    </div>
-                                                                    <span className="font-medium text-amber-600 dark:text-amber-400">{coin.symbol}</span>
-                                                                </Link>
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 truncate max-w-[200px]">
-                                                                {coin.name}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-right font-semibold text-slate-900 dark:text-white">
-                                                                {formatPrice(coin.price)}
-                                                            </td>
-                                                            <td className={`px-4 py-3 text-right font-medium ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
-                                                                {isPositive ? '+' : ''}{formatPrice(coin.change)}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-right">
-                                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${isPositive
-                                                                    ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
-                                                                    : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                                                                    }`}>
-                                                                    {isPositive ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
-                                                                    {isPositive ? '+' : ''}{formatNumber(coin.changePercent)}%
-                                                                </span>
-                                                            </td>
-                                                            <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
-                                                                {formatLargeNumber(coin.volume)}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
-                                                                {formatLargeNumber(coin.marketCap)}
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
-                            </div>
+                                    {loading && !cryptoData.length ? (
+                                        <div className="flex items-center justify-center py-12">
+                                            <Loader2 className="animate-spin text-emerald-500" size={24} />
+                                        </div>
+                                    ) : (
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full">
+                                                <thead>
+                                                    <tr className="border-b border-slate-200 dark:border-slate-700">
+                                                        <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Symbol</th>
+                                                        <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Name</th>
+                                                        <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Price</th>
+                                                        <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Change</th>
+                                                        <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">% Change</th>
+                                                        <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Volume</th>
+                                                        <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Market Cap</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
+                                                    {cryptoData.map((coin) => {
+                                                        const isPositive = (coin.changePercent || 0) >= 0;
+                                                        return (
+                                                            <tr key={coin.symbol} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                                                                <td className="px-4 py-3">
+                                                                    <Link href={`/crypto/${coin.symbol}`} className="flex items-center gap-2 hover:underline">
+                                                                        <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-xs font-bold text-amber-600 dark:text-amber-400">
+                                                                            {coin.symbol?.slice(0, 3)}
+                                                                        </div>
+                                                                        <span className="font-medium text-amber-600 dark:text-amber-400">{coin.symbol}</span>
+                                                                    </Link>
+                                                                </td>
+                                                                <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 truncate max-w-[200px]">
+                                                                    {coin.name}
+                                                                </td>
+                                                                <td className="px-4 py-3 text-right font-semibold text-slate-900 dark:text-white">
+                                                                    {formatPrice(coin.price)}
+                                                                </td>
+                                                                <td className={`px-4 py-3 text-right font-medium ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
+                                                                    {isPositive ? '+' : ''}{formatPrice(coin.change)}
+                                                                </td>
+                                                                <td className="px-4 py-3 text-right">
+                                                                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${isPositive
+                                                                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                                                                        : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                                                                        }`}>
+                                                                        {isPositive ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+                                                                        {isPositive ? '+' : ''}{formatNumber(coin.changePercent)}%
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
+                                                                    {formatLargeNumber(coin.volume)}
+                                                                </td>
+                                                                <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
+                                                                    {formatLargeNumber(coin.marketCap)}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="mt-8">
+                                    <RelatedTools category="Crypto" title="Crypto Trading Tools" limit={4} layout="grid" />
+                                </div>
+                            </>
                         )}
 
                         {/* Floorsheet Tab */}
                         {activeTab === 'floorsheet' && (
-                            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
-                                <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center gap-2">
-                                    <BarChart2 size={18} className="text-emerald-500" />
-                                    <span className="font-semibold text-slate-900 dark:text-white">Floorsheet</span>
-                                </div>
-                                <div className="p-8 text-center">
-                                    <BarChart2 size={48} className="mx-auto text-slate-300 dark:text-slate-600 mb-4" />
-                                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Transaction Floorsheet</h3>
-                                    <p className="text-slate-500 max-w-md mx-auto">
-                                        Detailed transaction records showing buyer/seller broker IDs, trade quantities, and prices. Coming soon.
-                                    </p>
-                                </div>
-                            </div>
+                            <FloorsheetSection />
                         )}
 
                         {/* Charts Tab */}
@@ -598,7 +714,7 @@ export default function MarketPage() {
                         )}
                     </div>
                 </div>
-            </main>
+            </main >
 
             <AIWidget
                 type="floating"
@@ -606,7 +722,7 @@ export default function MarketPage() {
                 pageType="markets"
                 quickPrompts={["Top gainers today", "Market analysis"]}
             />
-        </div>
+        </div >
     );
 }
 

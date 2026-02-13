@@ -242,6 +242,22 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
     }, [symbol, period, assetType, getPeriodParams]);
 
     useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 768) {
+                setShowSidebar(false);
+            } else {
+                setShowSidebar(true);
+            }
+        };
+
+        // Set initial state
+        handleResize();
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    useEffect(() => {
         fetchData();
     }, [fetchData]);
 
@@ -870,10 +886,10 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
 
     return (
         <div className="min-h-screen bg-slate-950 text-white flex flex-col">
-            {/* Top Header Bar */}
-            <header className="h-14 border-b border-slate-800 flex items-center justify-between px-4 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
+            {/* Top Header Bar - Responsive */}
+            <header className="h-14 border-b border-slate-800 flex items-center justify-between px-2 sm:px-4 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50 overflow-x-auto no-scrollbar">
                 {/* Left: Back + Symbol */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                     <button
                         onClick={() => router.back()}
                         className="p-2 hover:bg-slate-800 rounded-lg transition"
@@ -897,16 +913,15 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                         )}
 
                         {stats && (
-                            <div className="flex items-center gap-2 ml-4">
-                                <span className="text-2xl font-semibold">
+                            <div className="flex items-center gap-1 sm:gap-2 ml-2 sm:ml-4">
+                                <span className="text-lg sm:text-2xl font-semibold">
                                     {formatPrice(crosshairData?.price ?? stats.price)}
                                 </span>
-                                <span className={`text-sm font-medium px-2 py-0.5 rounded ${(crosshairData?.change ?? stats.change) >= 0
+                                <span className={`text-xs sm:text-sm font-medium px-1.5 sm:px-2 py-0.5 rounded whitespace-nowrap ${(crosshairData?.change ?? stats.change) >= 0
                                     ? 'bg-emerald-500/20 text-emerald-400'
                                     : 'bg-red-500/20 text-red-400'
                                     }`}>
-                                    {(crosshairData?.change ?? stats.change) >= 0 ? '+' : ''}
-                                    {((crosshairData?.change ?? stats.change)).toFixed(2)}
+                                    <span className="hidden sm:inline">{(crosshairData?.change ?? stats.change) >= 0 ? '+' : ''}{((crosshairData?.change ?? stats.change)).toFixed(2)} </span>
                                     ({stats.changePercent >= 0 ? '+' : ''}{stats.changePercent.toFixed(2)}%)
                                 </span>
                             </div>
@@ -915,7 +930,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                 </div>
 
                 {/* Right: Actions */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                     {lastUpdate && (
                         <span className="text-xs text-slate-500 mr-2">
                             Updated: {lastUpdate.toLocaleTimeString()}
@@ -962,9 +977,9 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
             </header>
 
             {/* Chart Controls Bar */}
-            <div className="h-12 border-b border-slate-800 flex items-center justify-between px-4 bg-slate-900/50">
+            <div className="h-12 border-b border-slate-800 flex items-center justify-between px-4 bg-slate-900/50 overflow-x-auto no-scrollbar gap-4">
                 {/* Period Selector */}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 shrink-0">
                     {PERIODS.map(p => (
                         <button
                             key={p.id}
@@ -980,7 +995,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                 </div>
 
                 {/* Center: Interval + Chart Type */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 shrink-0">
                     {/* Interval Dropdown */}
                     <div className="relative">
                         <button
@@ -1079,7 +1094,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
             {/* Main Content */}
             <div className="flex-1 flex overflow-hidden">
                 {/* Left: Drawing Tools */}
-                <div className="w-12 border-r border-slate-800 bg-slate-900/50 flex flex-col items-center py-2 gap-1">
+                <div className="hidden md:flex w-12 border-r border-slate-800 bg-slate-900/50 flex flex-col items-center py-2 gap-1">
                     <ChartToolbar
                         activeTool={activeTool}
                         onToolSelect={startDrawingTool}
@@ -1130,7 +1145,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
 
                 {/* Right: Sidebar */}
                 {showSidebar && (
-                    <ChartSidebar symbol={symbol} />
+                    <ChartSidebar symbol={symbol} onClose={() => setShowSidebar(false)} />
                 )}
             </div>
 

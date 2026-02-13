@@ -15,15 +15,33 @@ const pairs = [
     { symbol: 'USDCAD', name: 'USD/CAD' },
 ];
 
-export default function ForexChart() {
+interface ForexChartProps {
+    pair?: string;
+    onPairChange?: (pair: string) => void;
+}
+
+export default function ForexChart({ pair, onPairChange }: ForexChartProps = {}) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<any>(null);
     const seriesRef = useRef<any>(null);
-    const [selectedPair, setSelectedPair] = useState('EURUSD');
+
+    // Internal state for when uncontrolled, or to mirror prop
+    const [internalPair, setInternalPair] = useState('EURUSD');
+
+    // Use prop if available, otherwise internal state
+    const selectedPair = pair || internalPair;
+
     const [timeframe, setTimeframe] = useState('1mo');
     const [loading, setLoading] = useState(false);
     const [currentPrice, setCurrentPrice] = useState<number | null>(null);
     const [change24h, setChange24h] = useState<number | null>(null);
+
+    // Sync internal state if prop changes (optional, but good for hybrid usage)
+    useEffect(() => {
+        if (pair) {
+            setInternalPair(pair);
+        }
+    }, [pair]);
 
     useEffect(() => {
         if (!chartContainerRef.current) return;
@@ -142,68 +160,78 @@ export default function ForexChart() {
 
     const [showCustomInput, setShowCustomInput] = useState(false);
 
+    const handleUpdatePair = (newPair: string) => {
+        setInternalPair(newPair);
+        if (onPairChange) {
+            onPairChange(newPair);
+        }
+    };
+
     const handlePairChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const val = e.target.value;
         if (val === 'CUSTOM') {
             setShowCustomInput(true);
-            setSelectedPair(''); // clear for typing
+            // Don't clear selectedPair visually here to avoid jumping, just show input
         } else {
             setShowCustomInput(false);
-            setSelectedPair(val);
+            handleUpdatePair(val);
         }
     };
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-                <div className="flex items-center gap-4">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-3 sm:p-6 shadow-sm overflow-hidden max-w-full">
+            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 mb-6">
+
+                {/* Left Side: Pair Selector & Price */}
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 w-full xl:w-auto">
                     {!showCustomInput ? (
                         <select
                             value={selectedPair}
                             onChange={handlePairChange}
-                            className="bg-slate-100 dark:bg-slate-700 border-none rounded-lg px-3 py-2 text-sm font-semibold focus:ring-2 focus:ring-emerald-500 cursor-pointer text-slate-900 dark:text-white"
+                            className="bg-slate-100 dark:bg-slate-700 border-none rounded-lg px-3 py-2 text-sm font-semibold focus:ring-2 focus:ring-emerald-500 cursor-pointer text-slate-900 dark:text-white max-w-[140px] truncate"
                         >
                             {pairs.map(pair => (
                                 <option key={pair.symbol} value={pair.symbol}>{pair.name}</option>
                             ))}
-                            <option value="CUSTOM">Manual Selection...</option>
+                            <option value="CUSTOM">Manual...</option>
                         </select>
                     ) : (
                         <div className="flex items-center gap-2">
                             <input
                                 type="text"
-                                placeholder="e.g. BTCUSD"
-                                className="bg-slate-100 dark:bg-slate-700 border-none rounded-lg px-3 py-2 text-sm font-semibold focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white w-32 uppercase"
+                                placeholder="BTCUSD"
+                                className="bg-slate-100 dark:bg-slate-700 border-none rounded-lg px-3 py-2 text-sm font-semibold focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white w-24 uppercase"
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                         const val = e.currentTarget.value.toUpperCase();
-                                        if (val) setSelectedPair(val);
+                                        if (val) handleUpdatePair(val);
                                     }
                                 }}
                                 autoFocus
                                 onBlur={(e) => {
                                     const val = e.target.value.toUpperCase();
-                                    if (val) setSelectedPair(val);
+                                    if (val) handleUpdatePair(val);
                                 }}
                             />
                             <button
                                 onClick={() => setShowCustomInput(false)}
-                                className="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                                className="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 whitespace-nowrap"
                             >
                                 Cancel
                             </button>
                         </div>
                     )}
+
                     <div className="flex items-end gap-2">
                         {loading ? (
                             <Loader2 className="animate-spin text-slate-400" size={24} />
                         ) : (
                             <>
-                                <span className="text-2xl font-bold text-slate-900 dark:text-white">
+                                <span className="text-2xl font-bold text-slate-900 dark:text-white whitespace-nowrap">
                                     {currentPrice ? currentPrice.toFixed(selectedPair.includes('JPY') ? 2 : 5) : '-'}
                                 </span>
                                 <span className={`flex items-center text-sm font-medium ${(change24h || 0) >= 0 ? 'text-emerald-500' : 'text-red-500'
-                                    } mb-1`}>
+                                    } mb-1 whitespace-nowrap`}>
                                     {(change24h || 0) >= 0 ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
                                     {Math.abs(change24h || 0).toFixed(2)}%
                                 </span>
@@ -212,40 +240,48 @@ export default function ForexChart() {
                     </div>
                 </div>
 
-                <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
-                    {['1H', '1D', '1W', '1M', '1Y'].map((tf) => (
-                        <button
-                            key={tf}
-                            onClick={() => setTimeframe(tf)}
-                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${timeframe === tf
-                                ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
-                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                                }`}
-                        >
-                            {tf}
-                        </button>
-                    ))}
-                </div>
+                {/* Right Side: Timeframes & Actions */}
+                <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+                    <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1 overflow-x-auto max-w-full no-scrollbar">
+                        {['1H', '1D', '1W', '1M', '1Y'].map((tf) => (
+                            <button
+                                key={tf}
+                                onClick={() => setTimeframe(tf)}
+                                className={`px-3 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${timeframe === tf
+                                    ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                    }`}
+                            >
+                                {tf}
+                            </button>
+                        ))}
+                    </div>
 
-                <Link
-                    href={`/chart/${selectedPair}`}
-                    target="_blank"
-                    className="px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition flex items-center gap-1"
-                >
-                    <Maximize2 size={14} />
-                    Advanced Chart
-                </Link>
-                <Link
-                    href={`/live?symbol=${selectedPair}`}
-                    target="_blank"
-                    className="px-3 py-2 bg-emerald-600 text-white text-xs font-medium rounded-lg hover:bg-emerald-700 transition flex items-center gap-1"
-                >
-                    <Activity size={14} />
-                    Live Chart
-                </Link>
+                    <div className="flex items-center gap-2 ml-auto xl:ml-0">
+                        <Link
+                            href={`/chart/${selectedPair}?type=forex`}
+                            target="_blank"
+                            className="px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition flex items-center gap-1 whitespace-nowrap"
+                        >
+                            <Maximize2 size={14} />
+                            <span className="hidden sm:inline">Advanced</span>
+                        </Link>
+                        <Link
+                            href={`/live?symbol=${selectedPair}&type=forex`}
+                            target="_blank"
+                            className="px-3 py-2 bg-emerald-600 text-white text-xs font-medium rounded-lg hover:bg-emerald-700 transition flex items-center gap-1 whitespace-nowrap"
+                        >
+                            <Activity size={14} />
+                            <span className="hidden sm:inline">Live Chart</span>
+                        </Link>
+                    </div>
+                </div>
             </div>
 
-            <div ref={chartContainerRef} className="w-full h-[300px] sm:h-[400px]" />
+            {/* Chart Container with specific fix for resizing */}
+            <div className="relative w-full h-[300px] sm:h-[400px] min-w-0">
+                <div ref={chartContainerRef} className="absolute inset-0 w-full h-full" />
+            </div>
         </div>
     );
 }

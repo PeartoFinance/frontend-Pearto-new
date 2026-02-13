@@ -149,7 +149,7 @@ export function AIAnalysisPanel({
                     <span className={`font-semibold text-slate-900 dark:text-white ${compact ? 'text-sm' : ''}`}>{title}</span>
                     {!isPro && (
                         <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 rounded border border-slate-200 dark:border-slate-600 flex items-center gap-1">
-                            Free Trial
+                            Free
                         </span>
                     )}
                 </div>

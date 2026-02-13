@@ -20,7 +20,7 @@ interface PageData {
     createdAt?: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com/api';
 
 export default function DynamicPage({ params }: { params: Promise<{ slug: string }> }) {
     const resolvedParams = use(params);

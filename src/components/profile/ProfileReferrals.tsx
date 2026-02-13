@@ -97,7 +97,7 @@ export default function ProfileReferrals() {
                 <div className="bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border border-emerald-500/30 rounded-2xl p-6">
                     <p className="text-slate-400 text-sm mb-2">Your Referral Code</p>
                     <div className="flex items-center gap-3">
-                        <span className="text-2xl font-bold text-white font-mono">
+                        <span className="text-2xl font-bold text-slate-900 dark:text-white font-mono">
                             {data?.referralCode || 'N/A'}
                         </span>
                         <button
@@ -114,22 +114,22 @@ export default function ProfileReferrals() {
                 </div>
 
                 {/* Total Referrals */}
-                <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
+                <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
                     <p className="text-slate-400 text-sm mb-2">Total Referrals</p>
                     <div className="flex items-center gap-3">
                         <Users className="w-8 h-8 text-blue-400" />
-                        <span className="text-3xl font-bold text-white">
+                        <span className="text-3xl font-bold text-slate-900 dark:text-white">
                             {data?.totalReferrals || 0}
                         </span>
                     </div>
                 </div>
 
                 {/* Reward Points */}
-                <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
+                <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
                     <p className="text-slate-400 text-sm mb-2">Reward Points</p>
                     <div className="flex items-center gap-3">
                         <Award className="w-8 h-8 text-yellow-400" />
-                        <span className="text-3xl font-bold text-white">
+                        <span className="text-3xl font-bold text-slate-900 dark:text-white">
                             {data?.totalRewardPoints || 0}
                         </span>
                     </div>
@@ -137,10 +137,10 @@ export default function ProfileReferrals() {
             </div>
 
             {/* Share Section */}
-            <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
-                <h2 className="text-lg font-semibold text-white mb-4">Share Your Link</h2>
+            <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Share Your Link</h2>
                 <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="flex-1 bg-slate-900/50 border border-slate-600 rounded-xl px-4 py-3 font-mono text-sm text-slate-300 overflow-hidden">
+                    <div className="flex-1 bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 font-mono text-sm text-slate-700 dark:text-slate-300 overflow-hidden">
                         <span className="truncate block">
                             {`${APP_URL}/signup?ref=${data?.referralCode || ''}`}
                         </span>
@@ -148,7 +148,7 @@ export default function ProfileReferrals() {
                     <div className="flex gap-2">
                         <button
                             onClick={copyReferralLink}
-                            className="flex-1 sm:flex-none px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl flex items-center justify-center gap-2 transition"
+                            className="flex-1 sm:flex-none px-6 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-900 dark:text-white rounded-xl flex items-center justify-center gap-2 transition"
                         >
                             {copied ? <Check size={18} /> : <Copy size={18} />}
                             {copied ? 'Copied!' : 'Copy'}
@@ -165,21 +165,21 @@ export default function ProfileReferrals() {
             </div>
 
             {/* Referred Users Table */}
-            <div className="bg-slate-800/50 border border-slate-700 rounded-2xl overflow-hidden">
-                <div className="p-6 border-b border-slate-700">
-                    <h2 className="text-lg font-semibold text-white">People You Referred</h2>
+            <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
+                <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">People You Referred</h2>
                 </div>
 
                 {data?.referrals && data.referrals.length > 0 ? (
                     <div className="divide-y divide-slate-700">
                         {data.referrals.map((referral) => (
-                            <div key={referral.id} className="p-4 hover:bg-slate-700/30 transition flex items-center justify-between">
+                            <div key={referral.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-semibold">
                                         {referral.name.charAt(0).toUpperCase()}
                                     </div>
                                     <div>
-                                        <p className="text-white font-medium">{referral.name}</p>
+                                        <p className="text-slate-900 dark:text-white font-medium">{referral.name}</p>
                                         <p className="text-slate-400 text-sm">{referral.email}</p>
                                     </div>
                                 </div>
@@ -209,27 +209,27 @@ export default function ProfileReferrals() {
             </div>
 
             {/* How It Works */}
-            <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
-                <h2 className="text-lg font-semibold text-white mb-4">How It Works</h2>
+            <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">How It Works</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="flex items-start gap-3">
                         <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center text-emerald-400 font-bold shrink-0">1</div>
                         <div>
-                            <p className="text-white font-medium">Share Your Link</p>
+                            <p className="text-slate-900 dark:text-white font-medium">Share Your Link</p>
                             <p className="text-slate-400 text-sm">Copy and share your unique referral link with friends</p>
                         </div>
                     </div>
                     <div className="flex items-start gap-3">
                         <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center text-emerald-400 font-bold shrink-0">2</div>
                         <div>
-                            <p className="text-white font-medium">Friend Signs Up</p>
+                            <p className="text-slate-900 dark:text-white font-medium">Friend Signs Up</p>
                             <p className="text-slate-400 text-sm">When they create an account using your link</p>
                         </div>
                     </div>
                     <div className="flex items-start gap-3">
                         <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center text-emerald-400 font-bold shrink-0">3</div>
                         <div>
-                            <p className="text-white font-medium">Earn Rewards</p>
+                            <p className="text-slate-900 dark:text-white font-medium">Earn Rewards</p>
                             <p className="text-slate-400 text-sm">Both you and your friend earn reward points</p>
                         </div>
                     </div>

@@ -11,8 +11,8 @@ export default function ForexConverter() {
     const [fromCurrency, setFromCurrency] = useState('USD');
     const [toCurrency, setToCurrency] = useState('EUR');
 
-    // Get all available currencies from rates
-    const availableCurrencies = ['USD', ...Object.keys(rates)].sort();
+    // Get all available currencies from rates, ensuring unique values
+    const availableCurrencies = Array.from(new Set(['USD', ...Object.keys(rates)])).sort();
 
     // Simple conversion logic based on base USD rates
     const convertedAmount = () => {
@@ -28,7 +28,7 @@ export default function ForexConverter() {
     };
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm h-full">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6 shadow-sm overflow-hidden">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
                 <RefreshCw size={20} className="text-emerald-500" />
                 Currency Converter
@@ -43,12 +43,12 @@ export default function ForexConverter() {
                             type="number"
                             value={amount}
                             onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
-                            className="flex-1 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-lg font-bold focus:ring-2 focus:ring-emerald-500 outline-none"
+                            className="flex-1 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-lg font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-900 dark:text-white"
                         />
                         <select
                             value={fromCurrency}
                             onChange={(e) => setFromCurrency(e.target.value)}
-                            className="w-24 bg-slate-100 dark:bg-slate-600 border-none rounded-xl px-2 font-bold focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                            className="w-24 bg-slate-100 dark:bg-slate-600 border-none rounded-xl px-2 font-bold focus:ring-2 focus:ring-emerald-500 cursor-pointer text-slate-900 dark:text-white"
                         >
                             {availableCurrencies.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
@@ -69,15 +69,15 @@ export default function ForexConverter() {
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-500">Converted to</label>
                     <div className="flex gap-2">
-                        <div className="flex-1 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 rounded-xl px-4 py-3 flex items-center">
-                            <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
+                        <div className="flex-1 min-w-0 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 rounded-xl px-4 py-3 flex items-center">
+                            <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 truncate">
                                 {convertedAmount().toFixed(2)}
                             </span>
                         </div>
                         <select
                             value={toCurrency}
                             onChange={(e) => setToCurrency(e.target.value)}
-                            className="w-24 bg-slate-100 dark:bg-slate-600 border-none rounded-xl px-2 font-bold focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                            className="w-24 bg-slate-100 dark:bg-slate-600 border-none rounded-xl px-2 font-bold focus:ring-2 focus:ring-emerald-500 cursor-pointer text-slate-900 dark:text-white"
                         >
                             {availableCurrencies.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>

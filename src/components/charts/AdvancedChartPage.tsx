@@ -36,7 +36,7 @@ import {
 import { getStockHistory, getStockProfile, getCryptoHistory, getForexHistory, type PriceHistoryPoint, type MarketStock } from '@/services/marketService';
 import ChartToolbar from './toolbar/ChartToolbar';
 import { useChartDrawings, type Drawing, type DrawingPoint } from '@/hooks/useChartDrawings';
-import { detectPatterns, type ChartMarker } from '@/utils/technicalAnalysis';
+import { detectPatterns, type ChartMarker, dedupeAndSortChartData } from '@/utils/technicalAnalysis';
 import ChartSidebar from './sidebar/ChartSidebar';
 import IndicatorPanel, { type IndicatorConfig } from './indicators/IndicatorPanel';
 import {
@@ -49,20 +49,13 @@ import ComparisonMode, { type ComparisonSymbol } from './ComparisonMode';
 import MultiTimeframeView from './MultiTimeframeView';
 import { ChartGridLayout, ChartLayoutSelector, type ChartLayout } from './layout';
 import RiskAnalysisPanel from './RiskAnalysisPanel';
+import { useSubscription } from '@/context/SubscriptionContext';
+import { FeatureLock } from '@/components/subscription/FeatureGating';
 
 interface AdvancedChartPageProps {
     symbol: string;
     assetType?: 'stock' | 'crypto' | 'forex' | 'commodity';
 }
-
-// ... (code omitted for brevity if not strictly needed, but I should probably just replace the block)
-
-// Actually, I can use the tool to replace smaller chunks?
-// The tool requires context.
-// Let's replace the Interface and the fetchData block.
-
-// Interface replacement not shown here as I need to be careful with line numbers.
-// I will just replace the specific blocks.
 
 
 type ChartType = 'candle' | 'area' | 'line' | 'bar';
@@ -128,6 +121,7 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
     const [showRiskPanel, setShowRiskPanel] = useState(false);
     const [crosshairData, setCrosshairData] = useState<{ time: string; price: number; change: number; volume: number } | null>(null);
     const { formatPrice } = useCurrency();
+    const { hasFeature } = useSubscription();
 
     // Drawing tools
     const { drawings, activeTool, startDrawingTool, clearAll } = useChartDrawings(symbol);
@@ -204,6 +198,22 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
             setLoading(false);
         }
     }, [symbol, period, assetType, getPeriodParams]);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 768) {
+                setShowSidebar(false);
+            } else {
+                setShowSidebar(true);
+            }
+        };
+
+        // Set initial state
+        handleResize();
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         fetchData();
@@ -498,13 +508,17 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
             }
 
             if (indicatorData.length > 0) {
+                // Dedupe and sort data to prevent duplicate timestamp errors
+                const cleanData = dedupeAndSortChartData(indicatorData);
+                if (cleanData.length === 0) return;
+
                 const series = chart.addSeries(LineSeries, {
                     color: indicator.color,
                     lineWidth: 2,
                     priceLineVisible: false,
                     lastValueVisible: false
                 });
-                series.setData(indicatorData as any);
+                series.setData(cleanData as any);
                 indicatorSeriesRef.current.set(indicator.id, series);
             }
         });
@@ -585,283 +599,284 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white flex flex-col">
-            {/* Top Header Bar */}
-            <header className="h-14 border-b border-slate-800 flex items-center justify-between px-4 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
-                {/* Left: Back + Symbol */}
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => router.back()}
-                        className="p-2 hover:bg-slate-800 rounded-lg transition"
-                    >
-                        <ArrowLeft size={20} />
-                    </button>
-
-                    <div className="flex items-center gap-3">
-                        <span className="text-xl font-bold">{symbol}</span>
-                        {profile && (
-                            <span className="text-sm text-slate-400 hidden sm:inline">{profile.name}</span>
-                        )}
-
-                        {stats && (
-                            <div className="flex items-center gap-2 ml-4">
-                                <span className="text-2xl font-semibold">
-                                    {formatPrice(crosshairData?.price ?? stats.price)}
-                                </span>
-                                <span className={`text-sm font-medium px-2 py-0.5 rounded ${(crosshairData?.change ?? stats.change) >= 0
-                                    ? 'bg-emerald-500/20 text-emerald-400'
-                                    : 'bg-red-500/20 text-red-400'
-                                    }`}>
-                                    {(crosshairData?.change ?? stats.change) >= 0 ? '+' : ''}
-                                    {((crosshairData?.change ?? stats.change)).toFixed(2)}
-                                    ({stats.changePercent >= 0 ? '+' : ''}{stats.changePercent.toFixed(2)}%)
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Right: Actions */}
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setIsInWatchlist(!isInWatchlist)}
-                        className={`p-2 rounded-lg transition ${isInWatchlist ? 'text-yellow-400 bg-yellow-400/10' : 'hover:bg-slate-800'}`}
-                    >
-                        {isInWatchlist ? <Star size={20} fill="currentColor" /> : <StarOff size={20} />}
-                    </button>
-
-                    <Link
-                        href={`/stocks/${symbol}`}
-                        className="p-2 hover:bg-slate-800 rounded-lg transition"
-                        title="View Stock Details"
-                    >
-                        <ExternalLink size={20} />
-                    </Link>
-
-                    <button
-                        onClick={toggleFullscreen}
-                        className="p-2 hover:bg-slate-800 rounded-lg transition"
-                    >
-                        {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
-                    </button>
-
-                    <button
-                        onClick={() => setShowSidebar(!showSidebar)}
-                        className={`p-2 rounded-lg transition ${showSidebar ? 'bg-slate-700' : 'hover:bg-slate-800'}`}
-                    >
-                        <Menu size={20} />
-                    </button>
-                </div>
-            </header>
-
-            {/* Chart Controls Bar */}
-            <div className="h-12 border-b border-slate-800 flex items-center justify-between px-4 bg-slate-900/50">
-                {/* Period Selector */}
-                <div className="flex items-center gap-1">
-                    {PERIODS.map(p => (
+        <FeatureLock featureKey="advanced_charts" title="Advanced Charts">
+            <div className="min-h-screen bg-slate-950 text-white flex flex-col">
+                {/* Top Header Bar - Responsive */}
+                <header className="h-14 border-b border-slate-800 flex items-center justify-between px-2 sm:px-4 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50 overflow-x-auto no-scrollbar">
+                    {/* Left: Back + Symbol */}
+                    <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                         <button
-                            key={p.id}
-                            onClick={() => setPeriod(p.id)}
-                            className={`px-3 py-1.5 text-sm font-medium rounded transition ${period === p.id
-                                ? 'bg-blue-600 text-white'
-                                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                                }`}
+                            onClick={() => router.back()}
+                            className="p-2 hover:bg-slate-800 rounded-lg transition"
                         >
-                            {p.label}
+                            <ArrowLeft size={20} />
                         </button>
-                    ))}
-                </div>
 
-                {/* Center: Interval + Chart Type */}
-                <div className="flex items-center gap-3">
-                    {/* Interval Dropdown */}
-                    <div className="relative">
-                        <button
-                            onClick={() => { setShowIntervalDropdown(!showIntervalDropdown); setShowChartTypeDropdown(false); }}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-sm"
-                        >
-                            {INTERVALS.find(i => i.id === interval)?.label || interval}
-                            <ChevronDown size={14} />
-                        </button>
-                        {showIntervalDropdown && (
-                            <div className="absolute top-full mt-1 left-0 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-20 py-1 min-w-32">
-                                {INTERVALS.map(i => (
-                                    <button
-                                        key={i.id}
-                                        onClick={() => { setInterval(i.id); setShowIntervalDropdown(false); }}
-                                        className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-700 ${interval === i.id ? 'text-blue-400' : ''}`}
-                                    >
-                                        {i.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Chart Type Dropdown */}
-                    <div className="relative">
-                        <button
-                            onClick={() => { setShowChartTypeDropdown(!showChartTypeDropdown); setShowIntervalDropdown(false); }}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-sm"
-                        >
-                            {(() => {
-                                const ct = CHART_TYPES.find(c => c.id === chartType);
-                                return ct ? <ct.icon size={16} /> : null;
-                            })()}
-                            {CHART_TYPES.find(c => c.id === chartType)?.label}
-                            <ChevronDown size={14} />
-                        </button>
-                        {showChartTypeDropdown && (
-                            <div className="absolute top-full mt-1 left-0 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-20 py-1 min-w-40">
-                                {CHART_TYPES.map(ct => (
-                                    <button
-                                        key={ct.id}
-                                        onClick={() => { setChartType(ct.id); setShowChartTypeDropdown(false); }}
-                                        className={`w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-slate-700 ${chartType === ct.id ? 'text-blue-400' : ''}`}
-                                    >
-                                        <ct.icon size={16} />
-                                        {ct.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Pattern Toggle */}
-                    <button
-                        onClick={() => setShowPatterns(!showPatterns)}
-                        className={`px-3 py-1.5 text-sm rounded transition ${showPatterns ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30' : 'bg-slate-800 hover:bg-slate-700'}`}
-                    >
-                        Patterns
-                    </button>
-
-                    {/* Risk Analysis Toggle */}
-                    <button
-                        onClick={() => setShowRiskPanel(!showRiskPanel)}
-                        className={`px-3 py-1.5 text-sm rounded transition flex items-center gap-1 ${showRiskPanel ? 'bg-orange-600/20 text-orange-400 border border-orange-500/30' : 'bg-slate-800 hover:bg-slate-700'}`}
-                    >
-                        Risk
-                    </button>
-
-                    {/* Indicators Panel */}
-                    <IndicatorPanel
-                        activeIndicators={activeIndicators}
-                        onAddIndicator={handleAddIndicator}
-                        onRemoveIndicator={handleRemoveIndicator}
-                        onUpdateIndicator={handleUpdateIndicator}
-                    />
-
-                    {/* Comparison Mode */}
-                    <ComparisonMode
-                        primarySymbol={symbol}
-                        primaryData={data}
-                        onComparisonDataChange={setComparisonSymbols}
-                    />
-
-                    {/* Multi-Timeframe Toggle */}
-                    <button
-                        onClick={() => setShowMultiTimeframe(true)}
-                        className="px-3 py-1.5 text-sm bg-slate-800 hover:bg-slate-700 rounded transition"
-                    >
-                        Multi-TF
-                    </button>
-
-                    {/* Layout Selector */}
-                    <div className="flex items-center gap-2 border-l border-slate-700/50 pl-3 ml-1">
-                        <ChartLayoutSelector
-                            layout={layout}
-                            onLayoutChange={setLayout}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="flex-1 flex overflow-hidden">
-                {/* Left: Drawing Tools */}
-                <div className="w-12 border-r border-slate-800 bg-slate-900/50 flex flex-col items-center py-2 gap-1">
-                    <ChartToolbar
-                        activeTool={activeTool}
-                        onToolSelect={startDrawingTool}
-                        onClearDrawings={clearAll}
-                        variant="vertical-compact"
-                    />
-                </div>
-
-                {/* Center: Chart */}
-                <div className="flex-1 flex flex-col relative min-h-0 bg-slate-950">
-                    {layout === '1x1' ? (
-                        <>
-                            {/* Loading overlay */}
-                            {loading && (
-                                <div className="absolute inset-0 bg-slate-950/80 flex items-center justify-center z-10 transition-opacity duration-300">
-                                    <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                                </div>
+                        <div className="flex items-center gap-3">
+                            <span className="text-xl font-bold">{symbol}</span>
+                            {profile && (
+                                <span className="text-sm text-slate-400 hidden sm:inline">{profile.name}</span>
                             )}
 
-                            {/* Main chart */}
-                            <div ref={chartContainerRef} className="flex-1 w-full" />
+                            {stats && (
+                                <div className="flex items-center gap-1 sm:gap-2 ml-2 sm:ml-4">
+                                    <span className="text-lg sm:text-2xl font-semibold">
+                                        {formatPrice(crosshairData?.price ?? stats.price)}
+                                    </span>
+                                    <span className={`text-xs sm:text-sm font-medium px-1.5 sm:px-2 py-0.5 rounded whitespace-nowrap ${(crosshairData?.change ?? stats.change) >= 0
+                                        ? 'bg-emerald-500/20 text-emerald-400'
+                                        : 'bg-red-500/20 text-red-400'
+                                        }`}>
+                                        <span className="hidden sm:inline">{(crosshairData?.change ?? stats.change) >= 0 ? '+' : ''}{((crosshairData?.change ?? stats.change)).toFixed(2)} </span>
+                                        ({stats.changePercent >= 0 ? '+' : ''}{stats.changePercent.toFixed(2)}%)
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
-                            {/* Volume chart */}
-                            <div ref={volumeContainerRef} className="h-20 border-t border-slate-800 w-full" />
+                    {/* Right: Actions */}
+                    <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                        <button
+                            onClick={() => setIsInWatchlist(!isInWatchlist)}
+                            className={`p-2 rounded-lg transition ${isInWatchlist ? 'text-yellow-400 bg-yellow-400/10' : 'hover:bg-slate-800'}`}
+                        >
+                            {isInWatchlist ? <Star size={20} fill="currentColor" /> : <StarOff size={20} />}
+                        </button>
 
-                            {/* SVG Drawing Layer */}
-                            <svg
-                                ref={svgRef}
-                                className="absolute inset-0 pointer-events-none"
-                                style={{ top: 0, left: 0, width: '100%', height: 'calc(100% - 80px)' }}
+                        <Link
+                            href={`/stocks/${symbol}`}
+                            className="p-2 hover:bg-slate-800 rounded-lg transition"
+                            title="View Stock Details"
+                        >
+                            <ExternalLink size={20} />
+                        </Link>
+
+                        <button
+                            onClick={toggleFullscreen}
+                            className="p-2 hover:bg-slate-800 rounded-lg transition"
+                        >
+                            {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+                        </button>
+
+                        <button
+                            onClick={() => setShowSidebar(!showSidebar)}
+                            className={`p-2 rounded-lg transition ${showSidebar ? 'bg-slate-700' : 'hover:bg-slate-800'}`}
+                        >
+                            <Menu size={20} />
+                        </button>
+                    </div>
+                </header>
+
+                {/* Chart Controls Bar */}
+                <div className="h-12 border-b border-slate-800 flex items-center justify-between px-4 bg-slate-900/50 overflow-x-auto no-scrollbar gap-4">
+                    {/* Period Selector */}
+                    <div className="flex items-center gap-1 shrink-0">
+                        {PERIODS.map(p => (
+                            <button
+                                key={p.id}
+                                onClick={() => setPeriod(p.id)}
+                                className={`px-3 py-1.5 text-sm font-medium rounded transition ${period === p.id
+                                    ? 'bg-blue-600 text-white'
+                                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                                    }`}
                             >
-                                {/* Existing drawings would render here */}
-                            </svg>
-                        </>
-                    ) : (
-                        <ChartGridLayout
-                            primarySymbol={symbol}
-                            chartType={chartType}
-                            period={period}
-                            isLive={false}
-                            onMaximizePanel={(s) => {
-                                router.push(`/stock/${s}`);
-                            }}
+                                {p.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Center: Interval + Chart Type */}
+                    <div className="flex items-center gap-3 shrink-0">
+                        {/* Interval Dropdown */}
+                        <div className="relative">
+                            <button
+                                onClick={() => { setShowIntervalDropdown(!showIntervalDropdown); setShowChartTypeDropdown(false); }}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-sm"
+                            >
+                                {INTERVALS.find(i => i.id === interval)?.label || interval}
+                                <ChevronDown size={14} />
+                            </button>
+                            {showIntervalDropdown && (
+                                <div className="absolute top-full mt-1 left-0 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-20 py-1 min-w-32">
+                                    {INTERVALS.map(i => (
+                                        <button
+                                            key={i.id}
+                                            onClick={() => { setInterval(i.id); setShowIntervalDropdown(false); }}
+                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-700 ${interval === i.id ? 'text-blue-400' : ''}`}
+                                        >
+                                            {i.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Chart Type Dropdown */}
+                        <div className="relative">
+                            <button
+                                onClick={() => { setShowChartTypeDropdown(!showChartTypeDropdown); setShowIntervalDropdown(false); }}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-sm"
+                            >
+                                {(() => {
+                                    const ct = CHART_TYPES.find(c => c.id === chartType);
+                                    return ct ? <ct.icon size={16} /> : null;
+                                })()}
+                                {CHART_TYPES.find(c => c.id === chartType)?.label}
+                                <ChevronDown size={14} />
+                            </button>
+                            {showChartTypeDropdown && (
+                                <div className="absolute top-full mt-1 left-0 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-20 py-1 min-w-40">
+                                    {CHART_TYPES.map(ct => (
+                                        <button
+                                            key={ct.id}
+                                            onClick={() => { setChartType(ct.id); setShowChartTypeDropdown(false); }}
+                                            className={`w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-slate-700 ${chartType === ct.id ? 'text-blue-400' : ''}`}
+                                        >
+                                            <ct.icon size={16} />
+                                            {ct.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Pattern Toggle */}
+                        <button
+                            onClick={() => setShowPatterns(!showPatterns)}
+                            className={`px-3 py-1.5 text-sm rounded transition ${showPatterns ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30' : 'bg-slate-800 hover:bg-slate-700'}`}
+                        >
+                            Patterns
+                        </button>
+
+                        {/* Risk Analysis Toggle */}
+                        <button
+                            onClick={() => setShowRiskPanel(!showRiskPanel)}
+                            className={`px-3 py-1.5 text-sm rounded transition flex items-center gap-1 ${showRiskPanel ? 'bg-orange-600/20 text-orange-400 border border-orange-500/30' : 'bg-slate-800 hover:bg-slate-700'}`}
+                        >
+                            Risk
+                        </button>
+
+                        {/* Indicators Panel */}
+                        <IndicatorPanel
+                            activeIndicators={activeIndicators}
+                            onAddIndicator={handleAddIndicator}
+                            onRemoveIndicator={handleRemoveIndicator}
+                            onUpdateIndicator={handleUpdateIndicator}
                         />
+
+                        {/* Comparison Mode */}
+                        <ComparisonMode
+                            primarySymbol={symbol}
+                            primaryData={data}
+                            onComparisonDataChange={setComparisonSymbols}
+                        />
+
+                        {/* Multi-Timeframe Toggle */}
+                        <button
+                            onClick={() => setShowMultiTimeframe(true)}
+                            className="px-3 py-1.5 text-sm bg-slate-800 hover:bg-slate-700 rounded transition"
+                        >
+                            Multi-TF
+                        </button>
+
+                        {/* Layout Selector */}
+                        <div className="hidden md:flex items-center gap-2 border-l border-slate-700/50 pl-3 ml-1">
+                            <ChartLayoutSelector
+                                layout={layout}
+                                onLayoutChange={setLayout}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Main Content */}
+                <div className="flex-1 flex overflow-hidden">
+                    {/* Left: Drawing Tools */}
+                    <div className="hidden md:flex w-12 border-r border-slate-800 bg-slate-900/50 flex flex-col items-center py-2 gap-1">
+                        <ChartToolbar
+                            activeTool={activeTool}
+                            onToolSelect={startDrawingTool}
+                            onClearDrawings={clearAll}
+                            variant="vertical-compact"
+                        />
+                    </div>
+
+                    {/* Center: Chart */}
+                    <div className="flex-1 flex flex-col relative min-h-0 bg-slate-950">
+                        {layout === '1x1' ? (
+                            <>
+                                {/* Loading overlay */}
+                                {loading && (
+                                    <div className="absolute inset-0 bg-slate-950/80 flex items-center justify-center z-10 transition-opacity duration-300">
+                                        <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                    </div>
+                                )}
+
+                                {/* Main chart */}
+                                <div ref={chartContainerRef} className="flex-1 w-full" />
+
+                                {/* Volume chart */}
+                                <div ref={volumeContainerRef} className="h-20 border-t border-slate-800 w-full" />
+
+                                {/* SVG Drawing Layer */}
+                                <svg
+                                    ref={svgRef}
+                                    className="absolute inset-0 pointer-events-none"
+                                    style={{ top: 0, left: 0, width: '100%', height: 'calc(100% - 80px)' }}
+                                >
+                                    {/* Existing drawings would render here */}
+                                </svg>
+                            </>
+                        ) : (
+                            <ChartGridLayout
+                                primarySymbol={symbol}
+                                chartType={chartType}
+                                period={period}
+                                isLive={false}
+                                onMaximizePanel={(s) => {
+                                    router.push(`/stock/${s}`);
+                                }}
+                            />
+                        )}
+                    </div>
+
+                    {/* Right: Sidebar */}
+                    {showSidebar && (
+                        <ChartSidebar symbol={symbol} onClose={() => setShowSidebar(false)} />
                     )}
                 </div>
 
-                {/* Right: Sidebar */}
-                {showSidebar && (
-                    <ChartSidebar symbol={symbol} />
-                )}
+                {/* Bottom Status Bar */}
+                <footer className="h-8 border-t border-slate-800 flex items-center justify-between px-4 text-xs text-slate-500 bg-slate-900/50">
+                    <div className="flex items-center gap-4">
+                        <span>O: {data.length > 0 && crosshairData?.time ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time || Math.floor(new Date(d.date).getTime() / 1000) === (crosshairData.time as any))?.open ?? 0) : '-'}</span>
+                        <span>H: {data.length > 0 && crosshairData?.time ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time || Math.floor(new Date(d.date).getTime() / 1000) === (crosshairData.time as any))?.high ?? 0) : '-'}</span>
+                        <span>L: {data.length > 0 && crosshairData?.time ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time || Math.floor(new Date(d.date).getTime() / 1000) === (crosshairData.time as any))?.low ?? 0) : '-'}</span>
+                        <span>C: {crosshairData ? formatPrice(crosshairData.price) : '-'}</span>
+                        <span>Vol: {crosshairData ? formatNumber(crosshairData.volume) : '-'}</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <span>Data by Yahoo Finance</span>
+                        <span>© 2026 Pearto Finance</span>
+                    </div>
+                </footer>
+
+                {/* Risk Analysis Panel */}
+                <RiskAnalysisPanel
+                    symbol={symbol}
+                    isOpen={showRiskPanel}
+                    onClose={() => setShowRiskPanel(false)}
+                />
+
+                {/* Multi-Timeframe View Modal */}
+                <MultiTimeframeView
+                    symbol={symbol}
+                    chartType={chartType}
+                    isOpen={showMultiTimeframe}
+                    onClose={() => setShowMultiTimeframe(false)}
+                />
             </div>
-
-            {/* Bottom Status Bar */}
-            <footer className="h-8 border-t border-slate-800 flex items-center justify-between px-4 text-xs text-slate-500 bg-slate-900/50">
-                <div className="flex items-center gap-4">
-                    <span>O: {data.length > 0 && crosshairData?.time ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time || Math.floor(new Date(d.date).getTime() / 1000) === (crosshairData.time as any))?.open ?? 0) : '-'}</span>
-                    <span>H: {data.length > 0 && crosshairData?.time ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time || Math.floor(new Date(d.date).getTime() / 1000) === (crosshairData.time as any))?.high ?? 0) : '-'}</span>
-                    <span>L: {data.length > 0 && crosshairData?.time ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time || Math.floor(new Date(d.date).getTime() / 1000) === (crosshairData.time as any))?.low ?? 0) : '-'}</span>
-                    <span>C: {crosshairData ? formatPrice(crosshairData.price) : '-'}</span>
-                    <span>Vol: {crosshairData ? formatNumber(crosshairData.volume) : '-'}</span>
-                </div>
-                <div className="flex items-center gap-4">
-                    <span>Data by Yahoo Finance</span>
-                    <span>© 2026 Pearto Finance</span>
-                </div>
-            </footer>
-
-            {/* Risk Analysis Panel */}
-            <RiskAnalysisPanel
-                symbol={symbol}
-                isOpen={showRiskPanel}
-                onClose={() => setShowRiskPanel(false)}
-            />
-
-            {/* Multi-Timeframe View Modal */}
-            <MultiTimeframeView
-                symbol={symbol}
-                chartType={chartType}
-                isOpen={showMultiTimeframe}
-                onClose={() => setShowMultiTimeframe(false)}
-            />
-        </div>
+        </FeatureLock>
     );
 }

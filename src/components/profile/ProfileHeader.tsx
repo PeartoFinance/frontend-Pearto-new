@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Edit2, Settings, Briefcase } from 'lucide-react';
 import { UserProfile } from '@/services/userService';
 import PriceDisplay from '@/components/common/PriceDisplay';
+import { useSubscription } from '@/context/SubscriptionContext';
 
 interface ProfileHeaderProps {
     profile: UserProfile;
@@ -19,6 +20,22 @@ export default function ProfileHeader({ profile, netWorth, netWorthChangePercent
     const userHandle = profile.email?.split('@')[0] || 'user';
     const initials = userName.split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
 
+    // Get real subscription status
+    const { planName, isPro, status } = useSubscription();
+
+    // Determine subscription badge text and style
+    const getSubscriptionBadge = () => {
+        if (status === 'trialing') {
+            return { text: 'TRIAL', className: 'border-blue-500/40 text-blue-400' };
+        } else if (isPro) {
+            return { text: planName.toUpperCase(), className: 'border-emerald-500/40 text-emerald-500' };
+        } else {
+            return { text: 'FREE', className: 'border-slate-500/40 text-slate-400' };
+        }
+    };
+
+    const badge = getSubscriptionBadge();
+
     // Formatting logic from your original code (adapted for the design)
     const formatMemberSince = (iso?: string) => {
         if (!iso) return '—';
@@ -31,7 +48,7 @@ export default function ProfileHeader({ profile, netWorth, netWorthChangePercent
     };
 
     return (
-        <div className="w-full bg-white dark:bg-slate-900 text-white p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
+        <div className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
 
                 {/* Left Section: Avatar and Identity */}
@@ -51,9 +68,9 @@ export default function ProfileHeader({ profile, netWorth, netWorthChangePercent
 
                     <div className="space-y-1">
                         <div className="flex items-center gap-3">
-                            <h1 className="text-3xl font-bold tracking-tight text-white">{userName}</h1>
-                            <span className="px-2 py-0.5 rounded-md border border-emerald-500/40 text-emerald-500 text-[10px] font-bold uppercase tracking-widest">
-                                PRO
+                            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{userName}</h1>
+                            <span className={`px-2 py-0.5 rounded-md border text-[10px] font-bold uppercase tracking-widest ${badge.className}`}>
+                                {badge.text}
                             </span>
                         </div>
                         <div className="flex items-center gap-3 text-slate-400 text-sm">

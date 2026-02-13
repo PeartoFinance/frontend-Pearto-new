@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
 import { DollarSign, Package, TrendingUp, BarChart3 } from 'lucide-react';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 export default function ProfitMarginCalculator() {
     const [mode, setMode] = useState<'margin' | 'markup'>('margin');
@@ -35,7 +36,7 @@ export default function ProfitMarginCalculator() {
         };
     }, [cost, sellingPrice, desiredMargin, desiredMarkup]);
 
-    const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
+    const { formatPrice: formatCurrency } = useCurrency();
 
     return (
         <CalculatorLayout

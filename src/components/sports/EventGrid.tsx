@@ -9,9 +9,11 @@ interface EventGridProps {
     events: SportsEvent[];
     loading: boolean;
     onSelectEvent: (event: SportsEvent) => void;
+    pinnedIds?: number[];
+    onTogglePin?: (eventId: number) => void;
 }
 
-export default function EventGrid({ events, loading, onSelectEvent }: EventGridProps) {
+export default function EventGrid({ events, loading, onSelectEvent, pinnedIds = [], onTogglePin }: EventGridProps) {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-16">
@@ -26,7 +28,7 @@ export default function EventGrid({ events, loading, onSelectEvent }: EventGridP
     if (events.length === 0) {
         return (
             <div className="text-center py-16">
-                <Trophy className="h-16 w-16 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
+                <Trophy className="h-16 w-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">
                     No sports events found
                 </h3>
@@ -44,6 +46,8 @@ export default function EventGrid({ events, loading, onSelectEvent }: EventGridP
                     key={event.id}
                     event={event as ServiceSportsEvent}
                     onClick={() => onSelectEvent(event)}
+                    isPinned={pinnedIds.includes(event.id)}
+                    onTogglePin={onTogglePin}
                 />
             ))}
         </div>

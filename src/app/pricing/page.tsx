@@ -8,6 +8,7 @@ import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PricingCard from '@/components/pricing/PricingCard';
+import { useAuth } from '@/context/AuthContext';
 
 interface SubscriptionPlan {
     id: number;
@@ -19,29 +20,61 @@ interface SubscriptionPlan {
     features: Record<string, boolean | number | string> | null;
     maxMembers: number;
     isFeatured: boolean;
+    trialEnabled?: boolean;
+    trialDays?: number;
+}
+
+interface UserSubscription {
+    planId: number;
+    status: 'active' | 'trialing' | 'canceled' | 'expired';
+    planName: string;
 }
 
 export default function PricingPage() {
+    const { token, isAuthenticated } = useAuth();
     const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
     const [loading, setLoading] = useState(true);
     const [isYearly, setIsYearly] = useState(false);
+    const [userSubscription, setUserSubscription] = useState<UserSubscription | null>(null);
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
     useEffect(() => {
-        const fetchPlans = async () => {
+        const fetchData = async () => {
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscription/plans`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setPlans(data);
+                // Fetch plans
+                const plansRes = await fetch(`${API_URL}/subscription/plans`);
+                if (plansRes.ok) {
+                    const plansData = await plansRes.json();
+                    setPlans(plansData);
+                }
+
+                // Fetch user subscription if authenticated
+                if (isAuthenticated && token) {
+                    const subRes = await fetch(`${API_URL}/user/subscription`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                        },
+                    });
+                    if (subRes.ok) {
+                        const subData = await subRes.json();
+                        if (subData.has_subscription) {
+                            setUserSubscription({
+                                planId: subData.plan_id,
+                                status: subData.status,
+                                planName: subData.plan_name
+                            });
+                        }
+                    }
                 }
             } catch (error) {
-                console.error('Failed to fetch plans:', error);
+                console.error('Failed to fetch data:', error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchPlans();
-    }, []);
+        fetchData();
+    }, [API_URL, isAuthenticated, token]);
 
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
@@ -111,7 +144,12 @@ export default function PricingPage() {
                         ) : (
                             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {plans.map((plan) => (
-                                    <PricingCard key={plan.id} plan={plan} isYearly={isYearly} />
+                                    <PricingCard
+                                        key={plan.id}
+                                        plan={plan}
+                                        isYearly={isYearly}
+                                        userSubscription={userSubscription}
+                                    />
                                 ))}
                             </div>
                         )}
@@ -133,3 +171,4 @@ export default function PricingPage() {
         </div>
     );
 }
+

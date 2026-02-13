@@ -3,7 +3,7 @@
 import { useCallback } from 'react';
 import { useCountry } from '@/context/CountryContext';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com';
 
 interface ApiOptions {
     headers?: Record<string, string>;

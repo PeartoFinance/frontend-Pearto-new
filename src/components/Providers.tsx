@@ -9,6 +9,7 @@ import { SubscriptionProvider } from '@/context/SubscriptionContext';
 import { FeatureFlagsProvider } from '@/context/FeatureFlagsContext';
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
 import { MobileAppPrompt } from '@/components/common/MobileAppPrompt';
+import PushNotificationProvider from '@/components/PushNotificationProvider';
 
 // Configure React Query with caching for faster subsequent loads
 const queryClient = new QueryClient({
@@ -32,6 +33,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                             <CountryProvider>
                                 <CurrencyProvider>
                                     {children}
+                                    <PushNotificationProvider />
                                     <MobileAppPrompt
                                         appName="Pearto Finance"
                                         iosAppUrl="https://apps.apple.com/app/pearto-finance"

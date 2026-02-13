@@ -29,15 +29,19 @@ import { useSearchParams } from 'next/navigation';
 export default function LiveClientWrapper({ symbol: propSymbol }: LiveClientWrapperProps) {
     const searchParams = useSearchParams();
     const symbol = searchParams.get('symbol') || propSymbol || 'AAPL';
+    const assetType = (searchParams.get('type') as 'stock' | 'crypto' | 'forex' | 'commodity') || 'stock';
 
-    const { isPro, trackUsage } = useSubscription();
+    const { isPro, trackUsage, isLoading: isSubscriptionLoading } = useSubscription();
     const [isAllowed, setIsAllowed] = useState<boolean | null>(null);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     useEffect(() => {
+        if (isSubscriptionLoading) return;
+
         const checkAccess = async () => {
             if (isPro) {
                 setIsAllowed(true);
+                setShowUpgradeModal(false);
                 return;
             }
 
@@ -50,9 +54,9 @@ export default function LiveClientWrapper({ symbol: propSymbol }: LiveClientWrap
         };
 
         checkAccess();
-    }, [isPro, trackUsage]);
+    }, [isPro, trackUsage, isSubscriptionLoading]);
 
-    if (isAllowed === null) {
+    if (isAllowed === null || isSubscriptionLoading) {
         return (
             <div className="min-h-screen bg-slate-950 flex items-center justify-center">
                 <div className="flex items-center gap-3">
@@ -66,7 +70,7 @@ export default function LiveClientWrapper({ symbol: propSymbol }: LiveClientWrap
     return (
         <div className="relative">
             {isAllowed ? (
-                <LiveChartPage symbol={symbol} />
+                <LiveChartPage symbol={symbol} assetType={assetType} />
             ) : (
                 <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
                     <FeatureLock

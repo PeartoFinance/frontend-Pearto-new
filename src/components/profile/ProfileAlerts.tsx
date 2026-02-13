@@ -74,7 +74,7 @@ export default function ProfileAlerts() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">Price Alerts</h2>
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Price Alerts</h2>
                     <p className="text-slate-400 mt-1">Get notified when prices hit your targets</p>
                 </div>
                 <button
@@ -89,7 +89,7 @@ export default function ProfileAlerts() {
             {alerts.length === 0 ? (
                 <div className="text-center py-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
                     <Bell className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-white mb-2">No alerts yet</h3>
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No alerts yet</h3>
                     <p className="text-slate-400 mb-4">Create price alerts to get notified</p>
                 </div>
             ) : (
@@ -110,47 +110,47 @@ export default function ProfileAlerts() {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-md w-full">
                         <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
-                            <h3 className="text-lg font-semibold text-white">Create Price Alert</h3>
+                            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Create Price Alert</h3>
                             <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white">
                                 <X size={20} />
                             </button>
                         </div>
                         <div className="p-4 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1">Symbol</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Symbol</label>
                                 <input
                                     type="text"
                                     value={newAlert.symbol}
                                     onChange={(e) => setNewAlert({ ...newAlert, symbol: e.target.value.toUpperCase() })}
                                     placeholder="e.g., AAPL"
-                                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                    className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-1">Condition</label>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Condition</label>
                                     <select
                                         value={newAlert.condition}
                                         onChange={(e) => setNewAlert({ ...newAlert, condition: e.target.value as 'above' | 'below' })}
-                                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                        className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
                                     >
                                         <option value="above">Price Above</option>
                                         <option value="below">Price Below</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-1">Target Price</label>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Target Price</label>
                                     <input
                                         type="number"
                                         value={newAlert.targetValue || ''}
                                         onChange={(e) => setNewAlert({ ...newAlert, targetValue: parseFloat(e.target.value) })}
                                         placeholder="0.00"
-                                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                        className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
                                     />
                                 </div>
                             </div>
                             <div className="flex gap-4">
-                                <label className="flex items-center gap-2 text-sm text-slate-300">
+                                <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
                                     <input
                                         type="checkbox"
                                         checked={newAlert.notifyEmail}
@@ -159,7 +159,7 @@ export default function ProfileAlerts() {
                                     />
                                     Email
                                 </label>
-                                <label className="flex items-center gap-2 text-sm text-slate-300">
+                                <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
                                     <input
                                         type="checkbox"
                                         checked={newAlert.notifyPush}
@@ -196,7 +196,7 @@ function AlertCard({ alert, onToggle, onDelete }: { alert: Alert; onToggle: () =
                         {isAbove ? <TrendingUp className="text-emerald-500" size={20} /> : <TrendingDown className="text-red-500" size={20} />}
                     </div>
                     <div>
-                        <div className="font-bold text-white">{alert.symbol}</div>
+                        <div className="font-bold text-slate-900 dark:text-white">{alert.symbol}</div>
                         <div className="text-sm text-slate-400">
                             {isAbove ? 'Price above' : 'Price below'} ${alert.targetValue?.toFixed(2)}
                         </div>
@@ -208,7 +208,7 @@ function AlertCard({ alert, onToggle, onDelete }: { alert: Alert; onToggle: () =
                             Triggered
                         </span>
                     )}
-                    <button onClick={onToggle} className="p-2 text-slate-400 hover:text-white transition">
+                    <button onClick={onToggle} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
                         {alert.isActive ? <Pause size={16} /> : <Play size={16} />}
                     </button>
                     <button onClick={onDelete} className="p-2 text-slate-400 hover:text-red-400 transition">

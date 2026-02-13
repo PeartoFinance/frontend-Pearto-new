@@ -25,7 +25,7 @@ export default function FAQPage() {
     useEffect(() => {
         const fetchFAQs = async () => {
             try {
-                const url = `${process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com'}/api/content/faq`;
+                const url = `${process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com'}/api/content/faq`;
                 const res = await fetch(url);
                 if (res.ok) {
                     const data = await res.json();

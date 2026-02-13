@@ -12,22 +12,22 @@ const settingsSections = [
     {
         title: 'Account',
         items: [
-            { name: 'Profile', description: 'Update your personal information', icon: User, href: '/profile' },
-            { name: 'Notifications', description: 'Manage your notification preferences', icon: Bell, href: '/profile/settings' },
-            { name: 'Security', description: 'Password and authentication', icon: Shield, href: '/profile/settings' },
+            { name: 'Profile', description: 'Update your personal information', icon: User, href: '/profile?tab=overview' },
+            { name: 'Notifications', description: 'Manage your notification preferences', icon: Bell, href: '/profile?tab=notifications' },
+            { name: 'Security', description: 'Password and authentication', icon: Shield, href: '/profile?tab=security' },
         ]
     },
     {
         title: 'Preferences',
         items: [
-            { name: 'Language & Region', description: 'Set your language and timezone', icon: Globe, href: '/profile/settings' },
-            { name: 'Appearance', description: 'Theme and display settings', icon: Palette, href: '/profile/settings' },
+            { name: 'Language & Region', description: 'Set your language and timezone', icon: Globe, href: '/profile?tab=preferences' },
+            { name: 'Appearance', description: 'Theme and display settings', icon: Palette, href: '/profile?tab=preferences' },
         ]
     },
     {
         title: 'Billing',
         items: [
-            { name: 'Subscription', description: 'Manage your subscription plan', icon: CreditCard, href: '/settings/billing' },
+            { name: 'Subscription', description: 'Manage your subscription plan', icon: CreditCard, href: '/profile?tab=subscription' }, // Updated to profile tab
         ]
     },
 ];

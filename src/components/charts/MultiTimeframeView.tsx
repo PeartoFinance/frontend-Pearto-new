@@ -5,6 +5,8 @@ import { createChart, ColorType, CrosshairMode, type IChartApi, LineSeries, Area
 import { Grid2X2, Grid3X3, X, Settings } from 'lucide-react';
 import { getStockHistory, type PriceHistoryPoint } from '@/services/marketService';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useSubscription } from '@/context/SubscriptionContext';
+import { FeatureLock } from '@/components/subscription/FeatureGating';
 
 interface TimeframePane {
     id: string;
@@ -248,75 +250,77 @@ export default function MultiTimeframeView({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-slate-950 z-50 flex flex-col">
-            {/* Header */}
-            <div className="h-12 border-b border-slate-700 flex items-center justify-between px-4 bg-slate-900">
-                <div className="flex items-center gap-4">
-                    <span className="font-semibold text-white text-lg">{symbol}</span>
-                    <span className="text-slate-400 text-sm">Multi-Timeframe View</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    {/* Layout Toggle */}
-                    <button
-                        onClick={() => setLayout(layout === '2x2' ? '1x4' : '2x2')}
-                        className={`p-2 rounded transition ${layout === '2x2' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
-                        title="Toggle layout"
-                    >
-                        <Grid2X2 size={18} />
-                    </button>
-
-                    {/* Close */}
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-slate-800 rounded transition text-slate-400 hover:text-white"
-                    >
-                        <X size={18} />
-                    </button>
-                </div>
-            </div>
-
-            {/* Chart Grid */}
-            <div className={`flex-1 p-2 gap-2 ${layout === '2x2' ? 'grid grid-cols-2 grid-rows-2' : 'flex flex-row'}`}>
-                {panes.map((pane, index) => (
-                    <div
-                        key={pane.id}
-                        className="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden flex flex-col"
-                    >
-                        {/* Pane Header */}
-                        <div className="h-8 border-b border-slate-700 px-3 flex items-center justify-between bg-slate-800/50">
-                            <select
-                                value={pane.timeframe}
-                                onChange={(e) => changeTimeframe(pane.id, e.target.value)}
-                                className="bg-transparent text-sm text-white font-medium focus:outline-none cursor-pointer"
-                            >
-                                {TIMEFRAMES.map(tf => (
-                                    <option key={tf.id} value={tf.id} className="bg-slate-800">
-                                        {tf.label}
-                                    </option>
-                                ))}
-                            </select>
-                            {pane.data.length > 0 && (
-                                <span className="text-xs text-slate-500">
-                                    {pane.data.length} bars
-                                </span>
-                            )}
-                        </div>
-
-                        {/* Chart Container */}
-                        <div
-                            ref={el => { containerRefs.current[index] = el; }}
-                            className="flex-1 relative"
-                        >
-                            {loading && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80">
-                                    <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                                </div>
-                            )}
-                        </div>
+        <FeatureLock featureKey="advanced_charts" title="Multi-Timeframe View">
+            <div className="fixed inset-0 bg-slate-950 z-50 flex flex-col">
+                {/* Header */}
+                <div className="h-12 border-b border-slate-700 flex items-center justify-between px-4 bg-slate-900">
+                    <div className="flex items-center gap-4">
+                        <span className="font-semibold text-white text-lg">{symbol}</span>
+                        <span className="text-slate-400 text-sm">Multi-Timeframe View</span>
                     </div>
-                ))}
+
+                    <div className="flex items-center gap-2">
+                        {/* Layout Toggle */}
+                        <button
+                            onClick={() => setLayout(layout === '2x2' ? '1x4' : '2x2')}
+                            className={`p-2 rounded transition ${layout === '2x2' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+                            title="Toggle layout"
+                        >
+                            <Grid2X2 size={18} />
+                        </button>
+
+                        {/* Close */}
+                        <button
+                            onClick={onClose}
+                            className="p-2 hover:bg-slate-800 rounded transition text-slate-400 hover:text-white"
+                        >
+                            <X size={18} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Chart Grid */}
+                <div className={`flex-1 p-2 gap-2 ${layout === '2x2' ? 'grid grid-cols-2 grid-rows-2' : 'flex flex-row'}`}>
+                    {panes.map((pane, index) => (
+                        <div
+                            key={pane.id}
+                            className="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden flex flex-col"
+                        >
+                            {/* Pane Header */}
+                            <div className="h-8 border-b border-slate-700 px-3 flex items-center justify-between bg-slate-800/50">
+                                <select
+                                    value={pane.timeframe}
+                                    onChange={(e) => changeTimeframe(pane.id, e.target.value)}
+                                    className="bg-transparent text-sm text-white font-medium focus:outline-none cursor-pointer"
+                                >
+                                    {TIMEFRAMES.map(tf => (
+                                        <option key={tf.id} value={tf.id} className="bg-slate-800">
+                                            {tf.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                {pane.data.length > 0 && (
+                                    <span className="text-xs text-slate-500">
+                                        {pane.data.length} bars
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Chart Container */}
+                            <div
+                                ref={el => { containerRefs.current[index] = el; }}
+                                className="flex-1 relative"
+                            >
+                                {loading && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80">
+                                        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
-        </div>
+        </FeatureLock>
     );
 }

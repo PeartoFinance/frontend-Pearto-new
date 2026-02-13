@@ -31,6 +31,7 @@ export default function PortfolioPage() {
 
     // Health Score State
     const [showHealthSettings, setShowHealthSettings] = useState(false);
+    const [healthRefreshTrigger, setHealthRefreshTrigger] = useState(0);
 
     // Stock search state
     const [stockSearch, setStockSearch] = useState('');
@@ -216,9 +217,17 @@ export default function PortfolioPage() {
                             </div>
 
                             {showHealthSettings ? (
-                                <GoalSetting onComplete={() => setShowHealthSettings(false)} />
+                                <GoalSetting
+                                    onComplete={() => {
+                                        setShowHealthSettings(false);
+                                        setHealthRefreshTrigger(prev => prev + 1);
+                                    }}
+                                />
                             ) : (
-                                <HealthScore onConfigure={() => setShowHealthSettings(true)} />
+                                <HealthScore
+                                    onConfigure={() => setShowHealthSettings(true)}
+                                    refreshTrigger={healthRefreshTrigger}
+                                />
                             )}
                         </section>
 

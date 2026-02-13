@@ -71,7 +71,7 @@ export default function ProfileVerification({ profile }: ProfileVerificationProp
         try {
             // Mock API call - replace with actual backend call
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
+
             setEmailStep('code-sent');
             setDemoEmailCode('123456'); // Demo code
             setSuccess('Verification code sent to your email!');
@@ -89,7 +89,7 @@ export default function ProfileVerification({ profile }: ProfileVerificationProp
         try {
             // Mock verification - replace with actual backend call
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
+
             if (emailCode === demoEmailCode) {
                 setSuccess('Email verified successfully!');
                 setEmailStep('idle');
@@ -118,7 +118,7 @@ export default function ProfileVerification({ profile }: ProfileVerificationProp
         try {
             // Mock API call - replace with actual backend call
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
+
             setPhoneStep('code-sent');
             setDemoPhoneCode('654321'); // Demo code
             setSuccess('Verification code sent to your phone!');
@@ -136,7 +136,7 @@ export default function ProfileVerification({ profile }: ProfileVerificationProp
         try {
             // Mock verification - replace with actual backend call
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
+
             if (phoneCode === demoPhoneCode) {
                 setSuccess('Phone verified successfully!');
                 setPhoneStep('idle');
@@ -234,11 +234,9 @@ export default function ProfileVerification({ profile }: ProfileVerificationProp
                         </button>
                     ) : (
                         <div className="space-y-3">
+                            {/* Demo code hidden for production-like feel */}
                             {demoEmailCode && (
-                                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded p-3 text-center">
-                                    <p className="text-xs text-yellow-400 mb-1">Demo Code:</p>
-                                    <p className="text-lg font-mono font-bold text-yellow-300">{demoEmailCode}</p>
-                                </div>
+                                <div className="hidden" ref={() => console.log('Demo Email Code:', demoEmailCode)} />
                             )}
                             <input
                                 type="text"
@@ -316,11 +314,9 @@ export default function ProfileVerification({ profile }: ProfileVerificationProp
                         </div>
                     ) : (
                         <div className="space-y-3">
+                            {/* Demo code hidden for production-like feel */}
                             {demoPhoneCode && (
-                                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded p-3 text-center">
-                                    <p className="text-xs text-yellow-400 mb-1">Demo Code:</p>
-                                    <p className="text-lg font-mono font-bold text-yellow-300">{demoPhoneCode}</p>
-                                </div>
+                                <div className="hidden" ref={() => console.log('Demo Phone Code:', demoPhoneCode)} />
                             )}
                             <input
                                 type="text"

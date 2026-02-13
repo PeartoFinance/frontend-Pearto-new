@@ -67,10 +67,10 @@ export default function CarInsuranceCalculator() {
             <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Cover Type</label>
                 <div className="grid grid-cols-2 gap-2">
-                    <button onClick={() => setCoverType('comprehensive')} className={`py-3 px-4 rounded-lg font-medium transition ${coverType === 'comprehensive' ? 'bg-purple-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600'}`}>
+                    <button onClick={() => setCoverType('comprehensive')} className={`py-3 px-4 rounded-lg font-medium transition-colors ${coverType === 'comprehensive' ? 'bg-purple-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
                         Comprehensive
                     </button>
-                    <button onClick={() => setCoverType('tp')} className={`py-3 px-4 rounded-lg font-medium transition ${coverType === 'tp' ? 'bg-purple-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600'}`}>
+                    <button onClick={() => setCoverType('tp')} className={`py-3 px-4 rounded-lg font-medium transition-colors ${coverType === 'tp' ? 'bg-purple-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
                         Third Party
                     </button>
                 </div>
@@ -81,7 +81,7 @@ export default function CarInsuranceCalculator() {
                 <div className="relative">
                     <Car className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input type="number" value={carValue} onChange={(e) => setCarValue(Number(e.target.value))}
-                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" />
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500" />
                 </div>
                 <input type="range" min={200000} max={5000000} step={50000} value={carValue} onChange={(e) => setCarValue(Number(e.target.value))} className="w-full mt-2 accent-purple-500" />
             </div>

@@ -53,7 +53,7 @@ export default function ForexTable() {
         : majorPairs;
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm max-w-full">
             <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row justify-between gap-4 items-center">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">Live Exchange Rates</h3>
                 <div className="relative w-full sm:w-64">
@@ -90,7 +90,7 @@ export default function ForexTable() {
 
                             return (
                                 <tr key={`${pair.base}${pair.target}`} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
-                                    <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">
+                                    <td className="px-6 py-4 font-bold text-slate-900 dark:text-white whitespace-nowrap">
                                         <div className="flex items-center gap-3">
                                             <div className="flex -space-x-2">
                                                 <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center text-[10px] border-2 border-white dark:border-slate-800">{pair.base}</div>
@@ -99,22 +99,22 @@ export default function ForexTable() {
                                             {pair.base}/{pair.target}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-right font-mono text-base">
+                                    <td className="px-6 py-4 text-right font-mono text-base whitespace-nowrap">
                                         {price.toFixed(5)}
                                     </td>
-                                    <td className={`px-6 py-4 text-right font-medium ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                    <td className={`px-6 py-4 text-right font-medium whitespace-nowrap ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
                                         {change > 0 ? '+' : ''}{change.toFixed(5)}
                                     </td>
-                                    <td className={`px-6 py-4 text-right font-medium ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                    <td className={`px-6 py-4 text-right font-medium whitespace-nowrap ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
                                         <div className="inline-flex items-center gap-1 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
                                             {isPositive ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
                                             {Math.abs(percent).toFixed(2)}%
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-right text-slate-500 hidden md:table-cell">
+                                    <td className="px-6 py-4 text-right text-slate-500 hidden md:table-cell whitespace-nowrap">
                                         {(price * 1.002).toFixed(5)}
                                     </td>
-                                    <td className="px-6 py-4 text-right text-slate-500 hidden md:table-cell">
+                                    <td className="px-6 py-4 text-right text-slate-500 hidden md:table-cell whitespace-nowrap">
                                         {(price * 0.998).toFixed(5)}
                                     </td>
                                 </tr>

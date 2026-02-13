@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
 import { Percent, Tag, ShoppingCart, Calculator } from 'lucide-react';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 export default function DiscountCalculator() {
     const [originalPrice, setOriginalPrice] = useState(100);
@@ -28,7 +29,7 @@ export default function DiscountCalculator() {
         };
     }, [originalPrice, discountPercent, quantity, taxRate]);
 
-    const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
+    const { formatPrice: formatCurrency } = useCurrency();
 
     // Common discount presets
     const discountPresets = [10, 15, 20, 25, 30, 40, 50, 75];

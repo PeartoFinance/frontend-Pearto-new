@@ -117,13 +117,35 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
 
     // Track usage of a feature (call before performing action)
     const trackUsage = useCallback(async (key: string): Promise<{ allowed: boolean; remaining: number }> => {
-        if (!token) {
-            return { allowed: false, remaining: 0 };
-        }
-
         // If Pro, always allow
         if (state.isPro) {
             return { allowed: true, remaining: -1 };
+        }
+
+        // For non-logged-in users, use localStorage for tracking Free tier limits
+        if (!token) {
+            const today = new Date().toISOString().split('T')[0];
+            const storageKey = `usage_${key}_${today}`;
+            const currentUsage = parseInt(localStorage.getItem(storageKey) || '0', 10);
+
+            // Default Free tier limits (should match backend Free plan limits)
+            const FREE_LIMITS: Record<string, number> = {
+                'ai_queries_limit': 5,
+                'advanced_charts_limit': 3,
+                'download_reports_limit': 3,
+                'alerts_limit': 3,
+                'chart_templates_limit': 1,
+            };
+
+            const limit = FREE_LIMITS[key] ?? 3;
+            const remaining = limit - currentUsage;
+
+            if (remaining > 0) {
+                localStorage.setItem(storageKey, String(currentUsage + 1));
+                return { allowed: true, remaining: remaining - 1 };
+            } else {
+                return { allowed: false, remaining: 0 };
+            }
         }
 
         try {

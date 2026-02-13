@@ -9,6 +9,7 @@ import { Course, Instructor, CourseModule } from '@/types/education';
 import { get } from '@/services/api';
 import { enrollCourse } from '@/services/educationService';
 import { useAuth } from '@/context/AuthContext';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import {
     ArrowLeft, Star, Users, Clock, Award, Play, CheckCircle,
     BookOpen, Lock, GraduationCap, Share2, Heart, Zap, Download
@@ -238,10 +239,10 @@ export default function CourseDetailPage() {
                                                 ) : (
                                                     <div className="flex items-baseline gap-2">
                                                         <span className="text-2xl font-bold text-slate-900 dark:text-white">
-                                                            ${course.discountPrice || course.price}
+                                                            <PriceDisplay amount={course.discountPrice || course.price} />
                                                         </span>
                                                         {course.discountPrice && (
-                                                            <span className="text-sm text-slate-500 line-through">${course.price}</span>
+                                                            <span className="text-sm text-slate-500 line-through"><PriceDisplay amount={course.price} /></span>
                                                         )}
                                                     </div>
                                                 )}

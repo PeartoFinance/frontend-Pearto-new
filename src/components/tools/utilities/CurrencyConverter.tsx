@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
 import { ArrowLeftRight, RefreshCw, TrendingUp, Building2, Star, ExternalLink } from 'lucide-react';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { getVendors } from '@/services/vendorService';
 
 // Currency metadata with flags
 const currencyMeta: Record<string, { name: string; flag: string }> = {
@@ -71,24 +72,26 @@ export default function CurrencyConverter() {
         };
     }, [amount, fromCurrency, toCurrency, rates]);
 
+
+
     // Fetch vendor deals
     useEffect(() => {
         const fetchVendorDeals = async () => {
             setLoadingVendors(true);
             try {
-                const res = await fetch(`/api/public/vendors?category=forex&limit=5`);
-                if (res.ok) {
-                    const data = await res.json();
-                    const deals: VendorDeal[] = (data.vendors || []).map((v: any) => ({
+                const vendors = await getVendors({ category: 'forex', limit: 5 });
+
+                if (vendors) {
+                    const deals: VendorDeal[] = vendors.map((v) => ({
                         id: v.id,
                         name: v.name,
-                        logoUrl: v.logoUrl,
+                        logoUrl: v.logoUrl || null,
                         rating: v.rating || 0,
                         reviewCount: v.reviewCount || 0,
                         buyRate: v.metadata?.buyRate || result.rate * 0.99,
                         sellRate: v.metadata?.sellRate || result.rate * 1.01,
                         fee: v.metadata?.fee || '0.5%',
-                        website: v.website
+                        website: v.website || null
                     }));
 
                     // Mark best rate

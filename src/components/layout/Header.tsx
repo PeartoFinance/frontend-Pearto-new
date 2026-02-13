@@ -15,6 +15,7 @@ import { createPortal } from 'react-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useSubscription } from '@/context/SubscriptionContext';
 import SearchModal from './SearchModal';
+import NotificationsMenu from './NotificationsMenu';
 import { fetchNavigation, NavigationItem } from '@/services/navigationService';
 
 // Icon mapping for dynamic icons
@@ -28,10 +29,10 @@ const iconMap: Record<string, LucideIcon> = {
 
 // Fallback navigation data
 const fallbackPillarsItems = [
-    { href: '/stocks', label: 'Stocks', icon: 'TrendingUp' },
-    { href: '/crypto', label: 'Crypto', icon: 'Bitcoin' },
-    { href: '/forex', label: 'Forex', icon: 'DollarSign' },
-    { href: '/commodities', label: 'Commodities', icon: 'BarChart3' },
+    { href: 'https://stocks-nine-blush.vercel.app/stocks', label: 'Stocks', icon: 'TrendingUp' },
+    { href: 'https://stocks-nine-blush.vercel.app/crypto', label: 'Crypto', icon: 'Bitcoin' },
+    { href: 'https://stocks-nine-blush.vercel.app/forex', label: 'Forex', icon: 'DollarSign' },
+    { href: 'https://stocks-nine-blush.vercel.app/commodities', label: 'Commodities', icon: 'BarChart3' },
 ];
 
 const fallbackToolsItems = [
@@ -190,7 +191,7 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                 }
 
                 // Also fetch custom pages for header and resources
-                const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+                const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com/api';
                 const userCountry = localStorage.getItem('userCountry') || 'US';
                 const [headerPagesRes, resourcesPagesRes] = await Promise.all([
                     fetch(`${API_BASE}/pages?placement=header&status=published`, {
@@ -254,7 +255,7 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
             try {
                 // Try to get user's country from localStorage or default to US
                 const userCountry = localStorage.getItem('userCountry') || 'US';
-                const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+                const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com/api';
                 const res = await fetch(`${API_BASE}/market/status`, {
                     headers: { 'X-User-Country': userCountry }
                 });
@@ -362,10 +363,7 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                                 AI
                             </Link>
 
-                            <button className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                <Bell size={20} className="text-slate-600 dark:text-white" />
-                                <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full" />
-                            </button>
+                            <NotificationsMenu />
 
                             {/* Auth buttons - Desktop */}
                             <div className="hidden lg:flex items-center gap-2">
@@ -447,9 +445,9 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                         />
 
                         {/* Featured buttons (dynamic) */}
-                        {featuredItems.map((item) => (
+                        {featuredItems.map((item, index) => (
                             <Link
-                                key={item.href}
+                                key={`${item.href}-${index}`}
                                 href={item.href}
                                 className={`px-4 py-2 rounded-lg font-semibold text-sm text-white shadow hover:shadow-md transition ${item.css_class || 'bg-gradient-to-br from-emerald-500 to-cyan-500'}`}
                             >

@@ -7,6 +7,32 @@ export interface PriceData {
     volume?: number;
 }
 
+/**
+ * Deduplicate and sort chart data by time (ascending)
+ * Lightweight-charts requires unique, ascending timestamps
+ */
+export function dedupeAndSortChartData<T extends { time: string | number }>(data: T[]): T[] {
+    if (!data || data.length === 0) return [];
+
+    // Convert to Map to dedupe by time (keeps last occurrence)
+    const timeMap = new Map<string | number, T>();
+    data.forEach(item => {
+        // Normalize time to number for consistent handling
+        const timeKey = typeof item.time === 'string' ? item.time : item.time;
+        timeMap.set(timeKey, item);
+    });
+
+    // Convert back to array and sort
+    const deduped = Array.from(timeMap.values());
+
+    // Sort by time ascending
+    return deduped.sort((a, b) => {
+        const timeA = typeof a.time === 'string' ? new Date(a.time).getTime() : a.time;
+        const timeB = typeof b.time === 'string' ? new Date(b.time).getTime() : b.time;
+        return timeA - timeB;
+    });
+}
+
 export interface ChartMarker {
     time: string | number;
     position: 'aboveBar' | 'belowBar' | 'inBar';

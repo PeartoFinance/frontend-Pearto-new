@@ -74,7 +74,7 @@ export default function LifeInsuranceCalculator() {
                 <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input type="number" value={annualIncome} onChange={(e) => setAnnualIncome(Number(e.target.value))}
-                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" />
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500" />
                 </div>
                 <input type="range" min={200000} max={5000000} step={50000} value={annualIncome} onChange={(e) => setAnnualIncome(Number(e.target.value))} className="w-full mt-2 accent-emerald-500" />
             </div>
@@ -82,26 +82,26 @@ export default function LifeInsuranceCalculator() {
             <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Years of Income Replacement</label>
                 <input type="number" value={yearsToReplace} onChange={(e) => setYearsToReplace(Number(e.target.value))} min={5} max={30}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" />
+                    className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500" />
                 <input type="range" min={5} max={30} value={yearsToReplace} onChange={(e) => setYearsToReplace(Number(e.target.value))} className="w-full mt-2 accent-emerald-500" />
             </div>
 
             <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Outstanding Loans</label>
                 <input type="number" value={outstandingLoans} onChange={(e) => setOutstandingLoans(Number(e.target.value))} min={0}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" />
+                    className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500" />
             </div>
 
             <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Children's Education Fund</label>
                 <input type="number" value={childrenEducation} onChange={(e) => setChildrenEducation(Number(e.target.value))} min={0}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" />
+                    className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500" />
             </div>
 
             <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Existing Coverage</label>
                 <input type="number" value={existingCover} onChange={(e) => setExistingCover(Number(e.target.value))} min={0}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" />
+                    className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500" />
             </div>
         </CalculatorLayout>
     );

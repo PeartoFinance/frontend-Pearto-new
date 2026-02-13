@@ -7,15 +7,16 @@ import { Activity, AlertCircle, CheckCircle, TrendingUp, Wallet } from 'lucide-r
 interface HealthScoreProps {
     compact?: boolean; // For profile or sidebar view
     onConfigure?: () => void;
+    refreshTrigger?: number;
 }
 
-export default function HealthScore({ compact = false, onConfigure }: HealthScoreProps) {
+export default function HealthScore({ compact = false, onConfigure, refreshTrigger = 0 }: HealthScoreProps) {
     const [health, setHealth] = useState<PortfolioHealth | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         loadHealth();
-    }, []);
+    }, [refreshTrigger]);
 
     const loadHealth = async () => {
         try {

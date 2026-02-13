@@ -5,6 +5,7 @@ import { getTechnicalAnalysis } from '@/services/marketService';
 import { Loader2, Gauge, TrendingUp, TrendingDown, Minus, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState, useContext } from 'react';
 import { createContext } from 'react';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 // Safe import pattern - won't throw if context is missing
 let useLiveModeOptional: () => { isLive: boolean; refreshTrigger: number } | null = () => null;
@@ -28,6 +29,7 @@ interface RiskAnalysisWidgetProps {
 
 export default function RiskAnalysisWidget({ symbol }: RiskAnalysisWidgetProps) {
     const [isExpanded, setIsExpanded] = useState(false);
+    const { formatPrice } = useCurrency();
 
     // Safely get live mode context (may be null if outside provider)
     const liveMode = useLiveModeOptional();

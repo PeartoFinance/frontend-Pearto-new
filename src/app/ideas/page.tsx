@@ -10,6 +10,7 @@ import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import { ideasApi, TradingIdea } from '@/services/socialService';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 const IDEA_TYPE_STYLES = {
     long: { bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400', icon: TrendingUp },
@@ -65,19 +66,19 @@ function IdeaCard({ idea }: { idea: TradingIdea }) {
                         {idea.entryPrice && (
                             <div>
                                 <span className="text-slate-500">Entry:</span>
-                                <span className="ml-1 font-semibold text-slate-700 dark:text-slate-300">${idea.entryPrice}</span>
+                                <span className="ml-1 font-semibold text-slate-700 dark:text-slate-300"><PriceDisplay amount={idea.entryPrice} /></span>
                             </div>
                         )}
                         {idea.targetPrice && (
                             <div>
                                 <span className="text-slate-500">Target:</span>
-                                <span className="ml-1 font-semibold text-emerald-600">${idea.targetPrice}</span>
+                                <span className="ml-1 font-semibold text-emerald-600"><PriceDisplay amount={idea.targetPrice} /></span>
                             </div>
                         )}
                         {idea.stopLoss && (
                             <div>
                                 <span className="text-slate-500">Stop:</span>
-                                <span className="ml-1 font-semibold text-red-600">${idea.stopLoss}</span>
+                                <span className="ml-1 font-semibold text-red-600"><PriceDisplay amount={idea.stopLoss} /></span>
                             </div>
                         )}
                     </div>

@@ -3,6 +3,7 @@
 import { Course } from '@/types/education';
 import { Clock, Users, Star, Play, BookOpen } from 'lucide-react';
 import Link from 'next/link';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface CourseCardProps {
     course: Course;
@@ -101,15 +102,15 @@ export default function CourseCard({ course }: CourseCardProps) {
                                 {course.discountPrice ? (
                                     <>
                                         <span className="text-lg font-bold text-slate-900 dark:text-white">
-                                            ${course.discountPrice}
+                                            <PriceDisplay amount={course.discountPrice} />
                                         </span>
                                         <span className="text-sm text-slate-400 line-through">
-                                            ${course.price}
+                                            <PriceDisplay amount={course.price} />
                                         </span>
                                     </>
                                 ) : (
                                     <span className="text-lg font-bold text-slate-900 dark:text-white">
-                                        ${course.price}
+                                        <PriceDisplay amount={course.price} />
                                     </span>
                                 )}
                             </div>

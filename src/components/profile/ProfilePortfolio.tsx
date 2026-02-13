@@ -33,6 +33,7 @@ export default function ProfilePortfolio({ onAddHolding }: ProfilePortfolioProps
 
     // Health Score State
     const [showHealthSettings, setShowHealthSettings] = useState(false);
+    const [healthRefreshTrigger, setHealthRefreshTrigger] = useState(0);
 
     // Stock search state
     const [stockSearch, setStockSearch] = useState('');
@@ -230,7 +231,11 @@ export default function ProfilePortfolio({ onAddHolding }: ProfilePortfolioProps
                 {/* Health Score Card (Span 1) */}
                 <div className="md:col-span-1">
                     <div className="h-full">
-                        <HealthScore compact onConfigure={() => setShowHealthSettings(true)} />
+                        <HealthScore
+                            compact
+                            onConfigure={() => setShowHealthSettings(true)}
+                            refreshTrigger={healthRefreshTrigger}
+                        />
                     </div>
                 </div>
 
@@ -356,7 +361,13 @@ export default function ProfilePortfolio({ onAddHolding }: ProfilePortfolioProps
                                     <X size={20} />
                                 </button>
                             </div>
-                            <GoalSetting variant="clean" onComplete={() => setShowHealthSettings(false)} />
+                            <GoalSetting
+                                variant="clean"
+                                onComplete={() => {
+                                    setShowHealthSettings(false);
+                                    setHealthRefreshTrigger(prev => prev + 1);
+                                }}
+                            />
                         </div>
                         <button
                             onClick={() => setShowHealthSettings(false)}
@@ -438,7 +449,7 @@ export default function ProfilePortfolio({ onAddHolding }: ProfilePortfolioProps
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm text-gray-500 dark:text-slate-400 mb-2">Average Buy Price ($)</label>
+                                <label className="block text-sm text-gray-500 dark:text-slate-400 mb-2">Average Buy Price</label>
                                 <input
                                     type="number"
                                     step="0.01"

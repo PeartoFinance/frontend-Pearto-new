@@ -17,6 +17,8 @@ interface SubscriptionPlan {
     currency: string;
     interval: string;
     features: Record<string, boolean | number | string> | null;
+    trialEnabled?: boolean;
+    trialDays?: number;
 }
 
 function CheckoutContent() {
@@ -26,6 +28,7 @@ function CheckoutContent() {
 
     const planId = searchParams.get('plan');
     const isYearly = searchParams.get('yearly') === 'true';
+    const isTrial = searchParams.get('trial') === 'true';
 
     const [plan, setPlan] = useState<SubscriptionPlan | null>(null);
     const [loading, setLoading] = useState(true);
@@ -37,6 +40,7 @@ function CheckoutContent() {
     const [finalPrice, setFinalPrice] = useState(0);
     const [paymentLoading, setPaymentLoading] = useState(false);
     const [error, setError] = useState('');
+    const [selectedGateway, setSelectedGateway] = useState<'paypal' | 'stripe'>('stripe');
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -56,7 +60,7 @@ function CheckoutContent() {
                         setPlan(foundPlan);
                         const price = isYearly ? foundPlan.price * 12 * 0.8 : foundPlan.price;
                         setBasePrice(price);
-                        setFinalPrice(price);
+                        setFinalPrice(isTrial && foundPlan.trialEnabled ? 0 : price);
                     } else {
                         router.push('/pricing');
                     }
@@ -135,6 +139,8 @@ function CheckoutContent() {
                 body: JSON.stringify({
                     plan_id: parseInt(planId!),
                     coupon_code: couponApplied ? couponCode : null,
+                    trial: isTrial,
+                    gateway: selectedGateway
                 }),
             });
 
@@ -146,9 +152,21 @@ function CheckoutContent() {
                 return;
             }
 
-            if (res.ok && data.approval_url) {
-                // Redirect to PayPal
-                window.location.href = data.approval_url;
+            if (res.ok) {
+                // Always prefer redirecting to payment gateway if approval_url exists
+                // This ensures payment method is collected even for trials
+                if (data.approval_url) {
+                    // Redirect to payment gateway (Stripe/PayPal)
+                    window.location.href = data.approval_url;
+                    return;
+                }
+
+                // Fallback: If no approval_url but trial was activated directly
+                // (This shouldn't normally happen with proper gateway setup)
+                if (data.is_trial) {
+                    router.push('/subscription/success?trial=true');
+                    return;
+                }
             } else {
                 setError(data.error || 'Failed to initiate payment');
             }
@@ -192,7 +210,7 @@ function CheckoutContent() {
                 {/* Header */}
                 <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-5 text-white">
                     <h1 className="text-xl font-bold">Complete Your Purchase</h1>
-                    <p className="text-emerald-100 text-sm mt-1">Secure checkout powered by PayPal</p>
+                    <p className="text-emerald-100 text-sm mt-1">Secure checkout • 256-bit encryption</p>
                 </div>
 
                 <div className="p-6 space-y-6">
@@ -206,62 +224,64 @@ function CheckoutContent() {
                                 <div>
                                     <p className="font-semibold text-gray-900 dark:text-white">{plan.name}</p>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                                        {isYearly ? 'Yearly' : 'Monthly'} subscription
+                                        {isTrial ? `${plan.trialDays}-day Free Trial` : (isYearly ? 'Yearly' : 'Monthly') + ' subscription'}
                                     </p>
                                 </div>
                                 <p className="text-lg font-bold text-gray-900 dark:text-white">
-                                    {plan.currency} {basePrice.toFixed(2)}
+                                    {isTrial ? 'Free' : `${plan.currency} ${basePrice.toFixed(2)}`}
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Coupon Section */}
-                    <div>
-                        <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-                            Promo Code
-                        </h2>
-                        {couponApplied ? (
-                            <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl p-4">
-                                <div className="flex items-center gap-2">
-                                    <Check size={18} className="text-emerald-500" />
-                                    <span className="font-medium text-emerald-700 dark:text-emerald-300">{couponCode}</span>
-                                    <span className="text-sm text-emerald-600 dark:text-emerald-400">applied</span>
+                    {/* Coupon Section - Hide for trial */}
+                    {!isTrial && (
+                        <div>
+                            <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
+                                Promo Code
+                            </h2>
+                            {couponApplied ? (
+                                <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl p-4">
+                                    <div className="flex items-center gap-2">
+                                        <Check size={18} className="text-emerald-500" />
+                                        <span className="font-medium text-emerald-700 dark:text-emerald-300">{couponCode}</span>
+                                        <span className="text-sm text-emerald-600 dark:text-emerald-400">applied</span>
+                                    </div>
+                                    <button
+                                        onClick={handleRemoveCoupon}
+                                        className="text-sm text-gray-500 hover:text-red-500 transition-colors"
+                                    >
+                                        Remove
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={handleRemoveCoupon}
-                                    className="text-sm text-gray-500 hover:text-red-500 transition-colors"
-                                >
-                                    Remove
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="flex gap-2">
-                                <div className="flex-1 relative">
-                                    <Tag size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        value={couponCode}
-                                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                                        placeholder="Enter promo code"
-                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    />
+                            ) : (
+                                <div className="flex gap-2">
+                                    <div className="flex-1 relative">
+                                        <Tag size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            value={couponCode}
+                                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                            placeholder="Enter promo code"
+                                            className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={handleApplyCoupon}
+                                        disabled={couponLoading || !couponCode.trim()}
+                                        className="px-5 py-3 bg-gray-900 dark:bg-slate-600 text-white font-medium rounded-xl hover:bg-gray-800 dark:hover:bg-slate-500 disabled:opacity-50 transition-colors"
+                                    >
+                                        {couponLoading ? <Loader2 size={18} className="animate-spin" /> : 'Apply'}
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={handleApplyCoupon}
-                                    disabled={couponLoading || !couponCode.trim()}
-                                    className="px-5 py-3 bg-gray-900 dark:bg-slate-600 text-white font-medium rounded-xl hover:bg-gray-800 dark:hover:bg-slate-500 disabled:opacity-50 transition-colors"
-                                >
-                                    {couponLoading ? <Loader2 size={18} className="animate-spin" /> : 'Apply'}
-                                </button>
-                            </div>
-                        )}
-                        {couponError && (
-                            <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
-                                <AlertCircle size={14} /> {couponError}
-                            </p>
-                        )}
-                    </div>
+                            )}
+                            {couponError && (
+                                <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
+                                    <AlertCircle size={14} /> {couponError}
+                                </p>
+                            )}
+                        </div>
+                    )}
 
                     {/* Total */}
                     <div className="border-t border-gray-200 dark:border-slate-700 pt-4">
@@ -276,9 +296,9 @@ function CheckoutContent() {
                             </div>
                         )}
                         <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
-                            <span className="text-lg font-bold text-gray-900 dark:text-white">Total</span>
+                            <span className="text-lg font-bold text-gray-900 dark:text-white">Total due today</span>
                             <span className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
-                                {plan.currency} {finalPrice.toFixed(2)}
+                                {isTrial ? `${plan.currency} 0.00` : `${plan.currency} ${finalPrice.toFixed(2)}`}
                             </span>
                         </div>
                     </div>
@@ -291,21 +311,64 @@ function CheckoutContent() {
                         </div>
                     )}
 
+                    {/* Payment Method Selector - Hide for trial */}
+                    {!isTrial && (
+                        <div>
+                            <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
+                                Payment Method
+                            </h2>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    onClick={() => setSelectedGateway('stripe')}
+                                    className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 transition-all ${selectedGateway === 'stripe'
+                                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
+                                        : 'border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-slate-500'
+                                        }`}
+                                >
+                                    <CreditCard size={20} />
+                                    <span className="font-medium">Card</span>
+                                </button>
+                                <button
+                                    onClick={() => setSelectedGateway('paypal')}
+                                    className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 transition-all ${selectedGateway === 'paypal'
+                                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                                        : 'border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-slate-500'
+                                        }`}
+                                >
+                                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.217a.765.765 0 0 1 .756-.64h6.674c2.95 0 5.025.807 6.158 2.398.539.757.832 1.596.9 2.564.069.99-.073 2.158-.427 3.528-.378 1.462-.948 2.696-1.694 3.669-.713.93-1.582 1.684-2.58 2.24-1.03.573-2.16.917-3.365 1.024-.498.044-1 .066-1.503.066H7.987a.641.641 0 0 0-.632.526l-.279 1.535z" />
+                                    </svg>
+                                    <span className="font-medium">PayPal</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Pay Button */}
                     <button
                         onClick={handlePayment}
                         disabled={paymentLoading}
-                        className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-lg rounded-xl hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 transition-all shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-3"
+                        className={`w-full py-4 text-white font-bold text-lg rounded-xl disabled:opacity-50 transition-all shadow-lg flex items-center justify-center gap-3 ${isTrial
+                            ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-emerald-500/25'
+                            : selectedGateway === 'stripe'
+                                ? 'bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 shadow-violet-500/25'
+                                : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-blue-500/25'
+                            }`}
                     >
                         {paymentLoading ? (
                             <>
                                 <Loader2 size={20} className="animate-spin" />
                                 Processing...
                             </>
+                        ) : isTrial ? (
+                            <>
+                                <Check size={20} />
+                                Start Free Trial
+                            </>
                         ) : (
                             <>
                                 <CreditCard size={20} />
-                                Pay with PayPal
+                                Pay with {selectedGateway === 'stripe' ? 'Card' : 'PayPal'}
                             </>
                         )}
                     </button>

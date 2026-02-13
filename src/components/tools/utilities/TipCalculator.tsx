@@ -60,14 +60,14 @@ export default function TipCalculator() {
             <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Bill Amount</label>
                 <input type="number" value={billAmount} onChange={(e) => setBillAmount(Number(e.target.value))} min={0}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" />
+                    className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500" />
                 <input type="range" min={100} max={10000} step={100} value={billAmount} onChange={(e) => setBillAmount(Number(e.target.value))} className="w-full mt-2 accent-emerald-500" />
             </div>
             <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Tip Percentage: {tipPercent}%</label>
                 <div className="flex gap-2 flex-wrap mb-2">
                     {tipPresets.map((preset) => (
-                        <button key={preset} onClick={() => setTipPercent(preset)} className={`px-3 py-1.5 rounded-lg text-sm font-medium ${tipPercent === preset ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600'}`}>
+                        <button key={preset} onClick={() => setTipPercent(preset)} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${tipPercent === preset ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
                             {preset}%
                         </button>
                     ))}

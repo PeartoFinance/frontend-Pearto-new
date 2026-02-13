@@ -107,7 +107,7 @@ export default function RandomNumberGenerator() {
                             type="number"
                             value={min}
                             onChange={(e) => setMin(Number(e.target.value))}
-                            className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                            className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                         />
                     </div>
                     <div>
@@ -118,7 +118,7 @@ export default function RandomNumberGenerator() {
                             type="number"
                             value={max}
                             onChange={(e) => setMax(Number(e.target.value))}
-                            className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                            className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                         />
                     </div>
                 </div>
@@ -171,19 +171,19 @@ export default function RandomNumberGenerator() {
                     <div className="flex gap-2 flex-wrap">
                         <button
                             onClick={() => { setMin(1); setMax(6); setCount(1); }}
-                            className="px-3 py-1 text-xs bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-purple-100"
+                            className="px-3 py-1 text-xs bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/40 text-slate-600 dark:text-slate-300 transition-colors"
                         >
                             🎲 Dice (1-6)
                         </button>
                         <button
                             onClick={() => { setMin(1); setMax(100); setCount(1); }}
-                            className="px-3 py-1 text-xs bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-purple-100"
+                            className="px-3 py-1 text-xs bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/40 text-slate-600 dark:text-slate-300 transition-colors"
                         >
                             📊 1-100
                         </button>
                         <button
                             onClick={() => { setMin(1); setMax(50); setCount(6); setAllowDuplicates(false); }}
-                            className="px-3 py-1 text-xs bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-purple-100"
+                            className="px-3 py-1 text-xs bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/40 text-slate-600 dark:text-slate-300 transition-colors"
                         >
                             🎰 Lottery (6 of 50)
                         </button>

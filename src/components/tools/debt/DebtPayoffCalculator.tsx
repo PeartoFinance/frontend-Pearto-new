@@ -130,13 +130,13 @@ export default function DebtPayoffCalculator() {
             <div className="space-y-4">
                 <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Current Balance ($)
+                        Current Balance
                     </label>
                     <input
                         type="number"
                         value={balance}
                         onChange={(e) => setBalance(Number(e.target.value))}
-                        className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                        className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                     />
                 </div>
 
@@ -157,13 +157,13 @@ export default function DebtPayoffCalculator() {
 
                 <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Monthly Payment ($)
+                        Monthly Payment
                     </label>
                     <input
                         type="number"
                         value={monthlyPayment}
                         onChange={(e) => setMonthlyPayment(Number(e.target.value))}
-                        className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                        className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                     />
                     <p className="text-xs text-slate-400 mt-1">
                         Min payment to make progress: <PriceDisplay amount={balance * interestRate / 100 / 12} maximumFractionDigits={0} />
@@ -175,7 +175,7 @@ export default function DebtPayoffCalculator() {
                         💡 Tip: Pay More!
                     </p>
                     <p className="text-xs text-emerald-600 dark:text-emerald-500">
-                        Adding just $50/month could save you thousands in interest and months of payments.
+                        Adding just <span className="font-bold"><PriceDisplay amount={50} maximumFractionDigits={0} />/month</span> could save you thousands in interest and months of payments.
                     </p>
                 </div>
             </div>

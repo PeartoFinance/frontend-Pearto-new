@@ -15,6 +15,7 @@ import {
     type MarketStock
 } from '@/services/marketService';
 import { TrendingUp, TrendingDown, Activity, Search, RefreshCw, BarChart3 } from 'lucide-react';
+import RelatedTools from '@/components/tools/RelatedTools';
 
 type TabType = 'all' | 'gainers' | 'losers' | 'active' | 'etfs';
 
@@ -161,8 +162,8 @@ export default function StocksPage() {
                                             setSearchQuery('');
                                         }}
                                         className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition ${isActive
-                                                ? 'bg-emerald-600 text-white'
-                                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800'
+                                            ? 'bg-emerald-600 text-white'
+                                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800'
                                             }`}
                                     >
                                         <Icon size={16} />
@@ -194,6 +195,16 @@ export default function StocksPage() {
                                 </p>
                             </div>
                         )}
+
+                        {/* Related Tools Section */}
+                        <div className="pt-4">
+                            <RelatedTools
+                                category="Investing"
+                                title="Investment Calculation Tools"
+                                layout="grid"
+                                limit={4}
+                            />
+                        </div>
                     </div>
                 </div>
             </main>

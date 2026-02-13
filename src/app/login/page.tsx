@@ -17,7 +17,7 @@ export default function LoginPage() {
 function LoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { login, signInWithGoogle, isAuthenticated } = useAuth();
+    const { login, signInWithGoogle, isAuthenticated, isLoading, token } = useAuth();
 
     // Get redirect param
     const redirectParam = searchParams.get('redirect');
@@ -25,7 +25,7 @@ function LoginContent() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [localLoading, setLocalLoading] = useState(false);
     const [error, setError] = useState('');
     const [referrer, setReferrer] = useState<string | null>(null);
 
@@ -39,6 +39,21 @@ function LoginContent() {
     // Helper to handle post-login redirect
     const handleRedirect = () => {
         if (redirectParam) {
+            // Check if redirecting to Stocks app (or any allowed external domain)
+            const allowedDomains = ['stocks-nine-blush.vercel.app', 'localhost:3001', 'stocks.pearto.com'];
+            const isAllowedDomain = allowedDomains.some(domain => redirectParam.includes(domain));
+
+            if (isAllowedDomain) {
+                // Use token from context or localStorage
+                const authToken = token || localStorage.getItem('auth_token');
+                if (authToken) {
+                    // Append token to redirect URL
+                    const separator = redirectParam.includes('?') ? '&' : '?';
+                    window.location.href = `${redirectParam}${separator}token=${authToken}`;
+                    return;
+                }
+            }
+
             // If redirect is a URL, go there (for same-domain or explicitly provided URLs)
             if (redirectParam.startsWith('http') || redirectParam.startsWith('/')) {
                 window.location.href = redirectParam;
@@ -61,29 +76,45 @@ function LoginContent() {
 
     // Redirect if already authenticated
     useEffect(() => {
-        if (isAuthenticated) {
+        if (!isLoading && isAuthenticated) {
             handleRedirect();
         }
-    }, [isAuthenticated, redirectParam, referrer]);
+    }, [isAuthenticated, isLoading, redirectParam, referrer, token]);
+
+    // Show loading state while checking auth or if authenticated (redirecting)
+    if (isLoading || isAuthenticated) {
+        return (
+            <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center animate-pulse">
+                        <span className="text-2xl font-bold text-white">P</span>
+                    </div>
+                    <div className="text-white font-medium">
+                        {isAuthenticated ? 'Redirecting...' : 'Loading...'}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        setLoading(true);
+        setLocalLoading(true);
 
         try {
             await login(email, password);
-            handleRedirect();
+            // handleRedirect will be called by the useEffect when isAuthenticated becomes true
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Login failed');
-            setLoading(false);
+            setLocalLoading(false);
         }
     };
 
     const handleGoogleSignIn = async () => {
         try {
             await signInWithGoogle();
-            handleRedirect();
+            // handleRedirect will be called by the useEffect when isAuthenticated becomes true
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Google sign-in failed');
         }
@@ -254,10 +285,10 @@ function LoginContent() {
                             {/* Submit Button */}
                             <button
                                 type="submit"
-                                disabled={loading}
+                                disabled={localLoading}
                                 className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-emerald-500 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {loading ? 'Signing in...' : 'Sign In'}
+                                {localLoading ? 'Signing in...' : 'Sign In'}
                             </button>
                         </form>
 
@@ -274,10 +305,7 @@ function LoginContent() {
                         </div>
                     </div>
 
-                    {/* Demo Credentials */}
-                    <div className="bg-gray-100 dark:bg-slate-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-xs text-center text-gray-500 dark:text-gray-400">
-                        Demo: admin@pearto.com / admin1234
-                    </div>
+
                 </div>
             </div>
         </div>

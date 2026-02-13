@@ -18,8 +18,8 @@ Add these **Authorized redirect URIs**:
 | Environment | Redirect URI |
 |-------------|--------------|
 | Firebase Auth Handler | `https://pearto-app.firebaseapp.com/__/auth/handler` |
-| Local Development | `https://test.pearto.com/__/auth/handler` |
-| Local Callback | `https://test.pearto.com/auth/callback` |
+| Local Development | `https://pearto.com/__/auth/handler` |
+| Local Callback | `https://pearto.com/auth/callback` |
 | Production (if applicable) | `https://pearto.com/__/auth/handler` |
 
 ### 3. Environment Variables

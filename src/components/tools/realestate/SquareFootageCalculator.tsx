@@ -3,8 +3,10 @@
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
 import { Home, Ruler, DollarSign, Calculator } from 'lucide-react';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 export default function SquareFootageCalculator() {
+    const { formatPrice } = useCurrency();
     const [rooms, setRooms] = useState([
         { name: 'Living Room', length: 20, width: 15 },
         { name: 'Bedroom 1', length: 12, width: 12 },
@@ -66,9 +68,9 @@ export default function SquareFootageCalculator() {
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <p className="text-xs text-slate-500 mb-1">Estimated Value</p>
                             <p className="text-xl font-bold text-blue-600">
-                                ${formatNumber(results.totalValue)}
+                                {formatPrice(results.totalValue)}
                             </p>
-                            <p className="text-xs text-slate-400">@ ${pricePerSqFt}/sq ft</p>
+                            <p className="text-xs text-slate-400">@ {formatPrice(pricePerSqFt)}/sq ft</p>
                         </div>
                         <div className="p-4 bg-white dark:bg-slate-800 rounded-xl">
                             <p className="text-xs text-slate-500 mb-1">Avg Room Size</p>

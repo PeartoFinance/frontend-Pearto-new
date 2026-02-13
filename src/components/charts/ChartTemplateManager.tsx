@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { getTemplates, createTemplate, deleteTemplate, type ChartTemplate, type ChartConfig } from '@/services/chartService';
 import type { IndicatorConfig } from './indicators/IndicatorPanel';
+import { useSubscription } from '@/context/SubscriptionContext';
+import { UsageLimitBanner, UpgradeModal } from '@/components/subscription/FeatureGating';
 
 interface ChartTemplateManagerProps {
     currentConfig: ChartConfig;
@@ -33,6 +35,8 @@ export default function ChartTemplateManager({
     const [isSaving, setIsSaving] = useState(false);
     const [newName, setNewName] = useState('');
     const [isOpen, setIsOpen] = useState(false);
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const { trackUsage, isPro } = useSubscription();
 
     // Fetch templates
     useEffect(() => {
@@ -51,6 +55,15 @@ export default function ChartTemplateManager({
 
     const handleSaveTemplate = async () => {
         if (!newName.trim()) return;
+
+        // Check usage limit for free users
+        if (!isPro) {
+            const { allowed } = await trackUsage('chart_templates_limit');
+            if (!allowed) {
+                setShowUpgradeModal(true);
+                return;
+            }
+        }
 
         try {
             const template = await createTemplate({
@@ -207,6 +220,14 @@ export default function ChartTemplateManager({
                     </div>
                 </div>
             )}
+
+            {/* Upgrade Modal */}
+            <UpgradeModal
+                isOpen={showUpgradeModal}
+                onClose={() => setShowUpgradeModal(false)}
+                featureKey="chart_templates_limit"
+                message="You've reached your limit for chart templates. Upgrade to Pro for unlimited templates."
+            />
         </div>
     );
 }

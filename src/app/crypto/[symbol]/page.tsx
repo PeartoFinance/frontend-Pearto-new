@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import RelatedTools from '@/components/tools/RelatedTools';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
@@ -171,41 +172,43 @@ export default function CryptoDetailPage() {
             case 'overview':
                 return (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                        {/* Stats */}
-                        <div className="lg:col-span-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-                            <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
-                                Market Statistics
-                            </h3>
-                            <div className="space-y-2">
-                                {[
-                                    { label: 'Market Cap', value: formatLargeNumber(coin.marketCap) },
-                                    { label: 'Volume (24h)', value: formatLargeNumber(coin.volume) },
-                                    { label: 'Circulating Supply', value: coin.sharesOutstanding ? formatLargeNumber(coin.sharesOutstanding) : '-' },
-                                    { label: 'Open', value: <PriceDisplay amount={coin.open} /> },
-                                    { label: 'Previous Close', value: <PriceDisplay amount={coin.previousClose} /> },
-                                    {
-                                        label: "Day's Range",
-                                        value: coin.dayLow && coin.dayHigh ? (
-                                            <div className="flex gap-1">
-                                                <PriceDisplay amount={coin.dayLow} /> - <PriceDisplay amount={coin.dayHigh} />
-                                            </div>
-                                        ) : '-'
-                                    },
-                                    {
-                                        label: '52-Week Range',
-                                        value: coin.low52w && coin.high52w ? (
-                                            <div className="flex gap-1">
-                                                <PriceDisplay amount={coin.low52w} /> - <PriceDisplay amount={coin.high52w} />
-                                            </div>
-                                        ) : '-'
-                                    },
-                                ].map((item, i) => (
-                                    <div key={i} className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-                                        <span className="text-sm text-slate-500 dark:text-slate-400">{item.label}</span>
-                                        <span className="text-sm font-medium text-slate-900 dark:text-white">{item.value as any}</span>
-                                    </div>
-                                ))}
+                        <div className="lg:col-span-1 space-y-4">
+                            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+                                <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
+                                    Market Statistics
+                                </h3>
+                                <div className="space-y-2">
+                                    {[
+                                        { label: 'Market Cap', value: formatLargeNumber(coin.marketCap) },
+                                        { label: 'Volume (24h)', value: formatLargeNumber(coin.volume) },
+                                        { label: 'Circulating Supply', value: coin.sharesOutstanding ? formatLargeNumber(coin.sharesOutstanding) : '-' },
+                                        { label: 'Open', value: <PriceDisplay amount={coin.open} /> },
+                                        { label: 'Previous Close', value: <PriceDisplay amount={coin.previousClose} /> },
+                                        {
+                                            label: "Day's Range",
+                                            value: coin.dayLow && coin.dayHigh ? (
+                                                <div className="flex gap-1">
+                                                    <PriceDisplay amount={coin.dayLow} /> - <PriceDisplay amount={coin.dayHigh} />
+                                                </div>
+                                            ) : '-'
+                                        },
+                                        {
+                                            label: '52-Week Range',
+                                            value: coin.low52w && coin.high52w ? (
+                                                <div className="flex gap-1">
+                                                    <PriceDisplay amount={coin.low52w} /> - <PriceDisplay amount={coin.high52w} />
+                                                </div>
+                                            ) : '-'
+                                        },
+                                    ].map((item, i) => (
+                                        <div key={i} className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+                                            <span className="text-sm text-slate-500 dark:text-slate-400">{item.label}</span>
+                                            <span className="text-sm font-medium text-slate-900 dark:text-white">{item.value as any}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
+                            <RelatedTools category="Crypto" title="Crypto Tools" limit={3} />
                         </div>
 
                         {/* Chart */}

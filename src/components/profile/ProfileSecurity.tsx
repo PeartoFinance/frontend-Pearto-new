@@ -102,7 +102,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
         } catch (error: any) {
             setMessage({
                 type: 'error',
-                text: error.message || 'Failed to change password'
+                text: error.data?.error || error.data?.message || error.message || 'Failed to change password'
             });
         } finally {
             setSaving(false);
@@ -117,7 +117,10 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
             await exportBackup();
             setBackupMessage({ type: 'success', text: 'Backup downloaded successfully!' });
         } catch (error: any) {
-            setBackupMessage({ type: 'error', text: error.message || 'Failed to export data' });
+            setBackupMessage({
+                type: 'error',
+                text: error.data?.error || error.data?.message || error.message || 'Failed to export data'
+            });
         } finally {
             setExporting(false);
         }
@@ -142,7 +145,10 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
             const result = await importBackup(file);
             setBackupMessage({ type: 'success', text: result.message || 'Data restored successfully!' });
         } catch (error: any) {
-            setBackupMessage({ type: 'error', text: error.message || 'Failed to import data' });
+            setBackupMessage({
+                type: 'error',
+                text: error.data?.error || error.data?.message || error.message || 'Failed to import data'
+            });
         } finally {
             setImporting(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -163,7 +169,10 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
             logout();
             router.push('/auth/reactivate');
         } catch (error: any) {
-            setAccountMessage({ type: 'error', text: error.message || 'Failed to deactivate account' });
+            setAccountMessage({
+                type: 'error',
+                text: error.data?.error || error.data?.message || error.message || 'Failed to deactivate account'
+            });
         } finally {
             setAccountActionLoading(false);
         }
@@ -182,7 +191,10 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
             logout();
             router.push('/auth/account-deleted');
         } catch (error: any) {
-            setAccountMessage({ type: 'error', text: error.message || 'Failed to delete account' });
+            setAccountMessage({
+                type: 'error',
+                text: error.data?.error || error.data?.message || error.message || 'Failed to delete account'
+            });
         } finally {
             setAccountActionLoading(false);
         }
@@ -191,7 +203,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold text-white">Security Settings</h2>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Security Settings</h2>
                 <p className="text-slate-400 mt-1">
                     Manage your password, data backups, and account settings.
                 </p>
@@ -204,7 +216,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                         <Lock className="w-5 h-5 text-emerald-500" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-white">Change Password</h3>
+                        <h3 className="font-semibold text-slate-900 dark:text-white">Change Password</h3>
                         <p className="text-sm text-slate-400">Update your account password</p>
                     </div>
                 </div>
@@ -212,7 +224,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                 <div className="space-y-4">
                     {/* Current Password */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                             Current Password
                         </label>
                         <div className="relative">
@@ -221,7 +233,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                                 value={formData.currentPassword}
                                 onChange={(e) => handleInputChange('currentPassword', e.target.value)}
                                 placeholder="Enter your current password"
-                                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 transition"
+                                className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-3 pr-12 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 transition"
                             />
                             <button
                                 type="button"
@@ -235,7 +247,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
 
                     {/* New Password */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                             New Password
                         </label>
                         <div className="relative">
@@ -244,7 +256,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                                 value={formData.newPassword}
                                 onChange={(e) => handleInputChange('newPassword', e.target.value)}
                                 placeholder="Enter your new password"
-                                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 transition"
+                                className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-3 pr-12 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 transition"
                             />
                             <button
                                 type="button"
@@ -272,7 +284,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
 
                     {/* Confirm Password */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                             Confirm New Password
                         </label>
                         <div className="relative">
@@ -281,7 +293,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                                 value={formData.confirmPassword}
                                 onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                                 placeholder="Confirm your new password"
-                                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 transition"
+                                className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-3 pr-12 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 transition"
                             />
                             <button
                                 type="button"
@@ -300,8 +312,8 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                 {/* Message */}
                 {message && (
                     <div className={`mt-4 p-3 rounded-lg text-sm ${message.type === 'success'
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                            : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
                         }`}>
                         {message.text}
                     </div>
@@ -336,7 +348,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                         <Download className="w-5 h-5 text-cyan-500" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-white">Data Backup</h3>
+                        <h3 className="font-semibold text-slate-900 dark:text-white">Data Backup</h3>
                         <p className="text-sm text-slate-400">Export or restore your financial profile</p>
                     </div>
                 </div>
@@ -360,7 +372,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                         <button
                             onClick={handleImportClick}
                             disabled={importing}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 rounded-lg transition disabled:opacity-50"
+                            className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-600 rounded-lg transition disabled:opacity-50"
                         >
                             {importing ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
                             Import Backup
@@ -386,8 +398,8 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
 
                     {backupMessage && (
                         <div className={`p-3 rounded-lg text-sm ${backupMessage.type === 'success'
-                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                            : 'bg-red-500/10 text-red-400 border border-red-500/20'
                             }`}>
                             {backupMessage.text}
                         </div>
@@ -402,32 +414,32 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                         <Shield className="w-5 h-5 text-amber-500" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-white">Security Recommendations</h3>
+                        <h3 className="font-semibold text-slate-900 dark:text-white">Security Recommendations</h3>
                         <p className="text-sm text-slate-400">Keep your account secure</p>
                     </div>
                 </div>
 
                 <div className="space-y-3 text-sm">
-                    <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+                    <div className="flex items-start gap-3 p-3 bg-slate-100 dark:bg-slate-800/50 rounded-lg">
                         <Key className="w-4 h-4 text-emerald-500 mt-0.5" />
                         <div>
-                            <p className="text-white font-medium">Use a strong, unique password</p>
+                            <p className="text-slate-900 dark:text-white font-medium">Use a strong, unique password</p>
                             <p className="text-slate-400">Avoid using the same password across multiple sites</p>
                         </div>
                     </div>
 
-                    <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+                    <div className="flex items-start gap-3 p-3 bg-slate-100 dark:bg-slate-800/50 rounded-lg">
                         <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5" />
                         <div>
-                            <p className="text-white font-medium">Enable two-factor authentication</p>
+                            <p className="text-slate-900 dark:text-white font-medium">Enable two-factor authentication</p>
                             <p className="text-slate-400">Add an extra layer of security to your account</p>
                         </div>
                     </div>
 
-                    <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+                    <div className="flex items-start gap-3 p-3 bg-slate-100 dark:bg-slate-800/50 rounded-lg">
                         <Shield className="w-4 h-4 text-cyan-500 mt-0.5" />
                         <div>
-                            <p className="text-white font-medium">Keep your email secure</p>
+                            <p className="text-slate-900 dark:text-white font-medium">Keep your email secure</p>
                             <p className="text-slate-400">Ensure your email account is also protected</p>
                         </div>
                     </div>
@@ -448,9 +460,9 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
 
                 <div className="space-y-4">
                     {/* Deactivate Account */}
-                    <div className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                    <div className="flex items-center justify-between p-4 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
                         <div>
-                            <p className="text-white font-medium">Deactivate Account</p>
+                            <p className="text-slate-900 dark:text-white font-medium">Deactivate Account</p>
                             <p className="text-sm text-slate-400">Temporarily disable your account. You can reactivate it later.</p>
                         </div>
                         <button
@@ -463,9 +475,9 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                     </div>
 
                     {/* Delete Account */}
-                    <div className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg border border-red-500/20">
+                    <div className="flex items-center justify-between p-4 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-red-500/20">
                         <div>
-                            <p className="text-white font-medium">Delete Account Permanently</p>
+                            <p className="text-slate-900 dark:text-white font-medium">Delete Account Permanently</p>
                             <p className="text-sm text-slate-400">Permanently delete your account and all data. 30-day recovery window.</p>
                         </div>
                         <button
@@ -482,31 +494,31 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
             {/* Deactivate Modal */}
             {showDeactivateModal && (
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 max-w-md w-full">
-                        <h3 className="text-xl font-bold text-white mb-4">Deactivate Account</h3>
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 max-w-md w-full">
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Deactivate Account</h3>
                         <p className="text-slate-400 text-sm mb-4">
                             Your account will be deactivated and you will be logged out. You can reactivate it by logging in again.
                         </p>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm text-slate-300 mb-2">Password</label>
+                                <label className="block text-sm text-slate-700 dark:text-slate-300 mb-2">Password</label>
                                 <input
                                     type="password"
                                     value={deactivatePassword}
                                     onChange={(e) => setDeactivatePassword(e.target.value)}
                                     placeholder="Enter your password"
-                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500/50"
+                                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-amber-500/50"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm text-slate-300 mb-2">Reason (optional)</label>
+                                <label className="block text-sm text-slate-700 dark:text-slate-300 mb-2">Reason (optional)</label>
                                 <input
                                     type="text"
                                     value={deactivateReason}
                                     onChange={(e) => setDeactivateReason(e.target.value)}
                                     placeholder="Why are you leaving?"
-                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500/50"
+                                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-amber-500/50"
                                 />
                             </div>
                         </div>
@@ -520,7 +532,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                         <div className="mt-6 flex gap-3 justify-end">
                             <button
                                 onClick={() => { setShowDeactivateModal(false); setDeactivatePassword(''); setDeactivateReason(''); setAccountMessage(null); }}
-                                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+                                className="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-900 dark:text-white rounded-lg transition"
                             >
                                 Cancel
                             </button>
@@ -540,7 +552,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
             {/* Delete Modal */}
             {showDeleteModal && (
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-800 border border-red-500/30 rounded-xl p-6 max-w-md w-full">
+                    <div className="bg-white dark:bg-slate-800 border border-red-500/30 rounded-xl p-6 max-w-md w-full">
                         <h3 className="text-xl font-bold text-red-400 mb-4">Delete Account Permanently</h3>
                         <p className="text-slate-400 text-sm mb-4">
                             This action cannot be undone. Your account and all data will be permanently deleted after 30 days.
@@ -549,23 +561,23 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm text-slate-300 mb-2">Password</label>
+                                <label className="block text-sm text-slate-700 dark:text-slate-300 mb-2">Password</label>
                                 <input
                                     type="password"
                                     value={deletePassword}
                                     onChange={(e) => setDeletePassword(e.target.value)}
                                     placeholder="Enter your password"
-                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder:text-slate-500 focus:outline-none focus:border-red-500/50"
+                                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-red-500/50"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm text-slate-300 mb-2">Type DELETE to confirm</label>
+                                <label className="block text-sm text-slate-700 dark:text-slate-300 mb-2">Type DELETE to confirm</label>
                                 <input
                                     type="text"
                                     value={deleteConfirmation}
                                     onChange={(e) => setDeleteConfirmation(e.target.value)}
                                     placeholder="DELETE"
-                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder:text-slate-500 focus:outline-none focus:border-red-500/50 font-mono"
+                                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-red-500/50 font-mono"
                                 />
                             </div>
                         </div>
@@ -579,7 +591,7 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
                         <div className="mt-6 flex gap-3 justify-end">
                             <button
                                 onClick={() => { setShowDeleteModal(false); setDeletePassword(''); setDeleteConfirmation(''); setAccountMessage(null); }}
-                                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+                                className="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-900 dark:text-white rounded-lg transition"
                             >
                                 Cancel
                             </button>

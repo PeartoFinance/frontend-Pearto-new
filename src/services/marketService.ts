@@ -127,35 +127,35 @@ export interface MarketOverviewData {
  * Get market overview data
  */
 export async function getMarketOverview(): Promise<MarketOverviewData> {
-    return get<MarketOverviewData>('/market/overview');
+    return get<MarketOverviewData>('/live/overview');
 }
 
 /**
  * Get market indices
  */
 export async function getMarketIndices(): Promise<MarketIndex[]> {
-    return get<MarketIndex[]>('/market/indices');
+    return get<MarketIndex[]>('/live/indices');
 }
 
 /**
  * Get top movers (gainers/losers)
  */
 export async function getTopMovers(type: 'gainers' | 'losers' | 'both' = 'both', limit = 10) {
-    return get<{ gainers?: MarketStock[]; losers?: MarketStock[] }>('/stocks/movers', { type, limit });
+    return get<{ gainers?: MarketStock[]; losers?: MarketStock[] }>('/live/movers', { type, limit });
 }
 
 /**
  * Get most active stocks
  */
 export async function getMostActive(limit = 10): Promise<MarketStock[]> {
-    return get<MarketStock[]>('/stocks/most-active', { limit });
+    return get<MarketStock[]>('/live/most-active', { limit });
 }
 
 /**
  * Get stock quotes
  */
 export async function getQuotes(symbols: string[]): Promise<MarketStock[]> {
-    return get<MarketStock[]>('/stocks/quotes', { symbols: symbols.join(',') });
+    return get<MarketStock[]>('/live/quotes', { symbols: symbols.join(',') });
 }
 
 /**
@@ -166,14 +166,14 @@ export async function searchStocks(query: string, limit = 10): Promise<MarketSto
 }
 
 export async function getCommodities(): Promise<Commodity[]> {
-    return get<Commodity[]>('/market/commodities');
+    return get<Commodity[]>('/live/commodities');
 }
 
 /**
  * Get forex rates
  */
 export async function getForexRates(base = 'USD'): Promise<ForexRate[]> {
-    return get<ForexRate[]>('/content/forex', { base });
+    return get<ForexRate[]>('/live/forex', { base });
 }
 
 /**
@@ -189,14 +189,14 @@ export async function getStockOffers(status?: 'upcoming' | 'open' | 'closed'): P
 export async function getStocks(sector?: string, limit = 50): Promise<MarketStock[]> {
     const params: Record<string, string | number> = { limit };
     if (sector) params.sector = sector;
-    return get<MarketStock[]>('/market/stocks', params);
+    return get<MarketStock[]>('/live/stocks', params);
 }
 
 /**
  * Get crypto markets
  */
 export async function getCryptoMarkets(limit = 100, page = 1, sortBy = 'market_cap'): Promise<MarketStock[]> {
-    return get<MarketStock[]>('/market/crypto', { limit, page, sort: sortBy });
+    return get<MarketStock[]>('/live/crypto', { limit, page, sort: sortBy });
 }
 
 /**
@@ -586,4 +586,93 @@ export default {
     getStockDividends,
     // Technical Analysis
     getTechnicalAnalysis,
+    // Forex Analytics
+    getForexStrength,
+    getForexCorrelation,
+    // Floorsheet
+    getFloorsheet,
 };
+
+// ---------------------------------------------------------------------------
+// Forex Analytics
+// ---------------------------------------------------------------------------
+
+export interface CurrencyStrength {
+    currency: string;
+    strength: number;
+    rank: number;
+    avgChangePercent: number;
+    pairCount: number;
+}
+
+export interface ForexStrengthResponse {
+    currencies: CurrencyStrength[];
+    timestamp: string;
+}
+
+export interface ForexCorrelationResponse {
+    labels: string[];
+    matrix: number[][];
+    period: string;
+    interval: string;
+    timestamp: string;
+}
+
+/**
+ * Get currency strength index
+ */
+export async function getForexStrength(): Promise<ForexStrengthResponse> {
+    return get<ForexStrengthResponse>('/live/forex/strength');
+}
+
+/**
+ * Get forex cross-pair correlation matrix
+ */
+export async function getForexCorrelation(
+    period = '1mo',
+    interval = '1d',
+): Promise<ForexCorrelationResponse> {
+    return get<ForexCorrelationResponse>('/live/forex/correlation', { period, interval });
+}
+
+// ---------------------------------------------------------------------------
+// Floorsheet
+// ---------------------------------------------------------------------------
+
+export interface FloorsheetTrade {
+    id: string;
+    symbol: string;
+    transactionDate: string;
+    price: number;
+    quantity: number;
+    amount: number;
+    side?: string;
+    open?: number;
+    high?: number;
+    low?: number;
+    // DB-sourced fields
+    companyName?: string;
+    buyerBroker?: number;
+    sellerBroker?: number;
+    transactionType?: string;
+    changePercent?: number;
+}
+
+export interface FloorsheetResponse {
+    trades: FloorsheetTrade[];
+    source: 'database' | 'live' | 'error';
+    timestamp: string;
+    error?: string;
+}
+
+/**
+ * Get market transaction floorsheet
+ */
+export async function getFloorsheet(
+    limit = 100,
+    symbol?: string,
+): Promise<FloorsheetResponse> {
+    const params: Record<string, string | number> = { limit };
+    if (symbol) params.symbol = symbol;
+    return get<FloorsheetResponse>('/live/floorsheet', params);
+}

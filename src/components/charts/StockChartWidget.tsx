@@ -331,7 +331,7 @@ export function StockChartWidget({
                     <span className="font-semibold">{symbol} Chart</span>
                     <div className="flex items-center gap-2">
                         <Link
-                            href={`/live?symbol=${symbol}`}
+                            href={`/live?symbol=${symbol}&type=stock`}
                             target="_blank"
                             className="flex items-center gap-1 hover:bg-blue-700 px-2 py-1 rounded transition"
                         >
@@ -339,7 +339,7 @@ export function StockChartWidget({
                             Live Chart
                         </Link>
                         <Link
-                            href={`/chart/${symbol}`}
+                            href={`/chart/${symbol}?type=stock`}
                             target="_blank"
                             className="flex items-center gap-1 hover:bg-blue-700 px-2 py-1 rounded transition"
                         >

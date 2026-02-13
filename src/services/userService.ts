@@ -147,22 +147,10 @@ export async function getFullProfile(): Promise<ProfileData> {
         return {
             profile,
             preferences,
-            specializations: [
-                { id: '1', name: 'Equities', selected: false },
-                { id: '2', name: 'ETFs', selected: false },
-                { id: '3', name: 'Options', selected: false },
-                { id: '4', name: 'Crypto', selected: true },
-                { id: '5', name: 'Commodities', selected: false },
-                { id: '6', name: 'Macro', selected: false },
-                { id: '7', name: 'FX', selected: false }
-            ],
-            certifications: [
-                { id: '1', name: 'CFA Level I', level: true },
-                { id: '2', name: 'CMT', level: false },
-                { id: '3', name: 'Risk Mgmt', level: false },
-                { id: '4', name: 'Derivatives', level: false }
-            ],
-            hourlyRate: 45,
+            // Return API data directly - no fallback defaults
+            specializations: (profile as any).specializations || [],
+            certifications: (profile as any).certifications || [],
+            hourlyRate: (profile as any).hourlyRate || null,
             netWorth: netWorthData.netWorth,
             netWorthChange: netWorthData.netWorthChange,
             netWorthChangePercent: netWorthData.netWorthChangePercent,

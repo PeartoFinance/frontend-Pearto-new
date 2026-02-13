@@ -81,14 +81,14 @@ export default function HealthPremiumCalculator() {
             <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Age</label>
                 <input type="number" value={age} onChange={(e) => setAge(Number(e.target.value))} min={18} max={75}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" />
+                    className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500" />
                 <input type="range" min={18} max={75} value={age} onChange={(e) => setAge(Number(e.target.value))} className="w-full mt-2 accent-purple-500" />
             </div>
 
             <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Sum Insured</label>
                 <select value={sumInsured} onChange={(e) => setSumInsured(Number(e.target.value))}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500">
+                    className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
                     <option value={300000}>₹3 Lakhs</option>
                     <option value={500000}>₹5 Lakhs</option>
                     <option value={1000000}>₹10 Lakhs</option>
@@ -100,10 +100,10 @@ export default function HealthPremiumCalculator() {
             <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Plan Type</label>
                 <div className="grid grid-cols-2 gap-2">
-                    <button onClick={() => setFamilySize('individual')} className={`py-3 px-4 rounded-lg font-medium transition ${familySize === 'individual' ? 'bg-purple-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600'}`}>
+                    <button onClick={() => setFamilySize('individual')} className={`py-3 px-4 rounded-lg font-medium transition-colors ${familySize === 'individual' ? 'bg-purple-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
                         Individual
                     </button>
-                    <button onClick={() => setFamilySize('floater')} className={`py-3 px-4 rounded-lg font-medium transition ${familySize === 'floater' ? 'bg-purple-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600'}`}>
+                    <button onClick={() => setFamilySize('floater')} className={`py-3 px-4 rounded-lg font-medium transition-colors ${familySize === 'floater' ? 'bg-purple-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
                         Family Floater
                     </button>
                 </div>
@@ -113,7 +113,7 @@ export default function HealthPremiumCalculator() {
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">City Tier</label>
                 <div className="grid grid-cols-3 gap-2">
                     {[1, 2, 3].map((tier) => (
-                        <button key={tier} onClick={() => setCityTier(tier as 1 | 2 | 3)} className={`py-2 px-3 rounded-lg font-medium transition ${cityTier === tier ? 'bg-purple-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600'}`}>
+                        <button key={tier} onClick={() => setCityTier(tier as 1 | 2 | 3)} className={`py-2 px-3 rounded-lg font-medium transition-colors ${cityTier === tier ? 'bg-purple-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
                             Tier {tier}
                         </button>
                     ))}

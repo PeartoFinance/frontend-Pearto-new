@@ -5,6 +5,7 @@ import { Loader2, Target, TrendingUp } from 'lucide-react';
 import { getStockForecast, type DetailedForecast } from '@/services/marketService';
 import type { MarketStock, PriceHistoryPoint } from '@/services/marketService';
 import PriceDisplay from '@/components/common/PriceDisplay';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface CompareStock extends MarketStock {
     color: string;
@@ -24,6 +25,7 @@ interface StockForecast {
 export default function CompareForecastTab({ stocks }: CompareForecastTabProps) {
     const [stockForecasts, setStockForecasts] = useState<StockForecast[]>([]);
     const [loading, setLoading] = useState(true);
+    const { formatPrice: currencyFormatPrice } = useCurrency();
 
     useEffect(() => {
         const fetchForecasts = async () => {
@@ -54,7 +56,7 @@ export default function CompareForecastTab({ stocks }: CompareForecastTabProps) 
 
     const formatPrice = (num: number | null | undefined) => {
         if (num == null) return '-';
-        return `$${num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        return currencyFormatPrice(num);
     };
 
     const formatLargeNumber = (num: number | null | undefined) => {

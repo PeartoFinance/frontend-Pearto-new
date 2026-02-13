@@ -66,7 +66,7 @@ export default function WaterIntakeCalculator() {
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Activity Level</label>
                 <div className="grid grid-cols-2 gap-2">
                     {(['sedentary', 'moderate', 'active', 'intense'] as const).map((level) => (
-                        <button key={level} onClick={() => setActivityLevel(level)} className={`py-2 px-3 rounded-lg text-sm font-medium ${activityLevel === level ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600'}`}>
+                        <button key={level} onClick={() => setActivityLevel(level)} className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${activityLevel === level ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
                             {level.charAt(0).toUpperCase() + level.slice(1)}
                         </button>
                     ))}
@@ -75,8 +75,8 @@ export default function WaterIntakeCalculator() {
             <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Climate</label>
                 <div className="grid grid-cols-2 gap-2">
-                    <button onClick={() => setClimate('normal')} className={`py-3 px-4 rounded-lg font-medium ${climate === 'normal' ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600'}`}>Normal</button>
-                    <button onClick={() => setClimate('hot')} className={`py-3 px-4 rounded-lg font-medium ${climate === 'hot' ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600'}`}>Hot / Humid</button>
+                    <button onClick={() => setClimate('normal')} className={`py-3 px-4 rounded-lg font-medium transition-colors ${climate === 'normal' ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>Normal</button>
+                    <button onClick={() => setClimate('hot')} className={`py-3 px-4 rounded-lg font-medium transition-colors ${climate === 'hot' ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>Hot / Humid</button>
                 </div>
             </div>
         </CalculatorLayout>

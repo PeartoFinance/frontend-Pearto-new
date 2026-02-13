@@ -188,7 +188,8 @@ function DistributionCard({ data }: { data: SectorAnalysisData[] }) {
             .sort((a, b) => b.value - a.value);
     }, [data, activeTab]);
 
-    const formatTooltipValue = (val: number, rawVal: number) => {
+    const formatTooltipValue = (val: number, rawVal: number | undefined) => {
+        if (rawVal == null) return '-';
         if (activeTab === 'weight') return formatLargeNumber(rawVal, (v) => formatPrice(v, 2)); // Show turnover amount
         return rawVal.toLocaleString(); // Volume/Txns
     };

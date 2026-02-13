@@ -10,7 +10,8 @@ import {
     Coins,
     Globe,
     Hammer,
-    LayoutGrid
+    LayoutGrid,
+    X
 } from 'lucide-react';
 import {
     getTopMovers,
@@ -30,11 +31,12 @@ import { useForexRates } from '@/hooks/useContentData';
 
 interface ChartSidebarProps {
     symbol: string;
+    onClose?: () => void;
 }
 
 type TabType = 'stocks' | 'crypto' | 'forex' | 'commodities';
 
-export default function ChartSidebar({ symbol }: ChartSidebarProps) {
+export default function ChartSidebar({ symbol, onClose }: ChartSidebarProps) {
     const { user, isAuthenticated } = useAuth();
     const { formatPrice } = useCurrency();
     const [activeTab, setActiveTab] = useState<TabType>('stocks');
@@ -63,10 +65,6 @@ export default function ChartSidebar({ symbol }: ChartSidebarProps) {
         // Add current symbol
         const updated = [symbol, ...(recentlyViewed.filter(s => s !== symbol))].slice(0, 10);
         localStorage.setItem('pearto_recently_viewed', JSON.stringify(updated));
-
-        // Fetch Data based on active tab? Or fetch all initially?
-        // Let's fetch trending stocks + watchlist initially.
-        // Others can be lazy, but for sidebar it's fine to fetch.
 
         const fetchInitial = async () => {
             try {
@@ -127,7 +125,7 @@ export default function ChartSidebar({ symbol }: ChartSidebarProps) {
                 return (
                     <div className="space-y-1">
                         {trending.map(t => (
-                            <Link key={t.symbol} href={`/chart/${t.symbol}`} className="flex items-center justify-between px-3 py-2 hover:bg-slate-800 rounded group">
+                            <Link key={t.symbol} href={`/chart/${t.symbol}?type=stock`} className="flex items-center justify-between px-3 py-2 hover:bg-slate-800 rounded group">
                                 <div>
                                     <div className="font-bold text-xs text-slate-300 group-hover:text-blue-400">{t.symbol}</div>
                                     <div className="text-[10px] text-slate-500 truncate w-24">{t.name}</div>
@@ -203,74 +201,93 @@ export default function ChartSidebar({ symbol }: ChartSidebarProps) {
     };
 
     return (
-        <aside className="w-72 border-l border-slate-800 bg-slate-900/50 flex flex-col overflow-hidden h-full">
-            {/* My Portfolio & Markets Header */}
-            <div className="p-4 border-b border-slate-800">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="font-semibold text-sm text-slate-200">Market Explorer</h2>
-                    <Link
-                        href="/portfolio"
-                        className="text-xs text-blue-400 hover:text-blue-300"
-                    >
-                        Portfolio
-                    </Link>
-                </div>
+        <>
+            {/* Mobile Overlay Backdrop with fade animation */}
+            <div
+                className="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm animate-fadeIn"
+                onClick={onClose}
+            />
 
-                {/* Tabs */}
-                <div className="flex bg-slate-800/50 p-1 rounded-lg">
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`flex-1 flex flex-col items-center justify-center py-2 rounded text-[10px] font-medium transition ${activeTab === tab.id
-                                ? 'bg-slate-700 text-white shadow-sm'
-                                : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800'
-                                }`}
-                        >
-                            <tab.icon size={14} className="mb-1" />
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
+            <aside className="fixed inset-y-0 right-0 z-50 w-72 sm:w-80 border-l border-slate-800 bg-slate-900 md:static md:w-72 flex flex-col overflow-hidden h-full shadow-2xl md:shadow-none transform transition-transform duration-300 ease-out animate-slideInRight md:animate-none">
+                {/* My Portfolio & Markets Header */}
+                <div className="p-4 border-b border-slate-800">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="font-semibold text-sm text-slate-200">Market Explorer</h2>
 
-            {/* Content Scrollable */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar">
+                        <div className="flex items-center gap-3">
+                            <Link
+                                href="/portfolio"
+                                className="text-xs text-blue-400 hover:text-blue-300"
+                            >
+                                Portfolio
+                            </Link>
 
-                {/* Watchlist Section (Always Visible) */}
-                {watchlist.length > 0 && isAuthenticated && (
-                    <div className="p-2 border-b border-slate-800/50">
-                        <div className="flex items-center gap-2 px-2 py-1 mb-1 opacity-70">
-                            <Star size={12} className="text-yellow-400" />
-                            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Watchlist</span>
+                            {/* Close button for mobile */}
+                            <button
+                                onClick={onClose}
+                                className="md:hidden p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+                            >
+                                <X size={16} />
+                            </button>
                         </div>
-                        <div className="space-y-1">
-                            {watchlist.slice(0, 3).map(item => (
-                                <Link
-                                    key={item.symbol}
-                                    href={`/chart/${item.symbol}`}
-                                    className="flex items-center justify-between px-3 py-1.5 hover:bg-slate-800 rounded group"
-                                >
-                                    <span className="text-xs font-bold text-slate-400 group-hover:text-blue-400">{item.symbol}</span>
-                                    <span className={`text-xs ${item.changePercent && item.changePercent >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                        {formatPercent(item.changePercent || 0)}
-                                    </span>
-                                </Link>
-                            ))}
-                        </div>
-                        <div className="h-px bg-slate-800 mx-2 my-2"></div>
                     </div>
-                )}
 
-                {/* Tab Content */}
-                <div className="p-1">
-                    <div className="px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider flex items-center justify-between">
-                        <span>{tabs.find(t => t.id === activeTab)?.label} Movers</span>
-                        <ChevronRight size={12} />
+                    {/* Tabs */}
+                    <div className="flex bg-slate-800/50 p-1 rounded-lg">
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex-1 flex flex-col items-center justify-center py-2 rounded text-[10px] font-medium transition ${activeTab === tab.id
+                                    ? 'bg-slate-700 text-white shadow-sm'
+                                    : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800'
+                                    }`}
+                            >
+                                <tab.icon size={14} className="mb-1" />
+                                {tab.label}
+                            </button>
+                        ))}
                     </div>
-                    {renderList()}
                 </div>
-            </div>
-        </aside>
+
+                {/* Content Scrollable */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+
+                    {/* Watchlist Section (Always Visible) */}
+                    {watchlist.length > 0 && isAuthenticated && (
+                        <div className="p-2 border-b border-slate-800/50">
+                            <div className="flex items-center gap-2 px-2 py-1 mb-1 opacity-70">
+                                <Star size={12} className="text-yellow-400" />
+                                <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Watchlist</span>
+                            </div>
+                            <div className="space-y-1">
+                                {watchlist.slice(0, 3).map(item => (
+                                    <Link
+                                        key={item.symbol}
+                                        href={`/chart/${item.symbol}`}
+                                        className="flex items-center justify-between px-3 py-1.5 hover:bg-slate-800 rounded group"
+                                    >
+                                        <span className="text-xs font-bold text-slate-400 group-hover:text-blue-400">{item.symbol}</span>
+                                        <span className={`text-xs ${item.changePercent && item.changePercent >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                            {formatPercent(item.changePercent || 0)}
+                                        </span>
+                                    </Link>
+                                ))}
+                            </div>
+                            <div className="h-px bg-slate-800 mx-2 my-2"></div>
+                        </div>
+                    )}
+
+                    {/* Tab Content */}
+                    <div className="p-1">
+                        <div className="px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider flex items-center justify-between">
+                            <span>{tabs.find(t => t.id === activeTab)?.label} Movers</span>
+                            <ChevronRight size={12} />
+                        </div>
+                        {renderList()}
+                    </div>
+                </div>
+            </aside>
+        </>
     );
 }

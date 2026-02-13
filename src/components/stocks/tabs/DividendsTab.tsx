@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Loader2, Wallet, Calendar, DollarSign } from 'lucide-react';
 import { getStockDividends, type DividendRecord } from '@/services/marketService';
 import { TableExportButton } from '@/components/common/TableExportButton';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface DividendsTabProps {
     symbol: string;
@@ -68,7 +69,7 @@ export default function DividendsTab({ symbol }: DividendsTabProps) {
                         <span className="text-sm font-medium uppercase tracking-wide opacity-90">Latest Dividend</span>
                     </div>
                     <div className="text-3xl font-bold">
-                        {dividends[0].dividendAmount != null ? `$${dividends[0].dividendAmount.toFixed(2)}` : `${dividends[0].totalPercent}%`}
+                        {dividends[0].dividendAmount != null ? <PriceDisplay amount={dividends[0].dividendAmount} className="text-white" /> : `${dividends[0].totalPercent}%`}
                     </div>
                     <p className="text-sm mt-1 opacity-80">
                         {dividends[0].exDividendDate ? `Ex-Dividend: ${new Date(dividends[0].exDividendDate).toLocaleDateString()}` : dividends[0].fiscalYear}
@@ -117,7 +118,7 @@ export default function DividendsTab({ symbol }: DividendsTabProps) {
                                     {d.dividendType}
                                 </td>
                                 <td className="px-4 py-3 text-sm text-right font-medium text-slate-900 dark:text-white">
-                                    {d.dividendAmount != null ? `$${d.dividendAmount.toFixed(2)}` : `${d.totalPercent}%`}
+                                    {d.dividendAmount != null ? <PriceDisplay amount={d.dividendAmount} /> : `${d.totalPercent}%`}
                                 </td>
                                 <td className="px-4 py-3 text-sm text-right text-slate-500 hidden sm:table-cell">
                                     {d.exDividendDate ? new Date(d.exDividendDate).toLocaleDateString() : '-'}

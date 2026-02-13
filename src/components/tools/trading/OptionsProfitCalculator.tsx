@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
 import { TrendingUp, TrendingDown, DollarSign, Percent, AlertTriangle } from 'lucide-react';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import {
     createChart,
     ColorType,
@@ -192,9 +193,11 @@ export default function OptionsProfitCalculator() {
         };
     }, [result, isDark]);
 
+    const { formatPrice: currFormatPrice } = useCurrency();
+
     const formatCurrency = (value: number | string) =>
         typeof value === 'number'
-            ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
+            ? currFormatPrice(value)
             : value;
 
     return (
@@ -223,7 +226,7 @@ export default function OptionsProfitCalculator() {
                     <div className="grid grid-cols-3 gap-2">
                         <div className="p-3 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Breakeven</p>
-                            <p className="text-lg font-bold text-blue-600">${result.breakeven.toFixed(2)}</p>
+                            <p className="text-lg font-bold text-blue-600">{formatCurrency(result.breakeven)}</p>
                         </div>
                         <div className="p-3 bg-white dark:bg-slate-800 rounded-xl text-center">
                             <p className="text-xs text-slate-500 mb-1">Max Profit</p>
@@ -242,7 +245,7 @@ export default function OptionsProfitCalculator() {
                         </p>
                         <div ref={chartContainerRef} className="w-full" style={{ height: 200 }} />
                         <p className="text-xs text-center text-slate-400 mt-2">
-                            Stock price range: ${(stockPrice * 0.7).toFixed(0)} - ${(stockPrice * 1.3).toFixed(0)}
+                            Stock price range: {formatCurrency(Math.round(stockPrice * 0.7))} - {formatCurrency(Math.round(stockPrice * 1.3))}
                         </p>
                     </div>
 

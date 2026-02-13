@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowUp, ArrowDown, RefreshCw, Globe } from 'lucide-react';
 import { getRates, ExchangeRate } from '@/services/currencyService';
+import Link from 'next/link';
 
 export default function ExchangeRateWidget() {
     const [rates, setRates] = useState<ExchangeRate[]>([]);
@@ -52,9 +53,13 @@ export default function ExchangeRateWidget() {
                     ))
                 ) : rates.length > 0 ? (
                     rates.map((rate) => (
-                        <div key={rate.pair} className="flex items-center justify-between p-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl transition-colors">
+                        <Link
+                            key={rate.pair}
+                            href={`/forex?pair=${rate.pair.replace('/', '')}`}
+                            className="flex items-center justify-between p-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer group"
+                        >
                             <div className="flex items-center gap-3">
-                                <span className="font-semibold text-slate-700 dark:text-slate-200">{rate.pair}</span>
+                                <span className="font-semibold text-slate-700 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{rate.pair}</span>
                             </div>
                             <div className="text-right">
                                 <p className="font-mono font-medium text-slate-900 dark:text-white">{rate.rate.toFixed(4)}</p>
@@ -63,7 +68,7 @@ export default function ExchangeRateWidget() {
                                     {rate.targetCurrency}
                                 </p>
                             </div>
-                        </div>
+                        </Link>
                     ))
                 ) : (
                     <div className="text-center py-6 text-slate-500 text-sm">

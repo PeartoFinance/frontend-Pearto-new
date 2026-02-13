@@ -10,6 +10,8 @@ import {
     TrendingUp
 } from 'lucide-react';
 import { getStockHistory, type PriceHistoryPoint } from '@/services/marketService';
+import { useSubscription } from '@/context/SubscriptionContext';
+import { FeatureLock } from '@/components/subscription/FeatureGating';
 
 export interface ComparisonSymbol {
     symbol: string;
@@ -185,109 +187,111 @@ export default function ComparisonMode({
 
             {/* Dropdown Panel */}
             {isOpen && (
-                <div className="absolute top-full right-0 mt-2 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-xl z-[100] overflow-hidden">
-                    {/* Header */}
-                    <div className="p-3 border-b border-slate-700">
-                        <h3 className="font-semibold text-white mb-2">Compare Symbols</h3>
-                        <p className="text-xs text-slate-500 mb-2">
-                            Add up to 5 symbols to compare with {primarySymbol}
-                        </p>
+                <FeatureLock featureKey="advanced_charts" title="Stock Comparison">
+                    <div className="absolute top-full right-0 mt-2 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-xl z-[100] overflow-hidden">
+                        {/* Header */}
+                        <div className="p-3 border-b border-slate-700">
+                            <h3 className="font-semibold text-white mb-2">Compare Symbols</h3>
+                            <p className="text-xs text-slate-500 mb-2">
+                                Add up to 5 symbols to compare with {primarySymbol}
+                            </p>
 
-                        {/* Search Input */}
-                        <div className="relative">
-                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                            <input
-                                type="text"
-                                placeholder="Search symbol..."
-                                value={searchQuery}
-                                onChange={(e) => handleSearch(e.target.value)}
-                                className="w-full pl-9 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
-                            />
+                            {/* Search Input */}
+                            <div className="relative">
+                                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                                <input
+                                    type="text"
+                                    placeholder="Search symbol..."
+                                    value={searchQuery}
+                                    onChange={(e) => handleSearch(e.target.value)}
+                                    className="w-full pl-9 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                                />
+                            </div>
+
+                            {/* Search Results */}
+                            {searchResults.length > 0 && (
+                                <div className="mt-2 bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
+                                    {searchResults.map(symbol => (
+                                        <button
+                                            key={symbol}
+                                            onClick={() => addComparison(symbol)}
+                                            className="w-full px-3 py-2 text-left text-sm text-white hover:bg-slate-700 transition flex items-center justify-between"
+                                        >
+                                            <span>{symbol}</span>
+                                            <Plus size={14} className="text-slate-400" />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
-                        {/* Search Results */}
-                        {searchResults.length > 0 && (
-                            <div className="mt-2 bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
-                                {searchResults.map(symbol => (
-                                    <button
-                                        key={symbol}
-                                        onClick={() => addComparison(symbol)}
-                                        className="w-full px-3 py-2 text-left text-sm text-white hover:bg-slate-700 transition flex items-center justify-between"
-                                    >
-                                        <span>{symbol}</span>
-                                        <Plus size={14} className="text-slate-400" />
-                                    </button>
-                                ))}
+                        {/* Active Comparisons */}
+                        {comparisons.length > 0 && (
+                            <div className="p-3 border-b border-slate-700">
+                                <h4 className="text-xs text-slate-500 uppercase font-medium mb-2">Active</h4>
+                                <div className="space-y-2">
+                                    {comparisons.map(comp => (
+                                        <div
+                                            key={comp.symbol}
+                                            className="flex items-center gap-2 p-2 bg-slate-800 rounded-lg"
+                                        >
+                                            <div
+                                                className="w-3 h-3 rounded-full"
+                                                style={{ backgroundColor: comp.color }}
+                                            />
+                                            <span className="flex-1 text-sm text-white">{comp.symbol}</span>
+
+                                            <button
+                                                onClick={() => toggleVisibility(comp.symbol)}
+                                                className="p-1 hover:bg-slate-700 rounded transition"
+                                            >
+                                                {comp.visible
+                                                    ? <Eye size={14} className="text-slate-400" />
+                                                    : <EyeOff size={14} className="text-slate-500" />}
+                                            </button>
+
+                                            <button
+                                                onClick={() => removeComparison(comp.symbol)}
+                                                className="p-1 hover:bg-red-500/20 rounded transition"
+                                            >
+                                                <X size={14} className="text-red-400" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         )}
-                    </div>
 
-                    {/* Active Comparisons */}
-                    {comparisons.length > 0 && (
-                        <div className="p-3 border-b border-slate-700">
-                            <h4 className="text-xs text-slate-500 uppercase font-medium mb-2">Active</h4>
-                            <div className="space-y-2">
-                                {comparisons.map(comp => (
-                                    <div
-                                        key={comp.symbol}
-                                        className="flex items-center gap-2 p-2 bg-slate-800 rounded-lg"
-                                    >
-                                        <div
-                                            className="w-3 h-3 rounded-full"
-                                            style={{ backgroundColor: comp.color }}
-                                        />
-                                        <span className="flex-1 text-sm text-white">{comp.symbol}</span>
-
+                        {/* Quick Add - Popular Symbols */}
+                        <div className="p-3">
+                            <h4 className="text-xs text-slate-500 uppercase font-medium mb-2">Popular</h4>
+                            <div className="flex flex-wrap gap-1">
+                                {popularSymbols
+                                    .filter(s => s !== primarySymbol && !comparisons.some(c => c.symbol === s))
+                                    .slice(0, 6)
+                                    .map(symbol => (
                                         <button
-                                            onClick={() => toggleVisibility(comp.symbol)}
-                                            className="p-1 hover:bg-slate-700 rounded transition"
+                                            key={symbol}
+                                            onClick={() => addComparison(symbol)}
+                                            className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition"
                                         >
-                                            {comp.visible
-                                                ? <Eye size={14} className="text-slate-400" />
-                                                : <EyeOff size={14} className="text-slate-500" />}
+                                            {symbol}
                                         </button>
-
-                                        <button
-                                            onClick={() => removeComparison(comp.symbol)}
-                                            className="p-1 hover:bg-red-500/20 rounded transition"
-                                        >
-                                            <X size={14} className="text-red-400" />
-                                        </button>
-                                    </div>
-                                ))}
+                                    ))}
                             </div>
                         </div>
-                    )}
 
-                    {/* Quick Add - Popular Symbols */}
-                    <div className="p-3">
-                        <h4 className="text-xs text-slate-500 uppercase font-medium mb-2">Popular</h4>
-                        <div className="flex flex-wrap gap-1">
-                            {popularSymbols
-                                .filter(s => s !== primarySymbol && !comparisons.some(c => c.symbol === s))
-                                .slice(0, 6)
-                                .map(symbol => (
-                                    <button
-                                        key={symbol}
-                                        onClick={() => addComparison(symbol)}
-                                        className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition"
-                                    >
-                                        {symbol}
-                                    </button>
-                                ))}
+                        {/* Footer */}
+                        <div className="p-3 border-t border-slate-700 bg-slate-800/30">
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm transition"
+                            >
+                                Close
+                            </button>
                         </div>
                     </div>
-
-                    {/* Footer */}
-                    <div className="p-3 border-t border-slate-700 bg-slate-800/30">
-                        <button
-                            onClick={() => setIsOpen(false)}
-                            className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm transition"
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
+                </FeatureLock>
             )}
         </div>
     );

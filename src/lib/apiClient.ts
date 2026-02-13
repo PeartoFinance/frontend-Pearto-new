@@ -3,7 +3,7 @@
  * Intercepts 403 responses and redirects to appropriate pages
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com/api';
 
 export interface ApiError {
     status: number;

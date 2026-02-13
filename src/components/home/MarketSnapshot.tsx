@@ -90,9 +90,9 @@ export default function MarketSnapshot() {
     const hasNoData = !loading && (!data || (data.topGainers?.length === 0 && data.topLosers?.length === 0 && data.mostActive?.length === 0));
 
     return (
-        <section className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
+        <section className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">Market Snapshot</h3>
                 <div className="flex items-center gap-2">
                     {['Crypto', 'Stocks', 'Metals'].map((type) => (
@@ -155,7 +155,7 @@ export default function MarketSnapshot() {
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
                 {(['Top', 'Gainers', 'Losers'] as const).map((tab) => (
                     <button
                         key={tab}
@@ -185,7 +185,7 @@ export default function MarketSnapshot() {
                         <button onClick={handleRefresh} disabled={loading}>
                             <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
                         </button>
-                        <span>Auto-refresh • Live</span>
+                        <span className="hidden sm:inline">Auto-refresh • Live</span>
                     </div>
                 </div>
             </div>

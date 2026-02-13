@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -33,6 +34,23 @@ import { AIWidget } from '@/components/ai';
 export default function HomePage() {
   const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(120);
+
+  // Measure fixed header height dynamically (SportsTicker may be hidden)
+  const measureHeader = useCallback(() => {
+    if (headerRef.current) {
+      const h = headerRef.current.getBoundingClientRect().height;
+      if (h > 0) setHeaderHeight(h);
+    }
+  }, []);
+
+  useEffect(() => {
+    measureHeader();
+    const observer = new ResizeObserver(measureHeader);
+    if (headerRef.current) observer.observe(headerRef.current);
+    return () => observer.disconnect();
+  }, [measureHeader]);
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
@@ -42,8 +60,8 @@ export default function HomePage() {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
         {/* Fixed Header Section - Always visible */}
-        <div className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-gray-50 dark:bg-slate-900">
-          {/* Ticker Tape */}
+        <div ref={headerRef} className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-gray-50 dark:bg-slate-900">
+          {/* Ticker Tape (includes Sports Ticker) */}
           <TickerTape />
 
           {/* Header */}
@@ -51,7 +69,7 @@ export default function HomePage() {
         </div>
 
         {/* Scrollable Content - with top padding for fixed header */}
-        <div className="flex-1 pt-[112px] md:pt-[120px] overflow-x-hidden">
+        <div className="flex-1 overflow-x-hidden" style={{ paddingTop: `${headerHeight}px` }}>
           <div className="p-4 lg:p-6 space-y-6 w-full">
             {/* Welcome Section */}
             <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">

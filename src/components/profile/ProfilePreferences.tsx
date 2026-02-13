@@ -123,7 +123,7 @@ export default function ProfilePreferences({ initialPreferences, onUpdate }: Pro
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold text-white">Preferences</h2>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Preferences</h2>
                 <p className="text-slate-400 mt-1">
                     Customize your experience with currency, language, and regional settings.
                 </p>
@@ -146,7 +146,7 @@ export default function ProfilePreferences({ initialPreferences, onUpdate }: Pro
                             <DollarSign className="w-5 h-5 text-emerald-500" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-white">Currency</h3>
+                            <h3 className="font-semibold text-slate-900 dark:text-white">Currency</h3>
                             <p className="text-sm text-slate-400">Your preferred currency for display</p>
                         </div>
                     </div>
@@ -157,7 +157,7 @@ export default function ProfilePreferences({ initialPreferences, onUpdate }: Pro
                             setCurrency(newCurrency);
                             handleChange('currency', newCurrency);
                         }}
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 transition"
+                        className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition"
                     >
                         {CURRENCIES.map(c => (
                             <option key={c.code} value={c.code}>
@@ -174,14 +174,14 @@ export default function ProfilePreferences({ initialPreferences, onUpdate }: Pro
                             <Languages className="w-5 h-5 text-cyan-500" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-white">Language</h3>
+                            <h3 className="font-semibold text-slate-900 dark:text-white">Language</h3>
                             <p className="text-sm text-slate-400">Interface language preference</p>
                         </div>
                     </div>
                     <select
                         value={preferences.languagePref}
                         onChange={(e) => handleChange('languagePref', e.target.value)}
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500/50 transition"
+                        className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500/50 transition"
                     >
                         {LANGUAGES.map(language => (
                             <option key={language.code} value={language.code}>
@@ -198,14 +198,14 @@ export default function ProfilePreferences({ initialPreferences, onUpdate }: Pro
                             <Globe className="w-5 h-5 text-purple-500" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-white">Country</h3>
+                            <h3 className="font-semibold text-slate-900 dark:text-white">Country</h3>
                             <p className="text-sm text-slate-400">Your country of residence</p>
                         </div>
                     </div>
                     <select
                         value={preferences.countryCode}
                         onChange={(e) => handleChange('countryCode', e.target.value)}
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500/50 transition"
+                        className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-purple-500/50 transition"
                     >
                         {COUNTRIES.map(country => (
                             <option key={country.code} value={country.code}>
@@ -222,7 +222,7 @@ export default function ProfilePreferences({ initialPreferences, onUpdate }: Pro
                             <MapPin className="w-5 h-5 text-amber-500" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-white">Tax Residency</h3>
+                            <h3 className="font-semibold text-slate-900 dark:text-white">Tax Residency</h3>
                             <p className="text-sm text-slate-400">For tax reporting purposes (optional)</p>
                         </div>
                     </div>
@@ -231,7 +231,7 @@ export default function ProfilePreferences({ initialPreferences, onUpdate }: Pro
                         value={preferences.taxResidency || ''}
                         onChange={(e) => handleChange('taxResidency', e.target.value)}
                         placeholder="Enter tax residency country"
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500/50 transition"
+                        className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-amber-500/50 transition"
                     />
                 </div>
             </div>

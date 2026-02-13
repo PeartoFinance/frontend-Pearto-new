@@ -1,9 +1,12 @@
 'use client';
 
-import { X, Play, ExternalLink, MapPin, Calendar, Trophy } from 'lucide-react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { X, Play, ExternalLink, MapPin, Calendar, Trophy, RefreshCw, Pin, PinOff, Bell, BellOff } from 'lucide-react';
 import { SportsEvent } from '@/types/sports';
 import { getSportEmoji } from '@/data/sportsConfig';
+import { getSportsEventById, addFavoriteSport, removeFavoriteSport, getFavoriteIds } from '@/services/sportsService';
 import VideoPlayer from '@/components/common/VideoPlayer';
+import { useAuth } from '@/context/AuthContext';
 
 interface EventModalProps {
     event: SportsEvent | null;
@@ -11,7 +14,91 @@ interface EventModalProps {
     onClose: () => void;
 }
 
-export default function EventModal({ event, isOpen, onClose }: EventModalProps) {
+const LIVE_REFRESH_INTERVAL = 15_000; // 15 seconds for live events
+const DEFAULT_REFRESH_INTERVAL = 30_000; // 30 seconds for other events
+
+export default function EventModal({ event: initialEvent, isOpen, onClose }: EventModalProps) {
+    const { isAuthenticated } = useAuth();
+    const [event, setEvent] = useState<SportsEvent | null>(initialEvent);
+    const [refreshing, setRefreshing] = useState(false);
+    const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+    const [isPinned, setIsPinned] = useState(false);
+    const [pinLoading, setPinLoading] = useState(false);
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // Sync with prop when modal opens or event changes
+    useEffect(() => {
+        setEvent(initialEvent);
+    }, [initialEvent]);
+
+    // Check if event is pinned
+    useEffect(() => {
+        if (!isAuthenticated || !initialEvent?.id || !isOpen) {
+            setIsPinned(false);
+            return;
+        }
+        getFavoriteIds().then(ids => {
+            setIsPinned(ids.includes(initialEvent.id));
+        });
+    }, [isAuthenticated, initialEvent?.id, isOpen]);
+
+    const handleTogglePin = useCallback(async () => {
+        if (!event?.id || !isAuthenticated) return;
+        setPinLoading(true);
+        try {
+            if (isPinned) {
+                await removeFavoriteSport(event.id);
+                setIsPinned(false);
+            } else {
+                await addFavoriteSport(event.id);
+                setIsPinned(true);
+            }
+        } catch (err) {
+            console.error('Failed to toggle pin:', err);
+        } finally {
+            setPinLoading(false);
+        }
+    }, [event?.id, isPinned, isAuthenticated]);
+
+    const refreshEvent = useCallback(async () => {
+        if (!event?.id) return;
+        setRefreshing(true);
+        try {
+            const fresh = await getSportsEventById(event.id);
+            if (fresh) {
+                setEvent(fresh);
+                setLastRefreshed(new Date());
+            }
+        } catch (err) {
+            console.error('Failed to refresh event:', err);
+        } finally {
+            setRefreshing(false);
+        }
+    }, [event?.id]);
+
+    // Auto-refresh for ALL open events (faster for live)
+    useEffect(() => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+
+        if (isOpen && event?.id) {
+            const isLiveEvent = event?.isLive || event?.status === 'live';
+            const interval = isLiveEvent ? LIVE_REFRESH_INTERVAL : DEFAULT_REFRESH_INTERVAL;
+            intervalRef.current = setInterval(refreshEvent, interval);
+            // Also do an initial fetch when modal opens
+            refreshEvent();
+        }
+
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
+    }, [isOpen, event?.isLive, event?.status, event?.id, refreshEvent]);
+
     if (!isOpen || !event) return null;
 
     const isLive = event.isLive || event.status === 'live';
@@ -52,31 +139,80 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
                             <p className="text-emerald-100 text-sm">{event.sportType} • {event.league}</p>
                         </div>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-white/20 rounded-full transition"
-                    >
-                        <X className="h-5 w-5" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {/* Pin/Favorite Button */}
+                        {isAuthenticated && (
+                            <button
+                                onClick={handleTogglePin}
+                                disabled={pinLoading}
+                                className={`p-2 rounded-full transition ${isPinned ? 'bg-yellow-400/30 hover:bg-yellow-400/40' : 'hover:bg-white/20'}`}
+                                title={isPinned ? 'Unpin from ticker' : 'Pin to ticker'}
+                            >
+                                {isPinned ? (
+                                    <Pin className={`h-4 w-4 text-yellow-300 ${pinLoading ? 'animate-pulse' : ''}`} />
+                                ) : (
+                                    <PinOff className={`h-4 w-4 ${pinLoading ? 'animate-pulse' : ''}`} />
+                                )}
+                            </button>
+                        )}
+                        <button
+                            onClick={refreshEvent}
+                            disabled={refreshing}
+                            className="p-2 hover:bg-white/20 rounded-full transition"
+                            title="Refresh scores"
+                        >
+                            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                        </button>
+                        <button
+                            onClick={onClose}
+                            className="p-2 hover:bg-white/20 rounded-full transition"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                    </div>
                 </div>
 
-                {/* Video Player */}
-                <div className="aspect-video bg-slate-900 relative">
-                    <VideoPlayer
-                        url={event.streamUrl || undefined}
-                        thumbnail={event.thumbnailUrl || undefined}
-                        title={event.name}
-                        autoplay={isLive}
-                    />
+                {/* Video Player - only show if stream URL exists */}
+                {event.streamUrl ? (
+                    <div className="aspect-video bg-slate-900 relative">
+                        <VideoPlayer
+                            url={event.streamUrl}
+                            thumbnail={event.thumbnailUrl || undefined}
+                            title={event.name}
+                            autoplay={isLive}
+                        />
 
-                    {/* Live Badge */}
-                    {isLive && (
-                        <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg animate-pulse">
-                            <div className="w-2 h-2 bg-white rounded-full" />
-                            LIVE
+                        {/* Live Badge */}
+                        {isLive && (
+                            <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg animate-pulse">
+                                <div className="w-2 h-2 bg-white rounded-full" />
+                                LIVE
+                            </div>
+                        )}
+
+                        {/* Auto-refresh indicator */}
+                        <div className="absolute top-4 right-4 text-white/60 text-xs bg-black/40 px-2 py-1 rounded flex items-center gap-1.5">
+                            <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin' : ''}`} />
+                            {isLive ? 'Live · refreshing every 15s' : 'Auto-refreshing every 30s'}
                         </div>
-                    )}
-                </div>
+                    </div>
+                ) : (
+                    /* No stream - show compact status bar instead */
+                    <div className="flex items-center justify-between px-4 py-2 bg-slate-800 text-xs">
+                        <div className="flex items-center gap-2">
+                            {isLive && (
+                                <span className="flex items-center gap-1.5 bg-red-500 text-white font-bold px-2.5 py-1 rounded-full animate-pulse">
+                                    <span className="w-1.5 h-1.5 bg-white rounded-full" />
+                                    LIVE
+                                </span>
+                            )}
+                        </div>
+                        <div className="text-white/60 flex items-center gap-1.5">
+                            <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin' : ''}`} />
+                            {isLive ? 'Live · refreshing every 15s' : 'Auto-refreshing every 30s'}
+                        </div>
+                    </div>
+                )}
 
                 {/* Event Details */}
                 <div className="p-6 grid md:grid-cols-2 gap-6">
@@ -105,6 +241,19 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
                                     <span className="text-slate-600 dark:text-slate-300">{formatDate(event.eventDate)}</span>
                                 </div>
                             )}
+
+                            <div className="text-xs text-slate-400 mt-2">
+                                {isPinned && (
+                                    <span className="inline-flex items-center gap-1 text-yellow-500 mr-3">
+                                        <Pin className="h-3 w-3" /> Pinned to ticker
+                                    </span>
+                                )}
+                                {lastRefreshed
+                                    ? `Last refreshed: ${lastRefreshed.toLocaleTimeString()}`
+                                    : event.updatedAt
+                                        ? `Last updated: ${new Date(event.updatedAt).toLocaleTimeString()}`
+                                        : ''}
+                            </div>
                         </div>
                     </div>
 

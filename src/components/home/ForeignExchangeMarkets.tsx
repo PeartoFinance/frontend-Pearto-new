@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { RefreshCw, TrendingUp, TrendingDown, Loader2, AlertCircle } from 'lucide-react';
 import { useForexRates } from '@/hooks/useContentData';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const tabs = ['Major Pairs', 'Emerging Markets', 'Currency Exchange', 'Price Charts'];
 
@@ -11,6 +12,7 @@ export default function ForeignExchangeMarkets() {
     const [baseCurrency, setBaseCurrency] = useState('USD');
 
     const { data: forexRates = [], isLoading: loading, isError: error, refetch } = useForexRates(baseCurrency);
+    const { symbol: currencySymbol } = useCurrency();
 
     const handleRefresh = () => {
         refetch();
@@ -22,7 +24,7 @@ export default function ForeignExchangeMarkets() {
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">$</span>
+                        <span className="text-white font-bold text-sm">{currencySymbol}</span>
                     </div>
                     <div>
                         <h3 className="text-lg font-bold text-slate-900 dark:text-white">Foreign Exchange Markets</h3>

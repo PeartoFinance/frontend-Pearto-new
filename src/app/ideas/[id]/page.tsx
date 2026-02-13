@@ -12,6 +12,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import { useAuth } from '@/context/AuthContext';
 import { ideasApi, TradingIdea, IdeaComment } from '@/services/socialService';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 const IDEA_TYPE_STYLES = {
     long: { bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400', icon: TrendingUp, label: 'Bullish' },
@@ -220,7 +221,7 @@ export default function IdeaDetailPage() {
                                         {idea.entryPrice && (
                                             <div className="text-center">
                                                 <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Entry</div>
-                                                <div className="text-xl font-bold text-slate-900 dark:text-white">${idea.entryPrice}</div>
+                                                <div className="text-xl font-bold text-slate-900 dark:text-white"><PriceDisplay amount={idea.entryPrice} /></div>
                                             </div>
                                         )}
                                         {idea.targetPrice && (
@@ -228,7 +229,7 @@ export default function IdeaDetailPage() {
                                                 <div className="text-xs text-slate-500 uppercase tracking-wide mb-1 flex items-center justify-center gap-1">
                                                     <Target size={12} /> Target
                                                 </div>
-                                                <div className="text-xl font-bold text-emerald-600">${idea.targetPrice}</div>
+                                                <div className="text-xl font-bold text-emerald-600"><PriceDisplay amount={idea.targetPrice} /></div>
                                             </div>
                                         )}
                                         {idea.stopLoss && (
@@ -236,7 +237,7 @@ export default function IdeaDetailPage() {
                                                 <div className="text-xs text-slate-500 uppercase tracking-wide mb-1 flex items-center justify-center gap-1">
                                                     <Shield size={12} /> Stop Loss
                                                 </div>
-                                                <div className="text-xl font-bold text-red-600">${idea.stopLoss}</div>
+                                                <div className="text-xl font-bold text-red-600"><PriceDisplay amount={idea.stopLoss} /></div>
                                             </div>
                                         )}
                                     </div>

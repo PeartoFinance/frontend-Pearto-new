@@ -5,6 +5,7 @@ import { createChart, ColorType, CandlestickSeries, AreaSeries, LineSeries, Hist
 import { type PriceHistoryPoint } from '@/services/marketService';
 import { Loader2, CandlestickChart, LineChart, AreaChart, Maximize2, Activity } from 'lucide-react';
 import Link from 'next/link';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface StockChartProps {
     data: PriceHistoryPoint[];
@@ -235,6 +236,7 @@ export default function StockChart({ data, loading = false, symbol }: StockChart
     }
 
     // Calculate price range for display
+    const { formatPrice } = useCurrency();
     const prices = data.filter(d => d.close != null).map(d => d.close!);
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
@@ -253,14 +255,14 @@ export default function StockChart({ data, loading = false, symbol }: StockChart
                     <div>
                         <span className="text-sm text-slate-500 dark:text-slate-400">Range:</span>
                         <span className="ml-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                            ${minPrice.toFixed(2)} - ${maxPrice.toFixed(2)}
+                            {formatPrice(minPrice)} - {formatPrice(maxPrice)}
                         </span>
                     </div>
                     <div className={`px-3 py-1 rounded-full text-sm font-medium ${isPositive
                         ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
                         : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                         }`}>
-                        {isPositive ? '+' : ''}{priceChange.toFixed(2)} ({isPositive ? '+' : ''}{priceChangePercent.toFixed(2)}%)
+                        {isPositive ? '+' : ''}{formatPrice(Math.abs(priceChange))} ({isPositive ? '+' : ''}{priceChangePercent.toFixed(2)}%)
                     </div>
                 </div>
 
@@ -286,7 +288,7 @@ export default function StockChart({ data, loading = false, symbol }: StockChart
                         })}
                     </div>
                     <Link
-                        href={`/chart/${symbol}`}
+                        href={`/chart/${symbol}?type=stock`}
                         target="_blank"
                         className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition"
                     >
@@ -294,7 +296,7 @@ export default function StockChart({ data, loading = false, symbol }: StockChart
                         Advanced Chart
                     </Link>
                     <Link
-                        href={`/live?symbol=${symbol}`}
+                        href={`/live?symbol=${symbol}&type=stock`}
                         target="_blank"
                         className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition"
                     >

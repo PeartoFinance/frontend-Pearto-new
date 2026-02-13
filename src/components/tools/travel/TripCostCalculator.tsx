@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
 import { Car, Fuel, MapPin, DollarSign } from 'lucide-react';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 export default function TripCostCalculator() {
     const [distance, setDistance] = useState(500);
@@ -36,7 +37,7 @@ export default function TripCostCalculator() {
         };
     }, [distance, fuelEfficiency, fuelPrice, tolls, parking, meals, lodging, nights, passengers]);
 
-    const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
+    const { formatPrice: formatCurrency } = useCurrency();
 
     return (
         <CalculatorLayout

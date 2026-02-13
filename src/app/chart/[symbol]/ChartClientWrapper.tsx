@@ -24,7 +24,7 @@ interface ChartClientWrapperProps {
 }
 
 export default function ChartClientWrapper({ symbol }: ChartClientWrapperProps) {
-    const { isPro, trackUsage } = useSubscription();
+    const { isPro, trackUsage, isLoading: isSubscriptionLoading } = useSubscription();
     const searchParams = useSearchParams();
     const assetType = (searchParams?.get('type') as 'stock' | 'crypto' | 'forex' | 'commodity') || 'stock';
 
@@ -32,9 +32,12 @@ export default function ChartClientWrapper({ symbol }: ChartClientWrapperProps) 
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     useEffect(() => {
+        if (isSubscriptionLoading) return;
+
         const checkAccess = async () => {
             if (isPro) {
                 setIsAllowed(true);
+                setShowUpgradeModal(false);
                 return;
             }
 
@@ -46,10 +49,10 @@ export default function ChartClientWrapper({ symbol }: ChartClientWrapperProps) 
         };
 
         checkAccess();
-    }, [isPro, trackUsage]);
+    }, [isPro, trackUsage, isSubscriptionLoading]);
 
     // Show loading state while checking permissions
-    if (isAllowed === null) {
+    if (isAllowed === null || isSubscriptionLoading) {
         return (
             <div className="min-h-screen bg-slate-950 flex items-center justify-center">
                 <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />

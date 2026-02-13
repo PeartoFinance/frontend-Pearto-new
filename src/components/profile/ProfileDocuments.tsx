@@ -54,7 +54,7 @@ export default function ProfileDocuments() {
             formData.append('file', file);
             formData.append('documentType', selectedType);
 
-            const apiBase = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+            const apiBase = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com/api';
             await fetch(`${apiBase}/user/documents`, {
                 method: 'POST',
                 headers: {

@@ -144,7 +144,7 @@ export function IndicesGrid({ indices }: IndicesGridProps) {
                 return (
                     <Link
                         key={idx.symbol}
-                        href={`/live?symbol=${idx.symbol}`}
+                        href={`/live?symbol=${idx.symbol}&type=stock`}
                         className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 hover:shadow-lg hover:border-emerald-500/50 transition group"
                     >
                         <div className="flex items-center justify-between mb-2">

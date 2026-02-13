@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Download, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface FinancialsTabProps {
     symbol: string;
@@ -26,7 +27,7 @@ interface RatiosData {
     error?: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com/api';
 
 export default function FinancialsTab({ symbol }: FinancialsTabProps) {
     const [data, setData] = useState<FinancialData | RatiosData | null>(null);
@@ -34,6 +35,7 @@ export default function FinancialsTab({ symbol }: FinancialsTabProps) {
     const [error, setError] = useState<string | null>(null);
     const [statementType, setStatementType] = useState<StatementType>('income');
     const [period, setPeriod] = useState<PeriodType>('annual');
+    const { formatPrice: formatCurrencyPrice } = useCurrency();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -73,7 +75,7 @@ export default function FinancialsTab({ symbol }: FinancialsTabProps) {
 
         // EPS fields
         if (label.includes('EPS')) {
-            return `$${val.toFixed(2)}`;
+            return formatCurrencyPrice(val);
         }
         // Large numbers
         return formatLargeNumber(val);

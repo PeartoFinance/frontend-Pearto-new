@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, CreditCard, Calendar, CheckCircle, XCircle, Loader2, Crown, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, CreditCard, Calendar, CheckCircle, XCircle, Loader2, Crown, AlertTriangle, Clock } from 'lucide-react';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/context/AuthContext';
+import { getSubscriptionStatus, cancelSubscription } from '@/services/subscriptionService';
 
 interface UserSubscription {
     id: number;
-    status: 'active' | 'cancelled' | 'expired';
+    status: 'active' | 'trialing' | 'cancelled' | 'expired';
     auto_renew: boolean;
     start_date: string;
     current_period_end: string;
@@ -24,14 +25,15 @@ interface UserSubscription {
 }
 
 export default function BillingPage() {
-    const { user, isAuthenticated, token } = useAuth();
+    const { user, isAuthenticated, token, isLoading: authLoading } = useAuth();
     const [subscription, setSubscription] = useState<UserSubscription | null>(null);
     const [loading, setLoading] = useState(true);
     const [cancelling, setCancelling] = useState(false);
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
     useEffect(() => {
+        // Wait for auth to load
+        if (authLoading) return;
+
         const fetchSubscription = async () => {
             if (!isAuthenticated || !token) {
                 setLoading(false);
@@ -39,12 +41,10 @@ export default function BillingPage() {
             }
 
             try {
-                const res = await fetch(`${API_URL}/user/subscription`, {
-                    headers: { 'Authorization': `Bearer ${token}` },
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    setSubscription(data.subscription);
+                const data = await getSubscriptionStatus(token);
+                // Check if has_subscription and subscription object exist
+                if (data && (data as any).has_subscription && (data as any).subscription) {
+                    setSubscription((data as any).subscription);
                 }
             } catch (error) {
                 console.error('Failed to fetch subscription:', error);
@@ -53,21 +53,16 @@ export default function BillingPage() {
             }
         };
         fetchSubscription();
-    }, [isAuthenticated, token, API_URL]);
+    }, [isAuthenticated, token, authLoading]);
 
     const handleCancelSubscription = async () => {
+        if (!token) return;
         if (!confirm('Are you sure you want to cancel? You will still have access until the end of your billing period.')) return;
 
         setCancelling(true);
         try {
-            const res = await fetch(`${API_URL}/subscription/cancel`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-            if (res.ok) {
+            const result = await cancelSubscription(token);
+            if (result.success) {
                 setSubscription(prev => prev ? { ...prev, status: 'cancelled', auto_renew: false } : null);
             }
         } catch (error) {
@@ -77,7 +72,8 @@ export default function BillingPage() {
         }
     };
 
-    const formatDate = (dateStr: string) => {
+    const formatDate = (dateStr: string | null) => {
+        if (!dateStr) return 'N/A';
         return new Date(dateStr).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
@@ -91,6 +87,12 @@ export default function BillingPage() {
                 return (
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-sm font-medium rounded-full">
                         <CheckCircle size={14} /> Active
+                    </span>
+                );
+            case 'trialing':
+                return (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium rounded-full">
+                        <Clock size={14} /> Trial
                     </span>
                 );
             case 'cancelled':

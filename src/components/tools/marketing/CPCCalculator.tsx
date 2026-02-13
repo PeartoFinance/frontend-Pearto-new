@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import CalculatorLayout from '../CalculatorLayout';
 import { DollarSign, MousePointer, TrendingUp } from 'lucide-react';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 export default function CPCCalculator() {
     const [adSpend, setAdSpend] = useState(1000);
@@ -31,7 +32,7 @@ export default function CPCCalculator() {
         };
     }, [adSpend, clicks, conversions, revenue]);
 
-    const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
+    const { formatPrice: formatCurrency } = useCurrency();
 
     return (
         <CalculatorLayout

@@ -92,7 +92,7 @@ export default function Sidebar({ collapsible = true }: SidebarProps) {
                 }
 
                 // Also fetch custom pages for sidebar
-                const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+                const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com/api';
                 const userCountry = typeof window !== 'undefined' ? localStorage.getItem('userCountry') || 'US' : 'US';
                 const sidebarPagesRes = await fetch(`${API_BASE}/pages?placement=sidebar&status=published`, {
                     headers: { 'X-User-Country': userCountry }

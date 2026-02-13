@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Gift, Users, Copy, Check, Share2, ChevronRight, Award, Loader2 } from 'lucide-react';
 import { TableExportButton } from '@/components/common/TableExportButton';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.pearto.com/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com/api';
 
 interface Referral {
     id: number;

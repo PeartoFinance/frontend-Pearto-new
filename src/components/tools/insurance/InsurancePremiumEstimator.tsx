@@ -152,7 +152,7 @@ export default function InsurancePremiumEstimator() {
                     <select
                         value={coverageAmount}
                         onChange={(e) => setCoverageAmount(Number(e.target.value))}
-                        className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                        className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                     >
                         <option value={100000}>{formatPrice(100000)}</option>
                         <option value={250000}>{formatPrice(250000)}</option>
@@ -185,7 +185,7 @@ export default function InsurancePremiumEstimator() {
                     <select
                         value={healthRating}
                         onChange={(e) => setHealthRating(e.target.value as typeof healthRating)}
-                        className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                        className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                     >
                         <option value="excellent">Excellent</option>
                         <option value="good">Good</option>

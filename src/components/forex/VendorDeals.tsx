@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Building2, Star, ExternalLink, TrendingUp, RefreshCw } from 'lucide-react';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import Link from 'next/link';
+import { getVendors } from '@/services/vendorService';
 
 interface VendorDeal {
     id: string;
@@ -35,20 +37,22 @@ export default function VendorDeals({ fromCurrency = 'USD', toCurrency = 'NPR', 
         const fetchVendorDeals = async () => {
             setLoading(true);
             try {
-                const res = await fetch(`/api/public/vendors?category=forex&limit=6`);
-                if (res.ok) {
-                    const data = await res.json();
-                    const deals: VendorDeal[] = (data.vendors || []).map((v: any, idx: number) => ({
+                // Fetch from public vendors API using service
+                const vendors = await getVendors({ category: 'forex', limit: 6 });
+
+                if (vendors && vendors.length > 0) {
+                    const deals: VendorDeal[] = vendors.map((v, idx) => ({
                         id: v.id,
                         name: v.name,
-                        logoUrl: v.logoUrl,
-                        rating: v.rating || 4.0 + Math.random() * 0.9,
-                        reviewCount: v.reviewCount || Math.floor(50 + Math.random() * 200),
-                        // Use metadata rates or simulate variance from base rate
-                        buyRate: v.metadata?.buyRate || baseRate * (0.995 + Math.random() * 0.01),
-                        sellRate: v.metadata?.sellRate || baseRate * (1.005 + Math.random() * 0.01),
-                        fee: v.metadata?.fee || `${(0.3 + Math.random() * 0.7).toFixed(1)}%`,
-                        website: v.website
+                        logoUrl: v.logoUrl || null,
+                        rating: v.rating || 0,
+                        reviewCount: v.reviewCount || 0,
+                        // Use metadata rates if available, otherwise calculate from base with slight variance (simulated spread)
+                        buyRate: v.metadata?.buyRate ? parseFloat(v.metadata.buyRate) : baseRate * (0.995 - (idx * 0.001)),
+                        sellRate: v.metadata?.sellRate ? parseFloat(v.metadata.sellRate) : baseRate * (1.005 + (idx * 0.001)),
+                        fee: v.metadata?.fee || '0%',
+                        website: v.website || null,
+                        isFeatured: v.isFeatured
                     }));
 
                     // Sort by best buy rate and mark best
@@ -58,15 +62,13 @@ export default function VendorDeals({ fromCurrency = 'USD', toCurrency = 'NPR', 
                     }
 
                     setVendorDeals(deals);
+                } else {
+                    setVendorDeals([]);
                 }
+
             } catch (err) {
                 console.error('Failed to fetch vendor deals:', err);
-                // Generate mock data for demo
-                setVendorDeals([
-                    { id: '1', name: 'Global IME Bank', logoUrl: null, rating: 4.5, reviewCount: 234, buyRate: baseRate * 0.998, sellRate: baseRate * 1.002, fee: '0.5%', website: null, isBestRate: true },
-                    { id: '2', name: 'Nabil Bank', logoUrl: null, rating: 4.3, reviewCount: 189, buyRate: baseRate * 0.996, sellRate: baseRate * 1.004, fee: '0.6%', website: null },
-                    { id: '3', name: 'NIC Asia', logoUrl: null, rating: 4.4, reviewCount: 156, buyRate: baseRate * 0.995, sellRate: baseRate * 1.005, fee: '0.7%', website: null },
-                ]);
+                setVendorDeals([]);
             } finally {
                 setLoading(false);
             }
@@ -91,7 +93,7 @@ export default function VendorDeals({ fromCurrency = 'USD', toCurrency = 'NPR', 
     }
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6 shadow-sm overflow-hidden">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <Building2 size={20} className="text-emerald-500" />
@@ -111,17 +113,17 @@ export default function VendorDeals({ fromCurrency = 'USD', toCurrency = 'NPR', 
                     <div
                         key={vendor.id}
                         className={`p-4 rounded-xl border transition-all hover:shadow-md ${vendor.isBestRate
-                                ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 ring-1 ring-emerald-500/30'
-                                : 'border-slate-200 dark:border-slate-700 hover:border-emerald-300'
+                            ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 ring-1 ring-emerald-500/30'
+                            : 'border-slate-200 dark:border-slate-700 hover:border-emerald-300'
                             }`}
                     >
                         <div className="flex items-center gap-4">
                             {/* Rank Badge */}
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${idx === 0
-                                    ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white'
-                                    : idx === 1
-                                        ? 'bg-gradient-to-br from-slate-300 to-slate-500 text-white'
-                                        : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                                ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white'
+                                : idx === 1
+                                    ? 'bg-gradient-to-br from-slate-300 to-slate-500 text-white'
+                                    : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                                 }`}>
                                 #{idx + 1}
                             </div>
@@ -179,9 +181,9 @@ export default function VendorDeals({ fromCurrency = 'USD', toCurrency = 'NPR', 
                 <p className="text-xs text-slate-400">
                     Rates updated in real-time. Fees may vary.
                 </p>
-                <button className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1">
+                <Link href="/vendors" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1">
                     View All Vendors <TrendingUp size={14} />
-                </button>
+                </Link>
             </div>
         </div>
     );

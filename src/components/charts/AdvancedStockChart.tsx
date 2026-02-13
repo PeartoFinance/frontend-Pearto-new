@@ -311,7 +311,7 @@ export default function AdvancedStockChart({
 
                     {/* Advanced Chart Link */}
                     <Link
-                        href={`/chart/${symbol}`}
+                        href={`/chart/${symbol}?type=stock`}
                         target="_blank"
                         className="text-xs px-2 py-1 rounded text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 ml-auto flex-shrink-0 flex items-center gap-1"
                         title="Open Advanced Chart"
@@ -322,7 +322,7 @@ export default function AdvancedStockChart({
 
                     {/* Live Chart Link */}
                     <Link
-                        href={`/live?symbol=${symbol}`}
+                        href={`/live?symbol=${symbol}&type=stock`}
                         target="_blank"
                         className="text-xs px-2 py-1 rounded text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 ml-1 flex-shrink-0 flex items-center gap-1"
                         title="Open Live Chart"

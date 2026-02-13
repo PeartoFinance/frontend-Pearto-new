@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Save, Mail, Bell, MessageSquare, Moon, Shield, TrendingUp, Newspaper, Calendar, Send, Clock, BarChart3 } from 'lucide-react';
 import { getNotificationPreferences, updateNotificationPreferences, type NotificationPreferences } from '@/services/userService';
+import { enablePushNotifications } from '@/components/PushNotificationProvider';
+import { hasPermission as hasOSPermission } from '@/services/onesignal';
 
 interface NotificationToggleProps {
     label: string;
@@ -28,7 +30,7 @@ function NotificationToggle({ label, description, checked, onChange, icon, disab
                 )}
                 <div>
                     <div className="flex items-center gap-2">
-                        <span className="font-medium text-white text-sm">{label}</span>
+                        <span className="font-medium text-slate-900 dark:text-white text-sm">{label}</span>
                         {badge && (
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 uppercase">
                                 {badge}
@@ -76,9 +78,16 @@ export default function ProfileNotifications() {
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [hasChanges, setHasChanges] = useState(false);
+    const [pushPermission, setPushPermission] = useState<boolean>(false);
+    const [enablingPush, setEnablingPush] = useState(false);
 
     useEffect(() => {
         loadPreferences();
+    }, []);
+
+    // Check push permission on load
+    useEffect(() => {
+        setPushPermission(hasOSPermission());
     }, []);
 
     const loadPreferences = async () => {
@@ -129,7 +138,7 @@ export default function ProfileNotifications() {
         <div className="space-y-8">
             {/* Header */}
             <div>
-                <h2 className="text-2xl font-bold text-white">Notifications</h2>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Notifications</h2>
                 <p className="text-slate-400 mt-1">
                     Choose how and when you want to be notified about account activity, market updates, and more.
                 </p>
@@ -152,7 +161,7 @@ export default function ProfileNotifications() {
                         <Mail className="w-5 h-5 text-emerald-500" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-white">Email Notifications</h3>
+                        <h3 className="font-semibold text-slate-900 dark:text-white">Email Notifications</h3>
                         <p className="text-sm text-slate-400">Manage what emails you receive</p>
                     </div>
                 </div>
@@ -232,18 +241,43 @@ export default function ProfileNotifications() {
                         <Bell className="w-5 h-5 text-cyan-500" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-white">Push Notifications</h3>
+                        <h3 className="font-semibold text-slate-900 dark:text-white">Push Notifications</h3>
                         <p className="text-sm text-slate-400">Browser and mobile push alerts</p>
                     </div>
                 </div>
 
                 <div className="space-y-3">
+                    {/* Browser permission banner */}
+                    {!pushPermission && (
+                        <div className="flex items-center justify-between p-4 rounded-lg border border-amber-500/30 bg-amber-500/5">
+                            <div>
+                                <p className="text-sm font-medium text-slate-900 dark:text-white">Browser permission required</p>
+                                <p className="text-xs text-slate-400 mt-0.5">Allow push notifications in your browser to receive real-time alerts</p>
+                            </div>
+                            <button
+                                onClick={async () => {
+                                    setEnablingPush(true);
+                                    const granted = await enablePushNotifications();
+                                    setPushPermission(granted);
+                                    setEnablingPush(false);
+                                    if (!granted) {
+                                        setMessage({ type: 'error', text: 'Push notifications were denied. Check your browser settings.' });
+                                    }
+                                }}
+                                disabled={enablingPush}
+                                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-medium rounded-lg transition whitespace-nowrap"
+                            >
+                                {enablingPush ? 'Requesting...' : 'Enable Push'}
+                            </button>
+                        </div>
+                    )}
                     <NotificationToggle
                         label="Security Alerts"
                         description="Instant alerts for security-related events"
                         checked={preferences.pushSecurity}
                         onChange={(v) => handleChange('pushSecurity', v)}
                         icon={<Shield size={16} className="text-red-400" />}
+                        disabled={!pushPermission}
                     />
                     <NotificationToggle
                         label="Price Alerts"
@@ -251,6 +285,7 @@ export default function ProfileNotifications() {
                         checked={preferences.pushPriceAlerts}
                         onChange={(v) => handleChange('pushPriceAlerts', v)}
                         icon={<TrendingUp size={16} className="text-emerald-400" />}
+                        disabled={!pushPermission}
                     />
                     <NotificationToggle
                         label="Market News"
@@ -258,12 +293,14 @@ export default function ProfileNotifications() {
                         checked={preferences.pushNews}
                         onChange={(v) => handleChange('pushNews', v)}
                         icon={<Newspaper size={16} className="text-cyan-400" />}
+                        disabled={!pushPermission}
                     />
                     <NotificationToggle
                         label="Earnings Reminders"
                         description="Push alerts before earnings announcements"
                         checked={preferences.pushEarnings}
                         onChange={(v) => handleChange('pushEarnings', v)}
+                        disabled={!pushPermission}
                         icon={<Calendar size={16} className="text-amber-400" />}
                     />
                 </div>
@@ -276,7 +313,7 @@ export default function ProfileNotifications() {
                         <MessageSquare className="w-5 h-5 text-purple-500" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-white">SMS Notifications</h3>
+                        <h3 className="font-semibold text-slate-900 dark:text-white">SMS Notifications</h3>
                         <p className="text-sm text-slate-400">Text message alerts for critical updates</p>
                     </div>
                 </div>
@@ -308,7 +345,7 @@ export default function ProfileNotifications() {
                         <Moon className="w-5 h-5 text-amber-500" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-white">Quiet Hours</h3>
+                        <h3 className="font-semibold text-slate-900 dark:text-white">Quiet Hours</h3>
                         <p className="text-sm text-slate-400">Pause non-critical notifications during specific hours</p>
                     </div>
                 </div>
@@ -330,7 +367,7 @@ export default function ProfileNotifications() {
                                     type="time"
                                     value={preferences.quietHoursStart || '22:00'}
                                     onChange={(e) => handleChange('quietHoursStart', e.target.value)}
-                                    className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-emerald-500/50"
+                                    className="bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500/50"
                                 />
                             </div>
                             <span className="text-slate-500 pt-5">to</span>
@@ -340,7 +377,7 @@ export default function ProfileNotifications() {
                                     type="time"
                                     value={preferences.quietHoursEnd || '08:00'}
                                     onChange={(e) => handleChange('quietHoursEnd', e.target.value)}
-                                    className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-emerald-500/50"
+                                    className="bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500/50"
                                 />
                             </div>
                         </div>

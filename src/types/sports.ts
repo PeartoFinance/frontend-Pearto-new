@@ -1,13 +1,14 @@
 /**
  * Sports Event Types
- * Matches API response from /api/media/sports-events
+ * Matches API response from /api/sports/fixtures (DB-backed)
  */
 export interface SportsEvent {
-    id: string;
+    id: number;
+    externalId?: string;
     name: string;
     sportType: string;
     league: string;
-    status: 'scheduled' | 'live' | 'completed';
+    status: 'scheduled' | 'live' | 'completed' | 'postponed';
     venue: string;
     teamHome: string;
     teamAway: string;
@@ -18,24 +19,5 @@ export interface SportsEvent {
     thumbnailUrl: string | null;
     countryCode: string;
     isLive: boolean;
+    updatedAt?: string;
 }
-
-// Legacy type alias for backward compatibility
-export type LegacySportsEvent = {
-    id: string;
-    name: string;
-    description: string;
-    category: string;
-    status: string;
-    logo: string;
-    embed_url?: string;
-    venue?: string;
-    match_type?: string;
-    team_home?: string;
-    team_away?: string;
-    score_home?: string;
-    score_away?: string;
-    event_date?: string;
-    result?: string;
-    series?: string;
-};

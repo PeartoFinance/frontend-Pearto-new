@@ -10,7 +10,10 @@ import {
     type IChartApi,
 } from 'lightweight-charts';
 
+import { useCurrency } from '@/contexts/CurrencyContext';
+
 export default function MarketCrashSimulator() {
+    const { formatPrice, currency } = useCurrency();
     const [portfolioValue, setPortfolioValue] = useState(100000);
     const [stockAllocation, setStockAllocation] = useState(70);
     const [bondAllocation, setBondAllocation] = useState(25);
@@ -153,8 +156,7 @@ export default function MarketCrashSimulator() {
         };
     }, [result, isDark]);
 
-    const formatCurrency = (value: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+    const formatCurrency = (value: number) => formatPrice(value, 0, 0);
 
     // Ensure allocations sum to 100
     const handleStockChange = (value: number) => {
@@ -228,12 +230,12 @@ export default function MarketCrashSimulator() {
 
                     {/* Risk Warning */}
                     <div className={`p-4 rounded-xl border ${result.riskLevel === 'aggressive' ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800' :
-                            result.riskLevel === 'moderate' ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800' :
-                                'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800'
+                        result.riskLevel === 'moderate' ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800' :
+                            'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800'
                         }`}>
                         <div className="flex items-start gap-2">
                             <AlertTriangle className={`w-4 h-4 flex-shrink-0 ${result.riskLevel === 'aggressive' ? 'text-red-500' :
-                                    result.riskLevel === 'moderate' ? 'text-amber-500' : 'text-emerald-500'
+                                result.riskLevel === 'moderate' ? 'text-amber-500' : 'text-emerald-500'
                                 }`} />
                             <div>
                                 <p className="text-sm font-medium capitalize">{result.riskLevel} Risk Profile</p>
@@ -253,7 +255,7 @@ export default function MarketCrashSimulator() {
             <div className="space-y-4">
                 <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Portfolio Value ($)
+                        Portfolio Value
                     </label>
                     <input
                         type="number"

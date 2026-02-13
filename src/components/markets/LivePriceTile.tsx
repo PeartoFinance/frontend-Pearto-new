@@ -170,7 +170,7 @@ export function getAssetColor(type: string) {
 export function getSymbolLink(symbol: string, type: string) {
     switch (type) {
         case 'crypto': return `/crypto/${symbol}`;
-        case 'index': return `/live?symbol=${symbol}`;
+        case 'index': return `/live?symbol=${symbol}&type=stock`;
         default: return `/stocks/${symbol}`;
     }
 }
