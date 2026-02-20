@@ -15,6 +15,7 @@ import {
     Grid3X3, List, Bell, ExternalLink, AlertCircle
 } from 'lucide-react';
 import { TableExportButton } from '@/components/common/TableExportButton';
+import { getAssetDetailPath } from '@/utils/assetRoutes';
 
 export default function WatchlistPage() {
     const router = useRouter();
@@ -105,7 +106,7 @@ export default function WatchlistPage() {
                     <Header />
                 </div>
 
-                <div className="flex-1 pt-[112px] md:pt-[120px] overflow-x-hidden">
+                <div className="flex-1 pt-[112px] md:pt-[120px] overflow-x-hidden mt-10">
                     <div className="p-4 lg:p-6 space-y-6 w-full max-w-7xl mx-auto">
                         {/* Header */}
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -189,7 +190,7 @@ export default function WatchlistPage() {
                                         key={item.symbol}
                                         item={item}
                                         onRemove={() => handleRemoveSymbol(item.symbol)}
-                                        onClick={() => router.push(`/stocks/${item.symbol}`)}
+                                        onClick={() => router.push(getAssetDetailPath(item.symbol))}
                                     />
                                 ))}
                             </div>
@@ -224,7 +225,7 @@ export default function WatchlistPage() {
                                         {filteredItems.map((item) => (
                                             <tr
                                                 key={item.symbol}
-                                                onClick={() => router.push(`/stocks/${item.symbol}`)}
+                                                onClick={() => router.push(getAssetDetailPath(item.symbol))}
                                                 className="hover:bg-slate-50 dark:hover:bg-slate-800/30 cursor-pointer transition"
                                             >
                                                 <td className="px-6 py-4">
@@ -252,7 +253,7 @@ export default function WatchlistPage() {
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-2">
                                                         <button
-                                                            onClick={(e) => { e.stopPropagation(); router.push(`/stocks/${item.symbol}`); }}
+                                                            onClick={(e) => { e.stopPropagation(); router.push(getAssetDetailPath(item.symbol)); }}
                                                             className="p-2 text-slate-400 hover:text-emerald-500 transition"
                                                             title="View Details"
                                                         >

@@ -172,8 +172,8 @@ export async function getNetWorth(): Promise<{ netWorth: number; netWorthChange:
 /**
  * Change user password
  */
-export async function changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> {
-    return post<{ success: boolean; message: string }>('/user/change-password', {
+export async function changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string; token?: string }> {
+    return post<{ success: boolean; message: string; token?: string }>('/user/change-password', {
         currentPassword,
         newPassword,
     });

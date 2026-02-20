@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { TrendingUp, TrendingDown, Plus, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
 import PriceDisplay from '@/components/common/PriceDisplay';
+import { getAssetDetailPath } from '@/utils/assetRoutes';
 
 interface WatchlistItem {
     symbol: string;
@@ -88,7 +89,7 @@ export default function Watchlist() {
                     {items.map((item) => (
                         <Link
                             key={item.symbol}
-                            href={`/stocks/${item.symbol}`}
+                            href={getAssetDetailPath(item.symbol)}
                             className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition group"
                         >
                             {/* Symbol Badge */}

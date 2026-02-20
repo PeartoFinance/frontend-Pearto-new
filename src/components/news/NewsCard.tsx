@@ -5,6 +5,8 @@ import { ExternalLink, Clock } from 'lucide-react';
 import type { NewsArticle } from '@/services/newsService';
 import { getCategoryEmoji } from '@/data/newsData';
 
+import { fixImageUrl } from '@/utils/imageUtils';
+
 interface NewsCardProps {
     article: NewsArticle;
     featured?: boolean;
@@ -37,7 +39,7 @@ export default function NewsCard({ article, featured = false }: NewsCardProps) {
             {article.image && (
                 <div className={`overflow-hidden ${featured ? 'aspect-[16/10]' : 'aspect-video'}`}>
                     <img
-                        src={article.image}
+                        src={fixImageUrl(article.image)}
                         alt={article.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {

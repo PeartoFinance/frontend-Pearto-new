@@ -7,12 +7,14 @@ import Link from 'next/link';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
-import BulkTransactions from '@/components/widgets/BulkTransactions';
+import VolumeLeaders from '@/components/widgets/VolumeLeaders';
 import ProposedDividends from '@/components/widgets/ProposedDividends';
 import PublicOfferings from '@/components/widgets/PublicOfferings';
 import MarketOverview from '@/components/widgets/MarketOverview';
 import MarketAnalysisCharts from '@/components/markets/MarketAnalysisCharts';
 import RelatedTools from '@/components/tools/RelatedTools';
+import SectorHeatmap from '@/components/home/SectorHeatmap';
+import EarningsCalendar from '@/components/home/EarningsCalendar';
 import { AIWidget } from '@/components/ai';
 import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -333,11 +335,15 @@ export default function MarketPage() {
                                 />
 
                                 <MarketOverview />
+                                <SectorHeatmap />
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    <BulkTransactions />
+                                    <VolumeLeaders />
                                     <ProposedDividends />
                                 </div>
-                                <PublicOfferings />
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <PublicOfferings />
+                                    <EarningsCalendar />
+                                </div>
 
                                 <RelatedTools category="Investing" title="Market Analysis Tools" limit={4} layout="grid" />
                             </>

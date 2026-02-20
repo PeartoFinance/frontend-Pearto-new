@@ -83,12 +83,16 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     const formatPrice = (amount: number, minimumFractionDigits = 2, maximumFractionDigits = 2, options: Intl.NumberFormatOptions = {}) => {
         const converted = convertPrice(amount);
 
+        // Clamp fraction digits to valid Intl.NumberFormat range (0-20)
+        const minFD = Math.max(0, Math.min(20, Number(minimumFractionDigits) || 0));
+        const maxFD = Math.max(minFD, Math.min(20, Number(maximumFractionDigits) || 0));
+
         // Handle different locale formats potentially, for now using en-US for consistency
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: currency,
-            minimumFractionDigits,
-            maximumFractionDigits,
+            minimumFractionDigits: minFD,
+            maximumFractionDigits: maxFD,
             ...options
         }).format(converted);
     };

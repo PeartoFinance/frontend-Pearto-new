@@ -72,8 +72,8 @@ export async function verifyEmail(token: string): Promise<{ message: string }> {
 /**
  * Set password for Google-logged in user
  */
-export async function setPassword(password: string): Promise<{ message: string }> {
-    return post<{ message: string }>('/auth/set-password', { password });
+export async function setPassword(password: string): Promise<{ message: string; token?: string }> {
+    return post<{ message: string; token?: string }>('/auth/set-password', { password });
 }
 
 export default {

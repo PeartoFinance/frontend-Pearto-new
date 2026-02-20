@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getVendors, type Vendor } from '@/services/vendorService';
-import { Star, ExternalLink, ShieldCheck, ChevronDown, ChevronUp, MapPin, Phone, Clock, ArrowRight, Award, Users, GitCompare, Check, X } from 'lucide-react';
+import { Star, ExternalLink, ShieldCheck, ChevronDown, ChevronUp, MapPin, Phone, Briefcase, ArrowRight, Award, Users, GitCompare, Check, X } from 'lucide-react';
 import Link from 'next/link';
 
 interface VendorListProps {
@@ -202,10 +202,10 @@ export default function VendorList({
                                                 {vendor.reviewCount} reviews
                                             </div>
                                         )}
-                                        {vendor.location && (
+                                        {vendor.countryCode && (
                                             <div className="flex items-center gap-1.5 text-[10px] text-slate-500 bg-white dark:bg-slate-700 px-2 py-1.5 rounded">
                                                 <MapPin size={10} />
-                                                {vendor.location}
+                                                {vendor.countryCode}
                                             </div>
                                         )}
                                         {vendor.phone && (
@@ -214,10 +214,10 @@ export default function VendorList({
                                                 {vendor.phone}
                                             </div>
                                         )}
-                                        {vendor.hours && (
+                                        {vendor.category && (
                                             <div className="flex items-center gap-1.5 text-[10px] text-slate-500 bg-white dark:bg-slate-700 px-2 py-1.5 rounded">
-                                                <Clock size={10} />
-                                                {vendor.hours}
+                                                <Briefcase size={10} />
+                                                {vendor.category}
                                             </div>
                                         )}
                                     </div>

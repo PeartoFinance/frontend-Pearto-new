@@ -21,6 +21,7 @@ import {
     Minimize2,
     Settings,
     TrendingUp,
+    TrendingDown,
     Activity,
     BarChart2,
     Mountain,
@@ -31,10 +32,22 @@ import {
     Plus,
     Search,
     Bell,
-    Menu
+    Menu,
+    Clock,
+    Layers,
+    Shield,
+    LineChart,
+    ArrowUpRight,
+    ArrowDownRight,
+    LayoutGrid,
+    SlidersHorizontal,
+    GitCompareArrows,
+    Eye
 } from 'lucide-react';
 import { getStockHistory, getStockProfile, getCryptoHistory, getForexHistory, type PriceHistoryPoint, type MarketStock } from '@/services/marketService';
 import ChartToolbar from './toolbar/ChartToolbar';
+import ChartTypeSelector from './toolbar/ChartTypeSelector';
+import IntervalSelector from './toolbar/IntervalSelector';
 import { useChartDrawings, type Drawing, type DrawingPoint } from '@/hooks/useChartDrawings';
 import { detectPatterns, type ChartMarker, dedupeAndSortChartData } from '@/utils/technicalAnalysis';
 import ChartSidebar from './sidebar/ChartSidebar';
@@ -43,9 +56,13 @@ import {
     calculateSMA,
     calculateEMA,
     calculateBollingerBands,
+    calculateRSI,
+    calculateMACD,
     type OHLCData
 } from '@/utils/indicators';
+import { createSeriesMarkers } from 'lightweight-charts';
 import ComparisonMode, { type ComparisonSymbol } from './ComparisonMode';
+import { getAssetDetailPath } from '@/utils/assetRoutes';
 import MultiTimeframeView from './MultiTimeframeView';
 import { ChartGridLayout, ChartLayoutSelector, type ChartLayout } from './layout';
 import RiskAnalysisPanel from './RiskAnalysisPanel';
@@ -112,8 +129,7 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
     const [chartType, setChartType] = useState<ChartType>('area');
     const [layout, setLayout] = useState<ChartLayout>('1x1');
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [showIntervalDropdown, setShowIntervalDropdown] = useState(false);
-    const [showChartTypeDropdown, setShowChartTypeDropdown] = useState(false);
+
     const [showPatterns, setShowPatterns] = useState(false);
     const [isInWatchlist, setIsInWatchlist] = useState(false);
     const [showSidebar, setShowSidebar] = useState(true);
@@ -128,6 +144,8 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
     const [isDrawing, setIsDrawing] = useState(false);
     const [drawingStart, setDrawingStart] = useState<DrawingPoint | null>(null);
     const [currentMousePos, setCurrentMousePos] = useState<{ x: number; y: number } | null>(null);
+
+    const patternMarkersRef = useRef<any>(null);
 
     // Technical indicators
     const [activeIndicators, setActiveIndicators] = useState<IndicatorConfig[]>([]);
@@ -151,17 +169,17 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
     };
 
     // Period to API params mapping
-    const getPeriodParams = useCallback((p: Period) => {
+    const getPeriodParams = useCallback((p: Period, selectedInterval: Interval) => {
         const map: Record<Period, { period: string; interval: string }> = {
-            '1D': { period: '1d', interval: '1m' },
-            '5D': { period: '5d', interval: '5m' },
-            '1M': { period: '1mo', interval: '1h' },
-            '3M': { period: '3mo', interval: '1d' },
-            '6M': { period: '6mo', interval: '1d' },
-            'YTD': { period: 'ytd', interval: '1d' },
-            '1Y': { period: '1y', interval: '1d' },
-            '5Y': { period: '5y', interval: '1wk' },
-            'All': { period: 'max', interval: '1wk' }
+            '1D': { period: '1d', interval: selectedInterval || '1m' },
+            '5D': { period: '5d', interval: selectedInterval || '5m' },
+            '1M': { period: '1mo', interval: selectedInterval || '1h' },
+            '3M': { period: '3mo', interval: selectedInterval || '1d' },
+            '6M': { period: '6mo', interval: selectedInterval || '1d' },
+            'YTD': { period: 'ytd', interval: selectedInterval || '1d' },
+            '1Y': { period: '1y', interval: selectedInterval || '1d' },
+            '5Y': { period: '5y', interval: selectedInterval || '1wk' },
+            'All': { period: 'max', interval: selectedInterval || '1mo' }
         };
         return map[p] || { period: '1mo', interval: '1d' };
     }, []);
@@ -170,7 +188,7 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const { period: apiPeriod, interval: apiInterval } = getPeriodParams(period);
+            const { period: apiPeriod, interval: apiInterval } = getPeriodParams(period, interval);
             let historyData: PriceHistoryPoint[] = [];
 
             if (assetType === 'crypto') {
@@ -197,7 +215,7 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
         } finally {
             setLoading(false);
         }
-    }, [symbol, period, assetType, getPeriodParams]);
+    }, [symbol, period, interval, assetType, getPeriodParams]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -244,6 +262,8 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
         if (chartRef.current) {
             chartRef.current.remove();
             chartRef.current = null;
+            indicatorSeriesRef.current.clear();
+            comparisonSeriesRef.current.clear();
         }
         if (volumeChartRef.current) {
             volumeChartRef.current.remove();
@@ -421,20 +441,28 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
             }
         });
 
-        // Resize handler
-        const handleResize = () => {
-            if (chartContainerRef.current && chartRef.current) {
-                chartRef.current.applyOptions({ width: chartContainerRef.current.clientWidth });
+        // Resize observer for dynamic height/width
+        const resizeObserver = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                if (entry.target === chartContainerRef.current && chartRef.current) {
+                    chartRef.current.applyOptions({
+                        width: entry.contentRect.width,
+                        height: entry.contentRect.height
+                    });
+                }
+                if (entry.target === volumeContainerRef.current && volumeChartRef.current) {
+                    volumeChartRef.current.applyOptions({
+                        width: entry.contentRect.width
+                    });
+                }
             }
-            if (volumeContainerRef.current && volumeChartRef.current) {
-                volumeChartRef.current.applyOptions({ width: volumeContainerRef.current.clientWidth });
-            }
-        };
+        });
 
-        window.addEventListener('resize', handleResize);
+        if (chartContainerRef.current) resizeObserver.observe(chartContainerRef.current);
+        if (volumeContainerRef.current) resizeObserver.observe(volumeContainerRef.current);
 
         return () => {
-            window.removeEventListener('resize', handleResize);
+            resizeObserver.disconnect();
             if (chartRef.current) {
                 chartRef.current.remove();
                 chartRef.current = null;
@@ -482,11 +510,6 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
         activeIndicators.forEach(indicator => {
             if (!indicator.isActive) return;
 
-            // Skip if already rendered with same params
-            if (indicatorSeriesRef.current.has(indicator.id)) {
-                return;
-            }
-
             let indicatorData: { time: string | number; value: number }[] = [];
 
             switch (indicator.type) {
@@ -502,6 +525,14 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                     indicatorData = bb.map(b => ({ time: b.time, value: b.middle }));
                     break;
                 }
+                case 'rsi':
+                    indicatorData = calculateRSI(ohlcData, indicator.params.period || 14);
+                    break;
+                case 'macd': {
+                    const macd = calculateMACD(ohlcData, indicator.params.fastPeriod || 12, indicator.params.slowPeriod || 26, indicator.params.signalPeriod || 9);
+                    indicatorData = macd.map(m => ({ time: m.time, value: m.macd })); // Simplification
+                    break;
+                }
                 default:
                     // For other indicators, skip for now (can add later)
                     return;
@@ -512,17 +543,41 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                 const cleanData = dedupeAndSortChartData(indicatorData);
                 if (cleanData.length === 0) return;
 
-                const series = chart.addSeries(LineSeries, {
-                    color: indicator.color,
-                    lineWidth: 2,
-                    priceLineVisible: false,
-                    lastValueVisible: false
-                });
+                let series = indicatorSeriesRef.current.get(indicator.id);
+                if (!series) {
+                    const isOverlay = ['sma', 'ema', 'bollinger', 'vwap'].includes(indicator.type);
+                    const priceScaleId = isOverlay ? undefined : indicator.id;
+
+                    if (!isOverlay) {
+                        chart.priceScale('right').applyOptions({
+                            scaleMargins: { top: 0.1, bottom: 0.3 }
+                        });
+
+                        try {
+                            chart.priceScale(indicator.id).applyOptions({
+                                scaleMargins: { top: 0.75, bottom: 0 },
+                                visible: true,
+                                borderColor: '#334155'
+                            });
+                        } catch (e) {
+                            // Ignored, created on series add
+                        }
+                    }
+
+                    series = chart.addSeries(LineSeries, {
+                        color: indicator.color,
+                        lineWidth: 2,
+                        priceLineVisible: false,
+                        lastValueVisible: false,
+                        priceScaleId,
+                        title: `${indicator.name}`
+                    });
+                    indicatorSeriesRef.current.set(indicator.id, series);
+                }
                 series.setData(cleanData as any);
-                indicatorSeriesRef.current.set(indicator.id, series);
             }
         });
-    }, [activeIndicators, data]);
+    }, [activeIndicators, data, chartType, stats, period]);
 
     // Render comparison symbols on chart
     useEffect(() => {
@@ -559,26 +614,69 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                 title: comparison.symbol
             });
 
+            // Helper to get time key for comparison data
+            const isIntraday = period === '1D' || period === '5D';
+            const getCompTimeKey = (date: string): string | number => {
+                if (isIntraday) {
+                    return Math.floor(new Date(date).getTime() / 1000);
+                }
+                return date.split('T')[0];
+            };
+
             // Deduplicate by time
-            const dataMap = new Map<string, number>();
-            comparison.data.forEach(d => dataMap.set(d.time, d.value));
+            const dataMap = new Map<string | number, number>();
+            comparison.data.forEach(d => dataMap.set(getCompTimeKey(d.time), d.value));
             const uniqueData = Array.from(dataMap.entries())
-                .sort(([a], [b]) => a.localeCompare(b))
+                .sort(([a], [b]) => a.toString().localeCompare(b.toString()))
                 .map(([time, value]) => ({ time, value }));
 
             series.setData(uniqueData as any);
             comparisonSeriesRef.current.set(comparison.symbol, series);
         });
 
-        // Configure comparison price scale if we have comparisons
-        if (comparisonSymbols.filter(c => c.visible).length > 0) {
-            chart.priceScale('comparison').applyOptions({
-                scaleMargins: { top: 0.1, bottom: 0.1 },
-                visible: true,
-                borderColor: '#334155'
-            });
+        // Configure comparison price scale if we have comparison series
+        if (comparisonSeriesRef.current.size > 0) {
+            try {
+                chart.priceScale('comparison').applyOptions({
+                    scaleMargins: { top: 0.1, bottom: 0.1 },
+                    visible: true,
+                    borderColor: '#334155'
+                });
+            } catch (e) {
+                // Ignore if priceScale isn't ready
+            }
         }
-    }, [comparisonSymbols]);
+    }, [comparisonSymbols, data, chartType, stats, period]);
+
+    // Handle Pattern Detection
+    useEffect(() => {
+        if (!chartRef.current || !seriesRef.current || data.length === 0) return;
+
+        if (!patternMarkersRef.current || patternMarkersRef.current.getSeries() !== seriesRef.current) {
+            patternMarkersRef.current = createSeriesMarkers(seriesRef.current);
+        }
+
+        if (!showPatterns) {
+            patternMarkersRef.current.setMarkers([]);
+            return;
+        }
+
+        const ohlcData: OHLCData[] = data
+            .filter(d => d.date && d.close != null)
+            .sort((a, b) => a.date.localeCompare(b.date))
+            .map(d => ({
+                time: d.date.split('T')[0],
+                open: d.open ?? d.close!,
+                high: d.high ?? d.close!,
+                low: d.low ?? d.close!,
+                close: d.close!,
+                volume: d.volume ?? 0
+            }));
+
+        const markers = detectPatterns(ohlcData as any);
+        const cleanMarkers = dedupeAndSortChartData(markers);
+        patternMarkersRef.current.setMarkers(cleanMarkers);
+    }, [showPatterns, data, chartType, period]);
 
     // Fullscreen toggle
     const toggleFullscreen = useCallback(() => {
@@ -600,164 +698,149 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
 
     return (
         <FeatureLock featureKey="advanced_charts" title="Advanced Charts">
-            <div className="min-h-screen bg-slate-950 text-white flex flex-col">
-                {/* Top Header Bar - Responsive */}
-                <header className="h-14 border-b border-slate-800 flex items-center justify-between px-2 sm:px-4 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50 overflow-x-auto no-scrollbar">
-                    {/* Left: Back + Symbol */}
-                    <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-                        <button
-                            onClick={() => router.back()}
-                            className="p-2 hover:bg-slate-800 rounded-lg transition"
-                        >
-                            <ArrowLeft size={20} />
-                        </button>
+            <div className="h-screen overflow-hidden bg-[#0a0e17] text-white flex flex-col">
+                {/* ═══════ TOP HEADER BAR ═══════ */}
+                <header className="sticky top-0 z-50 border-b border-slate-800/60 shrink-0">
+                    <div className="min-h-14 flex flex-wrap items-center justify-between px-3 sm:px-5 py-2 bg-gradient-to-r from-[#0d1220] via-[#0f1628] to-[#0d1220] backdrop-blur-xl gap-y-2">
+                        {/* Left: Navigation + Symbol Info */}
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 min-w-0">
+                            <button
+                                onClick={() => router.back()}
+                                className="p-2 hover:bg-white/5 rounded-lg transition-all duration-200 text-slate-400 hover:text-white shrink-0"
+                                title="Go Back"
+                            >
+                                <ArrowLeft size={18} />
+                            </button>
 
-                        <div className="flex items-center gap-3">
-                            <span className="text-xl font-bold">{symbol}</span>
-                            {profile && (
-                                <span className="text-sm text-slate-400 hidden sm:inline">{profile.name}</span>
-                            )}
+                            <div className="h-6 w-px bg-slate-700/50 shrink-0 hidden sm:block" />
 
+                            {/* Symbol Badge */}
+                            <div className="flex items-center gap-3 min-w-0">
+                                <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-600/20 to-blue-500/10 border border-blue-500/20 rounded-lg shrink-0">
+                                    <BarChart2 size={14} className="text-blue-400" />
+                                    <span className="text-sm font-bold tracking-wide text-blue-100">{symbol}</span>
+                                </div>
+                                {profile && (
+                                    <span className="text-sm text-slate-500 truncate hidden md:block max-w-[200px]">{profile.name}</span>
+                                )}
+                            </div>
+
+                            {/* Price Display */}
                             {stats && (
-                                <div className="flex items-center gap-1 sm:gap-2 ml-2 sm:ml-4">
-                                    <span className="text-lg sm:text-2xl font-semibold">
+                                <div className="flex items-center gap-2 sm:gap-3 ml-1 sm:ml-3">
+                                    <span className="text-xl sm:text-2xl font-semibold tracking-tight text-white tabular-nums">
                                         {formatPrice(crosshairData?.price ?? stats.price)}
                                     </span>
-                                    <span className={`text-xs sm:text-sm font-medium px-1.5 sm:px-2 py-0.5 rounded whitespace-nowrap ${(crosshairData?.change ?? stats.change) >= 0
-                                        ? 'bg-emerald-500/20 text-emerald-400'
-                                        : 'bg-red-500/20 text-red-400'
+                                    <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs sm:text-sm font-medium tabular-nums ${(crosshairData?.change ?? stats.change) >= 0
+                                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
                                         }`}>
-                                        <span className="hidden sm:inline">{(crosshairData?.change ?? stats.change) >= 0 ? '+' : ''}{((crosshairData?.change ?? stats.change)).toFixed(2)} </span>
-                                        ({stats.changePercent >= 0 ? '+' : ''}{stats.changePercent.toFixed(2)}%)
-                                    </span>
+                                        {(crosshairData?.change ?? stats.change) >= 0
+                                            ? <ArrowUpRight size={14} />
+                                            : <ArrowDownRight size={14} />
+                                        }
+                                        <span className="hidden sm:inline">
+                                            {(crosshairData?.change ?? stats.change) >= 0 ? '+' : ''}
+                                            {((crosshairData?.change ?? stats.change)).toFixed(2)}
+                                        </span>
+                                        <span>({stats.changePercent >= 0 ? '+' : ''}{stats.changePercent.toFixed(2)}%)</span>
+                                    </div>
                                 </div>
                             )}
                         </div>
-                    </div>
 
-                    {/* Right: Actions */}
-                    <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-                        <button
-                            onClick={() => setIsInWatchlist(!isInWatchlist)}
-                            className={`p-2 rounded-lg transition ${isInWatchlist ? 'text-yellow-400 bg-yellow-400/10' : 'hover:bg-slate-800'}`}
-                        >
-                            {isInWatchlist ? <Star size={20} fill="currentColor" /> : <StarOff size={20} />}
-                        </button>
-
-                        <Link
-                            href={`/stocks/${symbol}`}
-                            className="p-2 hover:bg-slate-800 rounded-lg transition"
-                            title="View Stock Details"
-                        >
-                            <ExternalLink size={20} />
-                        </Link>
-
-                        <button
-                            onClick={toggleFullscreen}
-                            className="p-2 hover:bg-slate-800 rounded-lg transition"
-                        >
-                            {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
-                        </button>
-
-                        <button
-                            onClick={() => setShowSidebar(!showSidebar)}
-                            className={`p-2 rounded-lg transition ${showSidebar ? 'bg-slate-700' : 'hover:bg-slate-800'}`}
-                        >
-                            <Menu size={20} />
-                        </button>
-                    </div>
-                </header>
-
-                {/* Chart Controls Bar */}
-                <div className="h-12 border-b border-slate-800 flex items-center justify-between px-4 bg-slate-900/50 overflow-x-auto no-scrollbar gap-4">
-                    {/* Period Selector */}
-                    <div className="flex items-center gap-1 shrink-0">
-                        {PERIODS.map(p => (
+                        {/* Right: Action Buttons */}
+                        <div className="flex items-center gap-0.5 sm:gap-1 shrink-0 ml-2">
                             <button
-                                key={p.id}
-                                onClick={() => setPeriod(p.id)}
-                                className={`px-3 py-1.5 text-sm font-medium rounded transition ${period === p.id
-                                    ? 'bg-blue-600 text-white'
-                                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                                    }`}
+                                onClick={() => setIsInWatchlist(!isInWatchlist)}
+                                className={`p-2 rounded-lg transition-all duration-200 ${isInWatchlist
+                                    ? 'text-amber-400 bg-amber-400/10 shadow-[0_0_12px_rgba(251,191,36,0.15)]'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                                title={isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
                             >
-                                {p.label}
+                                {isInWatchlist ? <Star size={18} fill="currentColor" /> : <Star size={18} />}
                             </button>
-                        ))}
+
+                            <Link
+                                href={getAssetDetailPath(symbol, assetType)}
+                                className="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200"
+                                title="View Stock Details"
+                            >
+                                <ExternalLink size={18} />
+                            </Link>
+
+                            <button
+                                onClick={toggleFullscreen}
+                                className="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200"
+                                title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                            >
+                                {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+                            </button>
+
+                            <div className="h-6 w-px bg-slate-700/40 mx-1 hidden sm:block" />
+
+                            <button
+                                onClick={() => setShowSidebar(!showSidebar)}
+                                className={`p-2 rounded-lg transition-all duration-200 ${showSidebar
+                                    ? 'text-blue-400 bg-blue-400/10'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                                title={showSidebar ? 'Hide Sidebar' : 'Show Sidebar'}
+                            >
+                                <Menu size={18} />
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Center: Interval + Chart Type */}
-                    <div className="flex items-center gap-3 shrink-0">
+                    {/* ═══════ CHART CONTROLS TOOLBAR ═══════ */}
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 bg-[#0d1220]/90 backdrop-blur-sm border-t border-slate-800/30 shrink-0 relative z-[60]">
+                        {/* Period Selector — pill group */}
+                        <div className="flex items-center bg-slate-800/40 rounded-lg p-0.5 shrink-0">
+                            {PERIODS.map(p => (
+                                <button
+                                    key={p.id}
+                                    onClick={() => setPeriod(p.id)}
+                                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all duration-200 ${period === p.id
+                                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                        }`}
+                                >
+                                    {p.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="h-5 w-px bg-slate-700/30 shrink-0" />
+
                         {/* Interval Dropdown */}
-                        <div className="relative">
-                            <button
-                                onClick={() => { setShowIntervalDropdown(!showIntervalDropdown); setShowChartTypeDropdown(false); }}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-sm"
-                            >
-                                {INTERVALS.find(i => i.id === interval)?.label || interval}
-                                <ChevronDown size={14} />
-                            </button>
-                            {showIntervalDropdown && (
-                                <div className="absolute top-full mt-1 left-0 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-20 py-1 min-w-32">
-                                    {INTERVALS.map(i => (
-                                        <button
-                                            key={i.id}
-                                            onClick={() => { setInterval(i.id); setShowIntervalDropdown(false); }}
-                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-700 ${interval === i.id ? 'text-blue-400' : ''}`}
-                                        >
-                                            {i.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                        <IntervalSelector interval={interval} onIntervalChange={setInterval} />
 
                         {/* Chart Type Dropdown */}
-                        <div className="relative">
-                            <button
-                                onClick={() => { setShowChartTypeDropdown(!showChartTypeDropdown); setShowIntervalDropdown(false); }}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-sm"
-                            >
-                                {(() => {
-                                    const ct = CHART_TYPES.find(c => c.id === chartType);
-                                    return ct ? <ct.icon size={16} /> : null;
-                                })()}
-                                {CHART_TYPES.find(c => c.id === chartType)?.label}
-                                <ChevronDown size={14} />
-                            </button>
-                            {showChartTypeDropdown && (
-                                <div className="absolute top-full mt-1 left-0 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-20 py-1 min-w-40">
-                                    {CHART_TYPES.map(ct => (
-                                        <button
-                                            key={ct.id}
-                                            onClick={() => { setChartType(ct.id); setShowChartTypeDropdown(false); }}
-                                            className={`w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-slate-700 ${chartType === ct.id ? 'text-blue-400' : ''}`}
-                                        >
-                                            <ct.icon size={16} />
-                                            {ct.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                        <ChartTypeSelector chartType={chartType} onChartTypeChange={setChartType} />
 
-                        {/* Pattern Toggle */}
+                        <div className="h-5 w-px bg-slate-700/30 shrink-0" />
+
+                        {/* Feature Buttons Group */}
                         <button
                             onClick={() => setShowPatterns(!showPatterns)}
-                            className={`px-3 py-1.5 text-sm rounded transition ${showPatterns ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30' : 'bg-slate-800 hover:bg-slate-700'}`}
+                            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 shrink-0 ${showPatterns
+                                ? 'bg-purple-500/15 text-purple-400 border border-purple-500/25 shadow-[0_0_10px_rgba(168,85,247,0.1)]'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
                         >
-                            Patterns
+                            <Eye size={13} />
+                            <span className="hidden sm:inline">Patterns</span>
                         </button>
 
-                        {/* Risk Analysis Toggle */}
                         <button
                             onClick={() => setShowRiskPanel(!showRiskPanel)}
-                            className={`px-3 py-1.5 text-sm rounded transition flex items-center gap-1 ${showRiskPanel ? 'bg-orange-600/20 text-orange-400 border border-orange-500/30' : 'bg-slate-800 hover:bg-slate-700'}`}
+                            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 shrink-0 ${showRiskPanel
+                                ? 'bg-orange-500/15 text-orange-400 border border-orange-500/25 shadow-[0_0_10px_rgba(249,115,22,0.1)]'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
                         >
-                            Risk
+                            <Shield size={13} />
+                            <span className="hidden sm:inline">Risk</span>
                         </button>
 
-                        {/* Indicators Panel */}
+                        {/* Indicators */}
                         <IndicatorPanel
                             activeIndicators={activeIndicators}
                             onAddIndicator={handleAddIndicator}
@@ -765,35 +848,37 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                             onUpdateIndicator={handleUpdateIndicator}
                         />
 
-                        {/* Comparison Mode */}
+                        {/* Comparison */}
                         <ComparisonMode
                             primarySymbol={symbol}
                             primaryData={data}
                             onComparisonDataChange={setComparisonSymbols}
+                            period={getPeriodParams(period, interval).period}
+                            interval={getPeriodParams(period, interval).interval}
                         />
 
-                        {/* Multi-Timeframe Toggle */}
                         <button
                             onClick={() => setShowMultiTimeframe(true)}
-                            className="px-3 py-1.5 text-sm bg-slate-800 hover:bg-slate-700 rounded transition"
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 shrink-0"
                         >
-                            Multi-TF
+                            <Layers size={13} />
+                            <span className="hidden sm:inline">Multi-TF</span>
                         </button>
 
                         {/* Layout Selector */}
-                        <div className="hidden md:flex items-center gap-2 border-l border-slate-700/50 pl-3 ml-1">
+                        <div className="hidden md:flex items-center gap-2 border-l border-slate-700/30 pl-3 ml-1 shrink-0">
                             <ChartLayoutSelector
                                 layout={layout}
                                 onLayoutChange={setLayout}
                             />
                         </div>
                     </div>
-                </div>
+                </header>
 
-                {/* Main Content */}
+                {/* ═══════ MAIN CONTENT ═══════ */}
                 <div className="flex-1 flex overflow-hidden">
                     {/* Left: Drawing Tools */}
-                    <div className="hidden md:flex w-12 border-r border-slate-800 bg-slate-900/50 flex flex-col items-center py-2 gap-1">
+                    <div className="hidden md:flex w-11 border-r border-slate-800/50 bg-[#0b1020] flex-col items-center py-2 gap-0.5">
                         <ChartToolbar
                             activeTool={activeTool}
                             onToolSelect={startDrawingTool}
@@ -802,14 +887,17 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                         />
                     </div>
 
-                    {/* Center: Chart */}
-                    <div className="flex-1 flex flex-col relative min-h-0 bg-slate-950">
+                    {/* Center: Chart Area */}
+                    <div className="flex-1 flex flex-col relative min-h-0 min-w-0 bg-[#0a0e17]">
                         {layout === '1x1' ? (
                             <>
-                                {/* Loading overlay */}
+                                {/* Loading Overlay */}
                                 {loading && (
-                                    <div className="absolute inset-0 bg-slate-950/80 flex items-center justify-center z-10 transition-opacity duration-300">
-                                        <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                    <div className="absolute inset-0 bg-[#0a0e17]/90 flex items-center justify-center z-10 transition-opacity duration-300">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                            <span className="text-xs text-slate-500">Loading chart data...</span>
+                                        </div>
                                     </div>
                                 )}
 
@@ -817,7 +905,7 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                                 <div ref={chartContainerRef} className="flex-1 w-full" />
 
                                 {/* Volume chart */}
-                                <div ref={volumeContainerRef} className="h-20 border-t border-slate-800 w-full" />
+                                <div ref={volumeContainerRef} className="h-20 border-t border-slate-800/40 w-full" />
 
                                 {/* SVG Drawing Layer */}
                                 <svg
@@ -825,7 +913,6 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                                     className="absolute inset-0 pointer-events-none"
                                     style={{ top: 0, left: 0, width: '100%', height: 'calc(100% - 80px)' }}
                                 >
-                                    {/* Existing drawings would render here */}
                                 </svg>
                             </>
                         ) : (
@@ -847,29 +934,43 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                     )}
                 </div>
 
-                {/* Bottom Status Bar */}
-                <footer className="h-8 border-t border-slate-800 flex items-center justify-between px-4 text-xs text-slate-500 bg-slate-900/50">
-                    <div className="flex items-center gap-4">
-                        <span>O: {data.length > 0 && crosshairData?.time ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time || Math.floor(new Date(d.date).getTime() / 1000) === (crosshairData.time as any))?.open ?? 0) : '-'}</span>
-                        <span>H: {data.length > 0 && crosshairData?.time ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time || Math.floor(new Date(d.date).getTime() / 1000) === (crosshairData.time as any))?.high ?? 0) : '-'}</span>
-                        <span>L: {data.length > 0 && crosshairData?.time ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time || Math.floor(new Date(d.date).getTime() / 1000) === (crosshairData.time as any))?.low ?? 0) : '-'}</span>
-                        <span>C: {crosshairData ? formatPrice(crosshairData.price) : '-'}</span>
-                        <span>Vol: {crosshairData ? formatNumber(crosshairData.volume) : '-'}</span>
+                {/* ═══════ BOTTOM STATUS BAR ═══════ */}
+                <footer className="h-7 border-t border-slate-800/50 flex items-center justify-between px-4 text-[11px] bg-[#0b1020]/80 backdrop-blur-sm shrink-0">
+                    <div className="flex items-center gap-3 sm:gap-5 text-slate-500 tabular-nums">
+                        <span>
+                            <span className="text-blue-400/70 font-medium">O</span>{' '}
+                            {data.length > 0 && crosshairData?.time ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time || Math.floor(new Date(d.date).getTime() / 1000) === (crosshairData.time as any))?.open ?? 0) : '—'}
+                        </span>
+                        <span>
+                            <span className="text-emerald-400/70 font-medium">H</span>{' '}
+                            {data.length > 0 && crosshairData?.time ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time || Math.floor(new Date(d.date).getTime() / 1000) === (crosshairData.time as any))?.high ?? 0) : '—'}
+                        </span>
+                        <span>
+                            <span className="text-red-400/70 font-medium">L</span>{' '}
+                            {data.length > 0 && crosshairData?.time ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time || Math.floor(new Date(d.date).getTime() / 1000) === (crosshairData.time as any))?.low ?? 0) : '—'}
+                        </span>
+                        <span>
+                            <span className="text-amber-400/70 font-medium">C</span>{' '}
+                            {crosshairData ? formatPrice(crosshairData.price) : '—'}
+                        </span>
+                        <span className="hidden sm:inline">
+                            <span className="text-purple-400/70 font-medium">Vol</span>{' '}
+                            {crosshairData ? formatNumber(crosshairData.volume) : '—'}
+                        </span>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <span>Data by Yahoo Finance</span>
+                    <div className="flex items-center gap-4 text-slate-600">
+                        <span className="hidden sm:inline">Data by Yahoo Finance</span>
                         <span>© 2026 Pearto Finance</span>
                     </div>
                 </footer>
 
-                {/* Risk Analysis Panel */}
+                {/* Panels & Modals */}
                 <RiskAnalysisPanel
                     symbol={symbol}
                     isOpen={showRiskPanel}
                     onClose={() => setShowRiskPanel(false)}
                 />
 
-                {/* Multi-Timeframe View Modal */}
                 <MultiTimeframeView
                     symbol={symbol}
                     chartType={chartType}
@@ -880,3 +981,4 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
         </FeatureLock>
     );
 }
+

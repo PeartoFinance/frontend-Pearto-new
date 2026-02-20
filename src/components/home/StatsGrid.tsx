@@ -9,77 +9,57 @@ import PriceDisplay from '@/components/common/PriceDisplay';
 interface StatsCard {
     symbol: string;
     name: string;
-    // price can be a string (formatted) or number (for PriceDisplay)
     price: string | number;
-    isCommodity?: boolean; // New flag to distinguish
+    isCommodity?: boolean;
     change: number;
     changePercent: number;
     isUp: boolean;
     color: string;
 }
 
-const colorClasses: Record<string, { bg: string; bar: string }> = {
-    emerald: {
-        bg: 'from-emerald-50 to-emerald-100/50 dark:from-emerald-900/20 dark:to-emerald-800/10',
-        bar: 'bg-emerald-500',
-    },
-    blue: {
-        bg: 'from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10',
-        bar: 'bg-blue-500',
-    },
-    amber: {
-        bg: 'from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-800/10',
-        bar: 'bg-amber-500',
-    },
-    yellow: {
-        bg: 'from-yellow-50 to-yellow-100/50 dark:from-yellow-900/20 dark:to-yellow-800/10',
-        bar: 'bg-yellow-500',
-    },
+const colorClasses: Record<string, { accent: string; badge: string }> = {
+    emerald: { accent: 'bg-emerald-500', badge: 'text-emerald-600 dark:text-emerald-400' },
+    blue: { accent: 'bg-blue-500', badge: 'text-blue-600 dark:text-blue-400' },
+    amber: { accent: 'bg-amber-500', badge: 'text-amber-600 dark:text-amber-400' },
+    violet: { accent: 'bg-violet-500', badge: 'text-violet-600 dark:text-violet-400' },
 };
 
-// Loading skeleton component
 function SkeletonCard() {
     return (
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800/50 dark:to-slate-700/30 p-5 border border-slate-200/50 dark:border-slate-700/50 animate-pulse">
+        <div className="relative overflow-hidden rounded-xl bg-slate-200/50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 p-4 animate-pulse">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-300 dark:bg-slate-600" />
-            <div className="flex items-start justify-between mb-3">
-                <div className="h-6 w-16 bg-slate-200 dark:bg-slate-600 rounded-md" />
-                <div className="h-8 w-8 bg-slate-200 dark:bg-slate-600 rounded-lg" />
-            </div>
-            <div className="h-4 w-24 bg-slate-200 dark:bg-slate-600 rounded mb-2" />
-            <div className="h-8 w-32 bg-slate-200 dark:bg-slate-600 rounded mb-2" />
-            <div className="h-4 w-20 bg-slate-200 dark:bg-slate-600 rounded" />
+            <div className="h-4 w-14 bg-slate-300/60 dark:bg-white/10 rounded mb-3" />
+            <div className="h-3 w-24 bg-slate-300/60 dark:bg-white/10 rounded mb-2" />
+            <div className="h-7 w-28 bg-slate-300/60 dark:bg-white/10 rounded mb-2" />
+            <div className="h-3 w-20 bg-slate-300/60 dark:bg-white/10 rounded" />
         </div>
     );
 }
 
 export default function StatsGrid() {
-    // Use shared React Query hooks (caches data across components)
     const { data: indices, isLoading: indicesLoading, isError: indicesError } = useMarketIndices();
     const { data: commodities, isLoading: commoditiesLoading, isError: commoditiesError } = useCommodities();
 
     const loading = indicesLoading || commoditiesLoading;
     const error = indicesError || commoditiesError;
 
-    // Transform data into stats cards
     const statsData = useMemo(() => {
         const cards: StatsCard[] = [];
-        const colors = ['emerald', 'blue', 'amber', 'yellow'];
+        const colors = ['emerald', 'blue', 'amber', 'violet'];
 
         if (indices) {
             indices.slice(0, 2).forEach((idx: MarketIndex, i: number) => {
                 const changePercent = idx.changePercent || 0;
                 const change = idx.change || 0;
-                const isUp = changePercent >= 0;
                 cards.push({
                     symbol: idx.symbol,
                     name: idx.name || idx.symbol,
                     price: idx.value?.toLocaleString(undefined, { maximumFractionDigits: 2 }) || '0',
                     isCommodity: false,
-                    change: change,
-                    changePercent: changePercent,
-                    isUp,
-                    color: colors[i % colors.length]
+                    change,
+                    changePercent,
+                    isUp: changePercent >= 0,
+                    color: colors[i % colors.length],
                 });
             });
         }
@@ -88,16 +68,15 @@ export default function StatsGrid() {
             commodities.slice(0, 2).forEach((c: Commodity, i: number) => {
                 const changePercent = c.changePercent || 0;
                 const change = c.change || 0;
-                const isUp = changePercent >= 0;
                 cards.push({
                     symbol: c.symbol,
                     name: c.name || c.symbol,
                     price: c.price || 0,
                     isCommodity: true,
-                    change: change,
-                    changePercent: changePercent,
-                    isUp,
-                    color: colors[(i + 2) % colors.length]
+                    change,
+                    changePercent,
+                    isUp: changePercent >= 0,
+                    color: colors[(i + 2) % colors.length],
                 });
             });
         }
@@ -105,10 +84,9 @@ export default function StatsGrid() {
         return cards;
     }, [indices, commodities]);
 
-    // Show skeletons while loading
     if (loading) {
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {[1, 2, 3, 4].map((i) => <SkeletonCard key={i} />)}
             </div>
         );
@@ -116,44 +94,35 @@ export default function StatsGrid() {
 
     if (error || statsData.length === 0) {
         return (
-            <div className="flex items-center justify-center py-12 text-slate-500 dark:text-slate-400">
-                <AlertCircle size={20} className="mr-2" />
-                <span>No market data available. Import data from admin panel.</span>
+            <div className="flex items-center justify-center py-8 text-slate-500 dark:text-slate-400">
+                <AlertCircle size={18} className="mr-2" />
+                <span className="text-sm">No market data available. Import data from admin panel.</span>
             </div>
         );
     }
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {statsData.map((stat) => {
-                const colors = colorClasses[stat.color] || colorClasses.emerald;
+                const c = colorClasses[stat.color] || colorClasses.emerald;
                 return (
                     <div
                         key={stat.symbol}
-                        className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${colors.bg} p-5 border border-slate-200/50 dark:border-slate-700/50 hover:shadow-lg transition-shadow cursor-pointer`}
+                        className="relative group overflow-hidden rounded-xl bg-white dark:bg-white/[0.06] hover:bg-slate-50 dark:hover:bg-white/[0.1] backdrop-blur border border-slate-200/80 dark:border-white/10 p-4 transition-all cursor-pointer shadow-sm dark:shadow-none"
                     >
-                        {/* Colored accent bar */}
-                        <div className={`absolute left-0 top-0 bottom-0 w-1 ${colors.bar}`} />
+                        {/* Accent bar */}
+                        <div className={`absolute left-0 top-0 bottom-0 w-1 ${c.accent}`} />
 
-                        {/* Header */}
-                        <div className="flex items-start justify-between mb-3">
-                            <div>
-                                <span className="px-2 py-1 text-xs font-medium bg-white/80 dark:bg-slate-800/80 rounded-md text-slate-600 dark:text-slate-300">
-                                    {stat.symbol}
-                                </span>
-                            </div>
-                            <div className={`p-1.5 rounded-lg ${colors.bg}`}>
-                                {stat.isUp ? (
-                                    <TrendingUp size={16} className="text-emerald-500" />
-                                ) : (
-                                    <TrendingDown size={16} className="text-red-500" />
-                                )}
-                            </div>
-                        </div>
+                        {/* Symbol */}
+                        <span className={`text-xs font-bold tracking-wide ${c.badge}`}>
+                            {stat.symbol}
+                        </span>
 
-                        {/* Name & Price */}
-                        <h3 className="text-sm text-slate-500 dark:text-slate-400 mb-1">{stat.name}</h3>
-                        <div className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                        {/* Name */}
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">{stat.name}</p>
+
+                        {/* Price */}
+                        <div className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white mt-1">
                             {stat.isCommodity ? (
                                 <PriceDisplay amount={stat.price as number} />
                             ) : (
@@ -161,10 +130,10 @@ export default function StatsGrid() {
                             )}
                         </div>
 
-                        {/* Change */}
-                        {/* Change */}
-                        <div className="flex items-center gap-2">
-                            <span className={`text-sm font-semibold ${stat.isUp ? 'text-emerald-600' : 'text-red-600'}`}>
+                        {/* Change row */}
+                        <div className="flex items-center gap-2 mt-1.5">
+                            <span className={`inline-flex items-center gap-0.5 text-xs font-semibold ${stat.isUp ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                                {stat.isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                                 {stat.isUp ? '+' : ''}
                                 {stat.isCommodity ? (
                                     <PriceDisplay amount={Math.abs(stat.change)} showSymbol={false} />
@@ -172,17 +141,17 @@ export default function StatsGrid() {
                                     Math.abs(stat.change).toFixed(2)
                                 )}
                             </span>
-                            <span className={`text-sm ${stat.isUp ? 'text-emerald-500' : 'text-red-500'}`}>
-                                {stat.isUp ? '+' : ''}{stat.changePercent.toFixed(2)}%
+                            <span className={`text-xs ${stat.isUp ? 'text-emerald-600/70 dark:text-emerald-400/70' : 'text-red-600/70 dark:text-red-400/70'}`}>
+                                ({stat.isUp ? '+' : ''}{stat.changePercent.toFixed(2)}%)
                             </span>
                         </div>
 
-                        {/* Mini sparkline placeholder */}
-                        <div className="mt-3 h-8 flex items-end gap-0.5">
-                            {Array.from({ length: 12 }).map((_, i) => (
+                        {/* Mini sparkline */}
+                        <div className="mt-3 h-6 flex items-end gap-px opacity-0 group-hover:opacity-100 transition-opacity">
+                            {Array.from({ length: 14 }).map((_, i) => (
                                 <div
                                     key={i}
-                                    className={`flex-1 rounded-t ${colors.bar} opacity-30`}
+                                    className={`flex-1 rounded-t ${c.accent} opacity-30 dark:opacity-40`}
                                     style={{ height: `${20 + Math.random() * 80}%` }}
                                 />
                             ))}

@@ -61,6 +61,11 @@ export async function apiFetch(
         (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
     }
 
+    // DEBUG: Log token state
+    const shortEndpoint = endpoint.split('?')[0];
+    const hasAuth = 'Authorization' in headers;
+    console.log(`[apiClient DEBUG] ${shortEndpoint} → token: ${token ? 'YES' : 'NO'}, auth header: ${hasAuth}`);
+
     // Add content-type if not provided and body exists
     if (options.body && !('Content-Type' in headers) && !(options.body instanceof FormData)) {
         (headers as Record<string, string>)['Content-Type'] = 'application/json';
@@ -72,6 +77,20 @@ export async function apiFetch(
         ...options,
         headers,
     });
+
+    // Check for 401 expired token errors — only clear auth if we sent a token
+    // AND the token hasn't been refreshed by a newer login since this request started
+    if (response.status === 401 && token) {
+        const currentToken = localStorage.getItem('auth_token');
+        if (currentToken === token) {
+            console.warn('[apiClient] 401 Unauthorized — clearing auth data');
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('auth_user');
+            window.dispatchEvent(new CustomEvent('auth:expired'));
+        } else {
+            console.log('[apiClient] 401 received but token has changed — skipping auth clear');
+        }
+    }
 
     // Check for 403 account status errors
     if (response.status === 403) {

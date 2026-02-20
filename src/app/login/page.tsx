@@ -271,6 +271,7 @@ function LoginContent() {
                                         className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm transition"
                                         placeholder="••••••••"
                                         required
+                                        autoComplete="current-password"
                                     />
                                     <button
                                         type="button"

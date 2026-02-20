@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, Plus, Trash2, X, RefreshCw, Search, ChevronDown, Activity } from 'lucide-react';
 import { getPortfolios, createPortfolio, addHolding, deleteHolding, type Portfolio, type PortfolioHolding, type PortfolioAnalytics } from '@/services/portfolioService';
 import { get } from '@/services/api';
@@ -12,6 +13,7 @@ import PriceDisplay from '@/components/common/PriceDisplay';
 import HealthScore from '@/components/portfolio/HealthScore';
 import GoalSetting from '@/components/portfolio/GoalSetting';
 import FinancialGoals from '@/components/portfolio/FinancialGoals';
+import { useAuth } from '@/context/AuthContext';
 
 interface StockOption {
     symbol: string;
@@ -20,6 +22,9 @@ interface StockOption {
 }
 
 export default function PortfolioPage() {
+    const router = useRouter();
+    const { isAuthenticated, isLoading: authLoading } = useAuth();
+
     const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null);
@@ -40,9 +45,19 @@ export default function PortfolioPage() {
     const [searchLoading, setSearchLoading] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
 
+    // Auth guard: redirect to login if not authenticated
     useEffect(() => {
-        loadPortfolios();
-    }, []);
+        if (!authLoading && !isAuthenticated) {
+            router.push('/login?redirect=/portfolio');
+        }
+    }, [authLoading, isAuthenticated, router]);
+
+    // Only load portfolios once authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            loadPortfolios();
+        }
+    }, [isAuthenticated]);
 
     // Close dropdown when clicking outside
     useEffect(() => {

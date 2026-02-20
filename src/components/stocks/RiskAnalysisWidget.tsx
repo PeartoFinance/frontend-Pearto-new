@@ -53,7 +53,7 @@ export default function RiskAnalysisWidget({ symbol }: RiskAnalysisWidgetProps) 
         );
     }
 
-    if (isError || !data || data.summary.score === undefined) {
+    if (isError || !data || !data.summary || data.summary.score === undefined) {
         // Fallback or error state - don't show if data missing
         return null;
     }

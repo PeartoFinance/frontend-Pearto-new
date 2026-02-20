@@ -57,7 +57,7 @@ export default function LearningProgress() {
     // Show loading while checking auth
     if (authLoading || loading) {
         return (
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 h-full">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">Continue Learning</h3>
                 </div>
@@ -71,7 +71,7 @@ export default function LearningProgress() {
     // No enrolled courses
     if (courses.length === 0) {
         return (
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 h-full">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">Continue Learning</h3>
                     <Link
@@ -99,7 +99,7 @@ export default function LearningProgress() {
     const courseData = courses[0];
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 h-full">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">Continue Learning</h3>
                 <Link

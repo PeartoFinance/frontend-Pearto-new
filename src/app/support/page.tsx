@@ -1,44 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, HelpCircle, MessageSquare, Mail, FileText, ChevronRight, ExternalLink } from 'lucide-react';
+import { ArrowLeft, HelpCircle, Mail, FileText, ChevronRight, ExternalLink, Search, Loader2 } from 'lucide-react';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 
-const supportCategories = [
-    {
-        title: 'Getting Started',
-        icon: HelpCircle,
-        color: 'from-blue-500 to-indigo-500',
-        articles: [
-            { title: 'How to create an account', href: '/faq' },
-            { title: 'Setting up your profile', href: '/faq' },
-            { title: 'Navigating the dashboard', href: '/faq' },
-        ]
-    },
-    {
-        title: 'Account & Billing',
-        icon: FileText,
-        color: 'from-emerald-500 to-teal-500',
-        articles: [
-            { title: 'Managing your subscription', href: '/faq' },
-            { title: 'Payment methods', href: '/faq' },
-            { title: 'Refund policy', href: '/faq' },
-        ]
-    },
-    {
-        title: 'Trading & Investing',
-        icon: MessageSquare,
-        color: 'from-purple-500 to-pink-500',
-        articles: [
-            { title: 'Understanding market data', href: '/faq' },
-            { title: 'Using the portfolio tracker', href: '/faq' },
-            { title: 'Financial calculators guide', href: '/tools' },
-        ]
-    },
-];
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com/api';
+
+interface HelpCategory {
+    id: number;
+    name: string;
+    slug: string;
+    icon: string | null;
+    description: string | null;
+    articleCount: number;
+}
+
+interface HelpArticle {
+    id: number;
+    title: string;
+    slug: string;
+    content: string;
+    categoryId: number;
+    categoryName: string | null;
+    categorySlug: string | null;
+    isFeatured: boolean;
+    viewCount: number;
+    helpfulCount: number;
+    createdAt: string | null;
+}
 
 const contactMethods = [
     {
@@ -58,6 +50,79 @@ const contactMethods = [
 ];
 
 export default function SupportPage() {
+    const [categories, setCategories] = useState<HelpCategory[]>([]);
+    const [articles, setArticles] = useState<HelpArticle[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<HelpArticle[]>([]);
+    const [searching, setSearching] = useState(false);
+    const [expandedArticle, setExpandedArticle] = useState<number | null>(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const [catRes, artRes] = await Promise.all([
+                    fetch(`${API_BASE}/help/categories`),
+                    fetch(`${API_BASE}/help/articles`),
+                ]);
+                if (catRes.ok) {
+                    const catData = await catRes.json();
+                    setCategories(catData.categories || []);
+                }
+                if (artRes.ok) {
+                    const artData = await artRes.json();
+                    setArticles(artData.articles || []);
+                }
+            } catch (err) {
+                console.error('Failed to load help data:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
+    // Search articles
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            setSearchResults([]);
+            return;
+        }
+        const timer = setTimeout(async () => {
+            setSearching(true);
+            try {
+                const res = await fetch(`${API_BASE}/help/articles?search=${encodeURIComponent(searchQuery)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setSearchResults(data.articles || []);
+                }
+            } catch (err) {
+                console.error('Search failed:', err);
+            } finally {
+                setSearching(false);
+            }
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    const getArticlesForCategory = (categoryId: number) => {
+        return articles.filter(a => a.categoryId === categoryId);
+    };
+
+    const categoryColors = [
+        'from-blue-500 to-indigo-500',
+        'from-emerald-500 to-teal-500',
+        'from-purple-500 to-pink-500',
+        'from-amber-500 to-orange-500',
+        'from-cyan-500 to-blue-500',
+        'from-rose-500 to-red-500',
+    ];
+
+    const categoryIcons: Record<string, typeof HelpCircle> = {
+        default: HelpCircle,
+    };
+
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
             <Sidebar />
@@ -87,6 +152,57 @@ export default function SupportPage() {
                             </p>
                         </div>
 
+                        {/* Search */}
+                        <div className="relative">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="Search help articles..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-amber-500 outline-none transition text-slate-900 dark:text-white"
+                            />
+                            {searching && (
+                                <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-slate-400" />
+                            )}
+                        </div>
+
+                        {/* Search Results */}
+                        {searchQuery.trim() && (
+                            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                        Search Results ({searchResults.length})
+                                    </h3>
+                                </div>
+                                <div className="divide-y divide-slate-100 dark:divide-slate-700">
+                                    {searchResults.length === 0 ? (
+                                        <div className="p-6 text-center text-slate-500 dark:text-slate-400">
+                                            {searching ? 'Searching...' : 'No articles found matching your search.'}
+                                        </div>
+                                    ) : (
+                                        searchResults.map((article) => (
+                                            <button
+                                                key={article.id}
+                                                onClick={() => setExpandedArticle(expandedArticle === article.id ? null : article.id)}
+                                                className="w-full text-left px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition"
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm font-medium text-slate-900 dark:text-white">{article.title}</span>
+                                                    {article.categoryName && (
+                                                        <span className="text-xs text-slate-400 ml-2">{article.categoryName}</span>
+                                                    )}
+                                                </div>
+                                                {expandedArticle === article.id && (
+                                                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 whitespace-pre-wrap">{article.content}</p>
+                                                )}
+                                            </button>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Contact Methods */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {contactMethods.map((method) => {
@@ -114,36 +230,66 @@ export default function SupportPage() {
                             })}
                         </div>
 
-                        {/* Help Categories */}
-                        <div className="space-y-4">
-                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Browse Help Topics</h2>
+                        {/* Help Categories from API */}
+                        {loading ? (
+                            <div className="flex items-center justify-center gap-2 py-12 text-slate-500">
+                                <Loader2 className="w-5 h-5 animate-spin" /> Loading help topics...
+                            </div>
+                        ) : categories.length > 0 ? (
+                            <div className="space-y-4">
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Browse Help Topics</h2>
 
-                            {supportCategories.map((category) => {
-                                const Icon = category.icon;
-                                return (
-                                    <div key={category.title} className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                                        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
-                                            <div className={`p-2 rounded-lg bg-gradient-to-br ${category.color}`}>
-                                                <Icon size={18} className="text-white" />
+                                {categories.map((category, idx) => {
+                                    const catArticles = getArticlesForCategory(category.id);
+                                    const colorClass = categoryColors[idx % categoryColors.length];
+
+                                    return (
+                                        <div key={category.id} className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                            <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
+                                                <div className={`p-2 rounded-lg bg-gradient-to-br ${colorClass}`}>
+                                                    <FileText size={18} className="text-white" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="font-semibold text-slate-900 dark:text-white">{category.name}</h3>
+                                                    {category.description && (
+                                                        <p className="text-xs text-slate-400 mt-0.5">{category.description}</p>
+                                                    )}
+                                                </div>
+                                                <span className="text-xs text-slate-400">{category.articleCount} articles</span>
                                             </div>
-                                            <h3 className="font-semibold text-slate-900 dark:text-white">{category.title}</h3>
+                                            <div className="divide-y divide-slate-100 dark:divide-slate-700">
+                                                {catArticles.length === 0 ? (
+                                                    <div className="px-5 py-3 text-sm text-slate-400">No articles yet</div>
+                                                ) : (
+                                                    catArticles.map((article) => (
+                                                        <button
+                                                            key={article.id}
+                                                            onClick={() => setExpandedArticle(expandedArticle === article.id ? null : article.id)}
+                                                            className="w-full text-left flex flex-col px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition"
+                                                        >
+                                                            <div className="flex items-center justify-between w-full">
+                                                                <span className="text-sm text-slate-700 dark:text-slate-300">{article.title}</span>
+                                                                <ChevronRight size={16} className={`text-slate-400 transition-transform ${expandedArticle === article.id ? 'rotate-90' : ''}`} />
+                                                            </div>
+                                                            {expandedArticle === article.id && (
+                                                                <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 whitespace-pre-wrap">{article.content}</p>
+                                                            )}
+                                                        </button>
+                                                    ))
+                                                )}
+                                            </div>
                                         </div>
-                                        <div className="divide-y divide-slate-100 dark:divide-slate-700">
-                                            {category.articles.map((article) => (
-                                                <Link
-                                                    key={article.title}
-                                                    href={article.href}
-                                                    className="flex items-center justify-between px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition"
-                                                >
-                                                    <span className="text-sm text-slate-700 dark:text-slate-300">{article.title}</span>
-                                                    <ChevronRight size={16} className="text-slate-400" />
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Browse Help Topics</h2>
+                                <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-10 text-center text-slate-500">
+                                    No help categories available yet. Check back soon!
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>

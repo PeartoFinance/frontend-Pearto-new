@@ -23,7 +23,7 @@ export default function TrendingTopics() {
     };
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 h-full flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -50,7 +50,7 @@ export default function TrendingTopics() {
                     {topics.map((topic) => (
                         <Link
                             key={topic.id}
-                            href={`/news/topic/${topic.title.toLowerCase().replace(/\s+/g, '-')}`}
+                            href={`/news?q=${encodeURIComponent(topic.title)}`}
                             className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition group"
                         >
                             {/* Rank Number */}

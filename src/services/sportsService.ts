@@ -5,6 +5,7 @@
  */
 
 import { get, post, put, del } from './api';
+import type { MatchDetail, StandingGroup, MatchPrediction } from '@/types/sports';
 
 export interface SportsEvent {
     id: number;
@@ -206,6 +207,66 @@ export async function updateFavoriteNotifications(eventId: number, prefs: { noti
     }
 }
 
+// ─── Match Detail / Enriched Data ───
+
+/**
+ * Fetch enriched match detail: events timeline, statistics, lineups, player stats
+ */
+export async function getMatchDetail(eventId: number): Promise<MatchDetail | null> {
+    try {
+        const response = await get<{ success: boolean; data: MatchDetail }>(`sports/events/${eventId}/details`);
+        return response.data || null;
+    } catch (error) {
+        console.error('Error fetching match detail:', error);
+        return null;
+    }
+}
+
+/**
+ * Fetch league standings
+ */
+export async function getStandings(sportKey: string, leagueId: number, season?: number): Promise<StandingGroup[]> {
+    try {
+        const params: Record<string, string | number> = { sport: sportKey, league: leagueId };
+        if (season) params.season = season;
+        const qs = new URLSearchParams(
+            Object.entries(params).reduce((a, [k, v]) => ({ ...a, [k]: String(v) }), {} as Record<string, string>)
+        ).toString();
+        const response = await get<{ success: boolean; data: StandingGroup[] }>(`sports/standings?${qs}`);
+        return response.data || [];
+    } catch (error) {
+        console.error('Error fetching standings:', error);
+        return [];
+    }
+}
+
+/**
+ * Fetch head-to-head past matches
+ */
+export async function getHeadToHead(sportKey: string, team1Id: number, team2Id: number): Promise<SportsEvent[]> {
+    try {
+        const qs = new URLSearchParams({ sport: sportKey, team1: String(team1Id), team2: String(team2Id) }).toString();
+        const response = await get<{ success: boolean; data: SportsEvent[] }>(`sports/h2h?${qs}`);
+        return response.data || [];
+    } catch (error) {
+        console.error('Error fetching H2H:', error);
+        return [];
+    }
+}
+
+/**
+ * Fetch match prediction (Football only)
+ */
+export async function getMatchPrediction(eventId: number): Promise<MatchPrediction | null> {
+    try {
+        const response = await get<{ success: boolean; data: MatchPrediction | null }>(`sports/predictions/${eventId}`);
+        return response.data || null;
+    } catch (error) {
+        console.error('Error fetching prediction:', error);
+        return null;
+    }
+}
+
 export default {
     getSportsEvents,
     getLiveSportsEvents,
@@ -218,4 +279,8 @@ export default {
     addFavoriteSport,
     removeFavoriteSport,
     updateFavoriteNotifications,
+    getMatchDetail,
+    getStandings,
+    getHeadToHead,
+    getMatchPrediction,
 };

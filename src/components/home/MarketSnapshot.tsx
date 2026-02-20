@@ -6,6 +6,7 @@ import { TrendingUp, TrendingDown, RefreshCw, Loader2, AlertCircle } from 'lucid
 import { useMarketOverview, useCryptoMarkets, useCommodities, MarketOverviewData, MarketStock } from '@/hooks/useMarketData';
 import { TableExportButton } from '@/components/common/TableExportButton';
 import PriceDisplay from '@/components/common/PriceDisplay';
+import { getAssetDetailPath } from '@/utils/assetRoutes';
 
 export default function MarketSnapshot() {
     const [activeTab, setActiveTab] = useState<'Top' | 'Gainers' | 'Losers'>('Top');
@@ -90,18 +91,21 @@ export default function MarketSnapshot() {
     const hasNoData = !loading && (!data || (data.topGainers?.length === 0 && data.topLosers?.length === 0 && data.mostActive?.length === 0));
 
     return (
-        <section className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 overflow-hidden">
+        <section className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-200/80 dark:border-slate-700/50 overflow-hidden">
             {/* Header */}
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Market Snapshot</h3>
-                <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-5 pb-4">
+                <div>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Market Snapshot</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Stocks, crypto & metals overview</p>
+                </div>
+                <div className="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-slate-700/60 rounded-lg">
                     {['Crypto', 'Stocks', 'Metals'].map((type) => (
                         <button
                             key={type}
                             onClick={() => setAssetType(type as typeof assetType)}
-                            className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors ${assetType === type
-                                ? 'bg-emerald-500 text-white'
-                                : 'text-slate-500 hover:text-slate-700'
+                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${assetType === type
+                                ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                                 }`}
                         >
                             {type}
@@ -110,64 +114,53 @@ export default function MarketSnapshot() {
                 </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="text-lg">📈</span>
-                        <span className="text-xs text-slate-500">Advancers</span>
+            <div className="px-5 pb-5">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+                    <div className="p-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl">
+                        <span className="text-xs text-slate-500 dark:text-slate-400">Advancers</span>
+                        <p className="text-xl font-bold text-emerald-500 mt-0.5">{data?.advancers || 0}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-xl font-bold text-emerald-500">{data?.advancers || 0}</span>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl">
+                        <span className="text-xs text-slate-500 dark:text-slate-400">Decliners</span>
+                        <p className="text-xl font-bold text-red-500 mt-0.5">{data?.decliners || 0}</p>
+                    </div>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl">
+                        <span className="text-xs text-slate-500 dark:text-slate-400">Unchanged</span>
+                        <p className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">{data?.unchanged || 0}</p>
+                    </div>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl">
+                        <span className="text-xs text-slate-500 dark:text-slate-400">Top Gainer</span>
+                        {data?.topGainers?.[0] ? (
+                            <div className="flex items-center justify-between mt-1">
+                                <Link href={getAssetDetailPath(data.topGainers[0].symbol, assetType === 'Crypto' ? 'crypto' : 'stock')} className="flex items-center gap-1.5 text-emerald-500 hover:underline text-sm font-semibold">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    {data.topGainers[0].symbol}
+                                </Link>
+                                <span className="text-sm font-bold text-emerald-500">+{data.topGainers[0].changePercent?.toFixed(2)}%</span>
+                            </div>
+                        ) : (
+                            <p className="text-sm text-slate-400 mt-1">—</p>
+                        )}
                     </div>
                 </div>
-                <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="text-lg">📉</span>
-                        <span className="text-xs text-slate-500">Decliners</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-xl font-bold text-red-500">{data?.decliners || 0}</span>
-                    </div>
-                </div>
-                <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs text-slate-500">Unchanged</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-xl font-bold text-slate-900 dark:text-white">{data?.unchanged || 0}</span>
-                    </div>
-                </div>
-                <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                    <div className="text-xs text-slate-500 mb-2">Top Gainer</div>
-                    {data?.topGainers?.[0] && (
-                        <div className="flex items-center justify-between text-sm">
-                            <Link href={`/stocks/${data.topGainers[0].symbol}`} className="flex items-center gap-1 text-emerald-500 hover:underline">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                                {data.topGainers[0].symbol}
-                            </Link>
-                            <span className="text-emerald-500">
-                                +{data.topGainers[0].changePercent?.toFixed(2)}%
-                            </span>
-                        </div>
-                    )}
-                </div>
-            </div>
 
             {/* Filter Tabs */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
-                {(['Top', 'Gainers', 'Losers'] as const).map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === tab
-                            ? 'bg-emerald-500 text-white'
-                            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
-                            }`}
-                    >
-                        {tab}
-                    </button>
-                ))}
+                <div className="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-slate-700/60 rounded-lg">
+                    {(['Top', 'Gainers', 'Losers'] as const).map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${activeTab === tab
+                                ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                                }`}
+                        >
+                            {tab}
+                        </button>
+                    ))}
+                </div>
                 <div className="ml-auto flex items-center gap-3">
                     <TableExportButton
                         data={displayData}
@@ -181,12 +174,9 @@ export default function MarketSnapshot() {
                         title={`Market ${activeTab}`}
                         variant="icon"
                     />
-                    <div className="flex items-center gap-2 text-xs text-slate-500">
-                        <button onClick={handleRefresh} disabled={loading}>
-                            <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
-                        </button>
-                        <span className="hidden sm:inline">Auto-refresh • Live</span>
-                    </div>
+                    <button onClick={handleRefresh} disabled={loading} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 transition">
+                        <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                    </button>
                 </div>
             </div>
 
@@ -219,7 +209,7 @@ export default function MarketSnapshot() {
                                     className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30"
                                 >
                                     <td className="py-3">
-                                        <Link href={`/stocks/${asset.symbol}`} className="flex items-center gap-3 hover:underline">
+                                        <Link href={getAssetDetailPath(asset.symbol, assetType === 'Crypto' ? 'crypto' : 'stock')} className="flex items-center gap-3 hover:underline">
                                             <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-xs font-bold text-emerald-600">
                                                 {asset.symbol?.slice(0, 2)}
                                             </div>
@@ -246,6 +236,7 @@ export default function MarketSnapshot() {
                     </table>
                 </div>
             )}
+            </div>
         </section>
     );
 }

@@ -123,6 +123,13 @@ export function StockChartWidget({
             return date.split('T')[0];
         };
 
+        // Deduplicate: keep last entry per time key
+        const dedup = <T extends { time: string | number }>(arr: T[]): T[] => {
+            const map = new Map<string | number, T>();
+            for (const item of arr) map.set(item.time, item);
+            return Array.from(map.values());
+        };
+
         // Main price chart
         const chart = createChart(container, {
             layout: {
@@ -162,10 +169,10 @@ export function StockChartWidget({
                 bottomColor: 'rgba(59, 130, 246, 0.02)',
                 lineWidth: 2,
             });
-            areaSeries.setData(sortedData.filter(d => d.close != null).map(d => ({
+            areaSeries.setData(dedup(sortedData.filter(d => d.close != null).map(d => ({
                 time: getTimeKey(d.date),
                 value: d.close!,
-            })) as any);
+            }))) as any);
         } else if (chartType === 'candle') {
             const candleSeries = chart.addSeries(CandlestickSeries, {
                 upColor: '#10b981',
@@ -174,22 +181,22 @@ export function StockChartWidget({
                 wickUpColor: '#10b981',
                 wickDownColor: '#ef4444',
             });
-            candleSeries.setData(sortedData.filter(d => d.open && d.high && d.low && d.close).map(d => ({
+            candleSeries.setData(dedup(sortedData.filter(d => d.open && d.high && d.low && d.close).map(d => ({
                 time: getTimeKey(d.date),
                 open: d.open!,
                 high: d.high!,
                 low: d.low!,
                 close: d.close!,
-            })) as any);
+            }))) as any);
         } else {
             const lineSeries = chart.addSeries(LineSeries, {
                 color: '#8b5cf6',
                 lineWidth: 2,
             });
-            lineSeries.setData(sortedData.filter(d => d.close != null).map(d => ({
+            lineSeries.setData(dedup(sortedData.filter(d => d.close != null).map(d => ({
                 time: getTimeKey(d.date),
                 value: d.close!,
-            })) as any);
+            }))) as any);
         }
 
         chart.timeScale().fitContent();
@@ -222,13 +229,13 @@ export function StockChartWidget({
                 priceFormat: { type: 'volume' },
             });
 
-            volumeSeries.setData(sortedData.filter(d => d.volume != null).map(d => ({
+            volumeSeries.setData(dedup(sortedData.filter(d => d.volume != null).map(d => ({
                 time: getTimeKey(d.date),
                 value: d.volume!,
                 color: (d.close ?? 0) >= (d.open ?? 0)
                     ? 'rgba(16, 185, 129, 0.6)'
                     : 'rgba(239, 68, 68, 0.6)',
-            })) as any);
+            }))) as any);
 
             volumeChart.timeScale().fitContent();
 
@@ -376,10 +383,36 @@ export function StockChartWidget({
                         })}
                     </div>
                     <div className="flex items-center gap-1">
-                        <button className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition" title="Zoom Out">
+                        <button
+                            onClick={() => {
+                                if (chartRef.current) {
+                                    const timeScale = chartRef.current.timeScale();
+                                    const range = timeScale.getVisibleLogicalRange();
+                                    if (range) {
+                                        const width = range.to - range.from;
+                                        const center = (range.from + range.to) / 2;
+                                        timeScale.setVisibleLogicalRange({ from: center - width * 0.75, to: center + width * 0.75 });
+                                    }
+                                }
+                            }}
+                            className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition" title="Zoom Out"
+                        >
                             <Minus size={14} />
                         </button>
-                        <button className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition" title="Zoom In">
+                        <button
+                            onClick={() => {
+                                if (chartRef.current) {
+                                    const timeScale = chartRef.current.timeScale();
+                                    const range = timeScale.getVisibleLogicalRange();
+                                    if (range) {
+                                        const width = range.to - range.from;
+                                        const center = (range.from + range.to) / 2;
+                                        timeScale.setVisibleLogicalRange({ from: center - width * 0.25, to: center + width * 0.25 });
+                                    }
+                                }
+                            }}
+                            className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition" title="Zoom In"
+                        >
                             <Plus size={14} />
                         </button>
                     </div>

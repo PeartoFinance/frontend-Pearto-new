@@ -3,6 +3,7 @@
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import TickerTape from '@/components/layout/TickerTape';
+import Footer from '@/components/layout/Footer';
 import ForexChart from '@/components/forex/ForexChart';
 import CurrencyStrength from '@/components/forex/CurrencyStrength';
 import ForexConverter from '@/components/forex/ForexConverter';
@@ -13,12 +14,18 @@ import { AIWidget } from '@/components/ai';
 import RelatedTools from '@/components/tools/RelatedTools';
 
 import { useSearchParams } from 'next/navigation';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 
 function ForexPageContent() {
     const searchParams = useSearchParams();
     const pairParam = searchParams.get('pair');
     const [currentPair, setCurrentPair] = useState('EURUSD');
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const handleRefresh = useCallback(() => {
+        setRefreshKey(k => k + 1);
+        window.location.reload();
+    }, []);
 
     useEffect(() => {
         if (pairParam) {
@@ -27,10 +34,10 @@ function ForexPageContent() {
     }, [pairParam]);
 
     return (
-        <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900 overflow-x-hidden max-w-[100vw]">
+        <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
             <Sidebar />
 
-            <main className="flex-1 flex flex-col min-h-screen min-w-0 overflow-x-hidden">
+            <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
                 <div className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-gray-50 dark:bg-slate-900">
                     <TickerTape />
                     <Header />
@@ -51,7 +58,10 @@ function ForexPageContent() {
                             </p>
                         </div>
                         <div className="flex gap-2 flex-shrink-0">
-                            <button className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition shadow-sm font-medium text-sm">
+                            <button
+                                onClick={handleRefresh}
+                                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition shadow-sm font-medium text-sm"
+                            >
                                 <RefreshCw size={16} /> Refresh Rates
                             </button>
                         </div>
@@ -64,7 +74,7 @@ function ForexPageContent() {
                             <CurrencyStrength />
                         </div>
                         <div className="lg:col-span-1 space-y-4 sm:space-y-6 min-w-0 overflow-hidden">
-                            <ForexConverter />
+                            <ForexConverter initialFrom={currentPair.slice(0, 3)} initialTo={currentPair.slice(3)} />
                             <VendorDeals />
                             <RelatedTools category="Utilities" title="Forex Tools &amp; Converters" />
                         </div>
@@ -82,13 +92,23 @@ function ForexPageContent() {
                             <p className="opacity-90 mb-4 sm:mb-6 text-sm sm:text-base">
                                 Get artificial intelligence powered analysis on major currency pairs. Our AI analyzes technical indicators, news sentiment, and macroeconomic data.
                             </p>
-                            <button className="px-4 sm:px-6 py-2 bg-white text-emerald-600 rounded-lg font-bold hover:bg-emerald-50 transition shadow-lg text-sm sm:text-base">
+                            <button
+                                onClick={() => {
+                                    // Trigger the floating AI widget
+                                    const aiBtn = document.querySelector('[data-ai-trigger]') as HTMLButtonElement;
+                                    if (aiBtn) aiBtn.click();
+                                    else window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                                }}
+                                className="px-4 sm:px-6 py-2 bg-white text-emerald-600 rounded-lg font-bold hover:bg-emerald-50 transition shadow-lg text-sm sm:text-base"
+                            >
                                 Ask AI Assistant
                             </button>
                         </div>
                         <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-white/5 skew-x-12 transform translate-x-20"></div>
                     </div>
                 </div>
+
+                <Footer />
             </main>
 
             <AIWidget

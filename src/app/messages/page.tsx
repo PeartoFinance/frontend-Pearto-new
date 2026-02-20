@@ -11,6 +11,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
+import { toast } from 'sonner';
 
 interface Conversation {
     id: string;
@@ -142,7 +143,10 @@ export default function MessagesPage() {
                         <div className="p-4 border-b border-slate-200 dark:border-slate-700">
                             <div className="flex items-center justify-between mb-3">
                                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">Messages</h2>
-                                <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                                <button
+                                    onClick={() => toast.info('New conversations coming soon!')}
+                                    className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                                >
                                     <Plus size={20} className="text-slate-600 dark:text-slate-400" />
                                 </button>
                             </div>
@@ -252,13 +256,22 @@ export default function MessagesPage() {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                                        <button
+                                            onClick={() => toast.info('Voice calls coming soon!')}
+                                            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                                        >
                                             <Phone size={18} className="text-slate-500" />
                                         </button>
-                                        <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                                        <button
+                                            onClick={() => toast.info('Video calls coming soon!')}
+                                            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                                        >
                                             <Video size={18} className="text-slate-500" />
                                         </button>
-                                        <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                                        <button
+                                            onClick={() => toast.info('More options coming soon!')}
+                                            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                                        >
                                             <MoreVertical size={18} className="text-slate-500" />
                                         </button>
                                     </div>

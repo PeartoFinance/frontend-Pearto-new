@@ -7,6 +7,8 @@ import { Plus, Search, TrendingUp, TrendingDown, X, Star, Bell, ExternalLink } f
 import { getWatchlist, addToWatchlist, removeFromWatchlist, type WatchlistItem } from '@/services/portfolioService';
 import { createAlert } from '@/services/alertsService';
 import PriceDisplay from '@/components/common/PriceDisplay';
+import StockSymbolInput from '@/components/common/StockSymbolInput';
+import { getAssetDetailPath } from '@/utils/assetRoutes';
 
 interface ProfileWatchlistProps {
     onAddSymbol?: () => void;
@@ -151,14 +153,13 @@ export default function ProfileWatchlist({ onAddSymbol }: ProfileWatchlistProps)
             {/* Add Symbol */}
             <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
                 <div className="flex gap-3">
-                    <input
-                        type="text"
-                        value={addingSymbol}
-                        onChange={(e) => setAddingSymbol(e.target.value.toUpperCase())}
-                        placeholder="Enter symbol (e.g., AAPL)"
-                        className="flex-1 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2 text-slate-900 dark:text-white"
-                        onKeyPress={(e) => e.key === 'Enter' && handleAddSymbol()}
-                    />
+                    <div className="flex-1">
+                        <StockSymbolInput
+                            value={addingSymbol}
+                            onChange={(sym) => setAddingSymbol(sym.toUpperCase())}
+                            placeholder="Search symbol to add (e.g., AAPL)"
+                        />
+                    </div>
                     <button
                         onClick={handleAddSymbol}
                         disabled={!addingSymbol.trim() || isAdding}
@@ -250,7 +251,7 @@ function WatchlistCard({ item, onRemove, onSetAlert }: { item: WatchlistItem; on
 
     return (
         <div
-            onClick={() => router.push(`/stocks/${item.symbol}`)}
+            onClick={() => router.push(getAssetDetailPath(item.symbol))}
             className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:border-emerald-500/50 transition group cursor-pointer"
         >
             <div className="flex items-start justify-between mb-3">

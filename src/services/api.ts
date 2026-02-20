@@ -94,6 +94,14 @@ export async function apiFetch<T>(endpoint: string, options: ApiOptions = {}): P
     const country = getUserCountry();
     const userEmail = getUserEmail();
 
+    // DEBUG: Log token state for every request
+    const shortEndpoint = endpoint.split('?')[0];
+    if (token) {
+        console.log(`[API DEBUG] ${shortEndpoint} → token: ${token.substring(0, 15)}...${token.substring(token.length - 10)}`);
+    } else {
+        console.log(`[API DEBUG] ${shortEndpoint} → NO TOKEN`);
+    }
+
     // Attach identification headers if available
     if (token) headers['Authorization'] = `Bearer ${token}`;
     if (userEmail) headers['X-User-Email'] = userEmail;
@@ -103,6 +111,22 @@ export async function apiFetch<T>(endpoint: string, options: ApiOptions = {}): P
         const response = await fetch(url, { ...fetchOptions, headers });
 
         if (!response.ok) {
+            // Handle 401 — expired or invalid token → auto-logout
+            // Only clear if the token we sent is still the current token (prevents
+            // a stale 401 from clearing a freshly-issued token after re-login)
+            if (response.status === 401 && token) {
+                const currentToken = localStorage.getItem('auth_token');
+                if (currentToken === token) {
+                    console.warn('[API] 401 Unauthorized — clearing auth data');
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('auth_user');
+                    // Notify AuthContext to update its React state
+                    window.dispatchEvent(new CustomEvent('auth:expired'));
+                } else {
+                    console.log('[API] 401 received but token has changed — skipping auth clear');
+                }
+            }
+
             const error = new Error('API Error') as ApiError;
             error.status = response.status;
             try {

@@ -25,6 +25,10 @@ import {
     type NewsArticle
 } from '@/services/marketService';
 import { getNewsByStock } from '@/services/newsService';
+import { addToWatchlist, removeFromWatchlist } from '@/services/portfolioService';
+import { useWatchlist, portfolioQueryKeys } from '@/hooks/usePortfolioData';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
     ArrowLeft, Loader2, AlertCircle, TrendingUp, TrendingDown,
     Globe, Star, BarChart2, Newspaper, Coins
@@ -54,6 +58,30 @@ export default function CryptoDetailPage() {
     const [news, setNews] = useState<NewsArticle[]>([]);
     const [newsLoading, setNewsLoading] = useState(false);
     const [activeTab, setActiveTab] = useState<TabId>('overview');
+
+    const queryClient = useQueryClient();
+    const { data: watchlistItems = [] } = useWatchlist();
+    const isInWatchlist = watchlistItems.some((item: any) => item.symbol?.toUpperCase() === symbol);
+    const [watchlistLoading, setWatchlistLoading] = useState(false);
+
+    const handleWatchlistToggle = async () => {
+        if (watchlistLoading) return;
+        setWatchlistLoading(true);
+        try {
+            if (isInWatchlist) {
+                await removeFromWatchlist(symbol);
+                toast.success(`${symbol} removed from watchlist`);
+            } else {
+                await addToWatchlist(symbol);
+                toast.success(`${symbol} added to watchlist`);
+            }
+            queryClient.invalidateQueries({ queryKey: portfolioQueryKeys.watchlist() });
+        } catch (err) {
+            toast.error('Failed to update watchlist');
+        } finally {
+            setWatchlistLoading(false);
+        }
+    };
 
     const loadCoin = useCallback(async () => {
         if (!symbol) return;
@@ -428,9 +456,17 @@ export default function CryptoDetailPage() {
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
-                                            <button className="flex items-center gap-2 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition text-sm font-medium">
-                                                <Star size={14} />
-                                                Watchlist
+                                            <button
+                                                onClick={handleWatchlistToggle}
+                                                disabled={watchlistLoading}
+                                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-sm font-medium ${
+                                                    isInWatchlist
+                                                        ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400'
+                                                        : 'bg-amber-500 hover:bg-amber-600 text-white'
+                                                }`}
+                                            >
+                                                <Star size={14} fill={isInWatchlist ? 'currentColor' : 'none'} />
+                                                {watchlistLoading ? 'Updating...' : isInWatchlist ? 'In Watchlist' : 'Watchlist'}
                                             </button>
                                         </div>
                                     </div>

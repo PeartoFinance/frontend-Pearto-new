@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Save, X, Upload, User, Mail, Phone, Globe, Camera } from 'lucide-react';
 import { UserProfile, updateProfile } from '@/services/userService';
 
+import { fixImageUrl } from '@/utils/imageUtils';
+
 interface ProfileSettingsProps {
     profile: UserProfile;
     onClose: () => void;
@@ -50,25 +52,25 @@ export default function ProfileSettings({ profile, onClose, onUpdate }: ProfileS
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
             setTimeout(() => onClose(), 1500);
         } catch (error: any) {
-            setMessage({ 
-                type: 'error', 
-                text: error.message || 'Failed to update profile' 
+            setMessage({
+                type: 'error',
+                text: error.message || 'Failed to update profile'
             });
         } finally {
             setSaving(false);
         }
     };
 
-    const isChanged = formData.name !== profile.name || 
-                     formData.phone !== profile.phone || 
-                     formData.avatarUrl !== profile.avatarUrl;
+    const isChanged = formData.name !== profile.name ||
+        formData.phone !== profile.phone ||
+        formData.avatarUrl !== profile.avatarUrl;
 
     return (
         <div className="fixed inset-0 bg-white/50 dark:bg-slate-900/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold text-white">Edit Profile</h2>
-                    <button 
+                    <button
                         onClick={onClose}
                         className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition"
                     >
@@ -82,7 +84,7 @@ export default function ProfileSettings({ profile, onClose, onUpdate }: ProfileS
                     <div className="flex items-center gap-4">
                         <div className="w-20 h-20 rounded-full bg-linear-to-br from-emerald-500/80 to-cyan-500/70 text-white flex items-center justify-center text-xl font-bold overflow-hidden">
                             {formData.avatarUrl ? (
-                                <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                <img src={fixImageUrl(formData.avatarUrl)} alt="Avatar" className="w-full h-full object-cover" />
                             ) : (
                                 <span>{formData.name.charAt(0).toUpperCase() || 'U'}</span>
                             )}
@@ -127,7 +129,7 @@ export default function ProfileSettings({ profile, onClose, onUpdate }: ProfileS
                         label="Email"
                         icon={Mail}
                         value={profile.email}
-                        onChange={() => {}}
+                        onChange={() => { }}
                         disabled
                         placeholder="Email cannot be changed"
                     />
@@ -153,11 +155,10 @@ export default function ProfileSettings({ profile, onClose, onUpdate }: ProfileS
 
                 {/* Message */}
                 {message && (
-                    <div className={`mb-4 p-3 rounded-lg text-sm ${
-                        message.type === 'success' 
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                    <div className={`mb-4 p-3 rounded-lg text-sm ${message.type === 'success'
+                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                             : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                    }`}>
+                        }`}>
                         {message.text}
                     </div>
                 )}
@@ -193,15 +194,15 @@ export default function ProfileSettings({ profile, onClose, onUpdate }: ProfileS
     );
 }
 
-function Field({ 
-    label, 
-    icon: Icon, 
-    value, 
-    onChange, 
-    placeholder, 
-    type = 'text', 
-    disabled = false, 
-    required = false 
+function Field({
+    label,
+    icon: Icon,
+    value,
+    onChange,
+    placeholder,
+    type = 'text',
+    disabled = false,
+    required = false
 }: {
     label: string;
     icon: React.FC<{ className?: string }>;
@@ -219,7 +220,7 @@ function Field({
             </label>
             <div className="relative">
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">
-                    <Icon  />
+                    <Icon />
                 </div>
                 <input
                     type={type}

@@ -33,6 +33,7 @@ export default function VendorDetailPage({ params }: { params: Promise<{ id: str
     const [activeTab, setActiveTab] = useState<'overview' | 'analysis' | 'reviews'>('overview');
     const [reviews, setReviews] = useState<any[]>([]);
     const [showReviewModal, setShowReviewModal] = useState(false);
+    const [showContact, setShowContact] = useState(false);
 
     const refreshReviews = async () => {
         if (!id) return;
@@ -166,10 +167,37 @@ export default function VendorDetailPage({ params }: { params: Promise<{ id: str
                                                         <Globe size={14} /> Website
                                                     </a>
                                                 )}
-                                                <button className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed text-sm">
-                                                    <Phone size={14} /> Contact
-                                                </button>
+                                                {(vendor.phone || vendor.email) ? (
+                                                    <button
+                                                        onClick={() => setShowContact(!showContact)}
+                                                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 text-sm transition-colors"
+                                                    >
+                                                        <Phone size={14} /> {showContact ? 'Hide Contact' : 'Contact'}
+                                                    </button>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-400 text-sm">
+                                                        <Phone size={14} /> No contact info
+                                                    </span>
+                                                )}
                                             </div>
+
+                                            {/* Contact info reveal */}
+                                            {showContact && (vendor.phone || vendor.email) && (
+                                                <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-600 space-y-2 animate-in slide-in-from-top-2 duration-200">
+                                                    {vendor.phone && (
+                                                        <a href={`tel:${vendor.phone}`} className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                                                            <Phone size={14} className="text-slate-400" />
+                                                            {vendor.phone}
+                                                        </a>
+                                                    )}
+                                                    {vendor.email && (
+                                                        <a href={`mailto:${vendor.email}`} className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                                                            <Mail size={14} className="text-slate-400" />
+                                                            {vendor.email}
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Get Quote button removed */}

@@ -53,7 +53,6 @@ const fallbackResourcesItems = [
 
 const fallbackFeaturedItems = [
     { href: '/markets', label: 'Markets', css_class: 'bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600' },
-    { href: '/booyah', label: 'Booyah', css_class: 'bg-gradient-to-br from-green-500 via-emerald-500 to-green-600' },
 ];
 
 interface DropdownItem {
@@ -409,6 +408,9 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                                                     <Link href="/settings" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700" onClick={() => setUserMenuOpen(false)}>
                                                         <Settings size={16} /> Settings
                                                     </Link>
+                                                    <Link href="/developers" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700" onClick={() => setUserMenuOpen(false)}>
+                                                        <Key size={16} /> API Keys
+                                                    </Link>
                                                     <div className="border-t border-slate-200 dark:border-slate-700 mt-2 pt-2">
                                                         <button onClick={() => { logout(); setUserMenuOpen(false); }} className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
                                                             <LogOut size={16} /> Sign Out
@@ -431,9 +433,9 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
             </header>
 
             {/* SECONDARY NAVBAR */}
-            <div className={`hidden lg:block ${isFixed ? 'fixed top-14 left-0 right-0 z-40' : ''} bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 py-2.5`}>
-                <div className="px-4 lg:px-6">
-                    <div className="flex items-center justify-center gap-3">
+            <div className={`hidden lg:block ${isFixed ? 'fixed top-14 left-0 right-0 z-40' : 'relative z-50'} bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 py-2.5`}>
+                <div className="px-4 lg:px-6 overflow-visible">
+                    <div className="flex items-center justify-center gap-3 overflow-visible">
                         {/* Pillars dropdown */}
                         <DropdownMenu
                             label="Pillars"
@@ -629,7 +631,7 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                                                 {isPro ? 'Pro' : 'Free'}
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-2 gap-3 mb-3">
                                             <Link href="/profile" onClick={() => setMobileOpen(false)} className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-600 transition">
                                                 <User size={16} /> Profile
                                             </Link>
@@ -637,6 +639,9 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                                                 <Settings size={16} /> Settings
                                             </Link>
                                         </div>
+                                        <Link href="/developers" onClick={() => setMobileOpen(false)} className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-600 transition">
+                                            <Key size={16} /> API Keys
+                                        </Link>
                                         <button
                                             onClick={() => { logout(); setMobileOpen(false); }}
                                             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 font-medium hover:bg-red-100 dark:hover:bg-red-900/20 transition"

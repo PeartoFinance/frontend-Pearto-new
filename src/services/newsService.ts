@@ -51,15 +51,31 @@ export interface ArticleDetail {
 /**
  * Get published news articles
  */
+/**
+ * Get published news articles
+ */
 export async function getPublishedNews(options?: {
     limit?: number;
+    page?: number;
     offset?: number;
     category?: string;
+    search?: string;
 }): Promise<NewsResponse> {
     const params = new URLSearchParams();
-    if (options?.limit) params.set('limit', String(options.limit));
-    if (options?.offset) params.set('offset', String(options.offset));
+
+    // Default limit
+    const limit = options?.limit || 20; // Default to 20 per chunk as requested
+    params.set('limit', String(limit));
+
+    // Calculate offset from page if provided, otherwise use offset or 0
+    let offset = options?.offset || 0;
+    if (options?.page) {
+        offset = (options.page - 1) * limit;
+    }
+    params.set('offset', String(offset));
+
     if (options?.category) params.set('category', options.category);
+    if (options?.search) params.set('search', options.search);
 
     const response = await get<NewsResponse>(`/news/published?${params.toString()}`);
     return response;
@@ -88,11 +104,16 @@ export async function searchNews(query: string, limit: number = 20): Promise<{
 }
 
 /**
- * Get available categories
+ * Get available categories with article counts
  */
-export async function getCategories(): Promise<string[]> {
-    const response = await get<string[]>('/news/categories');
-    return response;
+export interface NewsCategory {
+    name: string;
+    count: number;
+}
+
+export async function getCategories(): Promise<NewsCategory[]> {
+    const response = await get<{ categories: NewsCategory[] }>('/news/categories');
+    return response.categories || [];
 }
 
 /**

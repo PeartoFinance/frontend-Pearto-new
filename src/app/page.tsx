@@ -1,6 +1,5 @@
 'use client';
 
-import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
@@ -16,28 +15,46 @@ import Watchlist from '@/components/home/Watchlist';
 import QuickTools from '@/components/home/QuickTools';
 import LearningProgress from '@/components/home/LearningProgress';
 import CategoryQuickLinks from '@/components/home/CategoryQuickLinks';
-import EducationalHubCards from '@/components/home/EducationalHubCards';
 import MarketAnalysis from '@/components/home/MarketAnalysis';
 import FeatureQuickGrid from '@/components/home/FeatureQuickGrid';
 import LiveRadioPreview from '@/components/home/LiveRadioPreview';
 import LiveTVPreview from '@/components/home/LiveTVPreview';
 import QuickMarkets from '@/components/home/QuickMarkets';
-import ExchangeRateWidget from '@/components/home/ExchangeRateWidget';
+import CryptoQuickWidget from '@/components/home/CryptoQuickWidget';
+import UpgradePlanCTA from '@/components/home/UpgradePlanCTA';
 import ForeignExchangeMarkets from '@/components/home/ForeignExchangeMarkets';
 import MarketSnapshot from '@/components/home/MarketSnapshot';
 import EducationalHub from '@/components/home/EducationalHub';
-import CategoryBar from '@/components/home/CategoryBar';
 import Testimonials from '@/components/home/Testimonials';
 import FAQ from '@/components/home/FAQ';
+import MarketSentiment from '@/components/home/MarketSentiment';
+import SectorHeatmap from '@/components/home/SectorHeatmap';
+import EarningsCalendar from '@/components/home/EarningsCalendar';
+import CurrencyStrengthMeter from '@/components/home/CurrencyStrengthMeter';
 import { AIWidget } from '@/components/ai';
 
+/* ── Section header helper ─────────────────────────────── */
+function SectionHeader({ title, subtitle, href, linkText }: { title: string; subtitle?: string; href?: string; linkText?: string }) {
+  return (
+    <div className="flex items-end justify-between mb-1">
+      <div>
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">{title}</h2>
+        {subtitle && <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{subtitle}</p>}
+      </div>
+      {href && (
+        <Link href={href} className="hidden sm:flex items-center gap-1 text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
+          {linkText || 'View all'} <ArrowRight size={14} />
+        </Link>
+      )}
+    </div>
+  );
+}
+
 export default function HomePage() {
-  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(120);
 
-  // Measure fixed header height dynamically (SportsTicker may be hidden)
   const measureHeader = useCallback(() => {
     if (headerRef.current) {
       const h = headerRef.current.getBoundingClientRect().height;
@@ -53,154 +70,134 @@ export default function HomePage() {
   }, [measureHeader]);
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
-      {/* Sidebar - Desktop Only */}
+    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
       <Sidebar />
 
-      {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
-        {/* Fixed Header Section - Always visible */}
-        <div ref={headerRef} className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-gray-50 dark:bg-slate-900">
-          {/* Ticker Tape (includes Sports Ticker) */}
+        {/* Fixed Header */}
+        <div ref={headerRef} className="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-slate-50 dark:bg-slate-900">
           <TickerTape />
-
-          {/* Header */}
           <Header />
         </div>
 
-        {/* Scrollable Content - with top padding for fixed header */}
+        {/* Scrollable Content */}
         <div className="flex-1 overflow-x-hidden" style={{ paddingTop: `${headerHeight}px` }}>
-          <div className="p-4 lg:p-6 space-y-6 w-full">
-            {/* Welcome Section */}
-            <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-                  {t('dashboard.welcome')}, Guest 👋
-                </h1>
-                <p className="text-gray-500 dark:text-gray-400 mt-1">
-                  Here is your market overview for today
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Link
-                  href="/market"
-                  className="px-4 py-2 bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-white text-sm font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
-                >
-                  Markets
-                </Link>
-                <Link
-                  href="/tools"
-                  className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/25"
-                >
-                  All Tools
-                </Link>
-              </div>
-            </section>
 
-            {/* Stats Grid - Market Indices */}
-            <section>
+          {/* ── HERO WELCOME ─────────────────────────────── */}
+          <section className="relative overflow-hidden bg-gradient-to-br from-slate-100 via-slate-50 to-white dark:from-slate-800 dark:via-slate-900 dark:to-slate-950 border-b border-slate-200/80 dark:border-slate-700/50">
+            {/* Decorative glow */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+            <div className="absolute bottom-0 left-0 w-72 h-72 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3" />
+
+            <div className="relative px-4 lg:px-8 py-4">
+              {/* Quick-stats row */}
               <StatsGrid />
-            </section>
+            </div>
+          </section>
 
-            {/* Quick Markets & Weather Row */}
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <QuickMarkets />
-              </div>
-              <div>
-                <ExchangeRateWidget />
-              </div>
-            </section>
+          {/* ── MAIN CONTENT ─────────────────────────────── */}
+          <div className="px-4 lg:px-8 py-3 space-y-5 max-w-[1600px] mx-auto w-full">
 
-            {/* Category Bar */}
+            {/* Row 1: Quick Markets + Crypto Overview */}
             <section>
-              <CategoryBar />
+              <SectionHeader title="Market Movers" subtitle="Top gainers, losers & crypto" href="/market" linkText="Full markets" />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-3">
+                <div className="lg:col-span-2"><QuickMarkets /></div>
+                <div><CryptoQuickWidget /></div>
+              </div>
             </section>
 
-            {/* Main Content Grid */}
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Featured Story - 2 columns */}
-              <div className={isAuthenticated ? "lg:col-span-2" : "lg:col-span-3"}>
-                <FeaturedStory />
-              </div>
-              {/* Watchlist - 1 column - Only show if logged in */}
-              {isAuthenticated && (
-                <div>
-                  <Watchlist />
+            {/* Row 2: Featured Story + Watchlist */}
+            <section>
+              <SectionHeader title="Top Stories" subtitle="Breaking news & featured coverage" href="/news" linkText="All news" />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-3">
+                <div className={isAuthenticated ? 'lg:col-span-2' : 'lg:col-span-3'}>
+                  <FeaturedStory />
                 </div>
-              )}
+                {isAuthenticated && <div><Watchlist /></div>}
+              </div>
             </section>
 
-            {/* Category Quick Links */}
+            {/* Row 3: Quick Category Links */}
             <section>
-              <CategoryQuickLinks />
+              <SectionHeader title="Explore" subtitle="Browse by category" />
+              <div className="mt-3"><CategoryQuickLinks /></div>
             </section>
 
-            {/* Market Snapshot */}
+            {/* Row 4: Market Snapshot (full width table) */}
             <section>
               <MarketSnapshot />
             </section>
 
-            {/* Feature Quick Grid */}
+            {/* Row 5: Market Sentiment + Currency Strength */}
             <section>
-              <FeatureQuickGrid />
+              <SectionHeader title="Market Analysis" subtitle="Sentiment indicators & currency strength" />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-3">
+                <MarketSentiment />
+                <CurrencyStrengthMeter />
+              </div>
             </section>
 
-            {/* Educational Hub */}
+            {/* Row 6: Feature Quick Grid */}
+            <FeatureQuickGrid />
+
+            {/* Row 7: Sector Heatmap */}
+            <section>
+              <SectorHeatmap />
+            </section>
+
+            {/* Row 8: Forex + Market Analysis + Earnings */}
+            <section>
+              <SectionHeader title="Foreign Exchange" subtitle="Live currency rates & analysis" href="/forex" />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-3">
+                <div className="lg:col-span-2"><ForeignExchangeMarkets /></div>
+                <div className="space-y-4">
+                  <MarketAnalysis />
+                  <EarningsCalendar />
+                </div>
+              </div>
+            </section>
+
+            {/* Row 9: Live Media */}
+            <section>
+              <SectionHeader title="Live Media" subtitle="Watch TV & listen to radio stations worldwide" />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-3">
+                <LiveTVPreview />
+                <LiveRadioPreview />
+              </div>
+            </section>
+
+            {/* Row 10: Trending + Quick Tools + Learning */}
+            <section>
+              <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${isAuthenticated ? 'lg:grid-cols-3' : ''}`}>
+                <TrendingTopics />
+                <QuickTools />
+                {isAuthenticated && <LearningProgress />}
+              </div>
+            </section>
+
+            {/* Row 11: Upgrade CTA */}
+            <section>
+              <UpgradePlanCTA />
+            </section>
+
+            {/* Row 12: Education */}
             <section>
               <EducationalHub />
             </section>
 
-            {/* Foreign Exchange Markets */}
-            <section>
-              <ForeignExchangeMarkets />
-            </section>
-
-            {/* Live TV & Radio Row */}
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <LiveTVPreview />
-              <LiveRadioPreview />
-            </section>
-
-            {/* Three column layout */}
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <TrendingTopics />
-              <QuickTools />
-              <LearningProgress />
-            </section>
-
-            {/* Market Analysis */}
-            <section>
-              <MarketAnalysis />
-            </section>
-
-            {/* Educational Hub Cards */}
-            <section>
-              <EducationalHubCards />
-            </section>
-            {/* Testimonials */}
-            <section>
+            {/* Row 13: Social proof + FAQ */}
+            <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Testimonials />
-            </section>
-
-            {/* FAQ */}
-            <section>
               <FAQ />
             </section>
           </div>
-        </div>
 
-        {/* Footer */}
-        <Footer />
+          <Footer />
+        </div>
       </main>
 
-      {/* Floating AI Widget */}
-      <AIWidget
-        type="floating"
-        position="bottom-right"
-        pageType="dashboard"
-        pageData={{}}
-      />
+      <AIWidget type="floating" position="bottom-right" pageType="dashboard" pageData={{}} />
     </div>
   );
 }

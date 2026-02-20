@@ -188,9 +188,87 @@ import KeywordDensityChecker from '@/components/tools/seo/KeywordDensityChecker'
 
 // Import additional cooking tools
 import CookingTempGuide from '@/components/tools/cooking/CookingTempGuide';
+import BakingPanConverter from '@/components/tools/cooking/BakingPanConverter';
+import CookingTimer from '@/components/tools/cooking/CookingTimer';
+import GroceryList from '@/components/tools/cooking/GroceryList';
+import MealCalorie from '@/components/tools/cooking/MealCalorie';
+import RecipeNutrition from '@/components/tools/cooking/RecipeNutrition';
+import SubstitutionFinder from '@/components/tools/cooking/SubstitutionFinder';
+import WhatCanIMake from '@/components/tools/cooking/WhatCanIMake';
+import WinePairing from '@/components/tools/cooking/WinePairing';
 
 // Import education tools (advanced)
 import CollegeSavingsPlanner from '@/components/tools/education/CollegeSavingsPlanner';
+
+// Import additional finance tools
+import DebtSnowballAvalanche from '@/components/tools/finance/DebtSnowballAvalanche';
+import InvoiceGenerator from '@/components/tools/finance/InvoiceGenerator';
+import MarkupMarginCalc from '@/components/tools/finance/MarkupMarginCalc';
+import SalaryComparison from '@/components/tools/finance/SalaryComparison';
+import SwotAnalysis from '@/components/tools/finance/SwotAnalysis';
+import TaxRefundEstimator from '@/components/tools/finance/TaxRefundEstimator';
+import WorkHoursCalculator from '@/components/tools/finance/WorkHoursCalculator';
+
+// Import additional health tools
+import BloodAlcoholCalculator from '@/components/tools/health/BloodAlcoholCalculator';
+import BodyFatCalculator from '@/components/tools/health/BodyFatCalculator';
+import DosageCalculator from '@/components/tools/health/DosageCalculator';
+import DrugInteractionChecker from '@/components/tools/health/DrugInteractionChecker';
+import HeartAgeCalculator from '@/components/tools/health/HeartAgeCalculator';
+import MacroCalculator from '@/components/tools/health/MacroCalculator';
+import MealPlanner from '@/components/tools/health/MealPlanner';
+import MedicalDictionary from '@/components/tools/health/MedicalDictionary';
+import OneRepMax from '@/components/tools/health/OneRepMax';
+import PillIdentifier from '@/components/tools/health/PillIdentifier';
+import RunningPaceCalculator from '@/components/tools/health/RunningPaceCalculator';
+import SymptomChecker from '@/components/tools/health/SymptomChecker';
+import VaccinationSchedule from '@/components/tools/health/VaccinationSchedule';
+
+// Import additional insurance tools
+import BikeInsuranceCalculator from '@/components/tools/insurance/BikeInsuranceCalculator';
+import HumanLifeValue from '@/components/tools/insurance/HumanLifeValue';
+import NRITermCalculator from '@/components/tools/insurance/NRITermCalculator';
+import ParentsHealthCalculator from '@/components/tools/insurance/ParentsHealthCalculator';
+import TermInsuranceCalculator from '@/components/tools/insurance/TermInsuranceCalculator';
+import TermLifeCalculator from '@/components/tools/insurance/TermLifeCalculator';
+
+// Import additional investing tools
+import RiskLevelAssessment from '@/components/tools/investing/RiskLevelAssessment';
+import VolatilityMeasurement from '@/components/tools/investing/VolatilityMeasurement';
+
+// Import additional portfolio tools
+import CorrelationMatrix from '@/components/tools/portfolio/CorrelationMatrix';
+import ESGScoring from '@/components/tools/portfolio/ESGScoring';
+import ETFOverlap from '@/components/tools/portfolio/ETFOverlap';
+import FeeAnalyzer from '@/components/tools/portfolio/FeeAnalyzer';
+
+// Import additional productivity tools
+import GoalSettingTemplate from '@/components/tools/productivity/GoalSettingTemplate';
+import HabitTracker from '@/components/tools/productivity/HabitTracker';
+import MindMapGenerator from '@/components/tools/productivity/MindMapGenerator';
+import ProjectTimeline from '@/components/tools/productivity/ProjectTimeline';
+import TaskPriorityMatrix from '@/components/tools/productivity/TaskPriorityMatrix';
+import TimeZoneConverter from '@/components/tools/productivity/TimeZoneConverter';
+
+// Import additional real estate tools
+import HomeLoanComparison from '@/components/tools/realestate/HomeLoanComparison';
+import HomeValueEstimator from '@/components/tools/realestate/HomeValueEstimator';
+import MortgageAffordability from '@/components/tools/realestate/MortgageAffordability';
+import MortgageRefinance from '@/components/tools/realestate/MortgageRefinance';
+import MovingCostCalculator from '@/components/tools/realestate/MovingCostCalculator';
+import PaintCalculator from '@/components/tools/realestate/PaintCalculator';
+
+// Import additional travel tools
+import AirportCodeLookup from '@/components/tools/travel/AirportCodeLookup';
+import FlightPriceTracker from '@/components/tools/travel/FlightPriceTracker';
+import MileageCalculator from '@/components/tools/travel/MileageCalculator';
+import PackingList from '@/components/tools/travel/PackingList';
+import TravelDestinationQuiz from '@/components/tools/travel/TravelDestinationQuiz';
+import TravelItinerary from '@/components/tools/travel/TravelItinerary';
+import VisaRequirementChecker from '@/components/tools/travel/VisaRequirementChecker';
+
+// Import debt tools
+import DebtPayoffCalculatorDebt from '@/components/tools/debt/DebtPayoffCalculator';
 
 /**
  * Tool Component Registry
@@ -383,6 +461,85 @@ const toolComponents: Record<string, React.ComponentType> = {
 
     // Trading (with charts)
     'options-profit': OptionsProfitCalculator,
+
+    // Additional Finance
+    'debt-snowball-avalanche': DebtSnowballAvalanche,
+    'invoice-generator': InvoiceGenerator,
+    'markup-margin': MarkupMarginCalc,
+    'salary-comparison': SalaryComparison,
+    'swot-analysis': SwotAnalysis,
+    'tax-refund-estimator': TaxRefundEstimator,
+    'work-hours': WorkHoursCalculator,
+
+    // Additional Health
+    'blood-alcohol-calculator': BloodAlcoholCalculator,
+    'body-fat-percentage': BodyFatCalculator,
+    'dosage-calculator': DosageCalculator,
+    'drug-interaction-checker': DrugInteractionChecker,
+    'heart-age-calculator': HeartAgeCalculator,
+    'macro-nutrient-calculator': MacroCalculator,
+    'meal-planner': MealPlanner,
+    'medical-dictionary': MedicalDictionary,
+    'one-rep-max': OneRepMax,
+    'pill-identifier': PillIdentifier,
+    'running-pace': RunningPaceCalculator,
+    'symptom-checker': SymptomChecker,
+    'vaccination-schedule': VaccinationSchedule,
+
+    // Additional Insurance
+    'bike-insurance': BikeInsuranceCalculator,
+    'human-life-value': HumanLifeValue,
+    'nri-term': NRITermCalculator,
+    'parents-health': ParentsHealthCalculator,
+    'term-insurance': TermInsuranceCalculator,
+    'term-life': TermLifeCalculator,
+
+    // Additional Investing
+    'risk-level-assessment': RiskLevelAssessment,
+    'volatility-measurement': VolatilityMeasurement,
+    'bond-yield': BondYieldCalculator,
+
+    // Additional Portfolio
+    'correlation-matrix': CorrelationMatrix,
+    'esg-scoring': ESGScoring,
+    'etf-overlap': ETFOverlap,
+    'fee-analyzer': FeeAnalyzer,
+
+    // Additional Productivity
+    'goal-setting-template': GoalSettingTemplate,
+    'habit-tracker': HabitTracker,
+    'mind-map-generator': MindMapGenerator,
+    'project-timeline-generator': ProjectTimeline,
+    'task-priority-matrix': TaskPriorityMatrix,
+    'time-zone-converter': TimeZoneConverter,
+
+    // Additional Real Estate
+    'home-loan-comparison': HomeLoanComparison,
+    'home-value-estimator': HomeValueEstimator,
+    'mortgage-affordability': MortgageAffordability,
+    'mortgage-refinance': MortgageRefinance,
+    'moving-cost': MovingCostCalculator,
+    'paint-calculator': PaintCalculator,
+    'rental-yield': RentalYieldCalculator,
+
+    // Additional Travel
+    'airport-code-lookup': AirportCodeLookup,
+    'flight-price-tracker': FlightPriceTracker,
+    'mileage-calculator': MileageCalculator,
+    'packing-list': PackingList,
+    'travel-destination-quiz': TravelDestinationQuiz,
+    'travel-itinerary': TravelItinerary,
+    'visa-requirement-checker': VisaRequirementChecker,
+
+    // Additional Cooking
+    'baking-pan-converter': BakingPanConverter,
+    'cooking-timer': CookingTimer,
+    'grocery-list': GroceryList,
+    'meal-calorie': MealCalorie,
+    'recipe-nutrition': RecipeNutrition,
+    'substitution-finder': SubstitutionFinder,
+    'what-can-i-make': WhatCanIMake,
+    'wine-pairing': WinePairing,
 };
 
 // Export the component map for use by other modules if needed

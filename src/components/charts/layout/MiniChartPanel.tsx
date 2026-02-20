@@ -153,6 +153,13 @@ export default function MiniChartPanel({
             return date.split('T')[0];
         };
 
+        // Deduplicate: keep last entry per time key
+        const dedup = <T extends { time: string | number }>(arr: T[]): T[] => {
+            const map = new Map<string | number, T>();
+            for (const item of arr) map.set(item.time, item);
+            return Array.from(map.values());
+        };
+
         const change = sortedData.length > 0
             ? (sortedData[sortedData.length - 1].close ?? 0) - (sortedData[0].close ?? 0)
             : 0;
@@ -166,7 +173,7 @@ export default function MiniChartPanel({
                 wickUpColor: '#10b981',
                 wickDownColor: '#ef4444'
             });
-            const candleData = sortedData
+            const candleData = dedup(sortedData
                 .filter(d => d.open && d.high && d.low && d.close)
                 .map(d => ({
                     time: getTimeKey(d.date),
@@ -174,7 +181,7 @@ export default function MiniChartPanel({
                     high: d.high!,
                     low: d.low!,
                     close: d.close!
-                }));
+                })));
             series.setData(candleData as any);
             seriesRef.current = series as any;
         } else if (chartType === 'area') {
@@ -184,10 +191,10 @@ export default function MiniChartPanel({
                 lineColor: change >= 0 ? '#10b981' : '#ef4444',
                 lineWidth: 2
             });
-            const areaData = sortedData.map(d => ({
+            const areaData = dedup(sortedData.map(d => ({
                 time: getTimeKey(d.date),
                 value: d.close!
-            }));
+            })));
             series.setData(areaData as any);
             seriesRef.current = series as any;
         } else if (chartType === 'bar') {
@@ -196,7 +203,7 @@ export default function MiniChartPanel({
                 downColor: '#ef4444',
                 thinBars: true
             });
-            const barData = sortedData
+            const barData = dedup(sortedData
                 .filter(d => d.open && d.high && d.low && d.close)
                 .map(d => ({
                     time: getTimeKey(d.date),
@@ -204,7 +211,7 @@ export default function MiniChartPanel({
                     high: d.high!,
                     low: d.low!,
                     close: d.close!
-                }));
+                })));
             series.setData(barData as any);
             seriesRef.current = series as any;
         } else {
@@ -212,10 +219,10 @@ export default function MiniChartPanel({
                 color: change >= 0 ? '#10b981' : '#ef4444',
                 lineWidth: 2
             });
-            const lineData = sortedData.map(d => ({
+            const lineData = dedup(sortedData.map(d => ({
                 time: getTimeKey(d.date),
                 value: d.close!
-            }));
+            })));
             series.setData(lineData as any);
             seriesRef.current = series as any;
         }

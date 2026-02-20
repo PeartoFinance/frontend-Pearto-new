@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import ReactOneSignal from 'react-onesignal';
 import {
     initOneSignal,
     requestPermission,
@@ -63,12 +64,31 @@ export default function PushNotificationProvider() {
             if (registeredUserId.current === user!.id) return;
 
             try {
+                // Validate user ID
+                if (!user?.id) {
+                    console.warn('[Push] User ID is missing, skipping OneSignal login');
+                    return;
+                }
+
                 // Link OneSignal subscription to our user ID
                 await setExternalUserId(String(user!.id));
 
                 // If user already granted permission, register device with backend
                 if (hasPermission()) {
                     await registerDeviceWithBackend();
+                } else {
+                    // Proactively ask the user if they want to enable notifications using OneSignal's native soft-prompt
+                    try {
+                        // Using any to bypass strict type checking for the slidedown API if not fully covered in definition
+                        const sdk = (window as any).OneSignal || ReactOneSignal;
+                        if (sdk && sdk.Slidedown) {
+                            sdk.Slidedown.promptPush();
+                        } else {
+                            await ReactOneSignal.Slidedown.promptPush();
+                        }
+                    } catch (err) {
+                        console.warn('[Push] Slidedown prompt failed or prompted already:', err);
+                    }
                 }
 
                 if (!cancelled) {

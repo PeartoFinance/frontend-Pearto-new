@@ -12,6 +12,7 @@ import { MultiChart } from '@/components/charts';
 import { getHoldingDetail, addTransaction, type HoldingDetail } from '@/services/portfolioService';
 import { getStockHistory, type PriceHistoryPoint } from '@/services/marketService';
 import PriceDisplay from '@/components/common/PriceDisplay';
+import { getAssetDetailPath } from '@/utils/assetRoutes';
 import {
     StockTabs, type TabId, FinancialsTab, DividendsTab, ForecastTab, ProfileTab, NewsTab
 } from '@/components/stocks/tabs';
@@ -430,7 +431,7 @@ export default function HoldingDetailPage({ params }: PageProps) {
                                                 </div>
                                             </div>
                                             <div className="px-5 py-4 border-t border-slate-200 dark:border-slate-700">
-                                                <Link href={`/stocks/${holding.symbol}`} className="text-emerald-500 hover:underline text-sm flex items-center gap-1">
+                                                <Link href={getAssetDetailPath(holding.symbol)} className="text-emerald-500 hover:underline text-sm flex items-center gap-1">
                                                     View Full Stock Details <ArrowUpRight size={14} />
                                                 </Link>
                                             </div>
@@ -497,7 +498,7 @@ export default function HoldingDetailPage({ params }: PageProps) {
                                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Company Profile</h3>
                                 <p className="text-slate-500 mb-4">View detailed company information, description, sector, and more on the stock page.</p>
                                 <Link
-                                    href={`/stocks/${holding.symbol}?tab=profile`}
+                                    href={`${getAssetDetailPath(holding.symbol)}?tab=profile`}
                                     className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition"
                                 >
                                     View Stock Profile <ArrowUpRight size={16} />
@@ -516,7 +517,7 @@ export default function HoldingDetailPage({ params }: PageProps) {
                                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Latest News</h3>
                                 <p className="text-slate-500 mb-4">Get the latest news and updates about {holding.symbol} on the stock page.</p>
                                 <Link
-                                    href={`/stocks/${holding.symbol}?tab=news`}
+                                    href={`${getAssetDetailPath(holding.symbol)}?tab=news`}
                                     className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition"
                                 >
                                     View Stock News <ArrowUpRight size={16} />

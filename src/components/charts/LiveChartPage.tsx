@@ -12,7 +12,8 @@ import {
     HistogramSeries,
     type IChartApi,
     type ISeriesApi,
-    CrosshairMode
+    CrosshairMode,
+    createSeriesMarkers
 } from 'lightweight-charts';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import {
@@ -21,6 +22,7 @@ import {
     Minimize2,
     Settings,
     TrendingUp,
+    TrendingDown,
     Activity,
     BarChart2,
     Mountain,
@@ -34,13 +36,26 @@ import {
     Menu,
     Pause,
     Play,
-    Zap
+    Zap,
+    Clock,
+    Layers,
+    Shield,
+    LineChart,
+    ArrowUpRight,
+    ArrowDownRight,
+    LayoutGrid,
+    SlidersHorizontal,
+    GitCompareArrows,
+    Eye,
+    Radio
 } from 'lucide-react';
 import { getStockHistory, getStockProfile, getCryptoHistory, getForexHistory, type PriceHistoryPoint, type MarketStock } from '@/services/marketService';
 import { getLiveQuote, getLiveQuotes, getLiveIntraday, type LiveQuote, type IntradayPoint } from '@/services/liveChartService';
 import ChartToolbar from './toolbar/ChartToolbar';
+import ChartTypeSelector from './toolbar/ChartTypeSelector';
+import IntervalSelector from './toolbar/IntervalSelector';
 import { useChartDrawings, type Drawing, type DrawingPoint } from '@/hooks/useChartDrawings';
-import { detectPatterns, type ChartMarker } from '@/utils/technicalAnalysis';
+import { detectPatterns, dedupeAndSortChartData, type ChartMarker } from '@/utils/technicalAnalysis';
 import ChartSidebar from './sidebar/ChartSidebar';
 import IndicatorPanel, { type IndicatorConfig } from './indicators/IndicatorPanel';
 import {
@@ -56,6 +71,7 @@ import {
     type OHLCData
 } from '@/utils/indicators';
 import ComparisonMode, { type ComparisonSymbol } from './ComparisonMode';
+import { getAssetDetailPath } from '@/utils/assetRoutes';
 import MultiTimeframeView from './MultiTimeframeView';
 import { ChartGridLayout, ChartLayoutSelector, type ChartLayout } from './layout';
 import RiskAnalysisPanel from './RiskAnalysisPanel';
@@ -111,6 +127,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
     const indicatorSeriesRef = useRef<Map<string, ISeriesApi<any> | ISeriesApi<any>[]>>(new Map());
     const comparisonSeriesRef = useRef<Map<string, ISeriesApi<'Line'>>>(new Map());
     const lastDataPointRef = useRef<PriceHistoryPoint | null>(null);
+    const patternMarkersRef = useRef<any>(null);
 
     const [symbol, setSymbol] = useState(initialSymbol);
     const [loading, setLoading] = useState(true);
@@ -122,8 +139,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
     const [chartType, setChartType] = useState<ChartType>('area');
     const [layout, setLayout] = useState<ChartLayout>('1x1');
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [showIntervalDropdown, setShowIntervalDropdown] = useState(false);
-    const [showChartTypeDropdown, setShowChartTypeDropdown] = useState(false);
+
     const [showPatterns, setShowPatterns] = useState(false);
     const [isInWatchlist, setIsInWatchlist] = useState(false);
     const [showSidebar, setShowSidebar] = useState(true);
@@ -165,17 +181,17 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
     };
 
     // Period to API params mapping
-    const getPeriodParams = useCallback((p: Period) => {
+    const getPeriodParams = useCallback((p: Period, selectedInterval: Interval) => {
         const map: Record<Period, { period: string; interval: string }> = {
-            '1D': { period: '1d', interval: '1m' },
-            '5D': { period: '5d', interval: '5m' },
-            '1M': { period: '1mo', interval: '1h' },
-            '3M': { period: '3mo', interval: '1d' },
-            '6M': { period: '6mo', interval: '1d' },
-            'YTD': { period: 'ytd', interval: '1d' },
-            '1Y': { period: '1y', interval: '1d' },
-            '5Y': { period: '5y', interval: '1wk' },
-            'All': { period: 'max', interval: '1wk' }
+            '1D': { period: '1d', interval: selectedInterval || '1m' },
+            '5D': { period: '5d', interval: selectedInterval || '5m' },
+            '1M': { period: '1mo', interval: selectedInterval || '1h' },
+            '3M': { period: '3mo', interval: selectedInterval || '1d' },
+            '6M': { period: '6mo', interval: selectedInterval || '1d' },
+            'YTD': { period: 'ytd', interval: selectedInterval || '1d' },
+            '1Y': { period: '1y', interval: selectedInterval || '1d' },
+            '5Y': { period: '5y', interval: selectedInterval || '1wk' },
+            'All': { period: 'max', interval: selectedInterval || '1wk' }
         };
         return map[p] || { period: '1mo', interval: '1d' };
     }, []);
@@ -184,11 +200,11 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const { period: apiPeriod, interval: apiInterval } = getPeriodParams(period);
+            const { period: apiPeriod, interval: apiInterval } = getPeriodParams(period, chartInterval);
             let historyData: PriceHistoryPoint[] = [];
 
             // For 1D period, use live intraday API for real-time data
-            if (period === '1D') {
+            if (period === '1D' && chartInterval === '1m') {
                 try {
                     const liveResponse = await getLiveIntraday(symbol);
                     if (liveResponse.data && liveResponse.data.length > 0) {
@@ -207,6 +223,10 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                     const response = await getStockHistory(symbol, apiPeriod, apiInterval);
                     historyData = response.data;
                 }
+            } else if (period === '1D') {
+                // If user selected 1D but a NON-1m interval (like 5m or 15m), we can't use the basic getLiveIntraday which defaults to 1m
+                const response = await getStockHistory(symbol, apiPeriod, apiInterval);
+                historyData = response.data;
             } else if (assetType === 'crypto') {
                 const response = await getCryptoHistory(symbol, apiPeriod, apiInterval);
                 historyData = response.data;
@@ -239,7 +259,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
         } finally {
             setLoading(false);
         }
-    }, [symbol, period, assetType, getPeriodParams]);
+    }, [symbol, period, chartInterval, assetType, getPeriodParams]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -382,6 +402,8 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
         if (chartRef.current) {
             chartRef.current.remove();
             chartRef.current = null;
+            indicatorSeriesRef.current.clear();
+            comparisonSeriesRef.current.clear();
         }
         if (volumeChartRef.current) {
             volumeChartRef.current.remove();
@@ -555,20 +577,28 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
             }
         });
 
-        // Resize handler
-        const handleResize = () => {
-            if (chartContainerRef.current && chartRef.current) {
-                chartRef.current.applyOptions({ width: chartContainerRef.current.clientWidth });
+        // Resize observer for dynamic height/width
+        const resizeObserver = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                if (entry.target === chartContainerRef.current && chartRef.current) {
+                    chartRef.current.applyOptions({
+                        width: entry.contentRect.width,
+                        height: entry.contentRect.height
+                    });
+                }
+                if (entry.target === volumeContainerRef.current && volumeChartRef.current) {
+                    volumeChartRef.current.applyOptions({
+                        width: entry.contentRect.width
+                    });
+                }
             }
-            if (volumeContainerRef.current && volumeChartRef.current) {
-                volumeChartRef.current.applyOptions({ width: volumeContainerRef.current.clientWidth });
-            }
-        };
+        });
 
-        window.addEventListener('resize', handleResize);
+        if (chartContainerRef.current) resizeObserver.observe(chartContainerRef.current);
+        if (volumeContainerRef.current) resizeObserver.observe(volumeContainerRef.current);
 
         return () => {
-            window.removeEventListener('resize', handleResize);
+            resizeObserver.disconnect();
             if (chartRef.current) {
                 chartRef.current.remove();
                 chartRef.current = null;
@@ -649,12 +679,20 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                     scaleMargins: { top: 0.1, bottom: 0.3 }
                 });
 
-                // Place oscillator in bottom 30%
-                chart.priceScale(indicator.id).applyOptions({
+                // Add or configure custom price scale for the oscillator
+                const priceScaleOptions = {
                     scaleMargins: { top: 0.75, bottom: 0 },
                     visible: true,
                     borderColor: '#334155'
-                });
+                };
+
+                try {
+                    // Try to apply if it exists
+                    chart.priceScale(indicator.id).applyOptions(priceScaleOptions);
+                } catch (e) {
+                    // It will be created when the series is added with this priceScaleId
+                    // The options will be applied on series creation
+                }
             } else {
                 // Reset main chart if only overlays (optional, but good for UX)
                 // We'd need to check if *any* other oscillator is active. 
@@ -795,7 +833,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                 indicatorSeriesRef.current.set(indicator.id, seriesList as any);
             }
         });
-    }, [activeIndicators, data]);
+    }, [activeIndicators, data, chartVersion, chartType, period, formatPrice]);
 
     // Render comparison symbols on chart
     useEffect(() => {
@@ -857,14 +895,48 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
             comparisonSeriesRef.current.set(comparison.symbol, series);
         });
 
-        if (comparisonSymbols.filter(c => c.visible).length > 0) {
-            chart.priceScale('comparison').applyOptions({
-                scaleMargins: { top: 0.1, bottom: 0.1 },
-                visible: true,
-                borderColor: '#334155'
-            });
+        if (comparisonSeriesRef.current.size > 0) {
+            try {
+                chart.priceScale('comparison').applyOptions({
+                    scaleMargins: { top: 0.1, bottom: 0.1 },
+                    visible: true,
+                    borderColor: '#334155'
+                });
+            } catch (e) {
+                // Ignore if priceScale isn't ready
+            }
         }
-    }, [comparisonSymbols]);
+    }, [comparisonSymbols, data, chartVersion, chartType, period, formatPrice]);
+
+    // Handle Pattern Detection
+    useEffect(() => {
+        if (!chartRef.current || !seriesRef.current || data.length === 0) return;
+
+        if (!patternMarkersRef.current || patternMarkersRef.current.getSeries() !== seriesRef.current) {
+            patternMarkersRef.current = createSeriesMarkers(seriesRef.current);
+        }
+
+        if (!showPatterns) {
+            patternMarkersRef.current.setMarkers([]);
+            return;
+        }
+
+        const ohlcData: OHLCData[] = data
+            .filter(d => d.date && d.close != null)
+            .sort((a, b) => a.date.localeCompare(b.date))
+            .map(d => ({
+                time: d.date.split('T')[0],
+                open: d.open ?? d.close!,
+                high: d.high ?? d.close!,
+                low: d.low ?? d.close!,
+                close: d.close!,
+                volume: d.volume ?? 0
+            }));
+
+        const markers = detectPatterns(ohlcData as any);
+        const cleanMarkers = dedupeAndSortChartData(markers);
+        patternMarkersRef.current.setMarkers(cleanMarkers);
+    }, [showPatterns, data, chartType, period]);
 
     // Fullscreen toggle
     const toggleFullscreen = useCallback(() => {
@@ -885,186 +957,186 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white flex flex-col">
-            {/* Top Header Bar - Responsive */}
-            <header className="h-14 border-b border-slate-800 flex items-center justify-between px-2 sm:px-4 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50 overflow-x-auto no-scrollbar">
-                {/* Left: Back + Symbol */}
-                <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-                    <button
-                        onClick={() => router.back()}
-                        className="p-2 hover:bg-slate-800 rounded-lg transition"
-                    >
-                        <ArrowLeft size={20} />
-                    </button>
+        <div className="h-screen bg-[#0a0e17] text-white flex flex-col overflow-hidden">
+            {/* ═══════ TOP HEADER BAR ═══════ */}
+            <header className="sticky top-0 z-50 border-b border-slate-800/60 shrink-0">
+                <div className="min-h-14 flex flex-wrap items-center justify-between px-3 sm:px-5 py-2 bg-gradient-to-r from-[#0d1220] via-[#0f1628] to-[#0d1220] backdrop-blur-xl gap-y-2">
+                    {/* Left: Navigation + Symbol Info */}
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 min-w-0">
+                        <button
+                            onClick={() => router.back()}
+                            className="p-2 hover:bg-white/5 rounded-lg transition-all duration-200 text-slate-400 hover:text-white shrink-0"
+                            title="Go Back"
+                        >
+                            <ArrowLeft size={18} />
+                        </button>
 
-                    <div className="flex items-center gap-3">
-                        {/* Live indicator */}
-                        <div className="flex items-center gap-2 px-2 py-1 bg-green-500/20 rounded-lg">
-                            <span className="relative flex h-2 w-2">
-                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isLive ? 'bg-green-400' : 'bg-yellow-400'} opacity-75`}></span>
-                                <span className={`relative inline-flex rounded-full h-2 w-2 ${isLive ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-                            </span>
-                            <span className="text-xs font-medium text-green-400">LIVE</span>
+                        <div className="h-6 w-px bg-slate-700/50 shrink-0 hidden sm:block" />
+
+                        {/* Live Badge + Symbol */}
+                        <div className="flex items-center gap-3 min-w-0">
+                            {/* Live Indicator */}
+                            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg shrink-0 ${isLive
+                                ? 'bg-emerald-500/15 border border-emerald-500/20'
+                                : 'bg-amber-500/15 border border-amber-500/20'}`}
+                            >
+                                <span className="relative flex h-2 w-2">
+                                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isLive ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                                    <span className={`relative inline-flex rounded-full h-2 w-2 ${isLive ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                                </span>
+                                <span className={`text-[10px] font-bold tracking-wider ${isLive ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                    {isLive ? 'LIVE' : 'PAUSED'}
+                                </span>
+                            </div>
+
+                            {/* Symbol Badge */}
+                            <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-600/20 to-blue-500/10 border border-blue-500/20 rounded-lg shrink-0">
+                                <Radio size={14} className="text-blue-400" />
+                                <span className="text-sm font-bold tracking-wide text-blue-100">{symbol}</span>
+                            </div>
+                            {profile && (
+                                <span className="text-sm text-slate-500 truncate hidden md:block max-w-[200px]">{profile.name}</span>
+                            )}
                         </div>
 
-                        <span className="text-xl font-bold">{symbol}</span>
-                        {profile && (
-                            <span className="text-sm text-slate-400 hidden sm:inline">{profile.name}</span>
-                        )}
-
+                        {/* Price Display */}
                         {stats && (
-                            <div className="flex items-center gap-1 sm:gap-2 ml-2 sm:ml-4">
-                                <span className="text-lg sm:text-2xl font-semibold">
+                            <div className="flex items-center gap-2 sm:gap-3 ml-1 sm:ml-3">
+                                <span className="text-xl sm:text-2xl font-semibold tracking-tight text-white tabular-nums">
                                     {formatPrice(crosshairData?.price ?? stats.price)}
                                 </span>
-                                <span className={`text-xs sm:text-sm font-medium px-1.5 sm:px-2 py-0.5 rounded whitespace-nowrap ${(crosshairData?.change ?? stats.change) >= 0
-                                    ? 'bg-emerald-500/20 text-emerald-400'
-                                    : 'bg-red-500/20 text-red-400'
+                                <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs sm:text-sm font-medium tabular-nums ${(crosshairData?.change ?? stats.change) >= 0
+                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                    : 'bg-red-500/10 text-red-400 border border-red-500/20'
                                     }`}>
-                                    <span className="hidden sm:inline">{(crosshairData?.change ?? stats.change) >= 0 ? '+' : ''}{((crosshairData?.change ?? stats.change)).toFixed(2)} </span>
-                                    ({stats.changePercent >= 0 ? '+' : ''}{stats.changePercent.toFixed(2)}%)
-                                </span>
+                                    {(crosshairData?.change ?? stats.change) >= 0
+                                        ? <ArrowUpRight size={14} />
+                                        : <ArrowDownRight size={14} />
+                                    }
+                                    <span className="hidden sm:inline">
+                                        {(crosshairData?.change ?? stats.change) >= 0 ? '+' : ''}
+                                        {((crosshairData?.change ?? stats.change)).toFixed(2)}
+                                    </span>
+                                    <span>({stats.changePercent >= 0 ? '+' : ''}{stats.changePercent.toFixed(2)}%)</span>
+                                </div>
                             </div>
                         )}
                     </div>
-                </div>
 
-                {/* Right: Actions */}
-                <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-                    {lastUpdate && (
-                        <span className="text-xs text-slate-500 mr-2">
-                            Updated: {lastUpdate.toLocaleTimeString()}
-                        </span>
-                    )}
+                    {/* Right: Action Buttons */}
+                    <div className="flex items-center gap-0.5 sm:gap-1 shrink-0 ml-2">
+                        {lastUpdate && (
+                            <span className="text-[10px] text-slate-600 mr-1 hidden sm:inline tabular-nums">
+                                {lastUpdate.toLocaleTimeString()}
+                            </span>
+                        )}
 
-                    <button
-                        onClick={() => setIsLive(!isLive)}
-                        className={`p-2 rounded-lg transition ${isLive ? 'text-green-400 bg-green-400/10' : 'text-yellow-400 bg-yellow-400/10'}`}
-                        title={isLive ? 'Pause live updates' : 'Resume live updates'}
-                    >
-                        {isLive ? <Pause size={20} /> : <Play size={20} />}
-                    </button>
-
-                    <button
-                        onClick={() => setIsInWatchlist(!isInWatchlist)}
-                        className={`p-2 rounded-lg transition ${isInWatchlist ? 'text-yellow-400 bg-yellow-400/10' : 'hover:bg-slate-800'}`}
-                    >
-                        {isInWatchlist ? <Star size={20} fill="currentColor" /> : <StarOff size={20} />}
-                    </button>
-
-                    <Link
-                        href={`/stocks/${symbol}`}
-                        className="p-2 hover:bg-slate-800 rounded-lg transition"
-                        title="View Stock Details"
-                    >
-                        <ExternalLink size={20} />
-                    </Link>
-
-                    <button
-                        onClick={toggleFullscreen}
-                        className="p-2 hover:bg-slate-800 rounded-lg transition"
-                    >
-                        {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
-                    </button>
-
-                    <button
-                        onClick={() => setShowSidebar(!showSidebar)}
-                        className={`p-2 rounded-lg transition ${showSidebar ? 'bg-slate-700' : 'hover:bg-slate-800'}`}
-                    >
-                        <Menu size={20} />
-                    </button>
-                </div>
-            </header>
-
-            {/* Chart Controls Bar */}
-            <div className="h-12 border-b border-slate-800 flex items-center justify-between px-4 bg-slate-900/50 overflow-x-auto no-scrollbar gap-4">
-                {/* Period Selector */}
-                <div className="flex items-center gap-1 shrink-0">
-                    {PERIODS.map(p => (
                         <button
-                            key={p.id}
-                            onClick={() => setPeriod(p.id)}
-                            className={`px-3 py-1.5 text-sm font-medium rounded transition ${period === p.id
-                                ? 'bg-blue-600 text-white'
-                                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                                }`}
+                            onClick={() => setIsLive(!isLive)}
+                            className={`p-2 rounded-lg transition-all duration-200 ${isLive
+                                ? 'text-emerald-400 bg-emerald-400/10 shadow-[0_0_12px_rgba(16,185,129,0.15)]'
+                                : 'text-amber-400 bg-amber-400/10'}`}
+                            title={isLive ? 'Pause live updates' : 'Resume live updates'}
                         >
-                            {p.label}
+                            {isLive ? <Pause size={16} /> : <Play size={16} />}
                         </button>
-                    ))}
+
+                        <button
+                            onClick={() => setIsInWatchlist(!isInWatchlist)}
+                            className={`p-2 rounded-lg transition-all duration-200 ${isInWatchlist
+                                ? 'text-amber-400 bg-amber-400/10 shadow-[0_0_12px_rgba(251,191,36,0.15)]'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                            title={isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
+                        >
+                            {isInWatchlist ? <Star size={18} fill="currentColor" /> : <Star size={18} />}
+                        </button>
+
+                        <Link
+                            href={getAssetDetailPath(symbol, assetType)}
+                            className="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200"
+                            title="View Stock Details"
+                        >
+                            <ExternalLink size={18} />
+                        </Link>
+
+                        <button
+                            onClick={toggleFullscreen}
+                            className="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200"
+                            title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                        >
+                            {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+                        </button>
+
+                        <div className="h-6 w-px bg-slate-700/40 mx-1 hidden sm:block" />
+
+                        <button
+                            onClick={() => setShowSidebar(!showSidebar)}
+                            className={`p-2 rounded-lg transition-all duration-200 ${showSidebar
+                                ? 'text-blue-400 bg-blue-400/10'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                            title={showSidebar ? 'Hide Sidebar' : 'Show Sidebar'}
+                        >
+                            <Menu size={18} />
+                        </button>
+                    </div>
                 </div>
 
-                {/* Center: Interval + Chart Type */}
-                <div className="flex items-center gap-3 shrink-0">
+                {/* ═══════ CHART CONTROLS TOOLBAR ═══════ */}
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 bg-[#0d1220]/90 backdrop-blur-sm border-t border-slate-800/30 shrink-0">
+                    {/* Period Selector — pill group */}
+                    <div className="flex items-center bg-slate-800/40 rounded-lg p-0.5 shrink-0">
+                        {PERIODS.map(p => (
+                            <button
+                                key={p.id}
+                                onClick={() => setPeriod(p.id)}
+                                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all duration-200 ${period === p.id
+                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                    }`}
+                            >
+                                {p.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="h-5 w-px bg-slate-700/30 shrink-0" />
+
                     {/* Interval Dropdown */}
-                    <div className="relative">
-                        <button
-                            onClick={() => { setShowIntervalDropdown(!showIntervalDropdown); setShowChartTypeDropdown(false); }}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-sm"
-                        >
-                            {INTERVALS.find(i => i.id === chartInterval)?.label || chartInterval}
-                            <ChevronDown size={14} />
-                        </button>
-                        {showIntervalDropdown && (
-                            <div className="absolute top-full mt-1 left-0 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-20 py-1 min-w-32">
-                                {INTERVALS.map(i => (
-                                    <button
-                                        key={i.id}
-                                        onClick={() => { setChartInterval(i.id); setShowIntervalDropdown(false); }}
-                                        className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-700 ${chartInterval === i.id ? 'text-blue-400' : ''}`}
-                                    >
-                                        {i.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    <IntervalSelector interval={chartInterval} onIntervalChange={setChartInterval} />
 
                     {/* Chart Type Dropdown */}
-                    <div className="relative">
-                        <button
-                            onClick={() => { setShowChartTypeDropdown(!showChartTypeDropdown); setShowIntervalDropdown(false); }}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-sm"
-                        >
-                            {(() => {
-                                const ct = CHART_TYPES.find(c => c.id === chartType);
-                                return ct ? <ct.icon size={16} /> : null;
-                            })()}
-                            {CHART_TYPES.find(c => c.id === chartType)?.label}
-                            <ChevronDown size={14} />
-                        </button>
-                        {showChartTypeDropdown && (
-                            <div className="absolute top-full mt-1 left-0 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-20 py-1 min-w-40">
-                                {CHART_TYPES.map(ct => (
-                                    <button
-                                        key={ct.id}
-                                        onClick={() => { setChartType(ct.id); setShowChartTypeDropdown(false); }}
-                                        className={`w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-slate-700 ${chartType === ct.id ? 'text-blue-400' : ''}`}
-                                    >
-                                        <ct.icon size={16} />
-                                        {ct.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    <ChartTypeSelector chartType={chartType} onChartTypeChange={setChartType} />
 
+                    <div className="h-5 w-px bg-slate-700/30 shrink-0" />
+
+                    {/* Feature Buttons Group */}
                     <button
                         onClick={() => setShowPatterns(!showPatterns)}
-                        className={`px-3 py-1.5 text-sm rounded transition ${showPatterns ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30' : 'bg-slate-800 hover:bg-slate-700'}`}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 shrink-0 ${showPatterns
+                            ? 'bg-purple-500/15 text-purple-400 border border-purple-500/25 shadow-[0_0_10px_rgba(168,85,247,0.1)]'
+                            : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
                     >
-                        Patterns
+                        <Eye size={13} />
+                        <span className="hidden sm:inline">Patterns</span>
                     </button>
 
-                    {/* Risk Analysis Toggle */}
                     <button
                         onClick={() => setShowRiskPanel(!showRiskPanel)}
-                        className={`px-3 py-1.5 text-sm rounded transition flex items-center gap-1 ${showRiskPanel ? 'bg-orange-600/20 text-orange-400 border border-orange-500/30' : 'bg-slate-800 hover:bg-slate-700'}`}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 shrink-0 ${showRiskPanel
+                            ? 'bg-orange-500/15 text-orange-400 border border-orange-500/25 shadow-[0_0_10px_rgba(249,115,22,0.1)]'
+                            : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
                     >
-                        Risk
+                        <Shield size={13} />
+                        <span className="hidden sm:inline">Risk</span>
                     </button>
 
-                    {/* Indicators Panel */}
+                    <div className="h-5 w-px bg-slate-700/30 shrink-0" />
+
+                    <div className="relative z-[60]">
+                        <ChartLayoutSelector layout={layout} onLayoutChange={setLayout} />
+                    </div>
+
+                    {/* Indicators */}
                     <IndicatorPanel
                         activeIndicators={activeIndicators}
                         onAddIndicator={handleAddIndicator}
@@ -1072,29 +1144,29 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                         onUpdateIndicator={handleUpdateIndicator}
                     />
 
-                    {/* Comparison Mode */}
+                    {/* Comparison */}
                     <ComparisonMode
                         primarySymbol={symbol}
                         primaryData={data}
                         onComparisonDataChange={setComparisonSymbols}
-                        period={getPeriodParams(period).period}
-                        interval={getPeriodParams(period).interval}
+                        period={getPeriodParams(period, chartInterval).period}
+                        interval={getPeriodParams(period, chartInterval).interval}
                     />
 
-                    {/* Multi-Timeframe Toggle */}
                     <button
                         onClick={() => setShowMultiTimeframe(true)}
-                        className="px-3 py-1.5 text-sm bg-slate-800 hover:bg-slate-700 rounded transition"
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 shrink-0"
                     >
-                        Multi-TF
+                        <Layers size={13} />
+                        <span className="hidden sm:inline">Multi-TF</span>
                     </button>
                 </div>
-            </div>
+            </header>
 
-            {/* Main Content */}
+            {/* ═══════ MAIN CONTENT ═══════ */}
             <div className="flex-1 flex overflow-hidden">
                 {/* Left: Drawing Tools */}
-                <div className="hidden md:flex w-12 border-r border-slate-800 bg-slate-900/50 flex flex-col items-center py-2 gap-1">
+                <div className="hidden md:flex w-11 border-r border-slate-800/50 bg-[#0b1020] flex-col items-center py-2 gap-0.5">
                     <ChartToolbar
                         activeTool={activeTool}
                         onToolSelect={startDrawingTool}
@@ -1103,14 +1175,17 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                     />
                 </div>
 
-                {/* Center: Chart */}
-                <div className="flex-1 flex flex-col relative min-h-0 bg-slate-950">
+                {/* Center: Chart Area */}
+                <div className="flex-1 flex flex-col relative min-h-0 min-w-0 bg-[#0a0e17]">
                     {layout === '1x1' ? (
                         <>
-                            {/* Loading overlay */}
+                            {/* Loading Overlay */}
                             {loading && (
-                                <div className="absolute inset-0 bg-slate-950/80 flex items-center justify-center z-10 transition-opacity duration-300">
-                                    <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                <div className="absolute inset-0 bg-[#0a0e17]/90 flex items-center justify-center z-10 transition-opacity duration-300">
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                        <span className="text-xs text-slate-500">Loading live data...</span>
+                                    </div>
                                 </div>
                             )}
 
@@ -1118,7 +1193,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                             <div ref={chartContainerRef} className="flex-1 w-full" />
 
                             {/* Volume chart */}
-                            <div ref={volumeContainerRef} className="h-20 border-t border-slate-800 w-full" />
+                            <div ref={volumeContainerRef} className="h-20 border-t border-slate-800/40 w-full" />
 
                             {/* SVG Drawing Layer */}
                             <svg
@@ -1126,7 +1201,6 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                                 className="absolute inset-0 pointer-events-none"
                                 style={{ top: 0, left: 0, width: '100%', height: 'calc(100% - 80px)' }}
                             >
-                                {/* Existing drawings would render here */}
                             </svg>
                         </>
                     ) : (
@@ -1149,33 +1223,47 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                 )}
             </div>
 
-            {/* Bottom Status Bar */}
-            <footer className="h-8 border-t border-slate-800 flex items-center justify-between px-4 text-xs text-slate-500 bg-slate-900/50">
-                <div className="flex items-center gap-4">
+            {/* ═══════ BOTTOM STATUS BAR ═══════ */}
+            <footer className="h-7 border-t border-slate-800/50 flex items-center justify-between px-4 text-[11px] bg-[#0b1020]/80 backdrop-blur-sm shrink-0">
+                <div className="flex items-center gap-3 sm:gap-5 text-slate-500 tabular-nums">
                     <span className="flex items-center gap-1">
-                        <Zap size={12} className={isLive ? 'text-green-500' : 'text-yellow-500'} />
-                        {isLive ? 'Live Data' : 'Paused'}
+                        <Zap size={10} className={isLive ? 'text-emerald-500' : 'text-amber-500'} />
+                        <span className={isLive ? 'text-emerald-500/70' : 'text-amber-500/70'}>{isLive ? 'Live' : 'Paused'}</span>
                     </span>
-                    <span>O: {crosshairData ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time)?.open ?? 0) : '-'}</span>
-                    <span>H: {crosshairData ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time)?.high ?? 0) : '-'}</span>
-                    <span>L: {crosshairData ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time)?.low ?? 0) : '-'}</span>
-                    <span>C: {crosshairData ? formatPrice(crosshairData.price) : '-'}</span>
-                    <span>Vol: {crosshairData ? formatNumber(crosshairData.volume) : '-'}</span>
+                    <span>
+                        <span className="text-blue-400/70 font-medium">O</span>{' '}
+                        {crosshairData ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time)?.open ?? 0) : '—'}
+                    </span>
+                    <span>
+                        <span className="text-emerald-400/70 font-medium">H</span>{' '}
+                        {crosshairData ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time)?.high ?? 0) : '—'}
+                    </span>
+                    <span>
+                        <span className="text-red-400/70 font-medium">L</span>{' '}
+                        {crosshairData ? formatPrice(data.find(d => d.date.split('T')[0] === crosshairData.time)?.low ?? 0) : '—'}
+                    </span>
+                    <span>
+                        <span className="text-amber-400/70 font-medium">C</span>{' '}
+                        {crosshairData ? formatPrice(crosshairData.price) : '—'}
+                    </span>
+                    <span className="hidden sm:inline">
+                        <span className="text-purple-400/70 font-medium">Vol</span>{' '}
+                        {crosshairData ? formatNumber(crosshairData.volume) : '—'}
+                    </span>
                 </div>
-                <div className="flex items-center gap-4">
-                    <span>Auto-refresh: {isLive ? '5s' : 'Off'}</span>
+                <div className="flex items-center gap-4 text-slate-600">
+                    <span className="hidden sm:inline">Refresh: {isLive ? '5s' : 'Off'}</span>
                     <span>© 2026 Pearto Finance</span>
                 </div>
             </footer>
 
-            {/* Risk Analysis Panel */}
+            {/* Panels & Modals */}
             <RiskAnalysisPanel
                 symbol={symbol}
                 isOpen={showRiskPanel}
                 onClose={() => setShowRiskPanel(false)}
             />
 
-            {/* Multi-Timeframe View Modal */}
             <MultiTimeframeView
                 symbol={symbol}
                 chartType={chartType}
@@ -1185,3 +1273,4 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
         </div>
     );
 }
+

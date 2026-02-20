@@ -145,6 +145,13 @@ export function MultiChart({
             return date.split('T')[0];
         };
 
+        // Deduplicate: keep last entry per time key
+        const dedup = <T extends { time: string | number }>(arr: T[]): T[] => {
+            const map = new Map<string | number, T>();
+            for (const item of arr) map.set(item.time, item);
+            return Array.from(map.values());
+        };
+
         // Remove existing chart
         if (chartRef.current) {
             chartRef.current.remove();
@@ -208,10 +215,10 @@ export function MultiChart({
                 crosshairMarkerBorderColor: '#ffffff',
             });
 
-            const areaData = sortedData.map(d => ({
+            const areaData = dedup(sortedData.map(d => ({
                 time: getTimeKey(d.date),
                 value: d.close ?? d.value ?? 0,
-            }));
+            })));
 
             series.setData(areaData as any);
             seriesRef.current = series as any;
@@ -226,7 +233,7 @@ export function MultiChart({
                 wickDownColor: negativeColor,
             });
 
-            const candleData = sortedData
+            const candleData = dedup(sortedData
                 .filter(d => d.open != null && d.high != null && d.low != null && d.close != null)
                 .map(d => ({
                     time: getTimeKey(d.date),
@@ -234,7 +241,7 @@ export function MultiChart({
                     high: d.high!,
                     low: d.low!,
                     close: d.close!,
-                }));
+                })));
 
             series.setData(candleData as any);
             seriesRef.current = series as any;
@@ -245,10 +252,10 @@ export function MultiChart({
                 lineWidth: 2,
             });
 
-            const lineData = sortedData.map(d => ({
+            const lineData = dedup(sortedData.map(d => ({
                 time: getTimeKey(d.date),
                 value: d.close ?? d.value ?? 0,
-            }));
+            })));
 
             series.setData(lineData as any);
             seriesRef.current = series as any;
@@ -264,10 +271,10 @@ export function MultiChart({
                 crosshairMarkerRadius: 4,
             });
 
-            const mountainData = sortedData.map(d => ({
+            const mountainData = dedup(sortedData.map(d => ({
                 time: getTimeKey(d.date),
                 value: d.close ?? d.value ?? 0,
-            }));
+            })));
 
             series.setData(mountainData as any);
             seriesRef.current = series as any;
@@ -280,7 +287,7 @@ export function MultiChart({
                 thinBars: false,
             });
 
-            const barsData = sortedData
+            const barsData = dedup(sortedData
                 .filter(d => d.open != null && d.high != null && d.low != null && d.close != null)
                 .map(d => ({
                     time: getTimeKey(d.date),
@@ -288,7 +295,7 @@ export function MultiChart({
                     high: d.high!,
                     low: d.low!,
                     close: d.close!,
-                }));
+                })));
 
             series.setData(barsData as any);
             seriesRef.current = series as any;
@@ -308,10 +315,10 @@ export function MultiChart({
                 lineWidth: 2,
             });
 
-            const baselineData = sortedData.map(d => ({
+            const baselineData = dedup(sortedData.map(d => ({
                 time: getTimeKey(d.date),
                 value: d.close ?? d.value ?? 0,
-            }));
+            })));
 
             series.setData(baselineData as any);
             seriesRef.current = series as any;
@@ -322,7 +329,7 @@ export function MultiChart({
                 color: chartColor,
             });
 
-            const histogramData = sortedData.map((d, i, arr) => {
+            const histogramData = dedup(sortedData.map((d, i, arr) => {
                 const prevClose = i > 0 ? (arr[i - 1].close ?? arr[i - 1].value ?? 0) : (d.close ?? d.value ?? 0);
                 const currentClose = d.close ?? d.value ?? 0;
                 return {
@@ -330,7 +337,7 @@ export function MultiChart({
                     value: currentClose,
                     color: currentClose >= prevClose ? positiveColor : negativeColor,
                 };
-            });
+            }));
 
             series.setData(histogramData as any);
             seriesRef.current = series as any;

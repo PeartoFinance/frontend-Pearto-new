@@ -1,21 +1,16 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, Plus, Trash2, X, Search, ExternalLink } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, Plus, Trash2, X, ExternalLink } from 'lucide-react';
 import { getPortfolios, createPortfolio, addHolding, deleteHolding, type Portfolio, type PortfolioHolding } from '@/services/portfolioService';
-import { get } from '@/services/api';
 import { TableExportButton } from '@/components/common/TableExportButton';
 import PriceDisplay from '@/components/common/PriceDisplay';
+import StockSymbolInput, { type MarketStock } from '@/components/common/StockSymbolInput';
 import HealthScore from '@/components/portfolio/HealthScore';
 import GoalSetting from '@/components/portfolio/GoalSetting';
 
-interface StockOption {
-    symbol: string;
-    name: string;
-    exchange?: string;
-}
 
 interface ProfilePortfolioProps {
     onAddHolding?: () => void;
@@ -35,49 +30,9 @@ export default function ProfilePortfolio({ onAddHolding }: ProfilePortfolioProps
     const [showHealthSettings, setShowHealthSettings] = useState(false);
     const [healthRefreshTrigger, setHealthRefreshTrigger] = useState(0);
 
-    // Stock search state
-    const [stockSearch, setStockSearch] = useState('');
-    const [stockOptions, setStockOptions] = useState<StockOption[]>([]);
-    const [showStockDropdown, setShowStockDropdown] = useState(false);
-    const [searchLoading, setSearchLoading] = useState(false);
-    const searchRef = useRef<HTMLDivElement>(null);
-
     useEffect(() => {
         loadPortfolios();
     }, []);
-
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-                setShowStockDropdown(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    // Search stocks when typing
-    useEffect(() => {
-        const searchStocks = async () => {
-            if (stockSearch.length < 1) {
-                setStockOptions([]);
-                return;
-            }
-            setSearchLoading(true);
-            try {
-                const results = await get<StockOption[]>(`/stocks/search?q=${stockSearch}&limit=10`);
-                setStockOptions(results);
-                setShowStockDropdown(true);
-            } catch (error) {
-                console.error('Failed to search stocks:', error);
-            } finally {
-                setSearchLoading(false);
-            }
-        };
-        const debounce = setTimeout(searchStocks, 300);
-        return () => clearTimeout(debounce);
-    }, [stockSearch]);
 
     const loadPortfolios = async () => {
         try {
@@ -109,10 +64,8 @@ export default function ProfilePortfolio({ onAddHolding }: ProfilePortfolioProps
         }
     };
 
-    const handleSelectStock = (stock: StockOption) => {
+    const handleSelectStock = (stock: MarketStock) => {
         setHoldingData({ ...holdingData, symbol: stock.symbol, name: stock.name });
-        setStockSearch(`${stock.symbol} - ${stock.name}`);
-        setShowStockDropdown(false);
     };
 
     const handleAddHolding = async () => {
@@ -128,7 +81,6 @@ export default function ProfilePortfolio({ onAddHolding }: ProfilePortfolioProps
             await loadPortfolios();
             setShowAddHoldingModal(false);
             setHoldingData({ symbol: '', name: '', shares: '', avgBuyPrice: '' });
-            setStockSearch('');
         } catch (error) {
             console.error('Failed to add holding:', error);
         } finally {
@@ -385,50 +337,20 @@ export default function ProfilePortfolio({ onAddHolding }: ProfilePortfolioProps
                     <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6 w-full max-w-md">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Add Holding</h3>
-                            <button onClick={() => { setShowAddHoldingModal(false); setStockSearch(''); setHoldingData({ symbol: '', name: '', shares: '', avgBuyPrice: '' }); }} className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-white">
+                            <button onClick={() => { setShowAddHoldingModal(false); setHoldingData({ symbol: '', name: '', shares: '', avgBuyPrice: '' }); }} className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-white">
                                 <X size={20} />
                             </button>
                         </div>
                         <div className="space-y-4 mb-6">
                             {/* Stock Symbol Search */}
-                            <div ref={searchRef} className="relative">
+                            <div>
                                 <label className="block text-sm text-gray-500 dark:text-slate-400 mb-2">Search Stock</label>
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        value={stockSearch}
-                                        onChange={(e) => setStockSearch(e.target.value)}
-                                        onFocus={() => stockOptions.length > 0 && setShowStockDropdown(true)}
-                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500"
-                                        placeholder="Search by symbol or name..."
-                                    />
-                                    {searchLoading && (
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                            <div className="w-4 h-4 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
-                                        </div>
-                                    )}
-                                </div>
-
-                                {showStockDropdown && stockOptions.length > 0 && (
-                                    <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg max-h-60 overflow-auto">
-                                        {stockOptions.map((stock) => (
-                                            <button
-                                                key={stock.symbol}
-                                                onClick={() => handleSelectStock(stock)}
-                                                className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-slate-700 transition flex items-center justify-between"
-                                            >
-                                                <div>
-                                                    <div className="font-medium text-gray-900 dark:text-white">{stock.symbol}</div>
-                                                    <div className="text-sm text-gray-500 dark:text-slate-400 truncate">{stock.name}</div>
-                                                </div>
-                                                {stock.exchange && (
-                                                    <span className="text-xs text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded">{stock.exchange}</span>
-                                                )}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
+                                <StockSymbolInput
+                                    value={holdingData.symbol}
+                                    onChange={(sym) => setHoldingData({ ...holdingData, symbol: sym })}
+                                    onSelectStock={handleSelectStock}
+                                    placeholder="Search by symbol or name..."
+                                />
                             </div>
 
                             {holdingData.symbol && (
@@ -461,7 +383,7 @@ export default function ProfilePortfolio({ onAddHolding }: ProfilePortfolioProps
                             </div>
                         </div>
                         <div className="flex gap-3">
-                            <button onClick={() => { setShowAddHoldingModal(false); setStockSearch(''); setHoldingData({ symbol: '', name: '', shares: '', avgBuyPrice: '' }); }} className="flex-1 px-4 py-3 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800">
+                            <button onClick={() => { setShowAddHoldingModal(false); setHoldingData({ symbol: '', name: '', shares: '', avgBuyPrice: '' }); }} className="flex-1 px-4 py-3 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800">
                                 Cancel
                             </button>
                             <button

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Manrope } from 'next/font/google';
 import './globals.css';
 import Providers from '@/components/Providers';
+import { Toaster } from 'sonner';
 
 const manrope = Manrope({
   subsets: ['latin'],
@@ -41,6 +42,15 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        <Toaster
+          position="top-right"
+          richColors
+          closeButton
+          toastOptions={{
+            duration: 3000,
+            className: 'font-sans',
+          }}
+        />
       </body>
     </html>
   );

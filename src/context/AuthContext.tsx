@@ -1,9 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef, ReactNode } from 'react';
 import { signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged, User as FirebaseUser, getRedirectResult } from 'firebase/auth';
 import { auth, googleProvider, signInWithGoogleRedirect } from '@/lib/firebase';
 import SetPasswordModal from '@/components/auth/SetPasswordModal';
+import { fixImageUrl } from '@/utils/imageUtils';
 
 interface User {
     id: string;
@@ -49,7 +50,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (savedToken && savedUser) {
                 setToken(savedToken);
-                setUser(JSON.parse(savedUser));
+                const parsedUser = JSON.parse(savedUser);
+                if (parsedUser.avatarUrl) {
+                    parsedUser.avatarUrl = fixImageUrl(parsedUser.avatarUrl);
+                }
+                setUser(parsedUser);
             }
         } catch (error) {
             console.error('Error loading auth state:', error);
@@ -65,6 +70,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, [user]);
 
+    // Listen for auth:expired events from API interceptors (401 responses)
+    useEffect(() => {
+        const handleAuthExpired = (event: Event) => {
+            // Check if we have a valid token currently
+            const currentToken = localStorage.getItem(AUTH_TOKEN_KEY);
+
+            // If no token, we're already logged out
+            if (!currentToken) return;
+
+            // Optional: You could check if the 401 really came from a meaningful request
+            // For now, we'll just log it and proceed, but we might want to be more conservative
+            console.warn('[AuthContext] Token expired — logging out. Event:', event);
+
+            setUser(null);
+            setToken(null);
+            localStorage.removeItem(AUTH_TOKEN_KEY);
+            localStorage.removeItem(AUTH_USER_KEY);
+
+            // Sign out of Firebase too
+            firebaseSignOut(auth).catch(() => { });
+        };
+        window.addEventListener('auth:expired', handleAuthExpired);
+        return () => window.removeEventListener('auth:expired', handleAuthExpired);
+    }, []);
+
+    // Flag to prevent double-sync race condition between signInWithGoogle and onAuthStateChanged
+    const isSyncingRef = useRef(false);
+
     // Listen for Firebase auth state changes
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
@@ -72,9 +105,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 // Check if we need to sync with backend (missing token)
                 const localToken = localStorage.getItem(AUTH_TOKEN_KEY);
 
-                if (!localToken) {
+                if (!localToken && !isSyncingRef.current) {
+                    // Prevent concurrent syncs (signInWithGoogle also calls google-signin)
+                    isSyncingRef.current = true;
                     console.log('Firebase user found but no token. Syncing with backend...');
                     try {
+                        // Re-check — signInWithGoogle may have saved a token while we awaited
+                        const recheckToken = localStorage.getItem(AUTH_TOKEN_KEY);
+                        if (recheckToken) {
+                            console.log('[AuthContext] Token appeared during sync, skipping');
+                            isSyncingRef.current = false;
+                            return;
+                        }
+
                         const idToken = await firebaseUser.getIdToken();
                         const response = await fetch(`${API_BASE}/auth/google-signin`, {
                             method: 'POST',
@@ -95,34 +138,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                                 localStorage.setItem(AUTH_TOKEN_KEY, data.token);
                             }
                             if (data.user) {
+                                if (data.user.avatarUrl) {
+                                    data.user.avatarUrl = fixImageUrl(data.user.avatarUrl);
+                                }
                                 setUser(data.user);
                                 localStorage.setItem(AUTH_USER_KEY, JSON.stringify(data.user));
-                                return; // Done
+                                isSyncingRef.current = false;
+                                return; // Done — synced successfully
                             }
                         }
+
+                        // Backend rejected the sync — sign out Firebase to avoid half-auth state
+                        console.warn('[AuthContext] Backend sync failed, signing out Firebase');
+                        await firebaseSignOut(auth).catch(() => { });
                     } catch (error) {
                         console.error('Backend sync error:', error);
+                        // Sign out Firebase to prevent half-authenticated loops
+                        await firebaseSignOut(auth).catch(() => { });
+                    } finally {
+                        isSyncingRef.current = false;
                     }
-                }
-
-                if (!user) {
-                    // User signed in with Firebase but no local user - create one
-                    const userData: User = {
-                        id: firebaseUser.uid,
-                        name: firebaseUser.displayName || 'User',
-                        email: firebaseUser.email || '',
-                        role: 'user',
-                        avatarUrl: firebaseUser.photoURL || undefined,
-                        isVerified: firebaseUser.emailVerified,
-                    };
-                    setUser(userData);
-                    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userData));
                 }
             }
         });
 
         return () => unsubscribe();
-    }, [user, token]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Handle redirect result (for redirect-based OAuth flow)
     useEffect(() => {
@@ -193,6 +235,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const data = await response.json();
 
+        if (data.user && data.user.avatarUrl) {
+            data.user.avatarUrl = fixImageUrl(data.user.avatarUrl);
+        }
+
         setUser(data.user);
         setToken(data.token);
         localStorage.setItem(AUTH_TOKEN_KEY, data.token);
@@ -217,6 +263,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const signInWithGoogle = useCallback(async () => {
         try {
+            // Set flag BEFORE popup — onAuthStateChanged fires the instant popup resolves,
+            // before the next line of this async function executes
+            isSyncingRef.current = true;
+
             // Try popup-based sign-in first (better UX)
             const result = await signInWithPopup(auth, googleProvider);
             const firebaseUser = result.user;
@@ -263,8 +313,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 }
             } catch {
                 // Ignore backend sync errors - user is still logged in via Firebase
+            } finally {
+                isSyncingRef.current = false;
             }
         } catch (error: unknown) {
+            isSyncingRef.current = false;
             console.error('Google sign-in error:', error);
 
             const firebaseError = error as { code?: string; message?: string };

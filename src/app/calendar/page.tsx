@@ -7,6 +7,7 @@ import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import { getEconomicCalendar, EconomicEvent } from '@/services/marketService';
 import { Loader2, Calendar as CalendarIcon, ArrowLeft, Filter, Globe } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function EconomicCalendarPage() {
     const [events, setEvents] = useState<EconomicEvent[]>([]);
@@ -74,7 +75,10 @@ export default function EconomicCalendarPage() {
                         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
                             <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
                                 <h2 className="font-semibold text-slate-900 dark:text-white">Upcoming Events</h2>
-                                <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
+                                <button
+                                    onClick={() => toast.info('Calendar filters coming soon!')}
+                                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"
+                                >
                                     <Filter size={16} /> Filter
                                 </button>
                             </div>

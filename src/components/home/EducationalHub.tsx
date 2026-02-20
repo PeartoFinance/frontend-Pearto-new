@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronRight, BookOpen, Clock, Loader2, AlertCircle } from 'lucide-react';
+import { ChevronRight, BookOpen, AlertCircle } from 'lucide-react';
 import { useCourses } from '@/hooks/useEducationData';
 
 interface Course {
@@ -49,18 +49,29 @@ export default function EducationalHub() {
     };
 
     return (
-        <section className="py-8">
-            <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Educational Hub</h2>
-                <p className="text-gray-500 dark:text-gray-400">
-                    Comprehensive learning and development platform for professional growth and education
-                </p>
+        <section>
+            <div className="flex items-end justify-between mb-4">
+                <div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Educational Hub</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                        Professional courses for growth and development
+                    </p>
+                </div>
+                <Link href="/learn" className="hidden sm:flex items-center gap-1 text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-colors">
+                    Browse all <ChevronRight size={14} />
+                </Link>
             </div>
 
             {loading ? (
-                <div className="flex items-center justify-center py-12">
-                    <Loader2 className="animate-spin text-emerald-500" size={24} />
-                    <span className="ml-2 text-slate-500 dark:text-slate-400">Loading courses...</span>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                        <div key={i} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 animate-pulse">
+                            <div className="h-4 w-16 bg-slate-200 dark:bg-slate-600 rounded mb-3" />
+                            <div className="h-8 w-8 bg-slate-200 dark:bg-slate-600 rounded-lg mb-3" />
+                            <div className="h-4 w-full bg-slate-200 dark:bg-slate-600 rounded mb-2" />
+                            <div className="h-3 w-20 bg-slate-200 dark:bg-slate-600 rounded" />
+                        </div>
+                    ))}
                 </div>
             ) : error && courses.length === 0 ? (
                 <div className="flex items-center justify-center py-12 text-slate-500 dark:text-slate-400">
@@ -68,56 +79,37 @@ export default function EducationalHub() {
                     <span>Failed to load courses</span>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     {courses.slice(0, 5).map((course) => (
                         <Link
                             key={course.id}
                             href={`/learn/${course.slug || course.id}`}
-                            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:border-emerald-500 transition-all group relative shadow-sm hover:shadow-md"
+                            className="group bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/50 rounded-xl p-4 hover:border-emerald-500/50 transition-all relative hover:shadow-md"
                         >
                             {/* Level badge */}
-                            <div className="flex gap-2 mb-3">
-                                <span className={`px-2 py-0.5 text-[10px] font-medium rounded ${getLevelColor(course.level)}`}>
-                                    {course.level || 'Beginner'}
-                                </span>
-                            </div>
+                            <span className={`inline-block px-2 py-0.5 text-[10px] font-medium rounded ${getLevelColor(course.level)} mb-3`}>
+                                {course.level || 'Beginner'}
+                            </span>
 
                             {/* Icon */}
-                            <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-3">
-                                <BookOpen size={20} className="text-emerald-500" />
+                            <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-3">
+                                <BookOpen size={18} className="text-emerald-500" />
                             </div>
 
                             {/* Title */}
-                            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">{course.title}</h3>
-                            <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">{course.category || 'General'}</p>
+                            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-0.5 line-clamp-2">{course.title}</h3>
+                            <p className="text-gray-500 dark:text-gray-400 text-[11px] mb-3">{course.category || 'General'}</p>
 
                             {/* Stats */}
-                            <div className="flex gap-4 mb-3">
-                                <div>
-                                    <span className="text-lg font-bold text-gray-900 dark:text-white">{course.duration || 10}</span>
-                                    <p className="text-[10px] text-gray-500">Hours</p>
-                                </div>
-                                <div>
-                                    <span className="text-lg font-bold text-gray-900 dark:text-white">{(course.enrolledCount || 0).toLocaleString()}</span>
-                                    <p className="text-[10px] text-gray-500">Students</p>
-                                </div>
+                            <div className="flex gap-3 text-[11px] text-gray-500 dark:text-gray-400">
+                                <span><strong className="text-gray-900 dark:text-white">{course.duration || 10}</strong> hrs</span>
+                                <span><strong className="text-gray-900 dark:text-white">{(course.enrolledCount || 0).toLocaleString()}</strong> learners</span>
                             </div>
 
-                            {/* Description */}
-                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">{course.description}</p>
-
-                            {/* Duration (Alternative display if needed, otherwise removed as redundant) */}
-                            {course.lessonsCount && (
-                                <div className="flex items-center gap-1 text-[10px] text-gray-500">
-                                    <Clock size={10} />
-                                    Lessons: {course.lessonsCount}
-                                </div>
-                            )}
-
                             {/* Arrow on hover */}
-                            <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
-                                    <ChevronRight size={16} className="text-white" />
+                            <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center">
+                                    <ChevronRight size={14} className="text-white" />
                                 </div>
                             </div>
                         </Link>
@@ -126,23 +118,18 @@ export default function EducationalHub() {
             )}
 
             {/* Stats Bar */}
-            <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalCourses}+</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Courses Available</p>
-                </div>
-                <div className="text-center p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{(stats.totalStudents / 1000).toFixed(0)}K+</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Active Learners</p>
-                </div>
-                <div className="text-center p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.avgCompletionRate}%</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Completion Rate</p>
-                </div>
-                <div className="text-center p-4 bg-emerald-500 text-white rounded-lg">
-                    <p className="text-2xl font-bold">24/7</p>
-                    <p className="text-sm text-emerald-100">Support Available</p>
-                </div>
+            <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                    { label: 'Courses Available', value: `${stats.totalCourses}+`, color: '' },
+                    { label: 'Active Learners', value: `${(stats.totalStudents / 1000).toFixed(0)}K+`, color: '' },
+                    { label: 'Completion Rate', value: `${stats.avgCompletionRate}%`, color: '' },
+                    { label: 'Support Available', value: '24/7', color: 'bg-emerald-500 text-white border-emerald-500' },
+                ].map((s) => (
+                    <div key={s.label} className={`text-center p-3 rounded-xl border transition-colors ${s.color || 'bg-white dark:bg-slate-800/80 border-slate-200/80 dark:border-slate-700/50'}`}>
+                        <p className={`text-xl font-bold ${s.color ? 'text-white' : 'text-gray-900 dark:text-white'}`}>{s.value}</p>
+                        <p className={`text-xs mt-0.5 ${s.color ? 'text-emerald-100' : 'text-gray-500 dark:text-gray-400'}`}>{s.label}</p>
+                    </div>
+                ))}
             </div>
         </section>
     );

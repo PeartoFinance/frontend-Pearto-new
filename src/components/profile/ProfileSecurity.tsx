@@ -96,6 +96,10 @@ export default function ProfileSecurity({ onPasswordChange }: ProfileSecurityPro
 
         try {
             const response = await changePassword(formData.currentPassword, formData.newPassword);
+            // Update auth token with the new one issued by the backend
+            if (response.token) {
+                localStorage.setItem('auth_token', response.token);
+            }
             setMessage({ type: 'success', text: response.message || 'Password changed successfully!' });
             setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
             onPasswordChange?.();

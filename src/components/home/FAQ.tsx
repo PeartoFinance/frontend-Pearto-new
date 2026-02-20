@@ -16,22 +16,22 @@ export default function FAQ() {
     if (!loading && faqs.length === 0) return null;
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-gray-100 dark:border-slate-700 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                        <HelpCircle size={20} />
+        <div className="bg-white dark:bg-slate-800/80 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/50">
+            <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                        <HelpCircle size={18} />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Quick Answers</h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Frequently Asked Questions</p>
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-white">Quick Answers</h2>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Frequently Asked Questions</p>
                     </div>
                 </div>
                 <Link
                     href="/faq"
                     className="flex items-center gap-1 text-sm font-medium text-emerald-500 hover:text-emerald-600 transition-colors"
                 >
-                    View All <ArrowRight size={16} />
+                    View All <ArrowRight size={14} />
                 </Link>
             </div>
 

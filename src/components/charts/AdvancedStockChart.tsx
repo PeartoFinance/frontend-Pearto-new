@@ -1,14 +1,16 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { createChart, ColorType, CandlestickSeries, AreaSeries, LineSeries, HistogramSeries, type IChartApi, type ISeriesApi, CrosshairMode } from 'lightweight-charts';
+import { createChart, ColorType, CandlestickSeries, AreaSeries, LineSeries, HistogramSeries, type IChartApi, type ISeriesApi, CrosshairMode, createSeriesMarkers } from 'lightweight-charts';
 import { Loader2, Plus, Minus, Maximize2, Settings, Download, ExternalLink, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useChartDrawings, type Drawing, type DrawingPoint } from '@/hooks/useChartDrawings';
 import { ChartToolbar } from './toolbar/ChartToolbar';
 import { calculateSMA, calculateRSI, detectPatterns, type ChartMarker } from '@/utils/technicalAnalysis';
+import { toast } from 'sonner';
 import { StockChartDataPoint } from './StockChartWidget'; // Reuse interface
+import { useChartResize } from '@/hooks/useChartResize';
 
 interface AdvancedStockChartProps {
     data: StockChartDataPoint[];
@@ -30,6 +32,7 @@ export default function AdvancedStockChart({
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
     const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+    const patternMarkersRef = useRef<any>(null);
 
     // State
     const [isDark, setIsDark] = useState(false);
@@ -95,19 +98,13 @@ export default function AdvancedStockChart({
         });
         seriesRef.current = mainSeries;
 
-        // Handle Resize
-        const handleResize = () => {
-            if (chartContainerRef.current) {
-                chart.applyOptions({ width: chartContainerRef.current.clientWidth });
-            }
-        };
-        window.addEventListener('resize', handleResize);
-
         return () => {
-            window.removeEventListener('resize', handleResize);
             chart.remove();
         };
     }, [isDark, height]);
+
+    // Apply ResizeObserver hook for robust responsive sizing
+    useChartResize(chartRef.current, chartContainerRef);
 
     // 2. Update Data & Patterns
     useEffect(() => {
@@ -137,18 +134,22 @@ export default function AdvancedStockChart({
         chartRef.current?.timeScale().fitContent();
 
         // Detect Patterns
+        if (!patternMarkersRef.current || (seriesRef.current && patternMarkersRef.current.getSeries() !== seriesRef.current)) {
+            if (seriesRef.current) {
+                patternMarkersRef.current = createSeriesMarkers(seriesRef.current);
+            }
+        }
+
         if (showPatterns) {
             const detected = detectPatterns(candleData as any);
             setMarkers(detected);
-            if (seriesRef.current && typeof (seriesRef.current as any).setMarkers === 'function') {
-                (seriesRef.current as any).setMarkers(detected);
+            if (patternMarkersRef.current) {
+                patternMarkersRef.current.setMarkers(detected);
             }
         } else {
             setMarkers([]);
-            setMarkers([]);
-            setMarkers([]);
-            if (seriesRef.current && typeof (seriesRef.current as any).setMarkers === 'function') {
-                (seriesRef.current as any).setMarkers([]);
+            if (patternMarkersRef.current) {
+                patternMarkersRef.current.setMarkers([]);
             }
         }
 
@@ -332,7 +333,10 @@ export default function AdvancedStockChart({
                     </Link>
 
                     {/* Indicators Placeholder */}
-                    <button className="text-xs px-2 py-1 rounded text-slate-500 hover:bg-slate-200 flex-shrink-0">
+                    <button
+                        onClick={() => toast.info('Chart indicators coming soon!')}
+                        className="text-xs px-2 py-1 rounded text-slate-500 hover:bg-slate-200 flex-shrink-0"
+                    >
                         <Settings size={16} />
                     </button>
                 </div>

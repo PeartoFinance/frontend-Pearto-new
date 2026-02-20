@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell, X, Check, TrendingUp, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { get } from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
 
 // Types for Alerts (mirroring backend UserAlert)
 interface UserAlert {
@@ -24,26 +25,23 @@ export default function NotificationsMenu() {
     const [loading, setLoading] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const menuRef = useRef<HTMLDivElement>(null);
+    const { isAuthenticated } = useAuth();
 
-    // Fetch alerts
+    // Fetch alerts — only when authenticated
     const fetchAlerts = async () => {
+        if (!isAuthenticated) return;
+
         try {
             setLoading(true);
-            // Verify endpoint in userService exists or use direct api call
             const data = await get<UserAlert[]>('/user/alerts');
 
-            // Filter/Sort: prioritizing triggered alerts or recent ones
-            // For now, let's just show all, but visually distinguish triggered ones
             const sortedAndFiltered = data.sort((a, b) => {
-                // Triggered first, then new
                 if (a.isTriggered && !b.isTriggered) return -1;
                 if (!a.isTriggered && b.isTriggered) return 1;
                 return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
             });
 
             setAlerts(sortedAndFiltered);
-
-            // Calculate "unread" as triggered alerts for now
             const triggeredCount = sortedAndFiltered.filter(a => a.isTriggered).length;
             setUnreadCount(triggeredCount);
         } catch (error) {
@@ -53,13 +51,17 @@ export default function NotificationsMenu() {
         }
     };
 
-    // Initial load and polling
+    // Initial load and polling — only when authenticated
     useEffect(() => {
+        if (!isAuthenticated) {
+            setAlerts([]);
+            setUnreadCount(0);
+            return;
+        }
         fetchAlerts();
-        // Poll every 60 seconds
         const interval = setInterval(fetchAlerts, 60000);
         return () => clearInterval(interval);
-    }, []);
+    }, [isAuthenticated]);
 
     // Close on click outside
     useEffect(() => {
@@ -125,8 +127,8 @@ export default function NotificationsMenu() {
                                     >
                                         <div className="flex gap-3">
                                             <div className={`mt-1 p-2 rounded-full shrink-0 ${alert.isTriggered
-                                                    ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                                    : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                                                ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                                : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
                                                 }`}>
                                                 {alert.isTriggered ? <Check size={16} /> : <TrendingUp size={16} />}
                                             </div>

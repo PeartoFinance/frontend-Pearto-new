@@ -239,7 +239,10 @@ function StockCompareContent() {
                                                 <p className="font-semibold text-slate-900 dark:text-white">{stock.symbol}</p>
                                                 <p className="text-xs text-slate-500">{stock.name}</p>
                                             </div>
-                                            <button className="flex items-center gap-1 px-3 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-600 rounded text-sm">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); addStock(stock); }}
+                                                className="flex items-center gap-1 px-3 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-600 rounded text-sm"
+                                            >
                                                 <Plus size={14} /> Add
                                             </button>
                                         </div>
@@ -273,8 +276,36 @@ function StockCompareContent() {
                         )}
 
                         {!loading && stocks.length === 0 && (
-                            <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
-                                <p className="text-slate-500">Search and add stocks to compare</p>
+                            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+                                <div className="text-center mb-6">
+                                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Popular Comparisons</h2>
+                                    <p className="text-sm text-slate-500 mt-1">Click any comparison to get started instantly</p>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    {[
+                                        { label: 'Big Tech', symbols: ['AAPL', 'MSFT', 'GOOGL'], emoji: '💻' },
+                                        { label: 'EV Makers', symbols: ['TSLA', 'RIVN', 'LCID'], emoji: '🚗' },
+                                        { label: 'Streaming Wars', symbols: ['NFLX', 'DIS', 'WBD'], emoji: '🎬' },
+                                        { label: 'Chip Giants', symbols: ['NVDA', 'AMD', 'INTC'], emoji: '🔧' },
+                                        { label: 'Social Media', symbols: ['META', 'SNAP', 'PINS'], emoji: '📱' },
+                                        { label: 'E-Commerce', symbols: ['AMZN', 'SHOP', 'EBAY'], emoji: '🛒' },
+                                        { label: 'Finance', symbols: ['JPM', 'GS', 'BAC'], emoji: '🏦' },
+                                        { label: 'Cloud & SaaS', symbols: ['CRM', 'NOW', 'SNOW'], emoji: '☁️' },
+                                        { label: 'Healthcare', symbols: ['JNJ', 'PFE', 'UNH'], emoji: '💊' },
+                                    ].map((group) => (
+                                        <button
+                                            key={group.label}
+                                            onClick={() => loadStocks(group.symbols)}
+                                            className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-teal-400 dark:hover:border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-900/10 transition-all group text-left"
+                                        >
+                                            <span className="text-2xl">{group.emoji}</span>
+                                            <div>
+                                                <p className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-teal-600">{group.label}</p>
+                                                <p className="text-xs text-slate-400">{group.symbols.join(' vs ')}</p>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         )}
 

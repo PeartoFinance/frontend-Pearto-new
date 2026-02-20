@@ -15,12 +15,11 @@ export interface Vendor {
     isFeatured: boolean;
     logoUrl?: string;
     website?: string;
+    email?: string;
+    phone?: string;
     metadata?: Record<string, any>;
     countryCode?: string;
     createdAt?: string;
-    location?: string;
-    phone?: string;
-    hours?: string;
 }
 
 export interface VendorFilters {

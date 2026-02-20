@@ -9,6 +9,7 @@ import {
 import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
+import { toast } from 'sonner';
 import { groupsApi, DiscussionGroup, GroupPost } from '@/services/socialService';
 import { useAuth } from '@/context/AuthContext';
 
@@ -263,7 +264,10 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                                                     </div>
                                                     <p className="text-slate-700 dark:text-slate-300 mt-2">{post.content}</p>
                                                 </div>
-                                                <button className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700">
+                                                <button
+                                                    onClick={() => toast.info('Post options coming soon!')}
+                                                    className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700"
+                                                >
                                                     <MoreVertical size={16} className="text-slate-400" />
                                                 </button>
                                             </div>

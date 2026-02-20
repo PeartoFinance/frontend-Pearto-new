@@ -69,7 +69,7 @@ export default function VendorsPage() {
                     <Header />
                 </div>
 
-                <div className="flex-1 pt-[112px] md:pt-[120px] pb-20 overflow-x-hidden">
+                <div className="flex-1 pt-[112px] md:pt-[120px] pb-20 overflow-x-hidden mt-10">
                     {/* Page Header */}
                     <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-800">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-8">

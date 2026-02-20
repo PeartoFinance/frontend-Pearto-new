@@ -100,7 +100,7 @@ export default function ChartLayoutSelector({ layout, onLayoutChange, className 
             </button>
 
             {isOpen && (
-                <div className="absolute top-full mt-1 left-0 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-30 p-2 min-w-48">
+                <div className="absolute top-full mt-1 left-0 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-[100] p-2 min-w-48">
                     <div className="text-xs text-slate-500 uppercase tracking-wider px-2 py-1 mb-1">
                         Chart Layout
                     </div>
@@ -113,8 +113,8 @@ export default function ChartLayoutSelector({ layout, onLayoutChange, className 
                                     setIsOpen(false);
                                 }}
                                 className={`flex flex-col items-center gap-1 p-3 rounded transition ${layout === option.id
-                                        ? 'bg-blue-600 text-white'
-                                        : 'hover:bg-slate-700 text-slate-300'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'hover:bg-slate-700 text-slate-300'
                                     }`}
                             >
                                 {/* Visual grid representation */}

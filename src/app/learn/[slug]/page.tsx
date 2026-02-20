@@ -10,6 +10,7 @@ import { get } from '@/services/api';
 import { enrollCourse } from '@/services/educationService';
 import { useAuth } from '@/context/AuthContext';
 import PriceDisplay from '@/components/common/PriceDisplay';
+import { toast } from 'sonner';
 import {
     ArrowLeft, Star, Users, Clock, Award, Play, CheckCircle,
     BookOpen, Lock, GraduationCap, Share2, Heart, Zap, Download
@@ -290,10 +291,26 @@ export default function CourseDetailPage() {
 
                                             {/* Actions */}
                                             <div className="flex items-center justify-center gap-4 pt-2 border-t border-slate-200 dark:border-slate-700/50">
-                                                <button className="p-2 text-slate-500 hover:text-rose-500 dark:text-slate-400 dark:hover:text-rose-400 transition" title="Wishlist">
+                                                <button
+                                                    onClick={() => toast.info('Wishlist coming soon!')}
+                                                    className="p-2 text-slate-500 hover:text-rose-500 dark:text-slate-400 dark:hover:text-rose-400 transition"
+                                                    title="Wishlist"
+                                                >
                                                     <Heart className="h-5 w-5" />
                                                 </button>
-                                                <button className="p-2 text-slate-500 hover:text-emerald-500 dark:text-slate-400 dark:hover:text-emerald-400 transition" title="Share">
+                                                <button
+                                                    onClick={async () => {
+                                                        const url = window.location.href;
+                                                        if (navigator.share) {
+                                                            await navigator.share({ title: course?.title || 'Course', url });
+                                                        } else {
+                                                            await navigator.clipboard.writeText(url);
+                                                            toast.success('Link copied to clipboard!');
+                                                        }
+                                                    }}
+                                                    className="p-2 text-slate-500 hover:text-emerald-500 dark:text-slate-400 dark:hover:text-emerald-400 transition"
+                                                    title="Share"
+                                                >
                                                     <Share2 className="h-5 w-5" />
                                                 </button>
                                             </div>

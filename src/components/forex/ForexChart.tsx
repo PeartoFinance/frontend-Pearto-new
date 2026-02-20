@@ -5,14 +5,20 @@ import { createChart, ColorType, IChartApi, CandlestickSeries } from 'lightweigh
 import { ArrowUp, ArrowDown, Loader2, Maximize2, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { getForexHistory } from '@/services/marketService';
+import StockSymbolInput from '@/components/common/StockSymbolInput';
+import { useChartResize } from '@/hooks/useChartResize';
 
-const pairs = [
+const defaultPairs = [
     { symbol: 'EURUSD', name: 'EUR/USD' },
     { symbol: 'GBPUSD', name: 'GBP/USD' },
     { symbol: 'USDJPY', name: 'USD/JPY' },
     { symbol: 'USDCHF', name: 'USD/CHF' },
     { symbol: 'AUDUSD', name: 'AUD/USD' },
     { symbol: 'USDCAD', name: 'USD/CAD' },
+    { symbol: 'USDNPR', name: 'USD/NPR' },
+    { symbol: 'USDINR', name: 'USD/INR' },
+    { symbol: 'USDCNY', name: 'USD/CNY' },
+    { symbol: 'GBPEUR', name: 'GBP/EUR' },
 ];
 
 interface ForexChartProps {
@@ -30,6 +36,18 @@ export default function ForexChart({ pair, onPairChange }: ForexChartProps = {})
 
     // Use prop if available, otherwise internal state
     const selectedPair = pair || internalPair;
+
+    // Build pairs list — include param pair if not in defaults
+    const pairs = (() => {
+        const list = [...defaultPairs];
+        if (selectedPair && !list.some(p => p.symbol === selectedPair)) {
+            const sym = selectedPair.toUpperCase();
+            const base = sym.slice(0, 3);
+            const quote = sym.slice(3);
+            list.push({ symbol: sym, name: `${base}/${quote}` });
+        }
+        return list;
+    })();
 
     const [timeframe, setTimeframe] = useState('1mo');
     const [loading, setLoading] = useState(false);
@@ -70,22 +88,13 @@ export default function ForexChart({ pair, onPairChange }: ForexChartProps = {})
         seriesRef.current = candlestickSeries;
         chartRef.current = chart;
 
-        const handleResize = () => {
-            if (chartContainerRef.current) {
-                chart.applyOptions({
-                    width: chartContainerRef.current.clientWidth,
-                    height: chartContainerRef.current.clientHeight
-                });
-            }
-        };
-
-        window.addEventListener('resize', handleResize);
-
         return () => {
-            window.removeEventListener('resize', handleResize);
             chart.remove();
         };
     }, []);
+
+    // Apply ResizeObserver hook for robust responsive sizing
+    useChartResize(chartRef.current, chartContainerRef);
 
     // Load Data Effect
     useEffect(() => {
@@ -197,21 +206,15 @@ export default function ForexChart({ pair, onPairChange }: ForexChartProps = {})
                         </select>
                     ) : (
                         <div className="flex items-center gap-2">
-                            <input
-                                type="text"
-                                placeholder="BTCUSD"
-                                className="bg-slate-100 dark:bg-slate-700 border-none rounded-lg px-3 py-2 text-sm font-semibold focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white w-24 uppercase"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        const val = e.currentTarget.value.toUpperCase();
-                                        if (val) handleUpdatePair(val);
-                                    }
+                            <StockSymbolInput
+                                value={internalPair}
+                                onChange={(val) => {
+                                    handleUpdatePair(val);
+                                    setShowCustomInput(false);
                                 }}
-                                autoFocus
-                                onBlur={(e) => {
-                                    const val = e.target.value.toUpperCase();
-                                    if (val) handleUpdatePair(val);
-                                }}
+                                assetType="forex"
+                                placeholder="Search pair..."
+                                className="w-40"
                             />
                             <button
                                 onClick={() => setShowCustomInput(false)}

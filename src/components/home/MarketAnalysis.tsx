@@ -8,10 +8,19 @@ import { get } from '@/services/api';
 interface Article {
     id: number | string;
     title: string;
+    source?: string;
     author?: string;
     summary?: string;
+    image?: string;
     imageUrl?: string;
+    published_at?: string;
     publishedAt?: string;
+    slug?: string;
+}
+
+interface NewsResponse {
+    items: Article[];
+    total: number;
 }
 
 export default function MarketAnalysis() {
@@ -22,8 +31,8 @@ export default function MarketAnalysis() {
         const fetchArticles = async () => {
             try {
                 setLoading(true);
-                const data = await get<Article[]>('/articles/featured', { limit: 2 });
-                setArticles(data || []);
+                const data = await get<NewsResponse>('/news/published', { limit: 6 });
+                setArticles(data?.items || []);
             } catch (err) {
                 console.error('Failed to fetch market analysis articles:', err);
                 setArticles([]);
@@ -79,17 +88,17 @@ export default function MarketAnalysis() {
             </h3>
             <div className="space-y-4">
                 {articles.map((article) => (
-                    <Link key={article.id} href="/news" className="flex gap-4 group">
+                    <Link key={article.id} href={article.slug ? `/news/${article.slug}` : '/news'} className="flex gap-4 group">
                         <div
                             className="h-16 w-16 flex-shrink-0 rounded-lg bg-cover bg-center bg-slate-200 dark:bg-slate-700"
-                            style={{ backgroundImage: article.imageUrl ? `url('${article.imageUrl}')` : undefined }}
+                            style={{ backgroundImage: (article.image || article.imageUrl) ? `url('${article.image || article.imageUrl}')` : undefined }}
                         />
-                        <div className="flex flex-col justify-center">
+                        <div className="flex flex-col justify-center min-w-0">
                             <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-emerald-600 transition-colors line-clamp-2">
                                 {article.title}
                             </h4>
                             <p className="text-xs text-slate-500 mt-1">
-                                By {article.author || 'Staff'} • {getTimeAgo(article.publishedAt)}
+                                By {article.source || article.author || 'Staff'} • {getTimeAgo(article.published_at || article.publishedAt)}
                             </p>
                         </div>
                     </Link>

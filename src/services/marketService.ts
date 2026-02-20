@@ -521,7 +521,9 @@ export async function getEconomicCalendar(start?: string, end?: string, limit = 
  * Get forex history
  */
 export async function getForexHistory(symbol: string, period = '1mo', interval = '1d'): Promise<PriceHistoryPoint[]> {
-    return get<PriceHistoryPoint[]>(`/market/forex/history/${symbol}`, { period, interval });
+    // Normalize symbol: USD/NPR → USDNPR (strip slashes/dashes for clean URL)
+    const normalizedSymbol = symbol.replace(/[\/\-]/g, '').toUpperCase();
+    return get<PriceHistoryPoint[]>(`/market/forex/history/${normalizedSymbol}`, { period, interval });
 }
 
 /**

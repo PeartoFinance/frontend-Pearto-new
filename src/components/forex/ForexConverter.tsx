@@ -1,15 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowRightLeft, RefreshCw } from 'lucide-react';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
 
-export default function ForexConverter() {
+interface ForexConverterProps {
+    initialFrom?: string;
+    initialTo?: string;
+}
+
+export default function ForexConverter({ initialFrom, initialTo }: ForexConverterProps = {}) {
     const { rates, convertPrice, formatPrice } = useCurrency();
     const [amount, setAmount] = useState<number>(1);
-    const [fromCurrency, setFromCurrency] = useState('USD');
-    const [toCurrency, setToCurrency] = useState('EUR');
+    const [fromCurrency, setFromCurrency] = useState(initialFrom || 'USD');
+    const [toCurrency, setToCurrency] = useState(initialTo || 'EUR');
+
+    // Sync with props when they change
+    useEffect(() => {
+        if (initialFrom) setFromCurrency(initialFrom);
+        if (initialTo) setToCurrency(initialTo);
+    }, [initialFrom, initialTo]);
 
     // Get all available currencies from rates, ensuring unique values
     const availableCurrencies = Array.from(new Set(['USD', ...Object.keys(rates)])).sort();

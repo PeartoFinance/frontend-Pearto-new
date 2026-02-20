@@ -23,6 +23,7 @@ import {
     type SectorAnalysisData
 } from '@/services/marketService';
 import { DonutChart, SECTOR_COLORS, getSectorColor } from './MarketAnalysisCharts';
+import { getAssetDetailPath } from '@/utils/assetRoutes';
 import {
     Search,
     RefreshCw,
@@ -704,7 +705,7 @@ export default function LiveMarketsPage() {
                                                         return (
                                                             <tr key={stock.symbol} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
                                                                 <td className="px-4 py-3">
-                                                                    <Link href={`/stocks/${stock.symbol}`} className="flex items-center gap-2">
+                                                                    <Link href={getAssetDetailPath(stock.symbol, stock.assetType)} className="flex items-center gap-2">
                                                                         <div className="w-6 h-6 rounded bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[10px] text-slate-600 dark:text-slate-300">
                                                                             {stock.symbol.slice(0, 2)}
                                                                         </div>
@@ -857,7 +858,7 @@ export default function LiveMarketsPage() {
                                                 dashboard?.gainers.slice(0, 8).map((stock, idx) => (
                                                     <Link
                                                         key={stock.symbol}
-                                                        href={`/stocks/${stock.symbol}`}
+                                                        href={getAssetDetailPath(stock.symbol, stock.assetType)}
                                                         className="grid grid-cols-4 gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition items-center"
                                                     >
                                                         <div className="flex items-center gap-1">
@@ -913,7 +914,7 @@ export default function LiveMarketsPage() {
                                                 dashboard?.losers.slice(0, 8).map((stock, idx) => (
                                                     <Link
                                                         key={stock.symbol}
-                                                        href={`/stocks/${stock.symbol}`}
+                                                        href={getAssetDetailPath(stock.symbol, stock.assetType)}
                                                         className="grid grid-cols-4 gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition items-center"
                                                     >
                                                         <div className="flex items-center gap-1">
@@ -971,7 +972,7 @@ export default function LiveMarketsPage() {
                                                     return (
                                                         <Link
                                                             key={stock.symbol}
-                                                            href={`/stocks/${stock.symbol}`}
+                                                            href={getAssetDetailPath(stock.symbol, stock.assetType)}
                                                             className="grid grid-cols-4 gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition items-center"
                                                         >
                                                             <div className="flex items-center gap-1">

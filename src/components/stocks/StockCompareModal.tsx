@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { X, Search, Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
-import { searchStocks, getStockHistory, type MarketStock, type PriceHistoryPoint } from '@/services/marketService';
+import { useState, useEffect } from 'react';
+import { X, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
+import { getStockHistory, type MarketStock, type PriceHistoryPoint } from '@/services/marketService';
+import StockSymbolInput from '@/components/common/StockSymbolInput';
 
 interface StockCompareModalProps {
     isOpen: boolean;
@@ -22,9 +23,7 @@ interface CompareStock {
 
 export default function StockCompareModal({ isOpen, onClose, initialSymbol, initialStock }: StockCompareModalProps) {
     const [compareStocks, setCompareStocks] = useState<CompareStock[]>([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchResults, setSearchResults] = useState<MarketStock[]>([]);
-    const [searching, setSearching] = useState(false);
+    const [searchSymbol, setSearchSymbol] = useState('');
     const [loading, setLoading] = useState(false);
 
     // Initialize with the current stock
@@ -40,29 +39,13 @@ export default function StockCompareModal({ isOpen, onClose, initialSymbol, init
         }
     }, [isOpen, initialStock, compareStocks.length]);
 
-    // Search stocks
-    const handleSearch = useCallback(async () => {
-        if (!searchQuery.trim() || searchQuery.length < 2) return;
-
-        setSearching(true);
-        try {
-            const results = await searchStocks(searchQuery, 5);
-            // Filter out already added stocks
-            const existing = compareStocks.map(s => s.symbol);
-            setSearchResults(results.filter(r => !existing.includes(r.symbol)));
-        } catch (err) {
-            console.error('Search failed:', err);
-        } finally {
-            setSearching(false);
-        }
-    }, [searchQuery, compareStocks]);
-
     // Add stock to comparison
     const addStock = (stock: MarketStock) => {
         if (compareStocks.length >= 5) {
             alert('Maximum 5 stocks for comparison');
             return;
         }
+        if (compareStocks.some(s => s.symbol === stock.symbol)) return;
 
         setCompareStocks(prev => [...prev, {
             symbol: stock.symbol,
@@ -71,8 +54,7 @@ export default function StockCompareModal({ isOpen, onClose, initialSymbol, init
             change: stock.change,
             changePercent: stock.changePercent,
         }]);
-        setSearchQuery('');
-        setSearchResults([]);
+        setSearchSymbol('');
     };
 
     // Remove stock from comparison
@@ -127,50 +109,12 @@ export default function StockCompareModal({ isOpen, onClose, initialSymbol, init
                         <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
                             Add Stock to Compare
                         </label>
-                        <div className="flex gap-2">
-                            <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
-                                <Search size={16} className="text-slate-400" />
-                                <input
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                    placeholder="Search by symbol or name..."
-                                    className="flex-1 bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 outline-none text-sm"
-                                />
-                            </div>
-                            <button
-                                onClick={handleSearch}
-                                disabled={searching}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-medium disabled:opacity-50"
-                            >
-                                {searching ? 'Searching...' : 'Search'}
-                            </button>
-                        </div>
-
-                        {/* Search Results */}
-                        {searchResults.length > 0 && (
-                            <div className="mt-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 divide-y divide-slate-200 dark:divide-slate-700">
-                                {searchResults.map((stock) => (
-                                    <div
-                                        key={stock.symbol}
-                                        className="flex items-center justify-between px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer"
-                                        onClick={() => addStock(stock)}
-                                    >
-                                        <div>
-                                            <p className="font-semibold text-slate-900 dark:text-white">
-                                                {stock.symbol}
-                                            </p>
-                                            <p className="text-xs text-slate-500">{stock.name}</p>
-                                        </div>
-                                        <button className="flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded text-sm font-medium">
-                                            <Plus size={14} />
-                                            Add
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                        <StockSymbolInput
+                            value={searchSymbol}
+                            onChange={setSearchSymbol}
+                            onSelectStock={addStock}
+                            placeholder="Search by symbol or name..."
+                        />
                     </div>
 
                     {/* Comparison Table */}

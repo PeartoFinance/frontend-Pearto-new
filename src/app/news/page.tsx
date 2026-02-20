@@ -7,8 +7,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import NewsCard from '@/components/news/NewsCard';
-import { getPublishedNews, type NewsArticle } from '@/services/newsService';
-import { categories, getCategoryBySlug } from '@/data/newsData';
+import { getPublishedNews, getCategories, type NewsArticle, type NewsCategory } from '@/services/newsService';
 import { Newspaper, Search, RefreshCw, ArrowLeft } from 'lucide-react';
 import { AIWidget } from '@/components/ai';
 
@@ -47,34 +46,64 @@ function NewsLoading() {
 function NewsContent({ params }: NewsPageProps) {
     const searchParams = useSearchParams();
     const categoryParam = searchParams.get('category');
+    const queryParam = searchParams.get('q');
 
     const [articles, setArticles] = useState<NewsArticle[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(queryParam || '');
     const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryParam);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [dynamicCategories, setDynamicCategories] = useState<NewsCategory[]>([]);
+    const ARTICLES_PER_PAGE = 20;
+
+    const CATEGORY_EMOJIS: Record<string, string> = {
+        markets: '📈', business: '💼', technology: '🚀', crypto: '🪙',
+        economy: '🏦', energy: '⚡', commodities: '🥇', world: '🌍',
+        healthcare: '🏥', realestate: '🏠', general: '📰',
+    };
+
+    useEffect(() => {
+        getCategories().then(setDynamicCategories).catch(() => { });
+    }, []);
 
     useEffect(() => {
         if (categoryParam) {
             setSelectedCategory(categoryParam);
+            setCurrentPage(1);
         } else {
             setSelectedCategory(null);
         }
     }, [categoryParam]);
 
+    // Sync q param from URL
+    useEffect(() => {
+        if (queryParam) {
+            setSearchQuery(queryParam);
+            setCurrentPage(1);
+        }
+    }, [queryParam]);
+
     useEffect(() => {
         loadArticles();
-    }, [selectedCategory]);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [selectedCategory, currentPage, searchQuery]);
 
     const loadArticles = async () => {
         setLoading(true);
         setError(null);
         try {
             const response = await getPublishedNews({
-                limit: 50,
-                category: selectedCategory || undefined
+                limit: ARTICLES_PER_PAGE,
+                page: currentPage,
+                category: selectedCategory || undefined,
+                search: searchQuery.trim() || undefined
             });
             setArticles(response.items || []);
+            // Calculate total pages from response.total
+            const total = response.total || 0;
+            setTotalPages(Math.ceil(total / ARTICLES_PER_PAGE));
         } catch (err) {
             console.error('Failed to fetch news:', err);
             setError('Failed to load news articles');
@@ -97,7 +126,9 @@ function NewsContent({ params }: NewsPageProps) {
     const featuredArticles = filteredArticles.filter(a => a.featured).slice(0, 3);
     const regularArticles = filteredArticles.filter(a => !featuredArticles.includes(a));
 
-    const currentCategory = selectedCategory ? getCategoryBySlug(selectedCategory) : null;
+    const currentCategory = selectedCategory
+        ? dynamicCategories.find(c => c.name === selectedCategory) || null
+        : null;
 
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
@@ -131,12 +162,12 @@ function NewsContent({ params }: NewsPageProps) {
                                 <div className="flex items-center gap-3">
                                     <Newspaper className="w-6 h-6 text-emerald-600 dark:text-emerald-500" />
                                     <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                                        {currentCategory ? currentCategory.name : 'Latest News'}
+                                        {currentCategory ? `${CATEGORY_EMOJIS[currentCategory.name] || '📰'} ${currentCategory.name.charAt(0).toUpperCase() + currentCategory.name.slice(1)}` : 'Latest News'}
                                     </h1>
                                 </div>
                                 <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">
                                     {currentCategory
-                                        ? currentCategory.description
+                                        ? `Showing ${currentCategory.count} articles in ${currentCategory.name}`
                                         : 'Stay updated with the latest financial news, market insights, and global developments'
                                     }
                                 </p>
@@ -176,14 +207,18 @@ function NewsContent({ params }: NewsPageProps) {
                             <div>
                                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">Browse by Category</h2>
                                 <div className="flex flex-wrap gap-2">
-                                    {categories.map((cat) => (
+                                    {dynamicCategories.map((cat) => (
                                         <button
-                                            key={cat.slug}
-                                            onClick={() => setSelectedCategory(cat.slug)}
+                                            key={cat.name}
+                                            onClick={() => {
+                                                setSelectedCategory(cat.name);
+                                                setCurrentPage(1);
+                                            }}
                                             className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 rounded-lg transition-colors"
                                         >
-                                            <span>{cat.emoji}</span>
-                                            <span className="font-medium text-slate-700 dark:text-slate-300">{cat.name}</span>
+                                            <span>{CATEGORY_EMOJIS[cat.name] || '📰'}</span>
+                                            <span className="font-medium text-slate-700 dark:text-slate-300">{cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}</span>
+                                            <span className="text-xs text-slate-400 dark:text-slate-500">({cat.count})</span>
                                         </button>
                                     ))}
                                 </div>
@@ -213,8 +248,8 @@ function NewsContent({ params }: NewsPageProps) {
                             </div>
                         )}
 
-                        {/* Featured Articles */}
-                        {!loading && featuredArticles.length > 0 && (
+                        {/* Featured Articles (Only on page 1) */}
+                        {!loading && currentPage === 1 && featuredArticles.length > 0 && (
                             <div>
                                 <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-3">Featured Stories</h2>
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -235,13 +270,36 @@ function NewsContent({ params }: NewsPageProps) {
                                 <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
                                     {selectedCategory ? `Latest ${currentCategory?.name} News` : 'All News'}
                                     <span className="text-sm font-normal text-slate-500 ml-2">
-                                        ({regularArticles.length})
+                                        (Page {currentPage})
                                     </span>
                                 </h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
                                     {regularArticles.map((article) => (
                                         <NewsCard key={article.id} article={article} />
                                     ))}
+                                </div>
+
+                                {/* Pagination Controls */}
+                                <div className="flex justify-center items-center gap-2 mt-8">
+                                    <button
+                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                        disabled={currentPage === 1 || loading}
+                                        className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                                    >
+                                        Previous
+                                    </button>
+
+                                    <span className="text-sm text-slate-600 dark:text-slate-400 font-medium px-2">
+                                        Page {currentPage} of {totalPages}
+                                    </span>
+
+                                    <button
+                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                        disabled={currentPage >= totalPages || loading}
+                                        className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                                    >
+                                        Next
+                                    </button>
                                 </div>
                             </div>
                         )}

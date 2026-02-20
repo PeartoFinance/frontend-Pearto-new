@@ -109,35 +109,35 @@ export default function SportsPage() {
         <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
             <Sidebar />
 
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-w-0">
                 <TickerTape />
                 <Header />
 
-                <main className="flex-1 px-4 lg:px-6 py-6 overflow-auto">
+                <main className="flex-1 px-3 sm:px-4 lg:px-6 py-4 sm:py-6 overflow-auto">
                     {/* Header Section */}
-                    <div className="mb-6 space-y-4">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <div>
-                                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-3">
-                                    <Trophy className="h-8 w-8 text-emerald-600" />
+                                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-2 sm:gap-3">
+                                    <Trophy className="h-6 w-6 sm:h-8 sm:w-8 text-emerald-600 flex-shrink-0" />
                                     Live Sports
                                 </h1>
-                                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
                                     Real-time scores and updates across multiple sports.
                                 </p>
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 sm:gap-3">
                                 <input
                                     type="date"
                                     value={date}
                                     onChange={(e) => setDate(e.target.value)}
-                                    className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    className="px-2 sm:px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-w-0"
                                 />
                                 <button
                                     onClick={fetchEvents}
                                     disabled={loading}
-                                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-500 transition disabled:opacity-50"
+                                    className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-500 transition disabled:opacity-50 flex-shrink-0"
                                 >
                                     <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                                     <span className="hidden sm:inline">Refresh</span>
@@ -146,16 +146,16 @@ export default function SportsPage() {
                         </div>
 
                         {/* Controls Bar */}
-                        <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-3">
 
                             {/* Horizontal Category Scroll */}
-                            <div className="w-full overflow-x-auto pb-2 scrollbar-hide">
+                            <div className="w-full overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
                                 <div className="flex gap-2 min-w-max">
                                     {categories.map(cat => (
                                         <button
                                             key={cat}
                                             onClick={() => setFilter(cat)}
-                                            className={`px-4 py-2 rounded-full text-sm font-medium border transition whitespace-nowrap ${filter === cat
+                                            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium border transition whitespace-nowrap ${filter === cat
                                                 ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
                                                 : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                                                 }`}
@@ -167,19 +167,19 @@ export default function SportsPage() {
                             </div>
 
                             {/* Secondary Filters (Status & League) */}
-                            <div className="flex flex-col sm:flex-row gap-3">
+                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                                 {/* Status Toggle */}
-                                <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg w-fit">
+                                <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg w-full sm:w-fit overflow-x-auto scrollbar-hide">
                                     {['All', 'Live', 'Upcoming', 'Finished'].map(status => (
                                         <button
                                             key={status}
                                             onClick={() => setStatusFilter(status)}
-                                            className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${statusFilter === status
+                                            className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-xs font-medium transition whitespace-nowrap ${statusFilter === status
                                                 ? 'bg-white dark:bg-slate-700 text-emerald-600 shadow-sm'
                                                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                                                 }`}
                                         >
-                                            {status}
+                                            {status === 'Live' && '🔴 '}{status}
                                         </button>
                                     ))}
                                 </div>
@@ -188,7 +188,7 @@ export default function SportsPage() {
                                 <select
                                     value={leagueFilter}
                                     onChange={(e) => setLeagueFilter(e.target.value)}
-                                    className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-xs"
+                                    className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 w-full sm:max-w-xs"
                                 >
                                     <option value="All">All Leagues</option>
                                     {leagues.filter(l => l !== 'All').map(league => (
@@ -198,9 +198,16 @@ export default function SportsPage() {
                             </div>
                         </div>
 
+                        {/* Counts */}
+                        <div className="text-xs text-slate-500 dark:text-slate-400">
+                            {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''}
+                            {statusFilter !== 'All' && ` (${statusFilter.toLowerCase()})`}
+                            {filter !== 'All' && ` in ${filter}`}
+                        </div>
+
                         {/* Error Message */}
                         {error && (
-                            <div className="mt-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-lg">
+                            <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-lg">
                                 {error}
                             </div>
                         )}
@@ -213,6 +220,7 @@ export default function SportsPage() {
                         onSelectEvent={setSelectedEvent}
                         pinnedIds={pinnedIds}
                         onTogglePin={handleTogglePin}
+                        statusFilter={statusFilter}
                     />
                 </main>
 

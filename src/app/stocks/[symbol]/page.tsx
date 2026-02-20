@@ -38,8 +38,9 @@ import {
     Globe, Building2, Star, BarChart2, ExternalLink, Newspaper, Clock, Activity
 } from 'lucide-react';
 import RiskAnalysisWidget from '@/components/stocks/RiskAnalysisWidget';
-import LiveModeToggle from '@/components/widgets/LiveModeToggle';
-import { LiveModeProvider, useLiveMode } from '@/context/LiveModeContext';
+import { addToWatchlist, removeFromWatchlist } from '@/services/portfolioService';
+import { useWatchlist, portfolioQueryKeys } from '@/hooks/usePortfolioData';
+import { useQueryClient } from '@tanstack/react-query';
 
 type Period = '1m' | '1d' | '5d' | '1mo' | '3mo' | '6mo' | '1y' | '5y';
 
@@ -48,16 +49,12 @@ interface StockWithExtras extends MarketStock {
     news?: NewsArticle[];
 }
 
-// Main export wraps with LiveModeProvider
+// Main export
 export default function StockDetailPage() {
-    return (
-        <LiveModeProvider>
-            <StockDetailContent />
-        </LiveModeProvider>
-    );
+    return <StockDetailContent />;
 }
 
-// This component consumes LiveModeContext
+// This component handles stock detail
 function StockDetailContent() {
     const params = useParams();
     const symbol = (params?.symbol as string)?.toUpperCase() || '';
@@ -73,7 +70,27 @@ function StockDetailContent() {
     const [showCompareModal, setShowCompareModal] = useState(false);
     const [activeTab, setActiveTab] = useState<TabId>('overview');
 
-    const { isLive, refreshTrigger } = useLiveMode();
+    const queryClient = useQueryClient();
+    const { data: watchlistItems = [] } = useWatchlist();
+    const isInWatchlist = watchlistItems.some((item: any) => item.symbol?.toUpperCase() === symbol);
+    const [watchlistLoading, setWatchlistLoading] = useState(false);
+
+    const handleWatchlistToggle = async () => {
+        if (watchlistLoading) return;
+        setWatchlistLoading(true);
+        try {
+            if (isInWatchlist) {
+                await removeFromWatchlist(symbol);
+            } else {
+                await addToWatchlist(symbol);
+            }
+            queryClient.invalidateQueries({ queryKey: portfolioQueryKeys.watchlist() });
+        } catch (err) {
+            console.error('Watchlist toggle failed:', err);
+        } finally {
+            setWatchlistLoading(false);
+        }
+    };
 
     const loadStock = useCallback(async () => {
         if (!symbol) return;
@@ -128,11 +145,11 @@ function StockDetailContent() {
         }
     }, [symbol]);
 
-    // Refresh on live mode trigger
+    // Refresh on load or period change
     useEffect(() => {
         loadStock();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [symbol, period, isLive && refreshTrigger]);
+    }, [symbol, period]);
 
     // Helper functions
     const formatNumber = (num: number | undefined | null, decimals = 2): string => {
@@ -438,10 +455,17 @@ function StockDetailContent() {
                                             </p>
                                         </div>
                                         <div className="flex gap-2">
-                                            <LiveModeToggle />
-                                            <button className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-medium">
-                                                <Star size={14} />
-                                                Watchlist
+                                            <button
+                                                onClick={handleWatchlistToggle}
+                                                disabled={watchlistLoading}
+                                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-sm font-medium ${
+                                                    isInWatchlist
+                                                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50'
+                                                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                } ${watchlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            >
+                                                <Star size={14} className={isInWatchlist ? 'fill-current' : ''} />
+                                                {watchlistLoading ? '...' : isInWatchlist ? 'Watching' : 'Watchlist'}
                                             </button>
                                             <button
                                                 onClick={() => setShowCompareModal(true)}

@@ -52,6 +52,11 @@ export default function ChartSidebar({ symbol, onClose }: ChartSidebarProps) {
 
     const [loading, setLoading] = useState(true);
 
+    // Pagination states
+    const [stocksLimit, setStocksLimit] = useState(20);
+    const [cryptoPage, setCryptoPage] = useState(1);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+
     useEffect(() => {
         // Load recently viewed
         const stored = localStorage.getItem('pearto_recently_viewed');
@@ -68,7 +73,7 @@ export default function ChartSidebar({ symbol, onClose }: ChartSidebarProps) {
 
         const fetchInitial = async () => {
             try {
-                const trendingData = await getTopMovers('both', 10);
+                const trendingData = await getTopMovers('both', stocksLimit);
                 if (trendingData.gainers) setTrending(trendingData.gainers);
 
                 if (isAuthenticated) {
@@ -83,16 +88,27 @@ export default function ChartSidebar({ symbol, onClose }: ChartSidebarProps) {
         };
 
         fetchInitial();
-    }, [symbol, isAuthenticated]);
+    }, [symbol, isAuthenticated, stocksLimit]);
 
-    // Fetch tab specific data when tab changes
+    // Fetch tab specific data when tab changes or crypto page increments
     useEffect(() => {
         const fetchTabData = async () => {
-            if (activeTab === 'crypto' && crypto.length === 0) {
+            if (activeTab === 'crypto') {
                 try {
-                    const data = await getCryptoMarkets(20);
-                    setCrypto(data);
-                } catch (e) { console.error(e); }
+                    // Fetch next page of crypto. We use 20 per page for smooth loading.
+                    setIsLoadingMore(true);
+                    const data = await getCryptoMarkets(20, cryptoPage);
+                    if (cryptoPage === 1) {
+                        setCrypto(data);
+                    } else {
+                        // Append to existing, filtering out duplicates
+                        setCrypto(prev => {
+                            const existingIds = new Set(prev.map(c => c.symbol));
+                            const newUnique = data.filter(c => !existingIds.has(c.symbol));
+                            return [...prev, ...newUnique];
+                        });
+                    }
+                } catch (e) { console.error(e); } finally { setIsLoadingMore(false); }
             }
             if (activeTab === 'commodities' && commodities.length === 0) {
                 try {
@@ -103,7 +119,15 @@ export default function ChartSidebar({ symbol, onClose }: ChartSidebarProps) {
             // Forex is handled by hook
         };
         fetchTabData();
-    }, [activeTab]);
+    }, [activeTab, cryptoPage]);
+
+    const handleLoadMore = () => {
+        if (activeTab === 'stocks') {
+            setStocksLimit(prev => prev + 20);
+        } else if (activeTab === 'crypto') {
+            setCryptoPage(prev => prev + 1);
+        }
+    };
 
     const formatPercent = (pct: number | null | undefined) => {
         if (pct == null) return '0.00%';
@@ -138,6 +162,14 @@ export default function ChartSidebar({ symbol, onClose }: ChartSidebarProps) {
                                 </div>
                             </Link>
                         ))}
+                        {trending.length > 0 && (
+                            <button
+                                onClick={handleLoadMore}
+                                className="w-full py-2 mt-2 text-xs font-medium text-blue-400 hover:text-blue-300 hover:bg-slate-800/50 rounded transition flex items-center justify-center gap-2"
+                            >
+                                Load More <ChevronRight size={14} className="rotate-90" />
+                            </button>
+                        )}
                     </div>
                 );
             case 'crypto':
@@ -157,6 +189,16 @@ export default function ChartSidebar({ symbol, onClose }: ChartSidebarProps) {
                                 </div>
                             </Link>
                         ))}
+                        {crypto.length > 0 && (
+                            <button
+                                onClick={handleLoadMore}
+                                disabled={isLoadingMore}
+                                className="w-full py-2 mt-2 text-xs font-medium text-blue-400 hover:text-blue-300 hover:bg-slate-800/50 rounded transition flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {isLoadingMore ? 'Loading...' : 'Load More'}
+                                {!isLoadingMore && <ChevronRight size={14} className="rotate-90" />}
+                            </button>
+                        )}
                     </div>
                 );
             case 'forex':

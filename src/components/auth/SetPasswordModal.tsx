@@ -35,7 +35,11 @@ export default function SetPasswordModal({ isOpen, onClose, onSuccess }: SetPass
 
         try {
             setLoading(true);
-            await setPassword(password);
+            const result = await setPassword(password);
+            // Save new token so user stays logged in after password set
+            if (result.token) {
+                localStorage.setItem('auth_token', result.token);
+            }
             onSuccess();
             onClose();
         } catch (err: any) {

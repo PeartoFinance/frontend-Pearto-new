@@ -27,7 +27,7 @@ export default function CategoryQuickLinks() {
                 <Link
                     key={cat.label}
                     href={cat.href}
-                    className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm transition-all cursor-pointer group bg-white dark:bg-slate-800/80 hover:shadow-md hover:-translate-y-0.5"
+                    className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/50 transition-all cursor-pointer group bg-white dark:bg-slate-800/80 hover:shadow-md hover:-translate-y-0.5"
                 >
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform ${colorMap[cat.color]}`}>
                         <span className="text-lg">{cat.icon}</span>

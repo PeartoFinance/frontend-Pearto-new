@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Bell, Plus, Trash2, AlertTriangle, TrendingUp, TrendingDown, Pause, Play, X } from 'lucide-react';
 import { getAlerts, createAlert, deleteAlert, toggleAlert, type Alert, type CreateAlertData } from '@/services/alertsService';
+import StockSymbolInput from '@/components/common/StockSymbolInput';
 
 export default function ProfileAlerts() {
     const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -118,12 +119,10 @@ export default function ProfileAlerts() {
                         <div className="p-4 space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Symbol</label>
-                                <input
-                                    type="text"
+                                <StockSymbolInput
                                     value={newAlert.symbol}
-                                    onChange={(e) => setNewAlert({ ...newAlert, symbol: e.target.value.toUpperCase() })}
+                                    onChange={(sym) => setNewAlert({ ...newAlert, symbol: sym.toUpperCase() })}
                                     placeholder="e.g., AAPL"
-                                    className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
