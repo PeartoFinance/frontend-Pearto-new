@@ -9,7 +9,8 @@ import {
     Bitcoin, DollarSign, BarChart3, Calculator, PiggyBank, Landmark,
     GraduationCap, FileText, HelpCircle, Tv, Radio, Newspaper, LucideIcon,
     LayoutDashboard, Briefcase, Star, Zap, Home, Mail, Phone, Globe,
-    Shield, Lock, Key, Heart, Filter, List, Clock, ChevronRight
+    Shield, Lock, Key, Heart, Filter, List, Clock, ChevronRight,
+    Cloud, CloudRain, CloudSnow, CloudLightning
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -17,7 +18,7 @@ import { useSubscription } from '@/context/SubscriptionContext';
 import SearchModal from './SearchModal';
 import NotificationsMenu from './NotificationsMenu';
 import { fetchNavigation, NavigationItem } from '@/services/navigationService';
-
+import { fetchLocationWeather, WeatherData } from '@/services/weatherService';
 // Icon mapping for dynamic icons
 const iconMap: Record<string, LucideIcon> = {
     LayoutDashboard, TrendingUp, Newspaper, GraduationCap, Briefcase, Wrench,
@@ -29,10 +30,10 @@ const iconMap: Record<string, LucideIcon> = {
 
 // Fallback navigation data
 const fallbackPillarsItems = [
-    { href: 'https://stocks-nine-blush.vercel.app/stocks', label: 'Stocks', icon: 'TrendingUp' },
-    { href: 'https://stocks-nine-blush.vercel.app/crypto', label: 'Crypto', icon: 'Bitcoin' },
-    { href: 'https://stocks-nine-blush.vercel.app/forex', label: 'Forex', icon: 'DollarSign' },
-    { href: 'https://stocks-nine-blush.vercel.app/commodities', label: 'Commodities', icon: 'BarChart3' },
+    { href: '/markets?tab=overview', label: 'Stocks', icon: 'TrendingUp' },
+    { href: '/markets?tab=crypto', label: 'Crypto', icon: 'Bitcoin' },
+    { href: '/markets?tab=forex', label: 'Forex', icon: 'DollarSign' },
+    { href: '/markets?tab=commodities', label: 'Commodities', icon: 'BarChart3' },
 ];
 
 const fallbackToolsItems = [
@@ -157,6 +158,29 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [searchOpen, setSearchOpen] = useState(false);
+
+    // Weather state
+    const [weather, setWeather] = useState<WeatherData | null>(null);
+
+    // Fetch weather data based on user location
+    useEffect(() => {
+        const loadWeather = async () => {
+            const data = await fetchLocationWeather();
+            if (data) {
+                setWeather(data);
+            }
+        };
+        loadWeather();
+    }, []);
+
+    const getWeatherIcon = (code: number) => {
+        if (code === 0 || code === 1) return <Sun size={14} className="text-amber-500" />;
+        if (code === 2 || code === 3 || code === 45 || code === 48) return <Cloud size={14} className="text-slate-400" />;
+        if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return <CloudRain size={14} className="text-blue-400" />;
+        if ((code >= 71 && code <= 77) || code === 85 || code === 86) return <CloudSnow size={14} className="text-cyan-400" />;
+        if (code >= 95 && code <= 99) return <CloudLightning size={14} className="text-yellow-500" />;
+        return <Sun size={14} className="text-amber-500" />; // fallback
+    };
 
     // Market status state
     const [marketStatus, setMarketStatus] = useState<{
@@ -349,11 +373,19 @@ export default function Header({ isFixed = false, customBg }: { isFixed?: boolea
                                 </div>
                             )}
 
-                            <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300">
-                                <Sun size={14} className="text-amber-500" />
-                                <span>7°C</span>
-                                <span className="text-slate-400 ml-1">Kathmandu</span>
-                            </div>
+                            {weather ? (
+                                <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300">
+                                    {getWeatherIcon(weather.code)}
+                                    <span>{weather.temp}°C</span>
+                                    <span className="text-slate-400 ml-1">{weather.city}</span>
+                                </div>
+                            ) : (
+                                <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 opacity-50">
+                                    <Sun size={14} className="text-amber-500" />
+                                    <span>--°C</span>
+                                    <span className="text-slate-400 ml-1">Loading...</span>
+                                </div>
+                            )}
 
 
 

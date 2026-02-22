@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
@@ -168,7 +169,24 @@ function FloorsheetSection() {
 type TabType = 'overview' | 'live' | 'crypto' | 'forex' | 'commodities' | 'floorsheet' | 'charts' | 'analysis';
 
 export default function MarketPage() {
-    const [activeTab, setActiveTab] = useState<TabType>('overview');
+    return (
+        <Suspense fallback={
+            <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-slate-900">
+                <div className="flex items-center justify-center py-20">
+                    <Loader2 className="animate-spin text-emerald-500" size={32} />
+                </div>
+            </div>
+        }>
+            <MarketPageContent />
+        </Suspense>
+    );
+}
+
+function MarketPageContent() {
+    const searchParams = useSearchParams();
+    const tabParam = searchParams.get('tab') as TabType | null;
+
+    const [activeTab, setActiveTab] = useState<TabType>(tabParam || 'overview');
     const [overview, setOverview] = useState<MarketOverviewData | null>(null);
     const [allStocks, setAllStocks] = useState<MarketStock[]>([]);
     const [cryptoData, setCryptoData] = useState<MarketStock[]>([]);
@@ -207,6 +225,13 @@ export default function MarketPage() {
         const interval = setInterval(loadData, 60000);
         return () => clearInterval(interval);
     }, [loadData]);
+
+    // Update active tab when URL parameter changes
+    useEffect(() => {
+        if (tabParam && tabs.some(t => t.id === tabParam)) {
+            setActiveTab(tabParam);
+        }
+    }, [tabParam]);
 
     const formatNumber = (num: number | null | undefined, decimals = 2) => {
         if (num == null) return '-';
