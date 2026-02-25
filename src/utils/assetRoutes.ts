@@ -27,5 +27,12 @@ export function getAssetDetailPath(symbol: string, assetType?: string): string {
     if (isCryptoSymbol(symbol, assetType)) {
         return `/crypto/${symbol}`;
     }
+    if (assetType === 'commodity') {
+        return `/chart/${symbol}?type=commodity`;
+    }
+    if (assetType === 'index') {
+        return `/chart/${symbol}?type=stock`;
+    }
+    // stock and etf both go to /stocks/
     return `/stocks/${symbol}`;
 }

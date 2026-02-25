@@ -60,8 +60,8 @@ export default function VendorAnalysis({ vendorId }: VendorAnalysisProps) {
             width: chartContainerRef.current.clientWidth,
             height: 300,
             grid: {
-                vertLines: { color: 'rgba(148, 163, 184, 0.1)' },
-                horzLines: { color: 'rgba(148, 163, 184, 0.1)' },
+                vertLines: { color: 'rgba(148, 163, 184, 0.2)' },
+                horzLines: { color: 'rgba(148, 163, 184, 0.2)' },
             },
         });
 

@@ -30,6 +30,7 @@ const iconMap: Record<string, LucideIcon> = {
 const fallbackNavItems = [
     { href: '/', icon: 'LayoutDashboard', label: 'Dashboard' },
     { href: '/markets', icon: 'TrendingUp', label: 'Markets' },
+    { href: '/booyah', icon: 'Zap', label: 'Booyah AI' },
     { href: '/news', icon: 'Newspaper', label: 'News' },
     { href: '/learn', icon: 'GraduationCap', label: 'Learn' },
     { href: '/vendors', icon: 'Briefcase', label: 'Partners' },

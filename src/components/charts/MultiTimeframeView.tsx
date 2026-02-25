@@ -27,7 +27,7 @@ interface MultiTimeframeViewProps {
 const TIMEFRAMES = [
     { id: '1D', label: '1 Day', period: '1d', interval: '5m' },
     { id: '5D', label: '5 Days', period: '5d', interval: '15m' },
-    { id: '1M', label: '1 Month', period: '1mo', interval: '1d' },
+    { id: '1M', label: '1 Month', period: '1mo', interval: '90m' },
     { id: '3M', label: '3 Month', period: '3mo', interval: '1d' },
     { id: '1Y', label: '1 Year', period: '1y', interval: '1d' },
     { id: '5Y', label: '5 Year', period: '5y', interval: '1wk' },
@@ -111,8 +111,8 @@ export default function MultiTimeframeView({
                     priceFormatter: (price: number) => formatPrice(price),
                 },
                 grid: {
-                    vertLines: { color: '#1e293b' },
-                    horzLines: { color: '#1e293b' }
+                    vertLines: { color: 'rgba(255, 255, 255, 0.10)' },
+                    horzLines: { color: 'rgba(255, 255, 255, 0.10)' }
                 },
                 crosshair: { mode: CrosshairMode.Normal },
                 rightPriceScale: { borderColor: '#334155', scaleMargins: { top: 0.1, bottom: 0.1 } },

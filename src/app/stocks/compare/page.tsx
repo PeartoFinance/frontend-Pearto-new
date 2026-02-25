@@ -36,6 +36,11 @@ interface CompareStock extends MarketStock {
 
 const COLORS = ['#14b8a6', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
+const INTERVAL_MAP: Record<string, string> = {
+    '1m': '1m', '1d': '5m', '2d': '5m', '5d': '15m', '1mo': '90m',
+    '3mo': '1d', '6mo': '1d', 'ytd': '1d', '1y': '1d', '3y': '1wk', '5y': '1wk', 'max': '1mo',
+};
+
 function StockCompareContent() {
     const searchParams = useSearchParams();
 
@@ -65,7 +70,7 @@ function StockCompareContent() {
                 symbols.map(async (symbol, index) => {
                     const [profile, history] = await Promise.all([
                         getStockProfile(symbol),
-                        getStockHistory(symbol, period, period === '1d' ? '5m' : '1d')
+                        getStockHistory(symbol, period, INTERVAL_MAP[period] || '1d')
                     ]);
                     return {
                         ...profile,
@@ -89,7 +94,7 @@ function StockCompareContent() {
 
         setLoading(true);
         try {
-            const interval = newPeriod === '1d' ? '5m' : newPeriod === '5d' ? '15m' : '1d';
+            const interval = INTERVAL_MAP[newPeriod] || '1d';
             const updated = await Promise.all(
                 stocks.map(async (stock) => {
                     const history = await getStockHistory(stock.symbol, newPeriod, interval);
@@ -135,7 +140,7 @@ function StockCompareContent() {
 
         setLoading(true);
         try {
-            const interval = period === '1d' ? '5m' : period === '5d' ? '15m' : '1d';
+            const interval = INTERVAL_MAP[period] || '1d';
             const history = await getStockHistory(stock.symbol, period, interval);
             setStocks(prev => [...prev, {
                 ...stock,

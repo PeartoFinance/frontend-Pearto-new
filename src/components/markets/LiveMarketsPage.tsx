@@ -171,7 +171,7 @@ export default function LiveMarketsPage() {
             if (activeTab === 'All' || activeTab === 'Crypto') {
                 const c = await getCryptoMarkets(activeTab === 'Crypto' ? 50 : 10);
                 // Map crypto to MarketStock shape
-                const mappedCrypto = c.map(i => ({ ...i, sector: 'Crypto', assetType: 'crypto' }));
+                const mappedCrypto = c.map(i => ({ ...i, sector: 'Crypto', assetType: 'crypto' as const }));
                 newStocks = [...newStocks, ...mappedCrypto];
             }
             if (activeTab === 'All' || activeTab === 'Indices') {
@@ -578,7 +578,7 @@ export default function LiveMarketsPage() {
                                                 <div className="space-y-3">
                                                     <div className="flex justify-between items-center text-sm">
                                                         <span className="text-slate-500 dark:text-slate-400">Total Turnover</span>
-                                                        <span className="font-bold text-slate-900 dark:text-white">{formatLargeNumber(sectorAnalysis.reduce((acc, s) => acc + s.turnover, 0))}</span>
+                                                        <span className="font-bold text-slate-900 dark:text-white">{formatPrice(sectorAnalysis.reduce((acc, s) => acc + s.turnover, 0), undefined, undefined, { notation: 'compact' })}</span>
                                                     </div>
                                                     <div className="flex justify-between items-center text-sm">
                                                         <span className="text-slate-500 dark:text-slate-400">Total Volume</span>
@@ -741,7 +741,7 @@ export default function LiveMarketsPage() {
                                                                     {formatLargeNumber(stock.volume)}
                                                                 </td>
                                                                 <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
-                                                                    {formatLargeNumber(stock.turnover || ((stock.volume || 0) * (stock.price || 0)))}
+                                                                    {formatPrice(stock.turnover || ((stock.volume || 0) * (stock.price || 0)), undefined, undefined, { notation: 'compact' })}
                                                                 </td>
                                                                 <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
                                                                     {formatPrice(stock.previousClose || 0)}
@@ -793,7 +793,7 @@ export default function LiveMarketsPage() {
                                             Total Turnover ({symbol}):
                                         </div>
                                         {loading ? <Skeleton className="h-6 w-24 mt-1" /> : (
-                                            <p className="text-lg font-bold text-slate-900 dark:text-white">{formatLargeNumber(marketStats.totalTurnover)}</p>
+                                            <p className="text-lg font-bold text-slate-900 dark:text-white">{formatPrice(marketStats.totalTurnover, undefined, undefined, { notation: 'compact' })}</p>
                                         )}
                                     </div>
                                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 shadow-sm dark:shadow-none">

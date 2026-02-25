@@ -181,7 +181,14 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
                         </header>
 
                         {/* Page Content */}
-                        <article className="prose prose-slate dark:prose-invert max-w-none">
+                        <style dangerouslySetInnerHTML={{ __html: `
+                            .dynamic-html-content [style],
+                            .dynamic-html-content font {
+                                color: inherit !important;
+                                background-color: transparent !important;
+                            }
+                        `}} />
+                        <article className="prose prose-slate dark:prose-invert max-w-none dynamic-html-content">
                             <div dangerouslySetInnerHTML={{ __html: page.content }} />
                         </article>
                     </div>

@@ -87,7 +87,7 @@ export interface SearchResult {
     price: number | null;
     change: number | null;
     changePercent: number | null;
-    assetType: 'stock' | 'crypto' | 'index' | 'commodity';
+    assetType: 'stock' | 'crypto' | 'index' | 'commodity' | 'etf';
     volume?: number | null;
     unit?: string | null;
 }

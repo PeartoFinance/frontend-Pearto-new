@@ -71,7 +71,7 @@ import { FeatureLock } from '@/components/subscription/FeatureGating';
 
 interface AdvancedChartPageProps {
     symbol: string;
-    assetType?: 'stock' | 'crypto' | 'forex' | 'commodity';
+    assetType?: 'stock' | 'crypto' | 'forex' | 'commodity' | 'index' | 'etf';
 }
 
 
@@ -168,20 +168,41 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
         ));
     };
 
-    // Period to API params mapping
+    // Period to API params mapping with backend validation rules:
+    // - 1m interval: only valid with 1d/5d/7d periods
+    // - 2m-90m intervals: max period is 1mo
+    // - 1d+ intervals: any period works
     const getPeriodParams = useCallback((p: Period, selectedInterval: Interval) => {
-        const map: Record<Period, { period: string; interval: string }> = {
-            '1D': { period: '1d', interval: selectedInterval || '1m' },
-            '5D': { period: '5d', interval: selectedInterval || '5m' },
-            '1M': { period: '1mo', interval: selectedInterval || '1h' },
-            '3M': { period: '3mo', interval: selectedInterval || '1d' },
-            '6M': { period: '6mo', interval: selectedInterval || '1d' },
-            'YTD': { period: 'ytd', interval: selectedInterval || '1d' },
-            '1Y': { period: '1y', interval: selectedInterval || '1d' },
-            '5Y': { period: '5y', interval: selectedInterval || '1wk' },
-            'All': { period: 'max', interval: selectedInterval || '1mo' }
+        const defaults: Record<Period, { period: string; interval: string }> = {
+            '1D': { period: '1d', interval: '1m' },
+            '5D': { period: '5d', interval: '5m' },
+            '1M': { period: '1mo', interval: '1h' },
+            '3M': { period: '3mo', interval: '1d' },
+            '6M': { period: '6mo', interval: '1d' },
+            'YTD': { period: 'ytd', interval: '1d' },
+            '1Y': { period: '1y', interval: '1d' },
+            '5Y': { period: '5y', interval: '1wk' },
+            'All': { period: 'max', interval: '1mo' }
         };
-        return map[p] || { period: '1mo', interval: '1d' };
+        const base = defaults[p] || { period: '1mo', interval: '1d' };
+        if (!selectedInterval) return base;
+
+        // Validate selected interval against period
+        const intradaySmall: Interval[] = ['1m'];
+        const intradayMed: Interval[] = ['5m', '15m', '30m', '1h'];
+        const shortPeriods = ['1d', '5d'];
+        const medPeriods = ['1d', '5d', '1mo'];
+
+        if (intradaySmall.includes(selectedInterval)) {
+            // 1m interval only valid with short periods
+            if (!shortPeriods.includes(base.period)) return { ...base, interval: base.interval };
+        } else if (intradayMed.includes(selectedInterval)) {
+            // 5m-1h interval max period is 1mo
+            const longPeriods = ['3mo', '6mo', 'ytd', '1y', '5y', 'max'];
+            if (longPeriods.includes(base.period)) return { ...base, interval: base.interval };
+        }
+
+        return { ...base, interval: selectedInterval };
     }, []);
 
     // Fetch data
@@ -283,8 +304,8 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                 priceFormatter: (price: number) => formatPrice(price),
             },
             grid: {
-                vertLines: { color: '#1e293b' },
-                horzLines: { color: '#1e293b' }
+                vertLines: { color: 'rgba(255, 255, 255, 0.10)' },
+                horzLines: { color: 'rgba(255, 255, 255, 0.10)' }
             },
             crosshair: {
                 mode: CrosshairMode.Normal,
@@ -391,7 +412,7 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                 },
                 grid: {
                     vertLines: { visible: false },
-                    horzLines: { color: '#1e293b' }
+                    horzLines: { color: 'rgba(255, 255, 255, 0.10)' }
                 },
                 rightPriceScale: { borderColor: '#334155' },
                 timeScale: { visible: false, borderColor: '#334155' },
@@ -812,7 +833,7 @@ export default function AdvancedChartPage({ symbol, assetType = 'stock' }: Advan
                         <div className="h-5 w-px bg-slate-700/30 shrink-0" />
 
                         {/* Interval Dropdown */}
-                        <IntervalSelector interval={interval} onIntervalChange={setInterval} />
+                        <IntervalSelector interval={interval} onIntervalChange={setInterval} period={getPeriodParams(period, interval).period} />
 
                         {/* Chart Type Dropdown */}
                         <ChartTypeSelector chartType={chartType} onChartTypeChange={setChartType} />

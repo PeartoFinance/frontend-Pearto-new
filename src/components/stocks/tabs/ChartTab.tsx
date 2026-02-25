@@ -40,9 +40,9 @@ export default function ChartTab({
     // Period mapping for API
     const periodMap: Record<Period, { period: string; interval: string }> = {
         '1D': { period: '1d', interval: '5m' },
-        '2D': { period: '2d', interval: '15m' },
+        '2D': { period: '2d', interval: '5m' },
         '5D': { period: '5d', interval: '15m' },
-        '1M': { period: '1mo', interval: '1d' },
+        '1M': { period: '1mo', interval: '90m' },
         '3M': { period: '3mo', interval: '1d' },
         '6M': { period: '6mo', interval: '1d' },
         'YTD': { period: 'ytd', interval: '1d' },

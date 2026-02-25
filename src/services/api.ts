@@ -10,6 +10,8 @@ const USER_COUNTRY_KEY = 'user_country';
 
 interface ApiOptions extends RequestInit {
     params?: Record<string, string | number | boolean>;
+    /** Request timeout in ms. Default: 15000. Search/discovery endpoints should use ≥5000. */
+    timeout?: number;
 }
 
 export interface ApiError extends Error {
@@ -81,8 +83,17 @@ function createUrl(endpoint: string, params?: Record<string, string | number | b
  * Main API fetch function with automatic headers and error handling
  */
 export async function apiFetch<T>(endpoint: string, options: ApiOptions = {}): Promise<T> {
-    const { params, ...fetchOptions } = options;
+    const { params, timeout, ...fetchOptions } = options;
     const url = createUrl(endpoint, params);
+
+    // Determine timeout: search/discovery endpoints get longer timeouts to avoid
+    // cutting off the backend's "Discovery Lock" (which can take ~2s per the integration guide)
+    const shortEndpoint = endpoint.split('?')[0];
+    const isDiscovery = /search|discover/i.test(shortEndpoint);
+    const timeoutMs = timeout ?? (isDiscovery ? 10000 : 15000);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -95,7 +106,6 @@ export async function apiFetch<T>(endpoint: string, options: ApiOptions = {}): P
     const userEmail = getUserEmail();
 
     // DEBUG: Log token state for every request
-    const shortEndpoint = endpoint.split('?')[0];
     if (token) {
         console.log(`[API DEBUG] ${shortEndpoint} → token: ${token.substring(0, 15)}...${token.substring(token.length - 10)}`);
     } else {
@@ -108,7 +118,7 @@ export async function apiFetch<T>(endpoint: string, options: ApiOptions = {}): P
     if (country) headers['X-User-Country'] = country;
 
     try {
-        const response = await fetch(url, { ...fetchOptions, headers });
+        const response = await fetch(url, { ...fetchOptions, headers, signal: controller.signal });
 
         if (!response.ok) {
             // Handle 401 — expired or invalid token → auto-logout
@@ -139,6 +149,12 @@ export async function apiFetch<T>(endpoint: string, options: ApiOptions = {}): P
 
         return response.json();
     } catch (error: any) {
+        // Handle request timeout (AbortController)
+        if (error.name === 'AbortError') {
+            const timeoutError = new Error('Request timed out. Please try again.') as ApiError;
+            timeoutError.status = 0;
+            throw timeoutError;
+        }
         // Handle network/connection errors
         if (error instanceof TypeError && error.message === 'Failed to fetch') {
             const networkError = new Error('Unable to connect to API server.') as ApiError;
@@ -146,6 +162,8 @@ export async function apiFetch<T>(endpoint: string, options: ApiOptions = {}): P
             throw networkError;
         }
         throw error;
+    } finally {
+        clearTimeout(timeoutId);
     }
 }
 

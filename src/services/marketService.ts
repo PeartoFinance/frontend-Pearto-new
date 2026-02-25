@@ -24,7 +24,7 @@ export interface MarketStock {
     industry?: string;
     exchange?: string;
     currency?: string;
-    assetType?: string;
+    assetType?: 'stock' | 'crypto' | 'index' | 'commodity' | 'etf';
     lastUpdated?: string;
     countryCode?: string;
     // Extended fields

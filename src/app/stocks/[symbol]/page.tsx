@@ -44,6 +44,11 @@ import { useQueryClient } from '@tanstack/react-query';
 
 type Period = '1m' | '1d' | '5d' | '1mo' | '3mo' | '6mo' | '1y' | '5y';
 
+const INTERVAL_MAP: Record<string, string> = {
+    '1m': '1m', '1d': '5m', '2d': '5m', '5d': '15m', '1mo': '90m',
+    '3mo': '1d', '6mo': '1d', 'ytd': '1d', '1y': '1d', '3y': '1wk', '5y': '1wk', 'max': '1mo',
+};
+
 interface StockWithExtras extends MarketStock {
     marketIssues?: MarketIssue[];
     news?: NewsArticle[];
@@ -101,7 +106,7 @@ function StockDetailContent() {
         try {
             const [profileData, historyData] = await Promise.all([
                 getStockProfile(symbol),
-                getStockHistory(symbol, period, period === '1d' ? '5m' : '1d'),
+                getStockHistory(symbol, period, INTERVAL_MAP[period] || '1d'),
             ]);
 
             setStock(profileData);
@@ -120,9 +125,15 @@ function StockDetailContent() {
                     setNewsLoading(false);
                 }
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to load stock:', err);
-            setError('Failed to load stock data. The symbol may be invalid.');
+            if (err?.status === 404) {
+                setError('This symbol does not exist or is not supported.');
+            } else if (err?.status === 0) {
+                setError('Unable to connect to the server. Please check your connection and try again.');
+            } else {
+                setError('Something went wrong loading stock data. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -135,7 +146,7 @@ function StockDetailContent() {
         setChartLoading(true);
 
         try {
-            const interval = newPeriod === '1m' ? '1m' : newPeriod === '1d' ? '5m' : newPeriod === '5d' ? '15m' : '1d';
+            const interval = INTERVAL_MAP[newPeriod] || '1d';
             const historyData = await getStockHistory(symbol, newPeriod, interval);
             setHistory(historyData);
         } catch (err) {
@@ -176,11 +187,6 @@ function StockDetailContent() {
 
     const isPositive = (stock?.changePercent ?? 0) >= 0;
 
-    const formatChartDate = (dateStr: string): string => {
-        if (!dateStr) return '';
-        return dateStr.split('T')[0];
-    };
-
     // Render tab content
     const renderTabContent = () => {
         if (!stock) return null;
@@ -196,7 +202,7 @@ function StockDetailContent() {
                                 </h3>
                                 <div className="space-y-2">
                                     {[
-                                        { label: 'Market Cap', value: formatLargeNumber(stock.marketCap) },
+                                        { label: 'Market Cap', value: <PriceDisplay amount={stock.marketCap} options={{ notation: 'compact' }} /> },
                                         { label: 'Volume', value: formatLargeNumber(stock.volume) },
                                         { label: 'Avg Volume', value: formatLargeNumber(stock.avgVolume) },
                                         { label: 'Open', value: <PriceDisplay amount={stock.open} /> },
@@ -268,7 +274,7 @@ function StockDetailContent() {
                                 </div>
                                 <MultiChart
                                     data={history?.data?.map(d => ({
-                                        date: formatChartDate(d.date),
+                                        date: d.date,
                                         open: d.open,
                                         high: d.high,
                                         low: d.low,
@@ -398,7 +404,7 @@ function StockDetailContent() {
                     <Header />
                 </div>
 
-                <div className="flex-1 pt-[112px] md:pt-[120px] overflow-x-hidden">
+                <div className="flex-1 pt-[112px] md:pt-[120px] overflow-x-hidden lg:mt-12">
                     <div className="p-2 lg:p-3 space-y-3 w-full">
                         <Link
                             href="/stocks"
@@ -418,7 +424,7 @@ function StockDetailContent() {
                             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 text-center">
                                 <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
                                 <h2 className="text-xl font-semibold text-red-700 dark:text-red-400 mb-2">
-                                    Stock Not Found
+                                    {error.includes('does not exist') ? 'Symbol Not Found' : 'Error Loading Data'}
                                 </h2>
                                 <p className="text-red-600 dark:text-red-300">{error}</p>
                             </div>
@@ -458,11 +464,10 @@ function StockDetailContent() {
                                             <button
                                                 onClick={handleWatchlistToggle}
                                                 disabled={watchlistLoading}
-                                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-sm font-medium ${
-                                                    isInWatchlist
-                                                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50'
-                                                        : 'bg-blue-600 hover:bg-blue-700 text-white'
-                                                } ${watchlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-sm font-medium ${isInWatchlist
+                                                    ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50'
+                                                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                    } ${watchlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                             >
                                                 <Star size={14} className={isInWatchlist ? 'fill-current' : ''} />
                                                 {watchlistLoading ? '...' : isInWatchlist ? 'Watching' : 'Watchlist'}

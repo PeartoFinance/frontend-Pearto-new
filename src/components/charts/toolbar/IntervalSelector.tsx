@@ -5,7 +5,7 @@ import { Clock, ChevronDown } from 'lucide-react';
 
 export type Interval = '1m' | '5m' | '15m' | '30m' | '1h' | '1d' | '1wk' | '1mo';
 
-const INTERVALS: { id: Interval; label: string }[] = [
+const ALL_INTERVALS: { id: Interval; label: string }[] = [
     { id: '1m', label: '1 min' },
     { id: '5m', label: '5 min' },
     { id: '15m', label: '15 min' },
@@ -16,14 +16,31 @@ const INTERVALS: { id: Interval; label: string }[] = [
     { id: '1mo', label: '1 month' }
 ];
 
+// Backend validation: filter intervals based on the current period
+// - 1m interval: only valid with short periods (1d, 5d)
+// - 5m-1h intervals: only valid up to 1mo period
+// - 1d+ intervals: always valid
+function getValidIntervals(period?: string): Interval[] {
+    const longPeriods = ['3mo', '6mo', 'ytd', '1y', '5y', 'max'];
+    const medPeriods = ['1mo', '3mo', '6mo', 'ytd', '1y', '5y', 'max'];
+    if (!period) return ALL_INTERVALS.map(i => i.id);
+    const p = period.toLowerCase();
+    if (longPeriods.includes(p)) return ['1d', '1wk', '1mo'];
+    if (medPeriods.includes(p)) return ['5m', '15m', '30m', '1h', '1d', '1wk', '1mo'];
+    return ALL_INTERVALS.map(i => i.id);
+}
+
 interface IntervalSelectorProps {
     interval: Interval;
     onIntervalChange: (interval: Interval) => void;
+    period?: string;
 }
 
-export default function IntervalSelector({ interval, onIntervalChange }: IntervalSelectorProps) {
+export default function IntervalSelector({ interval, onIntervalChange, period }: IntervalSelectorProps) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const validIntervals = getValidIntervals(period);
+    const INTERVALS = ALL_INTERVALS.filter(i => validIntervals.includes(i.id));
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -42,7 +59,7 @@ export default function IntervalSelector({ interval, onIntervalChange }: Interva
                 className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/30 rounded-lg text-xs font-medium transition-all duration-200"
             >
                 <Clock size={13} className="text-slate-400" />
-                {INTERVALS.find(i => i.id === interval)?.label || interval}
+                {ALL_INTERVALS.find(i => i.id === interval)?.label || interval}
                 <ChevronDown size={12} className="text-slate-500" />
             </button>
             {isOpen && (

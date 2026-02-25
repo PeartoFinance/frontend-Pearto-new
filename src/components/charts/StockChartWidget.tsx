@@ -138,8 +138,8 @@ export function StockChartWidget({
                 attributionLogo: false,
             },
             grid: {
-                vertLines: { color: isDark ? '#1e293b' : '#f1f5f9' },
-                horzLines: { color: isDark ? '#1e293b' : '#f1f5f9' },
+                vertLines: { color: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)' },
+                horzLines: { color: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)' },
             },
             width: container.clientWidth,
             height: height,
@@ -149,7 +149,7 @@ export function StockChartWidget({
                 horzLine: { color: '#3b82f6', width: 1, style: 2, labelBackgroundColor: '#3b82f6' },
             },
             rightPriceScale: {
-                borderColor: isDark ? '#334155' : '#e2e8f0',
+                borderColor: isDark ? '#334155' : '#cbd5e1',
                 scaleMargins: { top: 0.05, bottom: 0.05 },
             },
             timeScale: {
@@ -212,7 +212,7 @@ export function StockChartWidget({
                 },
                 grid: {
                     vertLines: { visible: false },
-                    horzLines: { color: isDark ? '#1e293b' : '#f1f5f9' },
+                    horzLines: { color: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)' },
                 },
                 width: volumeContainer.clientWidth,
                 height: 80,

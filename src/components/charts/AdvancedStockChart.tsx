@@ -71,8 +71,8 @@ export default function AdvancedStockChart({
                 textColor: isDark ? '#94a3b8' : '#64748b',
             },
             grid: {
-                vertLines: { color: isDark ? '#1e293b' : '#f1f5f9' },
-                horzLines: { color: isDark ? '#1e293b' : '#f1f5f9' },
+                vertLines: { color: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)' },
+                horzLines: { color: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)' },
             },
             width: chartContainerRef.current.clientWidth,
             height: height,

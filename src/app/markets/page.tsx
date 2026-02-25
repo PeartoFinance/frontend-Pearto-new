@@ -448,7 +448,7 @@ function MarketPageContent() {
                                                                 {formatPrice(stock.price || 0)}
                                                             </td>
                                                             <td className={`px-4 py-3 text-right font-medium ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
-                                                                {isPositive ? '+' : ''}{formatNumber(stock.change)}
+                                                                {isPositive ? '+' : ''}{formatPrice(stock.change || 0)}
                                                             </td>
                                                             <td className="px-4 py-3 text-right">
                                                                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${isPositive
@@ -759,6 +759,7 @@ function MarketPageContent() {
 
 // Mini Chart Component
 function MiniChart({ index }: { index: MarketIndex }) {
+    const { convertPrice, formatOnly } = useCurrency();
     const chartRef = useRef<HTMLDivElement>(null);
     const chartInstanceRef = useRef<IChartApi | null>(null);
     const [data, setData] = useState<PriceHistoryPoint[]>([]);
@@ -791,10 +792,13 @@ function MiniChart({ index }: { index: MarketIndex }) {
         const chart = createChart(chartRef.current, {
             layout: {
                 background: { type: ColorType.Solid, color: 'transparent' },
-                textColor: isDark ? '#64748b' : '#94a3b8',
+                textColor: isDark ? '#94a3b8' : '#475569',
                 attributionLogo: false,
             },
-            grid: { vertLines: { visible: false }, horzLines: { color: isDark ? '#1e293b' : '#f1f5f9' } },
+            localization: {
+                priceFormatter: (price: number) => formatOnly(price),
+            },
+            grid: { vertLines: { visible: false }, horzLines: { color: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)' } },
             width: chartRef.current.clientWidth,
             height: 180,
             rightPriceScale: { borderColor: isDark ? '#334155' : '#e2e8f0' },
@@ -817,7 +821,7 @@ function MiniChart({ index }: { index: MarketIndex }) {
 
         const chartData = sortedData.filter(d => d.close != null).map(d => ({
             time: d.date.split('T')[0], // Fix: Ensure strictly yyyy-mm-dd
-            value: d.close!,
+            value: convertPrice(d.close!),
         }));
 
         series.setData(chartData as any);

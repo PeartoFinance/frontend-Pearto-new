@@ -24,7 +24,7 @@ function NewsLoading() {
                     <TickerTape />
                     <Header />
                 </div>
-                <div className="flex-1 pt-[112px] md:pt-[120px] px-4 lg:px-6 py-6">
+                <div className="flex-1 pt-[112px] md:pt-[120px] px-4  lg:mt-10 lg:px-6 py-6" >
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         {Array.from({ length: 8 }).map((_, i) => (
                             <div key={i} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-pulse">
@@ -146,7 +146,7 @@ function NewsContent({ params }: NewsPageProps) {
                 {/* Content */}
                 <div className="flex-1 pt-[112px] md:pt-[120px]">
                     {/* Hero Header */}
-                    <div className="bg-white dark:bg-slate-900 py-8 px-4 lg:px-6 border-b border-slate-200 dark:border-slate-800">
+                    <div className="bg-white dark:bg-slate-900 lg:mt-8 py-8 px-4 lg:px-6 border-b border-slate-200 dark:border-slate-800">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                             <div>
                                 {selectedCategory && (

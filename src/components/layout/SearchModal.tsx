@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, X, TrendingUp, Bitcoin, Loader2, ArrowRight } from 'lucide-react';
+import { Search, X, TrendingUp, Bitcoin, Loader2, ArrowRight, BarChart2, DollarSign, Layers } from 'lucide-react';
 import { searchStocks, type MarketStock } from '@/services/marketService';
 import PriceDisplay from '@/components/common/PriceDisplay';
 
@@ -70,9 +70,16 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     }, [results, selectedIndex, onClose]);
 
     const navigateToStock = (stock: MarketStock) => {
-        const path = stock.assetType === 'crypto'
-            ? `/crypto/${stock.symbol}`
-            : `/stocks/${stock.symbol}`;
+        let path: string;
+        if (stock.assetType === 'crypto' || stock.symbol?.includes('-USD')) {
+            path = `/crypto/${stock.symbol}`;
+        } else if (stock.assetType === 'commodity') {
+            path = `/chart/${stock.symbol}?type=commodity`;
+        } else if (stock.assetType === 'index') {
+            path = `/chart/${stock.symbol}?type=stock`;
+        } else {
+            path = `/stocks/${stock.symbol}`;
+        }
         router.push(path);
         onClose();
     };
@@ -158,12 +165,21 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                                             : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
                                             }`}
                                     >
-                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${stock.assetType === 'crypto'
-                                            ? 'bg-amber-500/10'
+                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                            stock.assetType === 'crypto' ? 'bg-purple-500/10'
+                                            : stock.assetType === 'index' ? 'bg-blue-500/10'
+                                            : stock.assetType === 'commodity' ? 'bg-amber-500/10'
+                                            : stock.assetType === 'etf' ? 'bg-cyan-500/10'
                                             : 'bg-emerald-500/10'
                                             }`}>
                                             {stock.assetType === 'crypto'
-                                                ? <Bitcoin size={18} className="text-amber-500" />
+                                                ? <Bitcoin size={18} className="text-purple-500" />
+                                                : stock.assetType === 'index'
+                                                ? <BarChart2 size={18} className="text-blue-500" />
+                                                : stock.assetType === 'commodity'
+                                                ? <DollarSign size={18} className="text-amber-500" />
+                                                : stock.assetType === 'etf'
+                                                ? <Layers size={18} className="text-cyan-500" />
                                                 : <TrendingUp size={18} className="text-emerald-500" />
                                             }
                                         </div>

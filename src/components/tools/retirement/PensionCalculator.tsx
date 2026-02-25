@@ -132,8 +132,8 @@ export default function PensionCalculator() {
                 attributionLogo: false,
             },
             grid: {
-                vertLines: { color: isDark ? '#1e293b' : '#f1f5f9', style: 1 },
-                horzLines: { color: isDark ? '#1e293b' : '#f1f5f9', style: 1 },
+                vertLines: { color: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)', style: 1 },
+                horzLines: { color: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)', style: 1 },
             },
             width: container.clientWidth,
             height: 200,

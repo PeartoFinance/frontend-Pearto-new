@@ -78,7 +78,7 @@ import RiskAnalysisPanel from './RiskAnalysisPanel';
 
 interface LiveChartPageProps {
     symbol?: string;
-    assetType?: 'stock' | 'crypto' | 'forex' | 'commodity';
+    assetType?: 'stock' | 'crypto' | 'forex' | 'commodity' | 'index' | 'etf';
 }
 
 export type ChartType = 'candle' | 'area' | 'line' | 'bar';
@@ -146,7 +146,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
     const [showMultiTimeframe, setShowMultiTimeframe] = useState(false);
     const [showRiskPanel, setShowRiskPanel] = useState(false);
     const [crosshairData, setCrosshairData] = useState<{ time: string; price: number; change: number; volume: number } | null>(null);
-    const { formatPrice } = useCurrency();
+    const { formatPrice, convertPrice, formatOnly } = useCurrency();
 
     // Live data state
     const [isLive, setIsLive] = useState(true);
@@ -180,20 +180,38 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
         ));
     };
 
-    // Period to API params mapping
+    // Period to API params mapping with backend validation rules:
+    // - 1m interval: only valid with 1d/5d/7d periods
+    // - 2m-90m intervals: max period is 1mo  
+    // - 1d+ intervals: any period works
     const getPeriodParams = useCallback((p: Period, selectedInterval: Interval) => {
-        const map: Record<Period, { period: string; interval: string }> = {
-            '1D': { period: '1d', interval: selectedInterval || '1m' },
-            '5D': { period: '5d', interval: selectedInterval || '5m' },
-            '1M': { period: '1mo', interval: selectedInterval || '1h' },
-            '3M': { period: '3mo', interval: selectedInterval || '1d' },
-            '6M': { period: '6mo', interval: selectedInterval || '1d' },
-            'YTD': { period: 'ytd', interval: selectedInterval || '1d' },
-            '1Y': { period: '1y', interval: selectedInterval || '1d' },
-            '5Y': { period: '5y', interval: selectedInterval || '1wk' },
-            'All': { period: 'max', interval: selectedInterval || '1wk' }
+        const defaults: Record<Period, { period: string; interval: string }> = {
+            '1D': { period: '1d', interval: '1m' },
+            '5D': { period: '5d', interval: '5m' },
+            '1M': { period: '1mo', interval: '1h' },
+            '3M': { period: '3mo', interval: '1d' },
+            '6M': { period: '6mo', interval: '1d' },
+            'YTD': { period: 'ytd', interval: '1d' },
+            '1Y': { period: '1y', interval: '1d' },
+            '5Y': { period: '5y', interval: '1wk' },
+            'All': { period: 'max', interval: '1wk' }
         };
-        return map[p] || { period: '1mo', interval: '1d' };
+        const base = defaults[p] || { period: '1mo', interval: '1d' };
+        if (!selectedInterval) return base;
+
+        // Validate selected interval against period
+        const intradaySmall: Interval[] = ['1m'];
+        const intradayMed: Interval[] = ['5m', '15m', '30m', '1h'];
+        const shortPeriods = ['1d', '5d'];
+        const longPeriods = ['3mo', '6mo', 'ytd', '1y', '5y', 'max'];
+
+        if (intradaySmall.includes(selectedInterval)) {
+            if (!shortPeriods.includes(base.period)) return { ...base, interval: base.interval };
+        } else if (intradayMed.includes(selectedInterval)) {
+            if (longPeriods.includes(base.period)) return { ...base, interval: base.interval };
+        }
+
+        return { ...base, interval: selectedInterval };
     }, []);
 
     // Fetch historical data
@@ -311,16 +329,16 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                             // Update candlestick
                             seriesRef.current.update({
                                 time: now as any,
-                                open: mainQuote.open ?? mainQuote.price,
-                                high: mainQuote.dayHigh ?? mainQuote.price,
-                                low: mainQuote.dayLow ?? mainQuote.price,
-                                close: mainQuote.price
+                                open: convertPrice(mainQuote.open ?? mainQuote.price),
+                                high: convertPrice(mainQuote.dayHigh ?? mainQuote.price),
+                                low: convertPrice(mainQuote.dayLow ?? mainQuote.price),
+                                close: convertPrice(mainQuote.price)
                             } as any);
                         } else {
                             // Update line/area
                             seriesRef.current.update({
                                 time: now as any,
-                                value: mainQuote.price
+                                value: convertPrice(mainQuote.price)
                             } as any);
                         }
 
@@ -420,11 +438,11 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                 attributionLogo: false
             },
             localization: {
-                priceFormatter: (price: number) => formatPrice(price),
+                priceFormatter: (price: number) => formatOnly(price),
             },
             grid: {
-                vertLines: { color: '#1e293b' },
-                horzLines: { color: '#1e293b' }
+                vertLines: { color: 'rgba(255, 255, 255, 0.10)' },
+                horzLines: { color: 'rgba(255, 255, 255, 0.10)' }
             },
             crosshair: {
                 mode: CrosshairMode.Normal,
@@ -483,10 +501,10 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                 .filter(d => d.open && d.high && d.low && d.close)
                 .map(d => ({
                     time: getTimeKey(d.date),
-                    open: d.open!,
-                    high: d.high!,
-                    low: d.low!,
-                    close: d.close!
+                    open: convertPrice(d.open!),
+                    high: convertPrice(d.high!),
+                    low: convertPrice(d.low!),
+                    close: convertPrice(d.close!)
                 }));
             mainSeries.setData(candleData as any);
         } else if (chartType === 'area') {
@@ -499,7 +517,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
 
             const areaData = sortedData.map(d => ({
                 time: getTimeKey(d.date),
-                value: d.close!
+                value: convertPrice(d.close!)
             }));
             mainSeries.setData(areaData as any);
         } else {
@@ -510,7 +528,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
 
             const lineData = sortedData.map(d => ({
                 time: getTimeKey(d.date),
-                value: d.close!
+                value: convertPrice(d.close!)
             }));
             mainSeries.setData(lineData as any);
         }
@@ -527,7 +545,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                 },
                 grid: {
                     vertLines: { visible: false },
-                    horzLines: { color: '#1e293b' }
+                    horzLines: { color: 'rgba(255, 255, 255, 0.10)' }
                 },
                 rightPriceScale: { borderColor: '#334155' },
                 timeScale: { visible: false, borderColor: '#334155' },
@@ -635,10 +653,10 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
             .sort((a, b) => a.date.localeCompare(b.date))
             .map(d => ({
                 time: getTimeKey(d.date),
-                open: d.open ?? d.close!,
-                high: d.high ?? d.close!,
-                low: d.low ?? d.close!,
-                close: d.close!,
+                open: convertPrice(d.open ?? d.close!),
+                high: convertPrice(d.high ?? d.close!),
+                low: convertPrice(d.low ?? d.close!),
+                close: convertPrice(d.close!),
                 volume: d.volume ?? 0
             }));
 
@@ -1102,7 +1120,7 @@ export default function LiveChartPage({ symbol: initialSymbol = 'AAPL', assetTyp
                     <div className="h-5 w-px bg-slate-700/30 shrink-0" />
 
                     {/* Interval Dropdown */}
-                    <IntervalSelector interval={chartInterval} onIntervalChange={setChartInterval} />
+                    <IntervalSelector interval={chartInterval} onIntervalChange={setChartInterval} period={getPeriodParams(period, chartInterval).period} />
 
                     {/* Chart Type Dropdown */}
                     <ChartTypeSelector chartType={chartType} onChartTypeChange={setChartType} />

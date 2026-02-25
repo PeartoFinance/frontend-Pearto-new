@@ -50,9 +50,9 @@ export default function MiniChartPanel({
         setLoading(true);
         try {
             const periodMap: Record<string, { period: string; interval: string }> = {
-                '1D': { period: '1d', interval: '1m' },
-                '5D': { period: '5d', interval: '5m' },
-                '1M': { period: '1mo', interval: '1h' },
+                '1D': { period: '1d', interval: '5m' },
+                '5D': { period: '5d', interval: '15m' },
+                '1M': { period: '1mo', interval: '90m' },
                 '3M': { period: '3mo', interval: '1d' },
             };
             const { period: p, interval: i } = periodMap[period] || periodMap['1D'];
@@ -130,7 +130,7 @@ export default function MiniChartPanel({
             },
             grid: {
                 vertLines: { visible: false },
-                horzLines: { color: '#1e293b40' }
+                horzLines: { color: 'rgba(255, 255, 255, 0.10)' }
             },
             crosshair: { mode: CrosshairMode.Magnet },
             rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.1, bottom: 0.1 } },

@@ -36,6 +36,11 @@ import {
 
 type Period = '1m' | '1d' | '5d' | '1mo' | '3mo' | '6mo' | '1y' | '5y';
 
+const INTERVAL_MAP: Record<string, string> = {
+    '1m': '1m', '1d': '5m', '2d': '5m', '5d': '15m', '1mo': '90m',
+    '3mo': '1d', '6mo': '1d', 'ytd': '1d', '1y': '1d', '3y': '1wk', '5y': '1wk', 'max': '1mo',
+};
+
 // Subset of tabs relevant for crypto
 const cryptoTabs: { id: TabId; label: string }[] = [
     { id: 'overview', label: 'Overview' },
@@ -92,7 +97,7 @@ export default function CryptoDetailPage() {
         try {
             const [profileData, historyData] = await Promise.all([
                 getCryptoProfile(symbol),
-                getCryptoHistory(symbol, period, period === '1d' ? '5m' : '1d'),
+                getCryptoHistory(symbol, period, INTERVAL_MAP[period] || '1d'),
             ]);
 
             setCoin(profileData);
@@ -109,9 +114,15 @@ export default function CryptoDetailPage() {
                 setNewsLoading(false);
             }
 
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to load crypto:', err);
-            setError('Failed to load cryptocurrency data. The symbol may be invalid.');
+            if (err?.status === 404) {
+                setError('This cryptocurrency symbol does not exist or is not supported.');
+            } else if (err?.status === 0) {
+                setError('Unable to connect to the server. Please check your connection and try again.');
+            } else {
+                setError('Something went wrong loading cryptocurrency data. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -124,7 +135,7 @@ export default function CryptoDetailPage() {
         setChartLoading(true);
 
         try {
-            const interval = newPeriod === '1m' ? '1m' : newPeriod === '1d' ? '5m' : newPeriod === '5d' ? '15m' : '1d';
+            const interval = INTERVAL_MAP[newPeriod] || '1d';
             const historyData = await getCryptoHistory(symbol, newPeriod, interval);
             setHistory(historyData);
         } catch (err) {
@@ -163,13 +174,7 @@ export default function CryptoDetailPage() {
 
     const isPositive = (coin?.changePercent ?? 0) >= 0;
 
-    // Format for Chart
-    const formatChartDate = (dateStr: string): string => {
-        if (!dateStr) return '';
-        // If it's intraday, we might need full iso, but chart handles full iso fine usually.
-        // For simplicity let's rely on standard handling.
-        return dateStr;
-    };
+
 
     const { convertPrice } = useCurrency();
 
@@ -177,21 +182,21 @@ export default function CryptoDetailPage() {
         if (!coin) return null;
 
         const chartData = history?.data?.map(d => ({
-            date: d.date.split('T')[0],
-            open: d.open != null ? convertPrice(d.open) : null,
-            high: d.high != null ? convertPrice(d.high) : null,
-            low: d.low != null ? convertPrice(d.low) : null,
-            close: d.close != null ? convertPrice(d.close) : null,
+            date: d.date,
+            open: d.open,
+            high: d.high,
+            low: d.low,
+            close: d.close,
             volume: d.volume
         })) || [];
 
         const priceRange = coin.dayLow != null && coin.dayHigh != null ? {
-            low: convertPrice(coin.dayLow),
-            high: convertPrice(coin.dayHigh)
+            low: coin.dayLow,
+            high: coin.dayHigh
         } : undefined;
 
         const change = {
-            value: convertPrice(coin.change || 0),
+            value: coin.change || 0,
             percent: coin.changePercent || 0
         };
 
@@ -207,7 +212,7 @@ export default function CryptoDetailPage() {
                                 </h3>
                                 <div className="space-y-2">
                                     {[
-                                        { label: 'Market Cap', value: formatLargeNumber(coin.marketCap) },
+                                        { label: 'Market Cap', value: <PriceDisplay amount={coin.marketCap} options={{ notation: 'compact' }} /> },
                                         { label: 'Volume (24h)', value: formatLargeNumber(coin.volume) },
                                         { label: 'Circulating Supply', value: coin.sharesOutstanding ? formatLargeNumber(coin.sharesOutstanding) : '-' },
                                         { label: 'Open', value: <PriceDisplay amount={coin.open} /> },
@@ -417,7 +422,7 @@ export default function CryptoDetailPage() {
                             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 text-center">
                                 <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
                                 <h2 className="text-xl font-semibold text-red-700 dark:text-red-400 mb-2">
-                                    Crypto Not Found
+                                    {error.includes('does not exist') ? 'Symbol Not Found' : 'Error Loading Data'}
                                 </h2>
                                 <p className="text-red-600 dark:text-red-300">{error}</p>
                             </div>
@@ -459,11 +464,10 @@ export default function CryptoDetailPage() {
                                             <button
                                                 onClick={handleWatchlistToggle}
                                                 disabled={watchlistLoading}
-                                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-sm font-medium ${
-                                                    isInWatchlist
-                                                        ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400'
-                                                        : 'bg-amber-500 hover:bg-amber-600 text-white'
-                                                }`}
+                                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-sm font-medium ${isInWatchlist
+                                                    ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400'
+                                                    : 'bg-amber-500 hover:bg-amber-600 text-white'
+                                                    }`}
                                             >
                                                 <Star size={14} fill={isInWatchlist ? 'currentColor' : 'none'} />
                                                 {watchlistLoading ? 'Updating...' : isInWatchlist ? 'In Watchlist' : 'Watchlist'}

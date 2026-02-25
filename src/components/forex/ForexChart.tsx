@@ -70,8 +70,8 @@ export default function ForexChart({ pair, onPairChange }: ForexChartProps = {})
                 textColor: '#94a3b8',
             },
             grid: {
-                vertLines: { color: 'rgba(148, 163, 184, 0.1)' },
-                horzLines: { color: 'rgba(148, 163, 184, 0.1)' },
+                vertLines: { color: 'rgba(148, 163, 184, 0.2)' },
+                horzLines: { color: 'rgba(148, 163, 184, 0.2)' },
             },
             width: chartContainerRef.current.clientWidth,
             height: chartContainerRef.current.clientHeight,

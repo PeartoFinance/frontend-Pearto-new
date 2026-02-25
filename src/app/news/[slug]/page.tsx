@@ -190,10 +190,19 @@ export default function ArticlePage() {
 
                                     {/* Full Content */}
                                     {article.full_content && (
-                                        <div
-                                            className="prose prose-lg dark:prose-invert max-w-none"
-                                            dangerouslySetInnerHTML={{ __html: article.full_content }}
-                                        />
+                                        <>
+                                            <style dangerouslySetInnerHTML={{ __html: `
+                                                .dynamic-html-content [style],
+                                                .dynamic-html-content font {
+                                                    color: inherit !important;
+                                                    background-color: transparent !important;
+                                                }
+                                            `}} />
+                                            <div
+                                                className="prose prose-lg dark:prose-invert max-w-none dynamic-html-content"
+                                                dangerouslySetInnerHTML={{ __html: article.full_content }}
+                                            />
+                                        </>
                                     )}
 
                                     {/* Actions */}

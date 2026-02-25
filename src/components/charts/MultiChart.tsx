@@ -15,6 +15,7 @@ import {
 } from 'lightweight-charts';
 import { BarChart2, TrendingUp, Activity, Loader2, Mountain, BarChart3, GitBranch, BarChartHorizontal } from 'lucide-react';
 import PriceDisplay from '@/components/common/PriceDisplay';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 export interface ChartDataPoint {
     date: string;
@@ -85,6 +86,7 @@ export function MultiChart({
     negativeColor = '#ef4444',
     skipPriceConversion = false,
 }: MultiChartProps) {
+    const { convertPrice, formatOnly } = useCurrency();
     const chartContainerRef = useRef<HTMLDivElement>(null);
     // ... (unchanged code) ...
     // ... around line 384 for Change Badge ...
@@ -127,7 +129,18 @@ export function MultiChart({
         : (change?.percent ?? 0) >= 0;
 
     const isPositive = dataIsPositive;
-    const chartColor = isPositive ? positiveColor : negativeColor;
+    const chartColor = isDark ? (isPositive ? '#0aff8d' : '#e02d75') : (isPositive ? positiveColor : negativeColor);
+
+    const hexToRgba = (hex: string, alpha: number) => {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    };
+
+    const topGradient = isDark ? (isPositive ? 'rgba(10, 255, 141, 0.4)' : 'rgba(224, 45, 117, 0.4)') : (isPositive ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)');
+    const bottomGradient = isDark ? (isPositive ? 'rgba(10, 255, 141, 0.05)' : 'rgba(224, 45, 117, 0.05)') : (isPositive ? 'rgba(16, 185, 129, 0.05)' : 'rgba(239, 68, 68, 0.05)');
+
 
     // Create/update chart
     useEffect(() => {
@@ -137,12 +150,11 @@ export function MultiChart({
         if (sortedData.length === 0) return;
 
         // Helper for time format: Unix timestamp for intraday, YYYY-MM-DD for daily+
-        const isIntraday = ['1m', '1d', '5d'].includes(period);
         const getTimeKey = (date: string): string | number => {
-            if (isIntraday) {
+            if (date && date.includes('T')) {
                 return Math.floor(new Date(date).getTime() / 1000);
             }
-            return date.split('T')[0];
+            return date ? date.split('T')[0] : '';
         };
 
         // Deduplicate: keep last entry per time key
@@ -165,22 +177,25 @@ export function MultiChart({
         const chart = createChart(container, {
             layout: {
                 background: { type: ColorType.Solid, color: 'transparent' },
-                textColor: isDark ? '#94a3b8' : '#64748b',
+                textColor: isDark ? '#94a3b8' : '#475569',
                 attributionLogo: false,
             },
+            localization: {
+                priceFormatter: (price: number) => formatOnly(price),
+            },
             grid: {
-                vertLines: { color: isDark ? '#1e293b' : '#f1f5f9', style: 1 },
-                horzLines: { color: isDark ? '#1e293b' : '#f1f5f9', style: 1 },
+                vertLines: { color: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)', style: 1 },
+                horzLines: { color: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)', style: 1 },
             },
             width: container.clientWidth,
             height: height,
             rightPriceScale: {
-                borderColor: isDark ? '#334155' : '#e2e8f0',
+                borderColor: isDark ? '#334155' : '#cbd5e1',
                 scaleMargins: { top: 0.1, bottom: 0.1 },
             },
             timeScale: {
-                borderColor: isDark ? '#334155' : '#e2e8f0',
-                timeVisible: true,
+                borderColor: isDark ? '#334155' : '#cbd5e1',
+                timeVisible: sortedData.length > 0 && !!sortedData[0].date && sortedData[0].date.includes('T'),
                 secondsVisible: false,
             },
             crosshair: {
@@ -206,8 +221,8 @@ export function MultiChart({
         if (chartType === 'area') {
             const series = chart.addSeries(AreaSeries, {
                 lineColor: chartColor,
-                topColor: isPositive ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)',
-                bottomColor: isPositive ? 'rgba(16, 185, 129, 0.02)' : 'rgba(239, 68, 68, 0.02)',
+                topColor: topGradient,
+                bottomColor: bottomGradient,
                 lineWidth: 2,
                 crosshairMarkerVisible: true,
                 crosshairMarkerRadius: 5,
@@ -217,7 +232,7 @@ export function MultiChart({
 
             const areaData = dedup(sortedData.map(d => ({
                 time: getTimeKey(d.date),
-                value: d.close ?? d.value ?? 0,
+                value: skipPriceConversion ? (d.close ?? d.value ?? 0) : convertPrice(d.close ?? d.value ?? 0),
             })));
 
             series.setData(areaData as any);
@@ -225,22 +240,22 @@ export function MultiChart({
 
         } else if (chartType === 'candle') {
             const series = chart.addSeries(CandlestickSeries, {
-                upColor: positiveColor,
-                downColor: negativeColor,
-                borderUpColor: positiveColor,
-                borderDownColor: negativeColor,
-                wickUpColor: positiveColor,
-                wickDownColor: negativeColor,
+                upColor: isDark ? '#0aff8d' : '#2563eb',
+                downColor: isDark ? '#e02d75' : '#1d4ed8',
+                borderUpColor: isDark ? '#0aff8d' : '#2563eb',
+                borderDownColor: isDark ? '#e02d75' : '#1d4ed8',
+                wickUpColor: isDark ? '#0aff8d' : '#2563eb',
+                wickDownColor: isDark ? '#e02d75' : '#1d4ed8',
             });
 
             const candleData = dedup(sortedData
                 .filter(d => d.open != null && d.high != null && d.low != null && d.close != null)
                 .map(d => ({
                     time: getTimeKey(d.date),
-                    open: d.open!,
-                    high: d.high!,
-                    low: d.low!,
-                    close: d.close!,
+                    open: skipPriceConversion ? d.open! : convertPrice(d.open!),
+                    high: skipPriceConversion ? d.high! : convertPrice(d.high!),
+                    low: skipPriceConversion ? d.low! : convertPrice(d.low!),
+                    close: skipPriceConversion ? d.close! : convertPrice(d.close!),
                 })));
 
             series.setData(candleData as any);
@@ -254,7 +269,7 @@ export function MultiChart({
 
             const lineData = dedup(sortedData.map(d => ({
                 time: getTimeKey(d.date),
-                value: d.close ?? d.value ?? 0,
+                value: skipPriceConversion ? (d.close ?? d.value ?? 0) : convertPrice(d.close ?? d.value ?? 0),
             })));
 
             series.setData(lineData as any);
@@ -264,16 +279,16 @@ export function MultiChart({
             // Mountain chart - steeper gradient area fill
             const series = chart.addSeries(AreaSeries, {
                 lineColor: chartColor,
-                topColor: isPositive ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.6)',
-                bottomColor: 'transparent',
-                lineWidth: 2,
+                topColor: isPositive ? (isDark ? 'rgba(0, 194, 255, 0.6)' : 'rgba(37, 99, 235, 0.6)') : topGradient,
+                bottomColor: isPositive ? (isDark ? 'rgba(0, 194, 255, 0)' : 'rgba(37, 99, 235, 0)') : bottomGradient,
+                lineWidth: 3,
                 crosshairMarkerVisible: true,
                 crosshairMarkerRadius: 4,
             });
 
             const mountainData = dedup(sortedData.map(d => ({
                 time: getTimeKey(d.date),
-                value: d.close ?? d.value ?? 0,
+                value: skipPriceConversion ? (d.close ?? d.value ?? 0) : convertPrice(d.close ?? d.value ?? 0),
             })));
 
             series.setData(mountainData as any);
@@ -282,8 +297,8 @@ export function MultiChart({
         } else if (chartType === 'bars') {
             // OHLC Bars chart
             const series = chart.addSeries(BarSeries, {
-                upColor: positiveColor,
-                downColor: negativeColor,
+                upColor: isDark ? '#0aff8d' : '#2563eb',
+                downColor: isDark ? '#e02d75' : '#1d4ed8',
                 thinBars: false,
             });
 
@@ -291,10 +306,10 @@ export function MultiChart({
                 .filter(d => d.open != null && d.high != null && d.low != null && d.close != null)
                 .map(d => ({
                     time: getTimeKey(d.date),
-                    open: d.open!,
-                    high: d.high!,
-                    low: d.low!,
-                    close: d.close!,
+                    open: skipPriceConversion ? d.open! : convertPrice(d.open!),
+                    high: skipPriceConversion ? d.high! : convertPrice(d.high!),
+                    low: skipPriceConversion ? d.low! : convertPrice(d.low!),
+                    close: skipPriceConversion ? d.close! : convertPrice(d.close!),
                 })));
 
             series.setData(barsData as any);
@@ -302,22 +317,26 @@ export function MultiChart({
 
         } else if (chartType === 'baseline') {
             // Baseline chart - shows above/below a reference line
-            const avgValue = sortedData.reduce((sum, d) => sum + (d.close ?? d.value ?? 0), 0) / sortedData.length;
+            const avgValueRaw = sortedData.reduce((sum, d) => sum + (d.close ?? d.value ?? 0), 0) / sortedData.length;
+            const avgValue = skipPriceConversion ? avgValueRaw : convertPrice(avgValueRaw);
+
+            const positiveBaseColor = isDark ? '#0aff8d' : '#10b981';
+            const negativeBaseColor = isDark ? '#e02d75' : '#ef4444';
 
             const series = chart.addSeries(BaselineSeries, {
                 baseValue: { type: 'price', price: avgValue },
-                topLineColor: positiveColor,
-                topFillColor1: 'rgba(16, 185, 129, 0.3)',
-                topFillColor2: 'rgba(16, 185, 129, 0.05)',
-                bottomLineColor: negativeColor,
-                bottomFillColor1: 'rgba(239, 68, 68, 0.05)',
-                bottomFillColor2: 'rgba(239, 68, 68, 0.3)',
+                topLineColor: positiveBaseColor,
+                topFillColor1: isDark ? 'rgba(10, 255, 141, 0.3)' : 'rgba(16, 185, 129, 0.3)',
+                topFillColor2: isDark ? 'rgba(10, 255, 141, 0.05)' : 'rgba(16, 185, 129, 0.05)',
+                bottomLineColor: negativeBaseColor,
+                bottomFillColor1: isDark ? 'rgba(224, 45, 117, 0.05)' : 'rgba(239, 68, 68, 0.05)',
+                bottomFillColor2: isDark ? 'rgba(224, 45, 117, 0.3)' : 'rgba(239, 68, 68, 0.3)',
                 lineWidth: 2,
             });
 
             const baselineData = dedup(sortedData.map(d => ({
                 time: getTimeKey(d.date),
-                value: d.close ?? d.value ?? 0,
+                value: skipPriceConversion ? (d.close ?? d.value ?? 0) : convertPrice(d.close ?? d.value ?? 0),
             })));
 
             series.setData(baselineData as any);
@@ -334,8 +353,8 @@ export function MultiChart({
                 const currentClose = d.close ?? d.value ?? 0;
                 return {
                     time: getTimeKey(d.date),
-                    value: currentClose,
-                    color: currentClose >= prevClose ? positiveColor : negativeColor,
+                    value: skipPriceConversion ? currentClose : convertPrice(currentClose),
+                    color: currentClose >= prevClose ? (isDark ? '#0aff8d' : '#10b981') : (isDark ? '#e02d75' : '#ef4444'),
                 };
             }));
 
@@ -438,10 +457,11 @@ export function MultiChart({
             </div>
 
             {/* Chart Container */}
-            <div className="relative">
+            <div className="relative flex flex-col justify-center">
                 {loading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-slate-800/50 z-10">
-                        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-slate-800/80 z-10 rounded-xl text-slate-500 dark:text-slate-400">
+                        <Activity className="h-8 w-8 animate-spin mr-3 text-blue-500 dark:text-blue-400" />
+                        <span className="text-sm font-medium">Loading chart data...</span>
                     </div>
                 )}
                 <div

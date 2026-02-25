@@ -13,6 +13,7 @@ interface CurrencyContextType {
     setCurrency: (code: string) => Promise<void>;
     convertPrice: (amount: number) => number;
     formatPrice: (amount: number, minimumFractionDigits?: number, maximumFractionDigits?: number, options?: Intl.NumberFormatOptions) => string;
+    formatOnly: (amount: number, minimumFractionDigits?: number, maximumFractionDigits?: number, options?: Intl.NumberFormatOptions) => string;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
@@ -104,8 +105,21 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         maximumFractionDigits: 0,
     }).formatToParts(0).find(x => x.type === 'currency')?.value || currency;
 
+    const formatOnly = (amount: number, minimumFractionDigits = 2, maximumFractionDigits = 2, options: Intl.NumberFormatOptions = {}) => {
+        const minFD = Math.max(0, Math.min(20, Number(minimumFractionDigits) || 0));
+        const maxFD = Math.max(minFD, Math.min(20, Number(maximumFractionDigits) || 0));
+
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: currency,
+            minimumFractionDigits: minFD,
+            maximumFractionDigits: maxFD,
+            ...options
+        }).format(amount);
+    };
+
     return (
-        <CurrencyContext.Provider value={{ currency, symbol, rates, loading, setCurrency, convertPrice, formatPrice }}>
+        <CurrencyContext.Provider value={{ currency, symbol, rates, loading, setCurrency, convertPrice, formatPrice, formatOnly }}>
             {children}
         </CurrencyContext.Provider>
     );

@@ -50,45 +50,50 @@ export default function StockChart({ data, loading = false, symbol }: StockChart
         const chart = createChart(container, {
             layout: {
                 background: { type: ColorType.Solid, color: 'transparent' },
-                textColor: isDark ? '#94a3b8' : '#64748b',
+                textColor: isDark ? '#94a3b8' : '#475569',
                 attributionLogo: false,
             },
+            localization: {
+                priceFormatter: (price: number) => formatOnly(price),
+            },
             grid: {
-                vertLines: { color: isDark ? '#1e293b' : '#f1f5f9', visible: true },
-                horzLines: { color: isDark ? '#1e293b' : '#f1f5f9', visible: true },
+                vertLines: { color: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)', style: 1 },
+                horzLines: { color: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)', style: 1 },
             },
             width: container.clientWidth,
             height: 420,
             crosshair: {
                 mode: 1,
                 vertLine: {
-                    color: isDark ? '#3b82f6' : '#3b82f6',
+                    color: isDark ? '#475569' : '#94a3b8',
                     width: 1,
                     style: 2,
-                    labelBackgroundColor: '#3b82f6',
+                    labelBackgroundColor: isDark ? '#1e293b' : '#f1f5f9',
                 },
                 horzLine: {
-                    color: isDark ? '#3b82f6' : '#3b82f6',
+                    color: isDark ? '#0aff8d' : '#10b981', // Will be overridden per series
                     width: 1,
                     style: 2,
-                    labelBackgroundColor: '#3b82f6',
+                    labelBackgroundColor: isDark ? '#0aff8d' : '#10b981',
                 },
             },
             rightPriceScale: {
-                borderColor: isDark ? '#334155' : '#e2e8f0',
+                borderColor: isDark ? '#334155' : '#cbd5e1',
                 scaleMargins: {
                     top: 0.1,
                     bottom: 0.2,
                 },
             },
             timeScale: {
-                borderColor: isDark ? '#334155' : '#e2e8f0',
+                borderColor: isDark ? '#334155' : '#cbd5e1',
                 timeVisible: true,
                 secondsVisible: false,
             },
         });
 
         chartRef.current = chart;
+
+        const isIntraday = data.length > 0 && data[0].date.includes('T');
 
         // Set data if available
         if (data.length > 0) {
@@ -97,24 +102,41 @@ export default function StockChart({ data, loading = false, symbol }: StockChart
             data.forEach(d => dataMap.set(d.date, d));
             const sortedData = Array.from(dataMap.values()).sort((a, b) => a.date.localeCompare(b.date));
 
+            // Helper for time format: Unix timestamp for intraday, YYYY-MM-DD for daily+
+            const getTimeKey = (date: string): string | number => {
+                if (isIntraday && date.includes('T')) {
+                    return Math.floor(new Date(date).getTime() / 1000);
+                }
+                return date.split('T')[0];
+            };
+
+            // Calculate if positive or negative
+            const isPositive = sortedData.length >= 2
+                ? (sortedData[sortedData.length - 1].close ?? 0) >= (sortedData[0].close ?? 0)
+                : true;
+
+            const chartColor = isDark ? (isPositive ? '#0aff8d' : '#e02d75') : (isPositive ? '#10b981' : '#ef4444');
+            const topGradient = isDark ? (isPositive ? 'rgba(10, 255, 141, 0.4)' : 'rgba(224, 45, 117, 0.4)') : (isPositive ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)');
+            const bottomGradient = isDark ? (isPositive ? 'rgba(10, 255, 141, 0.05)' : 'rgba(224, 45, 117, 0.05)') : (isPositive ? 'rgba(16, 185, 129, 0.05)' : 'rgba(239, 68, 68, 0.05)');
+
             if (chartType === 'area') {
                 // Area chart
                 const areaSeries = chart.addSeries(AreaSeries, {
-                    lineColor: '#3b82f6',
-                    topColor: 'rgba(59, 130, 246, 0.4)',
-                    bottomColor: 'rgba(59, 130, 246, 0.02)',
+                    lineColor: chartColor,
+                    topColor: topGradient,
+                    bottomColor: bottomGradient,
                     lineWidth: 2,
                     crosshairMarkerVisible: true,
-                    crosshairMarkerRadius: 6,
-                    crosshairMarkerBorderColor: '#3b82f6',
-                    crosshairMarkerBackgroundColor: '#ffffff',
+                    crosshairMarkerRadius: 5,
+                    crosshairMarkerBorderColor: '#ffffff',
+                    crosshairMarkerBackgroundColor: chartColor,
                 });
 
                 const areaData = sortedData
                     .filter(d => d.close != null)
                     .map(d => ({
-                        time: d.date,
-                        value: d.close!,
+                        time: getTimeKey(d.date),
+                        value: convertPrice(d.close!),
                     }));
 
                 areaSeries.setData(areaData as any);
@@ -122,21 +144,22 @@ export default function StockChart({ data, loading = false, symbol }: StockChart
             } else if (chartType === 'candle') {
                 // Candlestick chart
                 const candleSeries = chart.addSeries(CandlestickSeries, {
-                    upColor: '#10b981',
-                    downColor: '#ef4444',
-                    borderVisible: false,
-                    wickUpColor: '#10b981',
-                    wickDownColor: '#ef4444',
+                    upColor: isDark ? '#0aff8d' : '#2563eb',
+                    downColor: isDark ? '#e02d75' : '#1d4ed8',
+                    borderUpColor: isDark ? '#0aff8d' : '#2563eb',
+                    borderDownColor: isDark ? '#e02d75' : '#1d4ed8',
+                    wickUpColor: isDark ? '#0aff8d' : '#2563eb',
+                    wickDownColor: isDark ? '#e02d75' : '#1d4ed8',
                 });
 
                 const candleData = sortedData
                     .filter(d => d.open != null && d.high != null && d.low != null && d.close != null)
                     .map(d => ({
-                        time: d.date,
-                        open: d.open!,
-                        high: d.high!,
-                        low: d.low!,
-                        close: d.close!,
+                        time: getTimeKey(d.date),
+                        open: convertPrice(d.open!),
+                        high: convertPrice(d.high!),
+                        low: convertPrice(d.low!),
+                        close: convertPrice(d.close!),
                     }));
 
                 candleSeries.setData(candleData as any);
@@ -152,14 +175,15 @@ export default function StockChart({ data, loading = false, symbol }: StockChart
                     scaleMargins: { top: 0.85, bottom: 0 },
                 });
 
+                // Deduping not needed here since we already sortedData deduplicated
                 const volumeData = sortedData
                     .filter(d => d.volume != null && d.close != null && d.open != null)
                     .map(d => ({
-                        time: d.date,
+                        time: getTimeKey(d.date),
                         value: d.volume!,
                         color: (d.close ?? 0) >= (d.open ?? 0)
-                            ? 'rgba(16, 185, 129, 0.4)'
-                            : 'rgba(239, 68, 68, 0.4)',
+                            ? (isDark ? 'rgba(10, 255, 141, 0.4)' : 'rgba(16, 185, 129, 0.4)')
+                            : (isDark ? 'rgba(224, 45, 117, 0.4)' : 'rgba(239, 68, 68, 0.4)'),
                     }));
 
                 volumeSeries.setData(volumeData as any);
@@ -167,7 +191,7 @@ export default function StockChart({ data, loading = false, symbol }: StockChart
             } else {
                 // Line chart
                 const lineSeries = chart.addSeries(LineSeries, {
-                    color: '#8b5cf6',
+                    color: chartColor,
                     lineWidth: 2,
                     crosshairMarkerVisible: true,
                     crosshairMarkerRadius: 5,
@@ -176,8 +200,8 @@ export default function StockChart({ data, loading = false, symbol }: StockChart
                 const lineData = sortedData
                     .filter(d => d.close != null)
                     .map(d => ({
-                        time: d.date,
-                        value: d.close!,
+                        time: getTimeKey(d.date),
+                        value: convertPrice(d.close!),
                     }));
 
                 lineSeries.setData(lineData as any);
@@ -215,11 +239,9 @@ export default function StockChart({ data, loading = false, symbol }: StockChart
 
     if (loading) {
         return (
-            <div className="h-[420px] flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-                <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-                    <span className="text-sm text-slate-500">Loading chart...</span>
-                </div>
+            <div className="h-[420px] flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-xl text-slate-500 dark:text-slate-400">
+                <Activity className="h-8 w-8 animate-spin mr-3 text-blue-500 dark:text-blue-400" />
+                <span className="text-sm">Loading chart data...</span>
             </div>
         );
     }
@@ -236,7 +258,7 @@ export default function StockChart({ data, loading = false, symbol }: StockChart
     }
 
     // Calculate price range for display
-    const { formatPrice } = useCurrency();
+    const { formatPrice, convertPrice, formatOnly } = useCurrency();
     const prices = data.filter(d => d.close != null).map(d => d.close!);
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);

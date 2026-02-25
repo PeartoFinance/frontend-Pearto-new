@@ -105,16 +105,7 @@ export default function HoldingDetailPage({ params }: PageProps) {
         return num.toLocaleString();
     };
 
-    // Format date for charts - ensures yyyy-mm-dd format
-    const formatChartDate = (dateStr: string): string => {
-        if (!dateStr) return '';
-        // If already yyyy-mm-dd, return as is
-        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-        // Parse ISO or other formats and convert to yyyy-mm-dd
-        const d = new Date(dateStr);
-        if (isNaN(d.getTime())) return dateStr;
-        return d.toISOString().split('T')[0];
-    };
+
 
     const periods = [
         { id: '1d', label: '1D' },
@@ -318,7 +309,7 @@ export default function HoldingDetailPage({ params }: PageProps) {
                                 {/* Chart Section */}
                                 <MultiChart
                                     data={history.map(d => ({
-                                        date: formatChartDate(d.date),
+                                        date: d.date,
                                         open: d.open,
                                         high: d.high,
                                         low: d.low,
@@ -419,7 +410,7 @@ export default function HoldingDetailPage({ params }: PageProps) {
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-500">Market Cap</span>
-                                                    <span className="font-medium text-slate-900 dark:text-white">{formatLargeNumber(market.marketCap)}</span>
+                                                    <span className="font-medium text-slate-900 dark:text-white"><PriceDisplay amount={market.marketCap} options={{ notation: 'compact' }} /></span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-500">Sector</span>
@@ -450,7 +441,7 @@ export default function HoldingDetailPage({ params }: PageProps) {
                         {activeTab === 'history' && (
                             <MultiChart
                                 data={history.map(d => ({
-                                    date: formatChartDate(d.date),
+                                    date: d.date,
                                     open: d.open,
                                     high: d.high,
                                     low: d.low,

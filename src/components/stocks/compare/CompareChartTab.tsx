@@ -46,8 +46,8 @@ export default function CompareChartTab({ stocks, period, onPeriodChange }: Comp
                 attributionLogo: false,
             },
             grid: {
-                vertLines: { color: isDark ? '#1e293b' : '#f1f5f9' },
-                horzLines: { color: isDark ? '#1e293b' : '#f1f5f9' },
+                vertLines: { color: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)' },
+                horzLines: { color: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)' },
             },
             width: container.clientWidth,
             height: 450,

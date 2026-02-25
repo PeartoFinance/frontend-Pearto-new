@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, BarChart2, Coins, DollarSign } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, BarChart2, Coins, DollarSign, Layers } from 'lucide-react';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import type { SearchResult } from '@/services/liveChartService';
 
@@ -154,6 +154,7 @@ export function getAssetIcon(type: string) {
         case 'index': return BarChart2;
         case 'commodity': return DollarSign;
         case 'crypto': return Coins;
+        case 'etf': return Layers;
         default: return TrendingUp;
     }
 }
@@ -163,6 +164,7 @@ export function getAssetColor(type: string) {
         case 'index': return 'text-blue-500 bg-blue-500/10';
         case 'commodity': return 'text-amber-500 bg-amber-500/10';
         case 'crypto': return 'text-purple-500 bg-purple-500/10';
+        case 'etf': return 'text-cyan-500 bg-cyan-500/10';
         default: return 'text-emerald-500 bg-emerald-500/10';
     }
 }
@@ -170,7 +172,9 @@ export function getAssetColor(type: string) {
 export function getSymbolLink(symbol: string, type: string) {
     switch (type) {
         case 'crypto': return `/crypto/${symbol}`;
-        case 'index': return `/live?symbol=${symbol}&type=stock`;
+        case 'index': return `/chart/${symbol}?type=stock`;
+        case 'commodity': return `/chart/${symbol}?type=commodity`;
+        case 'etf': return `/stocks/${symbol}`;
         default: return `/stocks/${symbol}`;
     }
 }
