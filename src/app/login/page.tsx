@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import Footer from '@/components/layout/Footer';
 
 export default function LoginPage() {
     return (
@@ -309,6 +310,7 @@ function LoginContent() {
 
                 </div>
             </div>
-        </div>
+          <Footer />
+    </div>
     );
 }

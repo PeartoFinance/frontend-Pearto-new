@@ -38,7 +38,7 @@ export default function StationFilter({
                     className="flex-1 bg-transparent text-sm outline-none min-w-[120px] text-slate-700 dark:text-slate-200"
                 >
                     {genres.map((g) => (
-                        <option key={g} value={g}>
+                        <option key={g} value={g} className="bg-white text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                             {g}
                         </option>
                     ))}

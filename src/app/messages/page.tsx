@@ -12,6 +12,7 @@ import TickerTape from '@/components/layout/TickerTape';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
 import { toast } from 'sonner';
+import Footer from '@/components/layout/Footer';
 
 interface Conversation {
     id: string;
@@ -121,7 +122,8 @@ export default function MessagesPage() {
                             <Link href="/login" className="text-emerald-500 hover:underline">Sign in now</Link>
                         </div>
                     </div>
-                </main>
+                  <Footer />
+      </main>
             </div>
         );
     }

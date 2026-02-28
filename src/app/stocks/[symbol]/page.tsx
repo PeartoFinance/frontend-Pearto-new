@@ -12,6 +12,7 @@ import { AIWidget } from '@/components/ai';
 import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
 import { AIColumnWrapper } from '@/components/ai/AIColumnWrapper';
 import PriceDisplay from '@/components/common/PriceDisplay';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import {
     StockTabs,
     MarketIssuesBanner,
@@ -41,6 +42,7 @@ import RiskAnalysisWidget from '@/components/stocks/RiskAnalysisWidget';
 import { addToWatchlist, removeFromWatchlist } from '@/services/portfolioService';
 import { useWatchlist, portfolioQueryKeys } from '@/hooks/usePortfolioData';
 import { useQueryClient } from '@tanstack/react-query';
+import Footer from '@/components/layout/Footer';
 
 type Period = '1m' | '1d' | '5d' | '1mo' | '3mo' | '6mo' | '1y' | '5y';
 
@@ -185,6 +187,7 @@ function StockDetailContent() {
         return `${(num * 100).toFixed(2)}%`;
     };
 
+    const { currency } = useCurrency();
     const isPositive = (stock?.changePercent ?? 0) >= 0;
 
     // Render tab content
@@ -443,7 +446,7 @@ function StockDetailContent() {
                                                 {stock.name} ({stock.symbol})
                                             </h1>
                                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                                {stock.exchange} · Real-Time Price · {stock.currency || 'USD'}
+                                                {stock.exchange} · Real-Time Price · {currency}
                                             </p>
                                             <div className="flex items-baseline gap-3 mt-2">
                                                 <span className="text-3xl font-bold text-slate-900 dark:text-white">
@@ -452,7 +455,7 @@ function StockDetailContent() {
                                                 <div className={`flex items-center gap-1 text-base font-semibold ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
                                                     {isPositive ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
                                                     <span>
-                                                        {isPositive ? '+' : ''}{formatNumber(stock.change)} ({isPositive ? '+' : ''}{formatNumber(stock.changePercent)}%)
+                                                        {isPositive ? '+' : ''}<PriceDisplay amount={stock.change} showSymbol={false} /> ({isPositive ? '+' : ''}{formatNumber(stock.changePercent)}%)
                                                     </span>
                                                 </div>
                                             </div>
@@ -518,7 +521,8 @@ function StockDetailContent() {
                         )}
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
 
             <div className="xl:hidden">
                 <AIWidget

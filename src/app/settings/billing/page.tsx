@@ -8,6 +8,7 @@ import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/context/AuthContext';
 import { getSubscriptionStatus, cancelSubscription } from '@/services/subscriptionService';
+import Footer from '@/components/layout/Footer';
 
 interface UserSubscription {
     id: number;
@@ -237,7 +238,8 @@ export default function BillingPage() {
                         )}
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

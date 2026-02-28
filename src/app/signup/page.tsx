@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Check, TrendingUp, PieChart, Shield, Gift } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import Footer from '@/components/layout/Footer';
 
 // Wrapper component for Suspense
 export default function SignupPage() {
@@ -410,6 +411,7 @@ function SignupContent() {
                     </div>
                 </div>
             </div>
-        </div>
+          <Footer />
+    </div>
     );
 }

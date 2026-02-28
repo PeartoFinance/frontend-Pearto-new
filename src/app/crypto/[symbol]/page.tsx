@@ -30,6 +30,7 @@ import { useWatchlist, portfolioQueryKeys } from '@/hooks/usePortfolioData';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
+import Footer from '@/components/layout/Footer';
     ArrowLeft, Loader2, AlertCircle, TrendingUp, TrendingDown,
     Globe, Star, BarChart2, Newspaper, Coins
 } from 'lucide-react';
@@ -176,7 +177,7 @@ export default function CryptoDetailPage() {
 
 
 
-    const { convertPrice } = useCurrency();
+    const { convertPrice, currency } = useCurrency();
 
     const renderTabContent = () => {
         if (!coin) return null;
@@ -443,7 +444,7 @@ export default function CryptoDetailPage() {
                                                         {coin.name} ({coin.symbol})
                                                     </h1>
                                                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                                                        Crypto · Real-Time Price · USD
+                                                        Crypto · Real-Time Price · {currency}
                                                     </p>
                                                 </div>
                                             </div>
@@ -455,7 +456,7 @@ export default function CryptoDetailPage() {
                                                 <div className={`flex items-center gap-1 text-base font-semibold ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
                                                     {isPositive ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
                                                     <span>
-                                                        {isPositive ? '+' : ''}{formatNumber(coin.change)} ({isPositive ? '+' : ''}{formatNumber(coin.changePercent)}%)
+                                                        {isPositive ? '+' : ''}<PriceDisplay amount={coin.change} showSymbol={false} /> ({isPositive ? '+' : ''}{formatNumber(coin.changePercent)}%)
                                                     </span>
                                                 </div>
                                             </div>
@@ -518,7 +519,8 @@ export default function CryptoDetailPage() {
                         )}
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

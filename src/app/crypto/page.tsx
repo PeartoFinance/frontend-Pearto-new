@@ -14,6 +14,7 @@ import {
     type MarketStock,
 } from '@/services/marketService';
 import {
+import Footer from '@/components/layout/Footer';
     Coins, TrendingUp, TrendingDown, Search, RefreshCw,
     Loader2, ArrowUpDown
 } from 'lucide-react';
@@ -68,13 +69,7 @@ export default function CryptoPage() {
         }
     };
 
-    const formatNumber = (val: number | undefined | null) => {
-        if (val == null) return '—';
-        if (Math.abs(val) >= 1e12) return `$${(val / 1e12).toFixed(2)}T`;
-        if (Math.abs(val) >= 1e9) return `$${(val / 1e9).toFixed(2)}B`;
-        if (Math.abs(val) >= 1e6) return `$${(val / 1e6).toFixed(2)}M`;
-        return `$${val.toLocaleString()}`;
-    };
+
 
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
@@ -147,11 +142,10 @@ export default function CryptoPage() {
                                         setSortBy(tab.id);
                                         setSearchQuery('');
                                     }}
-                                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition ${
-                                        sortBy === tab.id
+                                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition ${sortBy === tab.id
                                             ? 'bg-amber-500 text-white'
                                             : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800'
-                                    }`}
+                                        }`}
                                 >
                                     <ArrowUpDown size={14} />
                                     {tab.label}
@@ -202,7 +196,7 @@ export default function CryptoPage() {
 
                                                 return (
                                                     <tr
-                                                        key={coin.symbol}
+                                                        key={`${coin.symbol}-${index}`}
                                                         className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
                                                     >
                                                         <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
@@ -233,9 +227,8 @@ export default function CryptoPage() {
                                                         </td>
                                                         <td className="px-4 py-3 text-right">
                                                             <span
-                                                                className={`inline-flex items-center gap-1 text-sm font-medium ${
-                                                                    isPositive ? 'text-emerald-600' : 'text-red-500'
-                                                                }`}
+                                                                className={`inline-flex items-center gap-1 text-sm font-medium ${isPositive ? 'text-emerald-600' : 'text-red-500'
+                                                                    }`}
                                                             >
                                                                 {isPositive ? (
                                                                     <TrendingUp size={14} />
@@ -247,10 +240,10 @@ export default function CryptoPage() {
                                                             </span>
                                                         </td>
                                                         <td className="px-4 py-3 text-right hidden md:table-cell text-sm text-slate-600 dark:text-slate-400">
-                                                            {formatNumber(coin.marketCap)}
+                                                            <PriceDisplay amount={coin.marketCap} options={{ notation: 'compact' }} />
                                                         </td>
                                                         <td className="px-4 py-3 text-right hidden lg:table-cell text-sm text-slate-600 dark:text-slate-400">
-                                                            {formatNumber(coin.volume)}
+                                                            <PriceDisplay amount={coin.volume} options={{ notation: 'compact' }} />
                                                         </td>
                                                     </tr>
                                                 );
@@ -272,7 +265,8 @@ export default function CryptoPage() {
                         </div>
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
 
             {/* Floating AI Widget */}
             <AIWidget

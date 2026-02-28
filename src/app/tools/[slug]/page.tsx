@@ -269,6 +269,7 @@ import VisaRequirementChecker from '@/components/tools/travel/VisaRequirementChe
 
 // Import debt tools
 import DebtPayoffCalculatorDebt from '@/components/tools/debt/DebtPayoffCalculator';
+import Footer from '@/components/layout/Footer';
 
 /**
  * Tool Component Registry
@@ -578,7 +579,8 @@ export default function DynamicToolPage({ params }: ToolPageProps) {
                             />
                         </div>
                     </div>
-                </main>
+                  <Footer />
+      </main>
             </div>
         );
     }

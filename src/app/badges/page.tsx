@@ -10,6 +10,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import { badgesApi, Badge, UserBadge } from '@/services/socialService';
 import { useAuth } from '@/context/AuthContext';
+import Footer from '@/components/layout/Footer';
 
 const BADGE_ICONS: Record<string, any> = {
     first_trade: Target,
@@ -263,7 +264,8 @@ export default function BadgesPage() {
                         </div>
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

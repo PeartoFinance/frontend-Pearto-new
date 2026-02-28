@@ -8,6 +8,7 @@ import { developerService, ApiKey, ApiUsage } from '@/services/developerService'
 import { useApiSWR } from '@/hooks/useApi';
 import { Key, Plus, Trash2, Copy, BarChart3, CheckCircle2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import Footer from '@/components/layout/Footer';
 
 function DeveloperDashboard() {
     const { isAuthenticated } = useAuth();

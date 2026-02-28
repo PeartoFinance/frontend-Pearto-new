@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Search, Loader2, TrendingUp, X } from 'lucide-react';
 import { searchStocks, type MarketStock } from '@/services/marketService';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface BooyahSearchProps {
     onSelect: (symbol: string) => void;
@@ -139,7 +140,7 @@ export default function BooyahSearch({ onSelect }: BooyahSearchProps) {
                             </div>
                             {item.price && (
                                 <div className="text-right">
-                                    <span className="text-sm font-semibold text-slate-900 dark:text-white">{formatPrice(item.price)}</span>
+                                    <span className="text-sm font-semibold text-slate-900 dark:text-white"><PriceDisplay amount={item.price} /></span>
                                     {item.changePercent != null && (
                                         <p className={`text-xs font-medium ${item.changePercent >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                                             {item.changePercent >= 0 ? '+' : ''}{item.changePercent.toFixed(2)}%

@@ -8,6 +8,7 @@ import ToolsGrid from '@/components/tools/ToolsGrid';
 import { getEnabledTools, type ToolSetting } from '@/services/toolsService';
 import { Wrench, Sparkles, CheckCircle2, Clock, LayoutGrid } from 'lucide-react';
 import { AIWidget } from '@/components/ai';
+import Footer from '@/components/layout/Footer';
 
 export default function ToolsPage() {
     const [tools, setTools] = useState<ToolSetting[]>([]);
@@ -117,7 +118,8 @@ export default function ToolsPage() {
                         <ToolsGrid tools={tools} loading={loading} />
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
 
             <AIWidget
                 type="floating"

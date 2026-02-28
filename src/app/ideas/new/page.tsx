@@ -11,6 +11,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import { ideasApi } from '@/services/socialService';
 import { useAuth } from '@/context/AuthContext';
+import Footer from '@/components/layout/Footer';
 
 export default function NewIdeaPage() {
     const router = useRouter();
@@ -77,7 +78,8 @@ export default function NewIdeaPage() {
                             </Link>
                         </div>
                     </div>
-                </main>
+                  <Footer />
+      </main>
             </div>
         );
     }

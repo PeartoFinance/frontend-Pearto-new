@@ -6,6 +6,7 @@ import { ArrowLeft, HelpCircle, Mail, FileText, ChevronRight, ExternalLink, Sear
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com/api';
 
@@ -292,7 +293,8 @@ export default function SupportPage() {
                         )}
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

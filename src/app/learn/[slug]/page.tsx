@@ -16,6 +16,7 @@ import {
     BookOpen, Lock, GraduationCap, Share2, Heart, Zap, Download
 } from 'lucide-react';
 import { AIWidget } from '@/components/ai';
+import Footer from '@/components/layout/Footer';
 
 interface CourseDetail extends Course {
     longDescription?: string;
@@ -103,7 +104,8 @@ export default function CourseDetailPage() {
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4" />
                             <p className="text-slate-500 dark:text-slate-400">Loading course...</p>
                         </div>
-                    </main>
+                      <Footer />
+      </main>
                 </div>
             </div>
         );

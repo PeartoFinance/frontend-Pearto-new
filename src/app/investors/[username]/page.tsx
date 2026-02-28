@@ -10,9 +10,11 @@ import {
 import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { profilesApi, UserProfile, followApi, ideasApi, TradingIdea, badgesApi, UserBadge } from '@/services/socialService';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import Footer from '@/components/layout/Footer';
 
 const TRADING_STYLES: Record<string, { label: string; color: string; bg: string }> = {
     day_trader: { label: 'Day Trader', color: 'text-rose-500', bg: 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800' },
@@ -68,7 +70,7 @@ function IdeaCard({ idea }: { idea: TradingIdea }) {
                             {idea.entryPrice && (
                                 <div className="flex-1">
                                     <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Entry</div>
-                                    <div className="font-bold text-slate-900 dark:text-white">${parseFloat(idea.entryPrice.toString()).toFixed(2)}</div>
+                                    <div className="font-bold text-slate-900 dark:text-white"><PriceDisplay amount={parseFloat(idea.entryPrice.toString())} /></div>
                                 </div>
                             )}
                             {idea.targetPrice && (
@@ -76,7 +78,7 @@ function IdeaCard({ idea }: { idea: TradingIdea }) {
                                     <div className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold mb-1 flex items-center gap-1">
                                         <Target size={12} /> Target
                                     </div>
-                                    <div className="font-bold text-emerald-600 dark:text-emerald-400">${parseFloat(idea.targetPrice.toString()).toFixed(2)}</div>
+                                    <div className="font-bold text-emerald-600 dark:text-emerald-400"><PriceDisplay amount={parseFloat(idea.targetPrice.toString())} /></div>
                                 </div>
                             )}
                         </div>
@@ -175,7 +177,8 @@ export default function InvestorProfilePage({ params }: { params: Promise<{ user
                             </div>
                         </div>
                     </div>
-                </main>
+                  <Footer />
+      </main>
             </div>
         );
     }
@@ -278,8 +281,8 @@ export default function InvestorProfilePage({ params }: { params: Promise<{ user
                                                 <button
                                                     onClick={handleFollow}
                                                     className={`flex-1 flex items-center justify-center gap-2 py-2.5 font-medium rounded-xl transition-colors ${isFollowing
-                                                            ? 'bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600'
-                                                            : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                                                        ? 'bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600'
+                                                        : 'bg-emerald-500 hover:bg-emerald-600 text-white'
                                                         }`}
                                                 >
                                                     {isFollowing ? (
@@ -370,8 +373,8 @@ export default function InvestorProfilePage({ params }: { params: Promise<{ user
                                     <button
                                         onClick={() => setActiveTab('ideas')}
                                         className={`flex-1 flex justify-center items-center gap-2 py-2.5 px-4 rounded-lg font-semibold text-sm transition-colors ${activeTab === 'ideas'
-                                                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-600'
-                                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                            ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-600'
+                                            : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                                             }`}
                                     >
                                         <Activity size={16} /> Trading Ideas
@@ -379,8 +382,8 @@ export default function InvestorProfilePage({ params }: { params: Promise<{ user
                                     <button
                                         onClick={() => setActiveTab('badges')}
                                         className={`flex-1 flex justify-center items-center gap-2 py-2.5 px-4 rounded-lg font-semibold text-sm transition-colors ${activeTab === 'badges'
-                                                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-600'
-                                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                            ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-600'
+                                            : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                                             }`}
                                     >
                                         <Shield size={16} /> Earned Badges

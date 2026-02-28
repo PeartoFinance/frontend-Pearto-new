@@ -10,6 +10,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
+import Footer from '@/components/layout/Footer';
 
 function CompareContent() {
     const searchParams = useSearchParams();
@@ -320,7 +321,8 @@ export default function VendorComparePage() {
                         </Suspense>
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

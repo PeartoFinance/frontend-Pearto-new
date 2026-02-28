@@ -4,6 +4,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import CompoundCalculator from '@/components/tools/calculators/CompoundCalculator';
+import Footer from '@/components/layout/Footer';
 
 export default function CompoundPage() {
     return (
@@ -25,7 +26,8 @@ export default function CompoundPage() {
                         <CompoundCalculator />
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

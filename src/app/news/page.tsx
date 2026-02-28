@@ -10,6 +10,7 @@ import NewsCard from '@/components/news/NewsCard';
 import { getPublishedNews, getCategories, type NewsArticle, type NewsCategory } from '@/services/newsService';
 import { Newspaper, Search, RefreshCw, ArrowLeft } from 'lucide-react';
 import { AIWidget } from '@/components/ai';
+import Footer from '@/components/layout/Footer';
 
 interface NewsPageProps {
     params?: { category?: string };
@@ -38,7 +39,8 @@ function NewsLoading() {
                         ))}
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

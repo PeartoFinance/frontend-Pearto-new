@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import Sidebar from '@/components/layout/Sidebar';
 
 // Dynamic import to avoid SSR issues with useSearchParams
+import Footer from '@/components/layout/Footer';
 const TVContent = dynamic(() => import('@/components/tv/TVContent'), {
     ssr: false,
     loading: () => (
@@ -26,6 +27,7 @@ export default function TVPage() {
             }>
                 <TVContent />
             </Suspense>
-        </div>
+          <Footer />
+    </div>
     );
 }

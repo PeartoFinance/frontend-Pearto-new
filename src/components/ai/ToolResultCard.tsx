@@ -300,7 +300,7 @@ export function ComparisonCard({ data }: { data: ComparisonData }) {
                                         {s.peRatio ? s.peRatio.toFixed(1) : '—'}
                                     </td>
                                     <td className="text-right py-2 px-2 text-slate-300 hidden sm:table-cell">
-                                        {s.marketCap ? `$${(s.marketCap / 1e9).toFixed(1)}B` : '—'}
+                                        {s.marketCap ? <><PriceDisplay amount={s.marketCap / 1e9} />B</> : '—'}
                                     </td>
                                 </tr>
                             );
@@ -438,8 +438,8 @@ export function TechnicalCard({ data }: { data: TechnicalData }) {
             {/* 52-week Position */}
             <div className="mb-3">
                 <div className="flex justify-between text-[10px] text-slate-500 mb-1">
-                    <span>52w Low: ${data.weekLow52}</span>
-                    <span>52w High: ${data.weekHigh52}</span>
+                    <span>52w Low: <PriceDisplay amount={data.weekLow52 || 0} /></span>
+                    <span>52w High: <PriceDisplay amount={data.weekHigh52 || 0} /></span>
                 </div>
                 <div className="w-full bg-slate-700/50 rounded-full h-1.5 relative">
                     <div
@@ -454,13 +454,13 @@ export function TechnicalCard({ data }: { data: TechnicalData }) {
                 <div className="bg-emerald-900/20 rounded-lg p-2 border border-emerald-700/30">
                     <div className="text-emerald-400 text-[10px] font-medium mb-1">Support Levels</div>
                     {(data.support || []).map((lvl, i) => (
-                        <div key={i} className="text-white font-medium">${lvl.toFixed(2)}</div>
+                        <div key={i} className="text-white font-medium"><PriceDisplay amount={lvl} /></div>
                     ))}
                 </div>
                 <div className="bg-red-900/20 rounded-lg p-2 border border-red-700/30">
                     <div className="text-red-400 text-[10px] font-medium mb-1">Resistance Levels</div>
                     {(data.resistance || []).map((lvl, i) => (
-                        <div key={i} className="text-white font-medium">${lvl.toFixed(2)}</div>
+                        <div key={i} className="text-white font-medium"><PriceDisplay amount={lvl} /></div>
                     ))}
                 </div>
             </div>
@@ -511,7 +511,7 @@ export function CompoundInterestCard({ data }: { data: CalculatorData }) {
                                     key={i}
                                     className="flex-1 bg-indigo-500/60 rounded-t hover:bg-indigo-400/80 transition-colors"
                                     style={{ height: `${heightPct}%` }}
-                                    title={`Year ${yr.year}: $${yr.value.toLocaleString()}`}
+                                    title={`Year ${yr.year}: ${yr.value.toLocaleString()}`}
                                 />
                             );
                         })}

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, ArrowLeft, RefreshCw, Loader2 } from 'lucide-react';
 import { reactivateAccount } from '@/services/accountService';
+import Footer from '@/components/layout/Footer';
 
 export default function ReactivateAccountPage() {
     const router = useRouter();
@@ -147,6 +148,7 @@ export default function ReactivateAccountPage() {
                     </p>
                 </div>
             </div>
-        </div>
+          <Footer />
+    </div>
     );
 }

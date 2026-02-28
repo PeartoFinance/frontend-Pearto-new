@@ -20,6 +20,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
+import Footer from '@/components/layout/Footer';
 
 export default function VendorDetailPage({ params }: { params: Promise<{ id: string }> }) {
     // React 19: Unwrapping params with `use()` is standard for async props, 
@@ -78,7 +79,8 @@ export default function VendorDetailPage({ params }: { params: Promise<{ id: str
                             <p className="text-slate-500">Loading vendor profile...</p>
                         </div>
                     </div>
-                </main>
+                  <Footer />
+      </main>
             </div>
         );
     }

@@ -11,6 +11,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import { profilesApi, UserProfile, badgesApi } from '@/services/socialService';
 import { useAuth } from '@/context/AuthContext';
+import Footer from '@/components/layout/Footer';
 
 const TRADING_STYLES: Record<string, { label: string; color: string }> = {
     day_trader: { label: 'Day Trader', color: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' },
@@ -295,7 +296,8 @@ export default function InvestorsPage() {
                         </div>
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

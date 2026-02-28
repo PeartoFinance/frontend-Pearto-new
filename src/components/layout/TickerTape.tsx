@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Loader2, Clock } from 'lucide-react';
 import { useMarketIndices, useCommodities } from '@/hooks/useMarketData';
 import { MarketIndex, Commodity } from '@/services/marketService';
 import PriceDisplay from '@/components/common/PriceDisplay';
@@ -56,6 +56,12 @@ export default function TickerTape() {
         return items;
     }, [indices, commodities]);
 
+    // Detect market closed from index marketStatus field
+    const marketClosed = useMemo(() => {
+        if (!indices || indices.length === 0) return false;
+        return indices.some((idx: MarketIndex) => idx.marketStatus === 'Markets Closed');
+    }, [indices]);
+
     // Don't render if no data and error
     if (error && tickerData.length === 0) {
         return (<>
@@ -84,6 +90,13 @@ export default function TickerTape() {
     return (<>
         <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-xs font-medium overflow-hidden border-b border-slate-200 dark:border-slate-800">
             <div className="flex items-center gap-8 animate-marquee hover:pause-animation">
+                {/* Market status badge */}
+                {marketClosed && (
+                    <div className="flex items-center gap-1 flex-shrink-0 text-amber-500 dark:text-amber-400">
+                        <Clock size={12} />
+                        <span className="font-semibold">Markets Closed</span>
+                    </div>
+                )}
                 {/* First set of tickers */}
                 {tickerData.map((ticker, index) => (
                     <div key={index} className="flex items-center gap-2 flex-shrink-0">

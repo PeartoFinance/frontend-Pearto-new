@@ -9,6 +9,7 @@ import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
 import { getStockOffers, StockOffer } from '@/services/marketService';
 import PriceDisplay from '@/components/common/PriceDisplay';
 import {
+import Footer from '@/components/layout/Footer';
     ArrowLeft, FileText, Loader2, AlertCircle,
     RefreshCw, Calendar, DollarSign, Clock, CheckCircle, XCircle
 } from 'lucide-react';
@@ -236,9 +237,9 @@ export default function OfferingsPage() {
                             </div>
                         ) : (
                             <div className="grid gap-4">
-                                {filteredOffers.map((offer) => (
+                                {filteredOffers.map((offer, idx) => (
                                     <div
-                                        key={offer.id || offer.symbol}
+                                        key={offer.id || `${offer.symbol}-${idx}`}
                                         className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 hover:border-orange-300 dark:hover:border-orange-700 transition"
                                     >
                                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -299,7 +300,8 @@ export default function OfferingsPage() {
                         )}
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

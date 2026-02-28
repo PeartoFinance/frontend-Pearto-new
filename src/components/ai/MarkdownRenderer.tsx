@@ -3,6 +3,9 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 
 interface MarkdownRendererProps {
     content: string;
@@ -10,11 +13,30 @@ interface MarkdownRendererProps {
     className?: string;
 }
 
+/**
+ * Pre-process AI content to normalize LaTeX delimiters.
+ * AI often uses `[ ... ]` for display math and `( ... )` for inline math,
+ * but remark-math expects `$$ ... $$` and `$ ... $`.
+ */
+function preprocessMath(content: string): string {
+    // Convert display math: \[ ... \] → $$ ... $$
+    let processed = content.replace(/\\\[\s*([\s\S]*?)\s*\\\]/g, '\n$$\n$1\n$$\n');
+    // Convert inline math: \( ... \) → $ ... $
+    processed = processed.replace(/\\\(\s*([\s\S]*?)\s*\\\)/g, ' $$$1$$ ');
+    // Convert bracket-style display math: [ A = ... ] where it looks like LaTeX
+    // Only match lines that start with [ and contain LaTeX commands like \frac, \times, \sqrt
+    processed = processed.replace(/^\[\s*(.*?(?:\\frac|\\times|\\sqrt|\\sum|\\int|\\left|\\right|\\cdot|\\div).*?)\s*\]$/gm, '\n$$\n$1\n$$\n');
+    return processed;
+}
+
 export function MarkdownRenderer({ content, compact = false, className = '' }: MarkdownRendererProps) {
+    const processedContent = preprocessMath(content);
+
     return (
         <div className={`${compact ? 'text-xs' : 'text-sm'} leading-relaxed ${className}`}>
             <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
+                remarkPlugins={[remarkGfm, remarkMath]}
+                rehypePlugins={[rehypeKatex]}
                 components={{
                     // Headers
                     h1: ({ children }) => (
@@ -121,7 +143,7 @@ export function MarkdownRenderer({ content, compact = false, className = '' }: M
                     ),
                 }}
             >
-                {content}
+                {processedContent}
             </ReactMarkdown>
         </div>
     );

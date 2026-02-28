@@ -17,6 +17,7 @@ import {
     StockTabs, type TabId, FinancialsTab, DividendsTab, ForecastTab, ProfileTab, NewsTab
 } from '@/components/stocks/tabs';
 import {
+import Footer from '@/components/layout/Footer';
     ArrowLeft, Loader2, TrendingUp, TrendingDown, DollarSign,
     PieChart, Calendar, Activity, ArrowUpRight, ArrowDownRight, Plus, Minus, X
 } from 'lucide-react';
@@ -127,7 +128,8 @@ export default function HoldingDetailPage({ params }: PageProps) {
                     <div className="flex-1 pt-[112px] md:pt-[120px] flex items-center justify-center">
                         <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
                     </div>
-                </main>
+                  <Footer />
+      </main>
             </div>
         );
     }

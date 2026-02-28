@@ -9,6 +9,13 @@ import Header from '@/components/layout/Header';
 import { getArticleBySlug, getPublishedNews, type ArticleDetail, type NewsArticle } from '@/services/newsService';
 import { getCategoryEmoji } from '@/data/newsData';
 import { ArrowLeft, Clock, User, ExternalLink, Share2 } from 'lucide-react';
+import { MarkdownRenderer } from '@/components/ai/MarkdownRenderer';
+import Footer from '@/components/layout/Footer';
+
+/** Detect if content is HTML (has tags) vs Markdown */
+function isHtmlContent(content: string): boolean {
+    return /<[a-z][\s\S]*>/i.test(content.trim());
+}
 
 export default function ArticlePage() {
     const params = useParams();
@@ -190,19 +197,35 @@ export default function ArticlePage() {
 
                                     {/* Full Content */}
                                     {article.full_content && (
-                                        <>
-                                            <style dangerouslySetInnerHTML={{ __html: `
-                                                .dynamic-html-content [style],
-                                                .dynamic-html-content font {
-                                                    color: inherit !important;
-                                                    background-color: transparent !important;
-                                                }
-                                            `}} />
-                                            <div
-                                                className="prose prose-lg dark:prose-invert max-w-none dynamic-html-content"
-                                                dangerouslySetInnerHTML={{ __html: article.full_content }}
-                                            />
-                                        </>
+                                        isHtmlContent(article.full_content) ? (
+                                            <>
+                                                <style dangerouslySetInnerHTML={{ __html: `
+                                                    .dynamic-html-content [style],
+                                                    .dynamic-html-content font {
+                                                        color: inherit !important;
+                                                        background-color: transparent !important;
+                                                    }
+                                                    .dynamic-html-content img {
+                                                        border-radius: 0.75rem;
+                                                        max-width: 100%;
+                                                        height: auto;
+                                                    }
+                                                    .dynamic-html-content a {
+                                                        color: #10b981;
+                                                        text-decoration: underline;
+                                                    }
+                                                    .dynamic-html-content a:hover {
+                                                        color: #059669;
+                                                    }
+                                                `}} />
+                                                <div
+                                                    className="prose prose-lg dark:prose-invert max-w-none dynamic-html-content"
+                                                    dangerouslySetInnerHTML={{ __html: article.full_content }}
+                                                />
+                                            </>
+                                        ) : (
+                                            <MarkdownRenderer content={article.full_content} className="text-base" />
+                                        )
                                     )}
 
                                     {/* Actions */}
@@ -284,7 +307,8 @@ export default function ArticlePage() {
                         </div>
                     )}
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

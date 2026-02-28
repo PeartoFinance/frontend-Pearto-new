@@ -10,6 +10,7 @@ import { Course, Instructor } from '@/types/education';
 import { get } from '@/services/api';
 import { GraduationCap, Search, BookOpen, Users, Award, TrendingUp } from 'lucide-react';
 import { AIWidget } from '@/components/ai';
+import Footer from '@/components/layout/Footer';
 
 export default function LearnPage() {
     const [courses, setCourses] = useState<Course[]>([]);
@@ -172,7 +173,8 @@ export default function LearnPage() {
                             </section>
                         )}
                     </div>
-                </main>
+                  <Footer />
+      </main>
 
                 {/* Floating AI Widget */}
                 <AIWidget

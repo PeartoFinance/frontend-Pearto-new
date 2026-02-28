@@ -136,7 +136,7 @@ function FollowUpQuestions({ questions, onSelect }: { questions: string[]; onSel
 // Message Bubble Component
 function MessageBubble({ message, onFollowUp }: { message: Message; onFollowUp?: (q: string) => void }) {
     const isUser = message.role === 'user';
-    
+
     // Clean content of any leaked tool JSON
     const cleanContent = (content: string) => {
         return content
@@ -326,13 +326,17 @@ export function AIChat({
                 toolsUsed?: ToolExecution[];
                 followUpQuestions?: string[];
                 mode?: string;
-            }>('/ai/chat-with-tools', {
-                message: messageText.trim(),
-                history: messages.slice(-10).map(m => ({ role: m.role, content: m.content })),
-                enableTools: true,
-                context: context,
-                mode: mode
-            });
+            }>(
+                '/ai/chat-with-tools',
+                {
+                    message: messageText.trim(),
+                    history: messages.slice(-10).map(m => ({ role: m.role, content: m.content })),
+                    enableTools: true,
+                    context: context,
+                    mode: mode
+                },
+                { timeout: 120000 } // AI endpoint chains multiple API calls; needs longer timeout
+            );
 
             setMessages(prev => prev.map(m =>
                 m.id === streamingId
@@ -385,7 +389,7 @@ export function AIChat({
     return (
         <div className={`flex ${height} bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700/50`}>
             {/* Main Chat */}
-            <div className="flex-1 flex flex-col min-w-0">
+            <div className="flex-1 flex flex-col min-w-0 min-h-0">
                 {/* Header (if not compact) */}
                 {!compact && (
                     <header className="flex-shrink-0 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700/50 px-4 py-3">
@@ -410,7 +414,7 @@ export function AIChat({
                 )}
 
                 {/* Messages */}
-                <main className="flex-1 overflow-y-auto px-4 py-4">
+                <main className="flex-1 min-h-0 overflow-y-auto px-4 py-4">
                     {messages.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-center px-4">
                             {/* Hero */}
