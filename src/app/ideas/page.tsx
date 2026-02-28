@@ -11,6 +11,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import { ideasApi, TradingIdea } from '@/services/socialService';
 import PriceDisplay from '@/components/common/PriceDisplay';
+import Footer from '@/components/layout/Footer';
 
 const IDEA_TYPE_STYLES = {
     long: { bg: 'bg-emerald-500/10 dark:bg-emerald-500/20', border: 'border-emerald-500/20 text-emerald-600 dark:text-emerald-400', icon: TrendingUp },
@@ -326,7 +327,8 @@ export default function IdeasPage() {
                         )}
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

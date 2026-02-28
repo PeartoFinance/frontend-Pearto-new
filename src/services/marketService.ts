@@ -119,6 +119,11 @@ export interface MarketOverviewData {
     advancers?: number;
     decliners?: number;
     unchanged?: number;
+    marketStatus?: {
+        anyMarketOpen: boolean;
+        usMarketOpen: boolean;
+        label: string;
+    };
 }
 
 // API Functions

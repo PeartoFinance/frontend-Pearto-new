@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowLeft, Trash2, Mail, Clock } from 'lucide-react';
+import Footer from '@/components/layout/Footer';
 
 export default function AccountDeletedPage() {
     return (
@@ -72,6 +73,7 @@ export default function AccountDeletedPage() {
                     </p>
                 </div>
             </div>
-        </div>
+          <Footer />
+    </div>
     );
 }

@@ -14,6 +14,7 @@ import {
     RefreshCw, BarChart2, ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
 import { TableExportButton } from '@/components/common/TableExportButton';
+import Footer from '@/components/layout/Footer';
 
 type TabType = 'gainers' | 'losers' | 'active';
 
@@ -233,9 +234,9 @@ export default function MarketMoversPage() {
                             </h3>
                             <div ref={chartContainerRef} className="w-full h-[250px]" />
                             <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                                {currentStocks.slice(0, 10).map((stock) => (
+                                {currentStocks.slice(0, 10).map((stock, idx) => (
                                     <Link
-                                        key={stock.symbol}
+                                        key={`${stock.symbol}-${idx}`}
                                         href={`/stocks/${stock.symbol}`}
                                         className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded hover:bg-slate-200 dark:hover:bg-slate-600 transition"
                                     >
@@ -323,7 +324,7 @@ export default function MarketMoversPage() {
                                             {currentStocks.map((stock, index) => {
                                                 const isPositive = (stock.changePercent || 0) >= 0;
                                                 return (
-                                                    <tr key={stock.symbol} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                                    <tr key={`${stock.symbol}-${index}`} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                                                         <td className="px-4 py-4 text-slate-500 font-medium">{index + 1}</td>
                                                         <td className="px-4 py-4">
                                                             <Link href={`/stocks/${stock.symbol}`} className="flex items-center gap-3 hover:underline">
@@ -378,7 +379,8 @@ export default function MarketMoversPage() {
                         )}
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

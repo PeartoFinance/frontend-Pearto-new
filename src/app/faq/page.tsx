@@ -6,6 +6,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import { HelpCircle, ChevronDown, ChevronUp, Search, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import Footer from '@/components/layout/Footer';
 
 interface FAQ {
     id: string;
@@ -152,7 +153,8 @@ export default function FAQPage() {
                         )}
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

@@ -6,6 +6,7 @@ import { ArrowLeft, Search, BookOpen, Loader2 } from 'lucide-react';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com/api';
 
@@ -152,7 +153,8 @@ export default function GlossaryPage() {
                         </div>
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

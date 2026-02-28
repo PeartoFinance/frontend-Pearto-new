@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, Loader2 } from 'lucide-react';
 import { searchStocks, type MarketStock } from '@/services/marketService';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface StockSymbolInputProps {
     value: string;
@@ -109,7 +110,7 @@ export default function StockSymbolInput({
                         >
                             <div className="flex items-center justify-between">
                                 <span className="font-bold text-slate-900 dark:text-white text-sm">{item.symbol}</span>
-                                {item.price && <span className="text-xs text-slate-500">${item.price.toFixed(2)}</span>}
+                                {item.price && <span className="text-xs text-slate-500"><PriceDisplay amount={item.price} /></span>}
                             </div>
                             <span className="text-xs text-slate-500 truncate">{item.name}</span>
                         </button>

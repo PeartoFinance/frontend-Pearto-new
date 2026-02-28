@@ -8,6 +8,7 @@ import Header from '@/components/layout/Header';
 import { getEconomicCalendar, EconomicEvent } from '@/services/marketService';
 import { Loader2, Calendar as CalendarIcon, ArrowLeft, Filter, Globe } from 'lucide-react';
 import { toast } from 'sonner';
+import Footer from '@/components/layout/Footer';
 
 export default function EconomicCalendarPage() {
     const [events, setEvents] = useState<EconomicEvent[]>([]);
@@ -150,7 +151,8 @@ export default function EconomicCalendarPage() {
                         </div>
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

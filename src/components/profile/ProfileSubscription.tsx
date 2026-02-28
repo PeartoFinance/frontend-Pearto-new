@@ -17,6 +17,7 @@ import {
     BarChart3,
     Shield
 } from 'lucide-react';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { useSubscription } from '@/context/SubscriptionContext';
 import { useAuth } from '@/context/AuthContext';
 import { getBillingHistory, cancelSubscription, type BillingHistoryItem } from '@/services/subscriptionService';
@@ -257,7 +258,7 @@ export default function ProfileSubscription() {
                                     <p className="text-xs text-slate-500">{formatDate(item.date)}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-semibold text-slate-900 dark:text-white">${item.amount.toFixed(2)}</p>
+                                    <p className="text-sm font-semibold text-slate-900 dark:text-white"><PriceDisplay amount={item.amount} /></p>
                                     <span className={`text-xs px-2 py-0.5 rounded ${item.status === 'paid' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
                                         {item.status}
                                     </span>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Mail, ArrowLeft, Send, Loader2, CheckCircle } from 'lucide-react';
+import Footer from '@/components/layout/Footer';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com/api';
 
@@ -150,6 +151,7 @@ export default function ForgotPasswordPage() {
                     )}
                 </div>
             </div>
-        </div>
+          <Footer />
+    </div>
     );
 }

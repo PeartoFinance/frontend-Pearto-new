@@ -4,6 +4,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import EMICalculator from '@/components/tools/calculators/EMICalculator';
+import Footer from '@/components/layout/Footer';
 
 export default function EMIPage() {
     return (
@@ -25,7 +26,8 @@ export default function EMIPage() {
                         <EMICalculator />
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

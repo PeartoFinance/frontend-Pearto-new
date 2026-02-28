@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { TableExportButton } from '@/components/common/TableExportButton';
 import { getAssetDetailPath } from '@/utils/assetRoutes';
+import Footer from '@/components/layout/Footer';
 
 export default function WatchlistPage() {
     const router = useRouter();
@@ -185,9 +186,9 @@ export default function WatchlistPage() {
                             </div>
                         ) : viewMode === 'grid' ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                {filteredItems.map((item) => (
+                                {filteredItems.map((item, idx) => (
                                     <WatchlistCard
-                                        key={item.symbol}
+                                        key={`${item.symbol}-${idx}`}
                                         item={item}
                                         onRemove={() => handleRemoveSymbol(item.symbol)}
                                         onClick={() => router.push(getAssetDetailPath(item.symbol))}
@@ -222,9 +223,9 @@ export default function WatchlistPage() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                                        {filteredItems.map((item) => (
+                                        {filteredItems.map((item, idx) => (
                                             <tr
-                                                key={item.symbol}
+                                                key={`${item.symbol}-${idx}`}
                                                 onClick={() => router.push(getAssetDetailPath(item.symbol))}
                                                 className="hover:bg-slate-50 dark:hover:bg-slate-800/30 cursor-pointer transition"
                                             >
@@ -276,7 +277,8 @@ export default function WatchlistPage() {
                         )}
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
 
             {/* Add Symbol Modal */}
             {showAddModal && (
@@ -307,9 +309,9 @@ export default function WatchlistPage() {
 
                         {searchResults.length > 0 && (
                             <div className="max-h-60 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-lg">
-                                {searchResults.map((stock) => (
+                                {searchResults.map((stock, idx) => (
                                     <button
-                                        key={stock.symbol}
+                                        key={`${stock.symbol}-${idx}`}
                                         onClick={() => handleAddSymbol(stock.symbol)}
                                         disabled={adding || items.some(i => i.symbol === stock.symbol)}
                                         className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition flex items-center justify-between disabled:opacity-50"

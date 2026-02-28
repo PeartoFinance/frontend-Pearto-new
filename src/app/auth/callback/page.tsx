@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getRedirectResult } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import Footer from '@/components/layout/Footer';
 
 /**
  * OAuth Callback Page
@@ -121,6 +122,7 @@ export default function AuthCallbackPage() {
                     </>
                 )}
             </div>
-        </div>
+          <Footer />
+    </div>
     );
 }

@@ -11,6 +11,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import { groupsApi, DiscussionGroup } from '@/services/socialService';
 import { useAuth } from '@/context/AuthContext';
+import Footer from '@/components/layout/Footer';
 
 const CATEGORY_ICONS: Record<string, any> = {
     stocks: TrendingUp,
@@ -309,7 +310,8 @@ export default function GroupsPage() {
                         )}
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

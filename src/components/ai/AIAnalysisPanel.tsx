@@ -81,7 +81,7 @@ export function AIAnalysisPanel({
             const response = await post<{ success: boolean; response: string }>('/ai/chat', {
                 message,
                 context: { pageType, pageData }
-            });
+            }, { timeout: 60000 });
 
             setAnalysis(response.response || 'No analysis available.');
         } catch (err) {

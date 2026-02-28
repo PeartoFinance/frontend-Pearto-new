@@ -11,6 +11,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import { groupsApi } from '@/services/socialService';
 import { useAuth } from '@/context/AuthContext';
+import Footer from '@/components/layout/Footer';
 
 const CATEGORIES = [
     { value: 'stocks', label: 'Stocks', icon: TrendingUp, color: 'from-blue-500 to-indigo-500' },
@@ -75,7 +76,8 @@ export default function NewGroupPage() {
                             </Link>
                         </div>
                     </div>
-                </main>
+                  <Footer />
+      </main>
             </div>
         );
     }

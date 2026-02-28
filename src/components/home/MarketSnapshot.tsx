@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { TrendingUp, TrendingDown, RefreshCw, Loader2, AlertCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, RefreshCw, Loader2, AlertCircle, Clock } from 'lucide-react';
 import { useMarketOverview, useCryptoMarkets, useCommodities, MarketOverviewData, MarketStock } from '@/hooks/useMarketData';
 import { TableExportButton } from '@/components/common/TableExportButton';
 import PriceDisplay from '@/components/common/PriceDisplay';
@@ -96,7 +96,14 @@ export default function MarketSnapshot() {
             <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-5 pb-4">
                 <div>
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">Market Snapshot</h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Stocks, crypto & metals overview</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Stocks, crypto & metals overview
+                        {stocksData?.marketStatus && !stocksData.marketStatus.anyMarketOpen && (
+                            <span className="inline-flex items-center gap-1 ml-2 text-amber-500 dark:text-amber-400">
+                                <Clock size={10} /> Last session
+                            </span>
+                        )}
+                    </p>
                 </div>
                 <div className="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-slate-700/60 rounded-lg">
                     {['Crypto', 'Stocks', 'Metals'].map((type) => (

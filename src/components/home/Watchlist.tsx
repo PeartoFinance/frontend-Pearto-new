@@ -86,9 +86,9 @@ export default function Watchlist() {
                 </div>
             ) : (
                 <div className="space-y-2">
-                    {items.map((item) => (
+                    {items.map((item, idx) => (
                         <Link
-                            key={item.symbol}
+                            key={`${item.symbol}-${idx}`}
                             href={getAssetDetailPath(item.symbol)}
                             className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition group"
                         >

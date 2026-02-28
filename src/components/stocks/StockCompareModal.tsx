@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { X, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
 import { getStockHistory, type MarketStock, type PriceHistoryPoint } from '@/services/marketService';
 import StockSymbolInput from '@/components/common/StockSymbolInput';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface StockCompareModalProps {
     isOpen: boolean;
@@ -150,10 +151,10 @@ export default function StockCompareModal({ isOpen, onClose, initialSymbol, init
                                                 </div>
                                             </td>
                                             <td className="py-4 px-4 text-right font-semibold text-slate-900 dark:text-white">
-                                                ${formatNumber(stock.price)}
+                                                <PriceDisplay amount={stock.price} />
                                             </td>
                                             <td className={`py-4 px-4 text-right font-medium ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
-                                                {isPositive ? '+' : ''}{formatNumber(stock.change)}
+                                                {isPositive ? '+' : ''}<PriceDisplay amount={Math.abs(stock.change || 0)} showSymbol={false} />
                                             </td>
                                             <td className="py-4 px-4 text-right">
                                                 <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-medium ${isPositive

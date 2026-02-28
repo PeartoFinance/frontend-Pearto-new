@@ -53,12 +53,12 @@ export default function CryptoQuickWidget() {
                 ) : coins.length === 0 ? (
                     <div className="text-center py-6 text-slate-500 text-sm">No data available</div>
                 ) : (
-                    coins.map((coin) => {
+                    coins.map((coin, idx) => {
                         const isPositive = (coin.changePercent ?? 0) >= 0;
                         const displaySymbol = coin.symbol?.replace('-USD', '').replace('-USDT', '') || coin.symbol;
                         return (
                             <Link
-                                key={coin.symbol}
+                                key={`${coin.symbol}-${idx}`}
                                 href={`/crypto/${coin.symbol}`}
                                 className="flex items-center justify-between p-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl transition-colors group"
                             >

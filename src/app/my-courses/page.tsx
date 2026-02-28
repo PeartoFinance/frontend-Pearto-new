@@ -7,6 +7,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/context/AuthContext';
 import { getMyCourses, type EnrolledCourse } from '@/services/educationService';
+import Footer from '@/components/layout/Footer';
 
 export default function MyCoursesPage() {
     const router = useRouter();
@@ -120,7 +121,8 @@ export default function MyCoursesPage() {
                             </div>
                         )}
                     </div>
-                </main>
+                  <Footer />
+      </main>
             </div>
         </div>
     );

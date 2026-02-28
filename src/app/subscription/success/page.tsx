@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 
 function SubscriptionSuccessContent() {
     const searchParams = useSearchParams();
@@ -200,7 +201,8 @@ export default function SubscriptionSuccessPage() {
                         <SubscriptionSuccessContent />
                     </Suspense>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

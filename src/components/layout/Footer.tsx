@@ -15,6 +15,7 @@ import {
     ExternalLink,
     ChevronUp,
 } from 'lucide-react';
+import { fetchNavigation } from '@/services/navigationService';
 
 interface FooterLink {
     href: string;
@@ -38,31 +39,6 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.co
 export default function Footer() {
     const { t } = useTranslation();
     const [showScrollTop, setShowScrollTop] = useState(false);
-    const [customPages, setCustomPages] = useState<FooterLink[]>([]);
-
-    // Fetch footer pages from API
-    useEffect(() => {
-        const fetchFooterPages = async () => {
-            try {
-                const userCountry = typeof window !== 'undefined' ? localStorage.getItem('userCountry') || 'US' : 'US';
-                const res = await fetch(`${API_BASE}/pages?placement=footer&status=published`, {
-                    headers: { 'X-User-Country': userCountry }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.pages) {
-                        setCustomPages(data.pages.map((p: { slug: string; title: string }) => ({
-                            href: `/p/${p.slug}`,
-                            label: p.title
-                        })));
-                    }
-                }
-            } catch {
-                // Fallback to static pages
-            }
-        };
-        fetchFooterPages();
-    }, []);
 
     // Handle scroll to top button visibility
     useEffect(() => {
@@ -84,8 +60,7 @@ export default function Footer() {
         { icon: Linkedin, href: 'https://linkedin.com/company/peartofinance', label: 'LinkedIn' },
         { icon: Youtube, href: 'https://youtube.com/@peartofinance', label: 'YouTube' },
     ];
-
-    const sections: FooterSection[] = [
+    const defaultSections: FooterSection[] = [
         {
             title: 'Markets',
             links: [
@@ -111,7 +86,6 @@ export default function Footer() {
                 { href: '/p/contact', label: 'Contact' },
                 { href: '/p/careers', label: 'Careers' },
                 { href: '/p/press', label: 'Press' },
-                ...customPages,
             ],
         },
         {
@@ -124,6 +98,89 @@ export default function Footer() {
             ],
         },
     ];
+
+    const [sections, setSections] = useState<FooterSection[]>(defaultSections);
+
+    // Fetch footer data (navigation + pages)
+    useEffect(() => {
+        const loadFooterData = async () => {
+            try {
+                // 1. Fetch dynamic navigation
+                const nav = await fetchNavigation();
+                let dynamicSections: FooterSection[] | null = null;
+
+                if (nav.items.length > 0) {
+                    const markets = nav.navigation['footer_markets'];
+                    const resources = nav.navigation['footer_resources'];
+                    const company = nav.navigation['footer_company'];
+                    const legal = nav.navigation['footer_legal'];
+
+                    if (markets?.length || resources?.length || company?.length || legal?.length) {
+                        dynamicSections = [
+                            {
+                                title: 'Markets',
+                                links: markets?.map(i => ({ href: i.url, label: i.label })) || defaultSections[0].links
+                            },
+                            {
+                                title: 'Resources',
+                                links: resources?.map(i => ({ href: i.url, label: i.label })) || defaultSections[1].links
+                            },
+                            {
+                                title: 'Company',
+                                links: company?.map(i => ({ href: i.url, label: i.label })) || defaultSections[2].links
+                            },
+                            {
+                                title: 'Legal',
+                                links: legal?.map(i => ({ href: i.url, label: i.label })) || defaultSections[3].links
+                            }
+                        ];
+                    }
+                }
+
+                // 2. Fetch custom pages safely
+                let pages: FooterLink[] = [];
+                try {
+                    const userCountry = typeof window !== 'undefined' ? localStorage.getItem('userCountry') || 'US' : 'US';
+                    const res = await fetch(`${API_BASE}/pages?placement=footer&status=published`, {
+                        headers: { 'X-User-Country': userCountry }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.pages) {
+                            pages = data.pages.map((p: { slug: string; title: string }) => ({
+                                href: `/p/${p.slug}`,
+                                label: p.title
+                            }));
+                        }
+                    }
+                } catch {
+                    // Ignore page fetch errors
+                }
+
+                // 3. Merge data
+                const baseSections = dynamicSections || [...defaultSections];
+
+                if (pages.length > 0) {
+                    const companyIdx = baseSections.findIndex(s => s.title === 'Company');
+                    if (companyIdx >= 0) {
+                        const existingUrls = new Set(baseSections[companyIdx].links.map(l => l.href));
+                        const uniquePages = pages.filter(p => !existingUrls.has(p.href));
+
+                        baseSections[companyIdx] = {
+                            ...baseSections[companyIdx],
+                            links: [...baseSections[companyIdx].links, ...uniquePages]
+                        };
+                    }
+                }
+
+                setSections(baseSections);
+            } catch (error) {
+                console.error('Failed to load footer data:', error);
+            }
+        };
+
+        loadFooterData();
+    }, []);
 
     return (
         <footer className="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 relative transition-colors">

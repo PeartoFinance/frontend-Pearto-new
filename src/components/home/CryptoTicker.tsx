@@ -98,7 +98,7 @@ export default function CryptoTicker() {
 
                         return (
                             <Link
-                                key={crypto.symbol}
+                                key={`${crypto.symbol}-${idx}`}
                                 href={`/crypto/${crypto.symbol}`}
                                 className="flex items-center justify-between p-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors group"
                             >

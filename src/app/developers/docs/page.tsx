@@ -5,6 +5,7 @@ import Header from '@/components/layout/Header';
 import TickerTape from '@/components/layout/TickerTape';
 import { Book, Code, Globe, Zap, Database, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Footer from '@/components/layout/Footer';
 
 function ApiDocsContent() {
     const baseUrl = 'https://peartofinance.com/api/v1/public';

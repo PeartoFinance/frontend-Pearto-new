@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Flame, TrendingUp, TrendingDown, Loader2, Zap } from 'lucide-react';
 import { getTopMovers, type MarketStock } from '@/services/marketService';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface TrendingPicksProps {
     onSelect: (symbol: string) => void;
@@ -72,7 +73,7 @@ export default function TrendingPicks({ onSelect }: TrendingPicksProps) {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{formatPrice(stock.price || 0)}</p>
+                                    <div className="text-sm font-semibold text-slate-900 dark:text-white"><PriceDisplay amount={stock.price || 0} /></div>
                                     <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
                                         +{stock.changePercent?.toFixed(2)}%
                                     </p>
@@ -105,7 +106,7 @@ export default function TrendingPicks({ onSelect }: TrendingPicksProps) {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{formatPrice(stock.price || 0)}</p>
+                                    <div className="text-sm font-semibold text-slate-900 dark:text-white"><PriceDisplay amount={stock.price || 0} /></div>
                                     <p className="text-xs font-medium text-red-600 dark:text-red-400">
                                         {stock.changePercent?.toFixed(2)}%
                                     </p>

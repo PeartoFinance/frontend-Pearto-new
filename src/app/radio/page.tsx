@@ -9,6 +9,7 @@ import StationFilter from '@/components/radio/StationFilter';
 import { RadioStation } from '@/types/media';
 import { get } from '@/services/api';
 import { Radio } from 'lucide-react';
+import Footer from '@/components/layout/Footer';
 
 export default function RadioPage() {
     const [stations, setStations] = useState<RadioStation[]>([]);
@@ -110,7 +111,8 @@ export default function RadioPage() {
                         onToggleStation={handleToggleStation}
                         loading={loading}
                     />
-                </main>
+                  <Footer />
+      </main>
 
                 {/* Sticky Player */}
                 <RadioPlayer

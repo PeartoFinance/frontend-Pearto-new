@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, AlertCircle, Clock } from 'lucide-react';
 import { useMarketIndices, useCommodities } from '@/hooks/useMarketData';
 import { MarketIndex, Commodity } from '@/services/marketService';
 import PriceDisplay from '@/components/common/PriceDisplay';
@@ -42,6 +42,14 @@ export default function StatsGrid() {
 
     const loading = indicesLoading || commoditiesLoading;
     const error = indicesError || commoditiesError;
+
+    // Detect market closed: if all indices report "Markets Closed" in marketStatus
+    const marketClosed = useMemo(() => {
+        if (!indices || indices.length === 0) return false;
+        return indices.some((idx: MarketIndex) =>
+            idx.marketStatus === 'Markets Closed'
+        );
+    }, [indices]);
 
     const statsData = useMemo(() => {
         const cards: StatsCard[] = [];
@@ -102,12 +110,21 @@ export default function StatsGrid() {
     }
 
     return (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {statsData.map((stat) => {
+        <div>
+            {marketClosed && (
+                <div className="flex items-center gap-1.5 mb-2 px-1">
+                    <Clock size={13} className="text-amber-500" />
+                    <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                        Markets Closed — showing last session data
+                    </span>
+                </div>
+            )}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {statsData.map((stat, idx) => {
                 const c = colorClasses[stat.color] || colorClasses.emerald;
                 return (
                     <div
-                        key={stat.symbol}
+                        key={`${stat.symbol}-${idx}`}
                         className="relative group overflow-hidden rounded-xl bg-white dark:bg-white/[0.06] hover:bg-slate-50 dark:hover:bg-white/[0.1] backdrop-blur border border-slate-200/80 dark:border-white/10 p-4 transition-all cursor-pointer shadow-sm dark:shadow-none"
                     >
                         {/* Accent bar */}
@@ -144,6 +161,9 @@ export default function StatsGrid() {
                             <span className={`text-xs ${stat.isUp ? 'text-emerald-600/70 dark:text-emerald-400/70' : 'text-red-600/70 dark:text-red-400/70'}`}>
                                 ({stat.isUp ? '+' : ''}{stat.changePercent.toFixed(2)}%)
                             </span>
+                            {marketClosed && (
+                                <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-auto">prev close</span>
+                            )}
                         </div>
 
                         {/* Mini sparkline */}
@@ -159,6 +179,7 @@ export default function StatsGrid() {
                     </div>
                 );
             })}
+            </div>
         </div>
     );
 }

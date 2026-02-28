@@ -5,6 +5,7 @@ import { XCircle, ArrowLeft, HelpCircle } from 'lucide-react';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 
 export default function SubscriptionCancelPage() {
     return (
@@ -71,7 +72,8 @@ export default function SubscriptionCancelPage() {
                         </div>
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }
