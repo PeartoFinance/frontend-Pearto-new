@@ -9,6 +9,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
+import Footer from '@/components/layout/Footer';
 
 const CATEGORIES = ['All', 'Banking', 'Investment', 'Insurance', 'Real Estate', 'Tax Services', 'Crypto', 'Retirement', 'Education', 'Technology', 'Legal', 'Marketing', 'Travel', 'Health'];
 
@@ -290,7 +291,8 @@ export default function VendorsPage() {
                         </div>
                     </div>
                 )}
-            </main>
+              <Footer />
+      </main>
 
         </div>
     );

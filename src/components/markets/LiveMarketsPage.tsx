@@ -703,7 +703,7 @@ export default function LiveMarketsPage() {
                                                         const isNeutral = (stock.changePercent || 0) === 0;
 
                                                         return (
-                                                            <tr key={stock.symbol} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                                                            <tr key={`${stock.symbol}-${idx}`} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
                                                                 <td className="px-4 py-3">
                                                                     <Link href={getAssetDetailPath(stock.symbol, stock.assetType)} className="flex items-center gap-2">
                                                                         <div className="w-6 h-6 rounded bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[10px] text-slate-600 dark:text-slate-300">
@@ -718,7 +718,7 @@ export default function LiveMarketsPage() {
                                                                     {formatPrice(stock.price || 0)}
                                                                 </td>
                                                                 <td className={`px-4 py-3 text-right font-medium ${isNeutral ? 'text-slate-500 dark:text-slate-400' : isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
-                                                                    {isPositive && !isNeutral ? '+' : ''}{formatNumber(stock.change)}
+                                                                    {isPositive && !isNeutral ? '+' : ''}{formatPrice(stock.change || 0)}
                                                                 </td>
                                                                 <td className="px-4 py-3 text-right">
                                                                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${isNeutral ? 'bg-slate-700 text-slate-400' :
@@ -867,7 +867,7 @@ export default function LiveMarketsPage() {
                                                             </div>
                                                             <span className="text-blue-600 dark:text-blue-400">{stock.symbol}</span>
                                                         </div>
-                                                        <span className="text-right text-emerald-600 dark:text-emerald-400">+{formatNumber(stock.change)}</span>
+                                                        <span className="text-right text-emerald-600 dark:text-emerald-400">+{formatPrice(stock.change || 0)}</span>
                                                         <span className="text-right">
                                                             <span className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded text-[10px]">
                                                                 ↑ {formatNumber(stock.changePercent)}%
@@ -923,7 +923,7 @@ export default function LiveMarketsPage() {
                                                             </div>
                                                             <span className="text-blue-600 dark:text-blue-400">{stock.symbol}</span>
                                                         </div>
-                                                        <span className="text-right text-red-500 dark:text-red-400">{formatNumber(stock.change)}</span>
+                                                        <span className="text-right text-red-500 dark:text-red-400">{formatPrice(stock.change || 0)}</span>
                                                         <span className="text-right">
                                                             <span className="bg-red-500/20 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded text-[10px]">
                                                                 ↓ {formatNumber(stock.changePercent)}%

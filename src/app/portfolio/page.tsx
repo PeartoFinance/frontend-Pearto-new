@@ -14,6 +14,7 @@ import HealthScore from '@/components/portfolio/HealthScore';
 import GoalSetting from '@/components/portfolio/GoalSetting';
 import FinancialGoals from '@/components/portfolio/FinancialGoals';
 import { useAuth } from '@/context/AuthContext';
+import Footer from '@/components/layout/Footer';
 
 interface StockOption {
     symbol: string;
@@ -175,7 +176,8 @@ export default function PortfolioPage() {
                     <div className="flex-1 pt-[112px] md:pt-[120px] flex items-center justify-center">
                         <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
                     </div>
-                </main>
+                  <Footer />
+      </main>
             </div>
         );
     }
@@ -514,9 +516,9 @@ export default function PortfolioPage() {
                                 {/* Dropdown */}
                                 {showStockDropdown && stockOptions.length > 0 && (
                                     <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg max-h-60 overflow-auto">
-                                        {stockOptions.map((stock) => (
+                                        {stockOptions.map((stock, idx) => (
                                             <button
-                                                key={stock.symbol}
+                                                key={`${stock.symbol}-${idx}`}
                                                 onClick={() => handleSelectStock(stock)}
                                                 className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-slate-700 transition flex items-center justify-between"
                                             >

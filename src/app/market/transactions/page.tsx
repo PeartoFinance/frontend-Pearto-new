@@ -13,6 +13,7 @@ import {
     RefreshCw, Search, ArrowUpRight, ArrowDownRight, DollarSign
 } from 'lucide-react';
 import { TableExportButton } from '@/components/common/TableExportButton';
+import Footer from '@/components/layout/Footer';
 
 interface Transaction {
     id: number;
@@ -275,7 +276,8 @@ export default function TransactionsPage() {
                         )}
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

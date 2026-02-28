@@ -28,6 +28,7 @@ import {
     type CompareTabId,
 } from '@/components/stocks/compare';
 import { ArrowLeft, Loader2, Search, Plus, X } from 'lucide-react';
+import Footer from '@/components/layout/Footer';
 
 interface CompareStock extends MarketStock {
     color: string;
@@ -234,9 +235,9 @@ function StockCompareContent() {
                             {/* Search Results */}
                             {searchResults.length > 0 && (
                                 <div className="mt-2 divide-y divide-slate-200 dark:divide-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg">
-                                    {searchResults.map((stock) => (
+                                    {searchResults.map((stock, idx) => (
                                         <div
-                                            key={stock.symbol}
+                                            key={`${stock.symbol}-${idx}`}
                                             className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
                                             onClick={() => addStock(stock)}
                                         >
@@ -258,9 +259,9 @@ function StockCompareContent() {
                             {/* Selected Stocks Chips */}
                             {stocks.length > 0 && (
                                 <div className="flex flex-wrap gap-2 mt-4">
-                                    {stocks.map((stock) => (
+                                    {stocks.map((stock, idx) => (
                                         <div
-                                            key={stock.symbol}
+                                            key={`${stock.symbol}-${idx}`}
                                             className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium text-white"
                                             style={{ backgroundColor: stock.color }}
                                         >
@@ -359,7 +360,8 @@ function StockCompareContent() {
                         )}
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
 
             {/* Floating AI Widget (Mobile/Tablet only) */}
             <div className="xl:hidden">

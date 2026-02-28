@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { StockChartWidget } from '@/components/charts';
+import AdvancedStockChart from '@/components/charts/AdvancedStockChart';
+import PriceDisplay from '@/components/common/PriceDisplay';
 import { Loader2, ChevronDown } from 'lucide-react';
 import { getStockHistory } from '@/services/marketService';
 import { TableExportButton } from '@/components/common/TableExportButton';
@@ -75,11 +76,6 @@ export default function HistoryTab({ symbol }: HistoryTabProps) {
     }, [loadData]);
 
     // Format helpers
-    const formatNumber = (num: number | null, decimals = 2): string => {
-        if (num == null) return '-';
-        return num.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-    };
-
     const formatLargeNumber = (num: number | null): string => {
         if (num == null) return '-';
         if (num >= 1e9) return `${(num / 1e9).toFixed(2)}B`;
@@ -100,23 +96,40 @@ export default function HistoryTab({ symbol }: HistoryTabProps) {
         return { value, percent };
     };
 
+    // Chart period mapping for AdvancedStockChart
+    const chartPeriodMap: Record<Period, string> = {
+        '1M': '1M',
+        '3M': '3M',
+        '6M': '6M',
+        '1Y': '1Y',
+        '5Y': '5Y',
+        'All': 'All',
+    };
+
     // Prepare data for chart (reversed for chronological order)
     const chartData = [...data].reverse();
 
+    // Handle chart period change
+    const handleChartPeriodChange = (newPeriod: string) => {
+        const periodMapping: Record<string, Period> = {
+            '1M': '1M', '3M': '3M', '6M': '6M',
+            '1Y': '1Y', '5Y': '5Y', 'All': 'All',
+        };
+        if (periodMapping[newPeriod]) {
+            setPeriod(periodMapping[newPeriod]);
+        }
+    };
+
     return (
         <div className="space-y-5">
-            {/* Mini Chart using StockChartWidget */}
-            <StockChartWidget
+            {/* Advanced Chart (same as Chart tab) */}
+            <AdvancedStockChart
                 data={chartData}
                 symbol={symbol}
                 loading={loading}
-                height={200}
-                showVolume={false}
-                showPriceInfoBar={false}
-                showHeader={false}
-                showChartTypeSelector={false}
-                showPeriodSelector={false}
-                initialChartType="area"
+                height={350}
+                period={chartPeriodMap[period]}
+                onPeriodChange={handleChartPeriodChange}
             />
 
             {/* Historical Data Table */}
@@ -227,19 +240,19 @@ export default function HistoryTab({ symbol }: HistoryTabProps) {
                                                 {formatDate(row.date)}
                                             </td>
                                             <td className="px-4 py-3 text-right text-slate-700 dark:text-slate-300">
-                                                {formatNumber(row.open)}
+                                                <PriceDisplay amount={row.open} />
                                             </td>
                                             <td className="px-4 py-3 text-right text-slate-700 dark:text-slate-300">
-                                                {formatNumber(row.high)}
+                                                <PriceDisplay amount={row.high} />
                                             </td>
                                             <td className="px-4 py-3 text-right text-slate-700 dark:text-slate-300">
-                                                {formatNumber(row.low)}
+                                                <PriceDisplay amount={row.low} />
                                             </td>
                                             <td className="px-4 py-3 text-right text-slate-700 dark:text-slate-300 font-medium">
-                                                {formatNumber(row.close)}
+                                                <PriceDisplay amount={row.close} />
                                             </td>
                                             <td className="px-4 py-3 text-right text-slate-500 dark:text-slate-400">
-                                                {formatNumber(row.close)}
+                                                <PriceDisplay amount={row.close} />
                                             </td>
                                             <td className={`px-4 py-3 text-right font-medium ${change == null ? 'text-slate-400' :
                                                 isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'

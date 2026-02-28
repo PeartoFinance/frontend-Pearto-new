@@ -16,6 +16,7 @@ import {
 } from '@/services/marketService';
 import { TrendingUp, TrendingDown, Activity, Search, RefreshCw, BarChart3 } from 'lucide-react';
 import RelatedTools from '@/components/tools/RelatedTools';
+import Footer from '@/components/layout/Footer';
 
 type TabType = 'all' | 'gainers' | 'losers' | 'active' | 'etfs';
 
@@ -207,7 +208,8 @@ export default function StocksPage() {
                         </div>
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
 
             {/* Floating AI Widget */}
             <AIWidget

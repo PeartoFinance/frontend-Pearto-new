@@ -99,10 +99,10 @@ export function CommoditiesPanel({ commodities }: CommoditiesPanelProps) {
                 <span className="font-semibold text-slate-900 dark:text-white">Commodities</span>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-y lg:divide-y-0 divide-slate-100 dark:divide-slate-700/50">
-                {commodities.map(comm => {
+                {commodities.map((comm, i) => {
                     const isPositive = (comm.changePercent || 0) >= 0;
                     return (
-                        <div key={comm.symbol} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
+                        <div key={`${comm.symbol}-${i}`} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 text-xs font-bold">
                                     {comm.symbol.slice(0, 2)}
@@ -139,11 +139,11 @@ export function IndicesGrid({ indices }: IndicesGridProps) {
 
     return (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {indices.map(idx => {
+            {indices.map((idx, i) => {
                 const isPositive = (idx.changePercent || 0) >= 0;
                 return (
                     <Link
-                        key={idx.symbol}
+                        key={`${idx.symbol}-${i}`}
                         href={`/live?symbol=${idx.symbol}&type=stock`}
                         className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 hover:shadow-lg hover:border-emerald-500/50 transition group"
                     >
@@ -189,12 +189,12 @@ export function VolumeBarChart({ items }: VolumeBarChartProps) {
                 <span className="font-semibold text-slate-900 dark:text-white">Most Active by Volume</span>
             </div>
             <div className="p-5 space-y-4">
-                {items.map(item => {
+                {items.map((item, i) => {
                     const widthPercent = ((item.volume || 0) / maxVolume) * 100;
                     const isPositive = (item.changePercent || 0) >= 0;
 
                     return (
-                        <div key={item.symbol} className="flex items-center gap-4">
+                        <div key={`${item.symbol}-${i}`} className="flex items-center gap-4">
                             <Link
                                 href={`/stocks/${item.symbol}`}
                                 className="w-16 font-medium text-emerald-600 dark:text-emerald-400 hover:underline"

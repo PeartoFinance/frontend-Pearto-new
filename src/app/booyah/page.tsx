@@ -17,7 +17,8 @@ import SentimentHeatmapWidget from '@/components/booyah/SentimentHeatmapWidget';
 import { getStockProfile, getStockHistory, getStockForecast, type MarketStock, type PriceHistoryPoint, type DetailedForecast } from '@/services/marketService';
 import { post } from '@/services/api';
 import { Sparkles, TrendingUp, AlertTriangle } from 'lucide-react';
-import { useCurrency } from '@/contexts/CurrencyContext';
+import PriceDisplay from '@/components/common/PriceDisplay';
+import Footer from '@/components/layout/Footer';
 
 export interface BooyahPrediction {
     signal: 'STRONG_BUY' | 'BUY' | 'HOLD' | 'SELL' | 'STRONG_SELL';
@@ -39,7 +40,6 @@ export interface BooyahPrediction {
 }
 
 export default function BooyahPage() {
-    const { formatPrice } = useCurrency();
     const [selectedSymbol, setSelectedSymbol] = useState<string>('');
     const [stockData, setStockData] = useState<MarketStock | null>(null);
     const [historyData, setHistoryData] = useState<PriceHistoryPoint[]>([]);
@@ -54,16 +54,21 @@ export default function BooyahPage() {
         try {
             const prompt = `You are a professional financial analyst AI. Analyze ${symbol} (${stock.name}) and provide a structured prediction.
 
-Current Price: ${formatPrice(stock.price || 0)}
+Current Price: ${stock.price || 0}
 Change: ${stock.changePercent?.toFixed(2)}%
 Volume: ${stock.volume}
 Market Cap: ${stock.marketCap || 'N/A'}
-52W High: ${stock.high52w ? formatPrice(stock.high52w) : 'N/A'} | 52W Low: ${stock.low52w ? formatPrice(stock.low52w) : 'N/A'}
+52W High: ${stock.high52w || 'N/A'} | 52W Low: ${stock.low52w || 'N/A'}
 P/E: ${stock.peRatio || 'N/A'} | Beta: ${stock.beta || 'N/A'}
 EPS: ${stock.eps || 'N/A'}
-Recent price points: ${history.slice(-5).map(p => formatPrice(p.close || 0)).join(', ')}
+Recent price points: ${history.slice(-5).map(p => p.close || 0).join(', ')}
 
-Respond in EXACTLY this JSON format, no other text:
+CRITICAL RULES:
+- Return ONLY raw JSON, no markdown, no code fences, no backticks
+- ALL numeric values MUST be plain numbers WITHOUT commas, currency symbols, or formatting (e.g. 38000 NOT 38,000 or $38,000 or ₹38,000)
+- targetPrice and stopLoss must be plain decimal numbers matching the stock's price scale
+
+Respond in EXACTLY this JSON format:
 {
     "signal": "STRONG_BUY|BUY|HOLD|SELL|STRONG_SELL",
     "confidence": 75,
@@ -86,13 +91,25 @@ Respond in EXACTLY this JSON format, no other text:
             const response = await post<{ success: boolean; response: string }>('/ai/chat', {
                 message: prompt,
                 context: { pageType: 'booyah-prediction', pageData: { symbol, price: stock.price } }
-            });
+            }, { timeout: 60000 });
 
             const text = response.response || '';
+            // Strip markdown code fences if present
+            const stripped = text.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '').trim();
             // Extract JSON from response
-            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            const jsonMatch = stripped.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
-                const parsed = JSON.parse(jsonMatch[0]);
+                // Fix common AI formatting issues: commas in numbers (e.g. 38,000 → 38000)
+                // Match digit,digit patterns that aren't inside quotes
+                let jsonStr = jsonMatch[0];
+                // Remove commas between digits (38,000 → 38000) but not inside strings
+                jsonStr = jsonStr.replace(/:\s*(\d{1,3}(,\d{3})+)(\.\d+)?(?=\s*[,}\]])/g, (match) => {
+                    return match.replace(/,(?=\d{3})/g, '');
+                });
+                // Remove currency symbols before numbers in values
+                jsonStr = jsonStr.replace(/:\s*[₹$€£¥]\s*(\d)/g, ': $1');
+
+                const parsed = JSON.parse(jsonStr);
                 setPrediction({
                     signal: parsed.signal || 'HOLD',
                     confidence: Math.min(100, Math.max(0, parsed.confidence || 50)),
@@ -119,7 +136,7 @@ Respond in EXACTLY this JSON format, no other text:
         } finally {
             setAiLoading(false);
         }
-    }, [formatPrice]);
+    }, []);
 
     const handleSymbolSelect = useCallback(async (symbol: string) => {
         if (!symbol.trim()) return;
@@ -209,7 +226,7 @@ Respond in EXACTLY this JSON format, no other text:
                                                 <span className="text-base font-normal text-slate-500 dark:text-slate-400">{stockData.name}</span>
                                             </h2>
                                             <div className="flex items-center gap-3 mt-0.5">
-                                                <span className="text-2xl font-bold text-slate-900 dark:text-white">{formatPrice(stockData.price || 0)}</span>
+                                                <span className="text-2xl font-bold text-slate-900 dark:text-white"><PriceDisplay amount={stockData.price || 0} /></span>
                                                 <span className={`text-sm font-semibold px-2 py-0.5 rounded-lg ${(stockData.changePercent ?? 0) >= 0
                                                     ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
                                                     : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
@@ -244,7 +261,7 @@ Respond in EXACTLY this JSON format, no other text:
                                             prediction={prediction}
                                             currentPrice={stockData.price}
                                         />
-                                        
+
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <RiskRewardWidget
                                                 prediction={prediction}
@@ -288,7 +305,8 @@ Respond in EXACTLY this JSON format, no other text:
                             <TrendingPicks onSelect={handleSymbolSelect} />
                         )}
                     </div>
-                </main>
+                  <Footer />
+      </main>
             </div>
 
             <AIWidget pageType="booyah" type="compact" />

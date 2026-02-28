@@ -48,10 +48,10 @@ export default function CommoditiesTab({ commodities = [], isLoading }: Commodit
         }
     });
 
-    const renderCommodityRow = (item: Commodity) => {
+    const renderCommodityRow = (item: Commodity, index: number) => {
         const isPositive = item.change >= 0;
         return (
-            <div key={item.symbol} className="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500/50 transition-colors">
+            <div key={`${item.symbol}-${index}`} className="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500/50 transition-colors">
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-slate-300">
                         {item.symbol.substring(0, 2)}

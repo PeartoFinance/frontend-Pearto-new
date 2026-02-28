@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Lock, ArrowLeft, Eye, EyeOff, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import Footer from '@/components/layout/Footer';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://apipearto.ashlya.com/api';
 
@@ -264,6 +265,7 @@ function Requirement({ met, text }: { met: boolean; text: string }) {
         <div className={`flex items-center gap-2 ${met ? 'text-emerald-400' : 'text-slate-500'}`}>
             <div className={`w-1.5 h-1.5 rounded-full ${met ? 'bg-emerald-500' : 'bg-slate-600'}`} />
             <span>{text}</span>
-        </div>
+          <Footer />
+    </div>
     );
 }

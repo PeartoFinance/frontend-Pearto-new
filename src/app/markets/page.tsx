@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 import VolumeLeaders from '@/components/widgets/VolumeLeaders';
 import ProposedDividends from '@/components/widgets/ProposedDividends';
 import PublicOfferings from '@/components/widgets/PublicOfferings';
@@ -194,7 +195,7 @@ function MarketPageContent() {
     const [forexData, setForexData] = useState<ForexRate[]>([]);
     const [loading, setLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-    const { formatPrice } = useCurrency();
+    const { formatPrice, symbol: currencySymbol } = useCurrency();
 
     // Load data
     const loadData = useCallback(async () => {
@@ -429,10 +430,10 @@ function MarketPageContent() {
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
-                                                {allStocks.slice(0, 25).map((stock) => {
+                                                {allStocks.slice(0, 25).map((stock, idx) => {
                                                     const isPositive = (stock.changePercent || 0) >= 0;
                                                     return (
-                                                        <tr key={stock.symbol} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                                                        <tr key={`${stock.symbol}-${idx}`} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                                                             <td className="px-4 py-3">
                                                                 <Link href={`/stocks/${stock.symbol}`} className="flex items-center gap-2 hover:underline">
                                                                     <span className="w-7 h-7 rounded bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
@@ -463,7 +464,7 @@ function MarketPageContent() {
                                                                 {formatLargeNumber(stock.volume)}
                                                             </td>
                                                             <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
-                                                                {formatLargeNumber(stock.marketCap)}
+                                                                {currencySymbol}{formatLargeNumber(stock.marketCap)}
                                                             </td>
                                                         </tr>
                                                     );
@@ -532,10 +533,10 @@ function MarketPageContent() {
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
-                                                    {cryptoData.map((coin) => {
+                                                    {cryptoData.map((coin, idx) => {
                                                         const isPositive = (coin.changePercent || 0) >= 0;
                                                         return (
-                                                            <tr key={coin.symbol} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                                                            <tr key={`${coin.symbol}-${idx}`} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                                                                 <td className="px-4 py-3">
                                                                     <Link href={`/crypto/${coin.symbol}`} className="flex items-center gap-2 hover:underline">
                                                                         <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-xs font-bold text-amber-600 dark:text-amber-400">
@@ -566,7 +567,7 @@ function MarketPageContent() {
                                                                     {formatLargeNumber(coin.volume)}
                                                                 </td>
                                                                 <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
-                                                                    {formatLargeNumber(coin.marketCap)}
+                                                                    {currencySymbol}{formatLargeNumber(coin.marketCap)}
                                                                 </td>
                                                             </tr>
                                                         );
@@ -596,8 +597,8 @@ function MarketPageContent() {
                                         <span className="font-semibold text-slate-900 dark:text-white">Market Index Charts</span>
                                     </div>
                                     <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        {overview.indices.slice(0, 4).map((index) => (
-                                            <MiniChart key={index.symbol} index={index} />
+                                        {overview.indices.slice(0, 4).map((index, _idx) => (
+                                            <MiniChart key={`${index.symbol}-${_idx}`} index={index} />
                                         ))}
                                     </div>
                                 </div>
@@ -664,7 +665,7 @@ function MarketPageContent() {
                                         </div>
                                         <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
                                             {(overview.topGainers || []).slice(0, 5).map((stock, idx) => (
-                                                <Link key={stock.symbol} href={`/stocks/${stock.symbol}`} className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
+                                                <Link key={`${stock.symbol}-${idx}`} href={`/stocks/${stock.symbol}`} className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
                                                     <div className="flex items-center gap-3">
                                                         <span className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">{idx + 1}</span>
                                                         <div>
@@ -689,7 +690,7 @@ function MarketPageContent() {
                                         </div>
                                         <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
                                             {(overview.topLosers || []).slice(0, 5).map((stock, idx) => (
-                                                <Link key={stock.symbol} href={`/stocks/${stock.symbol}`} className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
+                                                <Link key={`${stock.symbol}-${idx}`} href={`/stocks/${stock.symbol}`} className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
                                                     <div className="flex items-center gap-3">
                                                         <span className="w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs font-bold">{idx + 1}</span>
                                                         <div>
@@ -715,12 +716,12 @@ function MarketPageContent() {
                                     </div>
                                     <div className="p-5">
                                         <div className="space-y-4">
-                                            {(overview.mostActive || []).slice(0, 5).map((stock) => {
+                                            {(overview.mostActive || []).slice(0, 5).map((stock, idx) => {
                                                 const maxVolume = Math.max(...(overview.mostActive || []).map(s => s.volume || 0));
                                                 const widthPercent = ((stock.volume || 0) / maxVolume) * 100;
                                                 const isPositive = (stock.changePercent || 0) >= 0;
                                                 return (
-                                                    <div key={stock.symbol} className="flex items-center gap-4">
+                                                    <div key={`${stock.symbol}-${idx}`} className="flex items-center gap-4">
                                                         <Link href={`/stocks/${stock.symbol}`} className="w-16 font-medium text-emerald-600 dark:text-emerald-400 hover:underline">
                                                             {stock.symbol}
                                                         </Link>
@@ -745,7 +746,8 @@ function MarketPageContent() {
                         )}
                     </div>
                 </div>
-            </main >
+                <Footer />
+            </main>
 
             <AIWidget
                 type="floating"

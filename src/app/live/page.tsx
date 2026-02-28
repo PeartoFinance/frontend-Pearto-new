@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 import { Suspense } from 'react';
+import Footer from '@/components/layout/Footer';
 
 export default function LivePage() {
     return (

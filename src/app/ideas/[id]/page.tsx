@@ -14,6 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { ideasApi, TradingIdea, IdeaComment } from '@/services/socialService';
 import PriceDisplay from '@/components/common/PriceDisplay';
 import { toast } from 'sonner';
+import Footer from '@/components/layout/Footer';
 
 const IDEA_TYPE_STYLES = {
     long: { bg: 'bg-emerald-50 dark:bg-emerald-900/20', text: 'text-emerald-700 dark:text-emerald-400', border: 'border-emerald-200 dark:border-emerald-800', icon: TrendingUp, label: 'Bullish' },
@@ -124,7 +125,8 @@ export default function IdeaDetailPage() {
                             <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-8 mb-6 h-[500px]" />
                         </div>
                     </div>
-                </main>
+                  <Footer />
+      </main>
             </div>
         );
     }

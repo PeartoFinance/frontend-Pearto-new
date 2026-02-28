@@ -12,6 +12,7 @@ import {
     Calendar, Filter, Search, Download, RefreshCw
 } from 'lucide-react';
 import { TableExportButton } from '@/components/common/TableExportButton';
+import Footer from '@/components/layout/Footer';
 
 interface Dividend {
     id: number;
@@ -253,8 +254,8 @@ export default function DividendsPage() {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                                            {filteredDividends.map((div) => (
-                                                <tr key={div.id || div.symbol} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                            {filteredDividends.map((div, idx) => (
+                                                <tr key={div.id || `${div.symbol}-${idx}`} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                                                     <td className="px-4 py-4">
                                                         <Link href={`/stocks/${div.symbol}`} className="flex items-center gap-3 hover:underline">
                                                             <span className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-xs font-bold text-emerald-600 dark:text-emerald-400">
@@ -304,7 +305,8 @@ export default function DividendsPage() {
                         )}
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

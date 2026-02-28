@@ -24,6 +24,7 @@ import ProfileSubscription from '@/components/profile/ProfileSubscription';
 import ProfileOverview from '@/components/profile/ProfileOverview';
 import ProfileSportsFavorites from '@/components/profile/ProfileSportsFavorites';
 import {
+import Footer from '@/components/layout/Footer';
     Home, Briefcase, BarChart3, Bookmark, Bell, Shield, User, Settings as SettingsIcon, Gift, Crown, FileText, Trophy
 } from 'lucide-react';
 

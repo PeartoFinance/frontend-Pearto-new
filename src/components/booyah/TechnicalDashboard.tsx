@@ -6,6 +6,7 @@ import type { PriceHistoryPoint } from '@/services/marketService';
 import type { BooyahPrediction } from '@/app/booyah/page';
 
 import { useCurrency } from '@/contexts/CurrencyContext';
+import PriceDisplay from '@/components/common/PriceDisplay';
 
 interface TechnicalDashboardProps {
     data: PriceHistoryPoint[];
@@ -53,7 +54,7 @@ function computeMACD(closes: number[]): { macd: number; signal: number; histogra
 
 interface IndicatorRowProps {
     name: string;
-    value: string;
+    value: React.ReactNode;
     signal: 'bullish' | 'bearish' | 'neutral';
     detail: string;
 }
@@ -79,7 +80,7 @@ function IndicatorRow({ name, value, signal, detail }: IndicatorRowProps) {
                 </div>
             </div>
             <div className="text-right shrink-0">
-                <p className="text-sm font-bold text-slate-900 dark:text-white">{value}</p>
+                <div className="text-sm font-bold text-slate-900 dark:text-white">{value}</div>
                 <span className={`text-xs font-semibold ${cfg.color}`}>{cfg.label}</span>
             </div>
         </div>
@@ -182,7 +183,7 @@ export default function TechnicalDashboard({ data, prediction, loading }: Techni
                 />
                 <IndicatorRow
                     name="SMA 20/50"
-                    value={`${formatPrice(indicators.sma20, 0, 2, { notation: 'compact' })} / ${formatPrice(indicators.sma50, 0, 2, { notation: 'compact' })}`}
+                    value={<><PriceDisplay amount={indicators.sma20} options={{ notation: 'compact' }} /> / <PriceDisplay amount={indicators.sma50} options={{ notation: 'compact' }} /></>}
                     signal={smaSignal}
                     detail={indicators.currentPrice > indicators.sma50 ? 'Price above SMA 50' : 'Price below SMA 50'}
                 />

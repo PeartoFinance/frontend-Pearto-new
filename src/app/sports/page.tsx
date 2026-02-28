@@ -10,6 +10,7 @@ import { SportsEvent } from '@/types/sports';
 import { getSportsEvents, getFavoriteIds, addFavoriteSport, removeFavoriteSport } from '@/services/sportsService';
 import { Trophy, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import Footer from '@/components/layout/Footer';
 
 export default function SportsPage() {
     const { isAuthenticated } = useAuth();
@@ -222,7 +223,8 @@ export default function SportsPage() {
                         onTogglePin={handleTogglePin}
                         statusFilter={statusFilter}
                     />
-                </main>
+                  <Footer />
+      </main>
 
                 {/* Event Modal */}
                 <EventModal

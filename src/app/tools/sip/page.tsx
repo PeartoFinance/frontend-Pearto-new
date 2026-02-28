@@ -4,6 +4,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import TickerTape from '@/components/layout/TickerTape';
 import Header from '@/components/layout/Header';
 import SIPCalculator from '@/components/tools/calculators/SIPCalculator';
+import Footer from '@/components/layout/Footer';
 
 export default function SIPPage() {
     return (
@@ -25,7 +26,8 @@ export default function SIPPage() {
                         <SIPCalculator />
                     </div>
                 </div>
-            </main>
+              <Footer />
+      </main>
         </div>
     );
 }

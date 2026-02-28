@@ -12,6 +12,7 @@ import TickerTape from '@/components/layout/TickerTape';
 import { toast } from 'sonner';
 import { groupsApi, DiscussionGroup, GroupPost } from '@/services/socialService';
 import { useAuth } from '@/context/AuthContext';
+import Footer from '@/components/layout/Footer';
 
 export default function GroupDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -96,7 +97,8 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                             <div className="h-8 w-48 bg-slate-200 dark:bg-slate-700 rounded" />
                         </div>
                     </div>
-                </main>
+                  <Footer />
+      </main>
             </div>
         );
     }

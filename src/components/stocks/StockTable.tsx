@@ -6,6 +6,7 @@ import { type MarketStock } from '@/services/marketService';
 import { ArrowUpDown, ArrowUp, ArrowDown, TrendingUp, TrendingDown } from 'lucide-react';
 import { TableExportButton, type ExportColumn } from '@/components/common/TableExportButton';
 import PriceDisplay from '@/components/common/PriceDisplay';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 
 interface StockTableProps {
@@ -19,6 +20,7 @@ type SortDirection = 'asc' | 'desc';
 export default function StockTable({ stocks, loading = false }: StockTableProps) {
     const [sortKey, setSortKey] = useState<SortKey>('marketCap');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+    const { symbol: currencySymbol } = useCurrency();
 
     const handleSort = (key: SortKey) => {
         if (sortKey === key) {
@@ -30,7 +32,14 @@ export default function StockTable({ stocks, loading = false }: StockTableProps)
     };
 
     const sortedStocks = useMemo(() => {
-        return [...stocks].sort((a, b) => {
+        // Deduplicate by symbol - keep first occurrence
+        const seen = new Set<string>();
+        const unique = stocks.filter(s => {
+            if (seen.has(s.symbol)) return false;
+            seen.add(s.symbol);
+            return true;
+        });
+        return [...unique].sort((a, b) => {
             let aVal = a[sortKey];
             let bVal = b[sortKey];
 
@@ -190,12 +199,12 @@ export default function StockTable({ stocks, loading = false }: StockTableProps)
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                        {sortedStocks.map((stock) => {
+                        {sortedStocks.map((stock, index) => {
                             const isPositive = (stock.changePercent ?? 0) >= 0;
 
                             return (
                                 <tr
-                                    key={stock.id || stock.symbol}
+                                    key={`${stock.symbol}-${index}`}
                                     className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition cursor-pointer group"
                                 >
                                     <td className="px-4 py-3">
@@ -236,7 +245,7 @@ export default function StockTable({ stocks, loading = false }: StockTableProps)
                                         {formatLargeNumber(stock.volume)}
                                     </td>
                                     <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-400 text-sm hidden md:table-cell">
-                                        {formatLargeNumber(stock.marketCap)}
+                                        {currencySymbol}{formatLargeNumber(stock.marketCap)}
                                     </td>
                                     <td className="px-4 py-3 text-right hidden xl:table-cell">
                                         <div className="text-xs text-slate-500">

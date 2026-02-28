@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { Metadata } from 'next';
 import ChartClientWrapper from './ChartClientWrapper';
+import Footer from '@/components/layout/Footer';
 
 interface Props {
     params: Promise<{ slug: string[] }>;

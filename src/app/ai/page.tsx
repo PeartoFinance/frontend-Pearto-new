@@ -11,6 +11,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import { AIChat } from '@/components/ai/AIChat';
 import { AIAnalysisPanel } from '@/components/ai/AIAnalysisPanel';
+import Footer from '@/components/layout/Footer';
 
 type AIMode = 'default' | 'deep-analysis' | 'quick';
 
@@ -209,17 +210,17 @@ export default function AIPage() {
         : TOOL_CATEGORIES;
 
     return (
-        <div className="flex h-screen bg-gray-50 dark:bg-slate-900">
+        <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-slate-900">
             <Sidebar />
 
-            <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                 <Header />
 
-                <main className="flex-1 flex overflow-hidden">
+                <main className="flex-1 flex min-h-0 overflow-hidden">
                     {/* Main Chat Area */}
-                    <div className="flex-1 flex flex-col p-4 lg:p-6">
+                    <div className="flex-1 flex flex-col min-h-0 overflow-hidden p-4 lg:p-6">
                         {/* Page Header with Mode Selector */}
-                        <div className="flex items-center justify-between mb-4">
+                        <div className="flex-shrink-0 flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
                                     <Sparkles className="w-5 h-5 text-white" />
@@ -260,7 +261,7 @@ export default function AIPage() {
                         </div>
 
                         {/* Chat Component */}
-                        <div className="flex-1 min-h-0">
+                        <div className="flex-1 min-h-0 overflow-hidden">
                             <AIChat
                                 showSuggestions={false}
                                 compact={true}
@@ -399,7 +400,8 @@ export default function AIPage() {
                             </aside>
                         </div>
                     )}
-                </main>
+                  <Footer />
+      </main>
             </div>
         </div>
     );

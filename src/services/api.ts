@@ -172,8 +172,8 @@ export async function apiFetch<T>(endpoint: string, options: ApiOptions = {}): P
 export const get = <T>(endpoint: string, params?: Record<string, string | number | boolean>) =>
     apiFetch<T>(endpoint, { method: 'GET', params });
 
-export const post = <T>(endpoint: string, data?: unknown) =>
-    apiFetch<T>(endpoint, { method: 'POST', body: data ? JSON.stringify(data) : undefined });
+export const post = <T>(endpoint: string, data?: unknown, opts?: { timeout?: number }) =>
+    apiFetch<T>(endpoint, { method: 'POST', body: data ? JSON.stringify(data) : undefined, ...opts });
 
 export const put = <T>(endpoint: string, data?: unknown) =>
     apiFetch<T>(endpoint, { method: 'PUT', body: data ? JSON.stringify(data) : undefined });

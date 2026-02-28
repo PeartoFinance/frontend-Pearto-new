@@ -9,6 +9,7 @@ import VideoPlayer from '@/components/common/VideoPlayer';
 import { AIWidget } from '@/components/ai';
 import { useAuth } from '@/context/AuthContext';
 import { getMyCourse, completeModule, unenrollCourse, type MyCourseDetail, type CourseModule } from '@/services/educationService';
+import Footer from '@/components/layout/Footer';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -315,7 +316,8 @@ export default function MyCourseDetailPage({ params }: PageProps) {
                             </div>
                         </div>
                     </div>
-                </main>
+                  <Footer />
+      </main>
 
                 {/* Floating AI Widget */}
                 <AIWidget

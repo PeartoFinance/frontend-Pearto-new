@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
 // Dynamic import to avoid SSR issues with live data
+import Footer from '@/components/layout/Footer';
 const LiveMarketsPage = dynamic(
     () => import('@/components/markets/LiveMarketsPage'),
     {
